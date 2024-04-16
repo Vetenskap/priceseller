@@ -30,10 +30,35 @@ new class extends Component
 
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
+                    <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate.hover>
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('moysklad')" :active="request()->routeIs('moysklad')" wire:navigate.hover>
+                        {{ __('Мой склад') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('avito')" :active="request()->routeIs('avito')" wire:navigate.hover>
+                        {{ __('Авито') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('emails')" :active="request()->routeIs('emails', 'email-show')" wire:navigate.hover>
+                        {{ __('Почта') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('suppliers')" :active="request()->routeIs('suppliers', 'supplier-edit')" wire:navigate.hover>
+                        {{ __('Поставщики') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('items')" :active="request()->routeIs('items', 'item-edit')" wire:navigate.hover>
+                        {{ __('Товары') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('ozon')" :active="request()->routeIs('ozon', 'ozon-market-edit')" wire:navigate.hover>
+                        {{ __('ОЗОН') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('wb')" :active="request()->routeIs('wb', 'wb-market-edit')" wire:navigate.hover>
+                        {{ __('ВБ') }}
+                    </x-nav-link>
                 </div>
+            </div>
+
+            <div class="sm:flex sm:items-center">
+                <i class="fa-regular fa-bell fa-lg cursor-pointer"></i>
             </div>
 
             <!-- Settings Dropdown -->
