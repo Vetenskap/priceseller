@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Storage;
 
 class SupplierPriceHandler
 {
+
     protected string $disk;
     protected string $path;
     protected Supplier $supplier;
@@ -62,14 +63,14 @@ class SupplierPriceHandler
                     'current_row' => $row->toArray()
                 ]);
 
-                dump($row->toArray());
+                dd($row->toArray());
             }
         }
     }
+
 
     protected function otherHandle()
     {
         (new SupplierImport($this->supplier->id))->queue($this->path, $this->disk);
     }
-
 }

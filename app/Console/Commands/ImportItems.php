@@ -5,7 +5,11 @@ namespace App\Console\Commands;
 use App\Components\SupplierPriceHandler;
 use App\Imports\ItemsImport;
 use App\Imports\SupplierImport;
+use Box\Spout\Common\Entity\Cell;
+use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Illuminate\Console\Command;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ImportItems extends Command
@@ -38,7 +42,5 @@ class ImportItems extends Command
 //        (new SupplierImport)->withOutput($this->output)->import('test/test_voshod.csv', 'public');
 //        $this->output->success('Update successful');
 
-        $handler = new SupplierPriceHandler('test/test_trast.txt', '9bd1f334-9270-429e-b225-8382d3f16ba9', 'public');
-        $handler->handle();
     }
 }
