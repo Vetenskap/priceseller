@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Components\SupplierPriceHandler;
 use App\Imports\ItemsImport;
 use App\Imports\SupplierImport;
 use Illuminate\Console\Command;
@@ -33,8 +34,11 @@ class ImportItems extends Command
 //        (new ItemsImport(1))->withOutput($this->output)->import('test/my_store.xlsx', 'public');
 //        $this->output->success('Import successful');
 
-        $this->output->title('Starting update');
-        (new SupplierImport)->withOutput($this->output)->import('test/test_voshod.csv', 'public');
-        $this->output->success('Update successful');
+//        $this->output->title('Starting update');
+//        (new SupplierImport)->withOutput($this->output)->import('test/test_voshod.csv', 'public');
+//        $this->output->success('Update successful');
+
+        $handler = new SupplierPriceHandler('test/test_trast.txt', '9bd1f334-9270-429e-b225-8382d3f16ba9', 'public');
+        $handler->handle();
     }
 }

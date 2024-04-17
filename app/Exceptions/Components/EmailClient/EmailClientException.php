@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Exceptions\EmailClient;
+namespace App\Exceptions\Components\EmailClient;
 
 class EmailClientException extends \RuntimeException
 {

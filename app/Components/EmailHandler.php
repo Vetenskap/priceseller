@@ -2,7 +2,7 @@
 
 namespace App\Components;
 
-use App\Exceptions\EmailClient\EmailClientException;
+use App\Exceptions\Components\EmailClient\EmailClientException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Storage;
