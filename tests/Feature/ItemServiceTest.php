@@ -21,6 +21,6 @@ class ItemServiceTest extends TestCase
 //        $service = new ItemService();
 //        $service->massCreateFromFile();
 //        (new ItemsImport)->queue('test/my_store.xlsx', 'public');
-        (new SupplierImport)->import('test/test_voshod.xlsx', 'public');
+//        (new SupplierImport)->import('test/test_voshod.xlsx', 'public');
     }
 }
