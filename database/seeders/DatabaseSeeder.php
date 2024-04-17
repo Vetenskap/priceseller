@@ -68,7 +68,8 @@ class DatabaseSeeder extends Seeder
 
         Supplier::create([
             'name' => 'Траст',
-            'user_id' => 1
+            'user_id' => 1,
+            'id' => '9bd1f334-9270-429e-b225-8382d3f16ba9'
         ]);
     }
 }

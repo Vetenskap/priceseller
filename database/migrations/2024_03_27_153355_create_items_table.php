@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('items', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->uuid('ms_uuid')->nullable()->index('ms_uuid_index');
+            $table->uuid('ms_uuid')->nullable()->unique();
             $table->string('code')->unique();
             $table->foreignUuid('supplier_id')->constrained('suppliers');
             $table->string('article_supplier')->nullable()->index('article_supplier_index');

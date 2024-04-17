@@ -12,4 +12,13 @@ class Item extends Model
     use HasFactory;
     use HasUuids;
     use SoftDeletes;
+
+    protected $fillable = [
+        'code',
+        'supplier_id',
+        'article_supplier',
+        'brand',
+        'article_manufacture',
+        'user_id'
+    ];
 }
