@@ -2,10 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Components\EmailHandler;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
-use Illuminate\Support\Facades\Context;
+use App\Components\EmailClient\EmailHandler;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -95,7 +92,7 @@ class EmailHandlerTest extends TestCase
         $login = env('TEST_EMAIL_LOGIN');
         $password = env('TEST_EMAIL_PASSWORD');
         $handler = new EmailHandler($login, $password, Storage::disk('public'));
-        $path = $handler->getNewPrice('anything supplier', 'anything filename', 1);
+        $path = $handler->getNewPrice('anything supplier', 'anything filename');
 
         $this->assertEmpty($path);
     }
@@ -106,7 +103,7 @@ class EmailHandlerTest extends TestCase
         $password = env('TEST_EMAIL_PASSWORD');
 
         $handler = new EmailHandler($login, $password);
-        $path = $handler->getNewPrice('vetenskap2@yandex.ru', 'anything filename', 1);
+        $path = $handler->getNewPrice('vetenskap2@yandex.ru', 'anything filename');
 
         $this->assertEmpty($path);
     }
@@ -117,7 +114,7 @@ class EmailHandlerTest extends TestCase
         $password = env('TEST_EMAIL_PASSWORD');
 
         $handler = new EmailHandler($login, $password);
-        $path = $handler->getNewPrice('vetenskap2@yandex.ru', 'BERG_praice.xlsx', 1, 'SEEN');
+        $path = $handler->getNewPrice('vetenskap2@yandex.ru', 'BERG_praice.xlsx', 'SEEN');
 
         $this->assertNotEmpty($path);
         $this->assertTrue(Storage::disk('public')->exists($path));

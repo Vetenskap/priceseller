@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Components;
+namespace App\Components\EmailClient;
 
+use App\Components\ZipArchive;
 use App\Exceptions\Components\EmailClient\EmailClientException;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Context;
@@ -11,8 +12,9 @@ use IMAP\Connection;
 
 class EmailHandler
 {
-    public ?Connection $connection = null;
+    public $connection;
     public Filesystem $storage;
+    const SAVE_PATH = "/users/prices/";
 
     public function __construct(string $address, string $password, ?Filesystem $storage = null)
     {
@@ -21,8 +23,9 @@ class EmailHandler
             'password' => $password,
         ]);
 
-        $this->connection = $this->connect($address, $password);
         $this->storage = $storage ?? Storage::disk('public');
+
+        $this->connection = $this->connect($address, $password);
     }
 
     public function getMails(string $criteria = 'UNSEEN'): array
@@ -31,7 +34,7 @@ class EmailHandler
         return imap_search($this->connection, $criteria);
     }
 
-    public function getNewPrice(string $supplierEmail, string $supplierFilename, int $userId, $criteria = 'UNSEEN'): ?string
+    public function getNewPrice(string $supplierEmail, string $supplierFilename, $criteria = 'UNSEEN'): ?string
     {
 
         Context::push('emailHandler', [
@@ -71,7 +74,7 @@ class EmailHandler
 
             $message = $this->decodeMessage($messageEncrypt);
 
-            return $this->saveFile($message, $filename, $userId);
+            return $this->saveFile($message, $filename);
         }
 
         return null;
@@ -135,14 +138,16 @@ class EmailHandler
         return $decodedFileName;
     }
 
-    public function saveFile($message, $filename, int $userId): ?string
+    public function saveFile($message, $filename): ?string
     {
-        $this->storage->put("users/user_{$userId}/prices/{$filename}", $message);
+        $fullPath = self::SAVE_PATH . uniqid() . '_' . $filename;
+
+        $this->storage->put($fullPath, $message);
 
         if (pathinfo($filename, PATHINFO_EXTENSION) === 'zip') {
 
             $zip = new ZipArchive;
-            $res = $zip->open($this->storage->path("users/user_{$userId}/prices/{$filename}"));
+            $res = $zip->open($this->storage->path($fullPath));
 
             if ($res === TRUE) {
 
@@ -151,13 +156,15 @@ class EmailHandler
 
                 $filenameInZip = mb_convert_encoding($filenameInZip, 'UTF-8', mb_detect_encoding($filenameInZip));
 
-                $this->storage->put("users/user_{$userId}/prices/{$filenameInZip}", $bytes_file);
+                $fullPathZip = self::SAVE_PATH . uniqid() . '_' . $filenameInZip;
+
+                $this->storage->put($fullPathZip, $bytes_file);
 
                 $zip->close();
 
-                $this->storage->delete($this->storage->path("users/user_{$userId}/prices/{$filename}"));
+                $this->storage->delete($this->storage->path($fullPath));
 
-                return "users/user_{$userId}/prices/{$filenameInZip}";
+                return $fullPathZip;
 
             } else {
 
@@ -166,7 +173,7 @@ class EmailHandler
             }
         }
 
-        return "users/user_{$userId}/prices/{$filename}";
+        return $fullPath;
     }
 
     public function connect(string $address, string $password): Connection
