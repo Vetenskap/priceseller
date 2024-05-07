@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Models\Email;
+use App\Models\EmailSupplier;
 use App\Models\Moysklad;
 use App\Models\Permission;
 use App\Models\Supplier;
@@ -66,10 +68,61 @@ class DatabaseSeeder extends Seeder
             'name' => 'Основной',
         ]);
 
-        Supplier::create([
-            'name' => 'Траст',
-            'user_id' => 1,
-            'id' => '9bd1f334-9270-429e-b225-8382d3f16ba9'
+        $suppliers = [
+            [
+                'name' => 'Траст',
+                'user_id' => 1,
+                'id' => '9bd1f334-9270-429e-b225-8382d3f16ba9'
+            ],
+            [
+                'name' => 'Восход',
+                'user_id' => 1,
+                'id' => '9bd1f334-9270-429e-b335-8382d3f16ba9'
+            ],
+        ];
+
+        foreach ($suppliers as $supplier) {
+            Supplier::create($supplier);
+        }
+
+        Email::create([
+            'name' => 'avprice',
+            'address' => 'vetenskap@bk.ru',
+            'password' => 'WmGjJBFan0EGta6BtDUw',
+            'id' => '9bd1f334-9270-429e-b225-8382d7f16ba4',
+            'user_id' => 1
         ]);
+
+        $emailSuppliers = [
+            [
+                'supplier_id' =>  '9bd1f334-9270-429e-b225-8382d3f16ba9',
+                'email_id' => '9bd1f334-9270-429e-b225-8382d7f16ba4',
+                'email' => 'vetenskap2@yandex.ru',
+                'filename' => 'АвтоТраст',
+                'header_start' => 1,
+                'header_article_supplier' => 'Артикул',
+                'header_article_manufacturer' => '',
+                'header_brand' => 'Производитель',
+                'header_price' => 'Цена',
+                'header_count' => 'Остаток'
+            ],
+            [
+                'supplier_id' =>  '9bd1f334-9270-429e-b335-8382d3f16ba9',
+                'email_id' => '9bd1f334-9270-429e-b225-8382d7f16ba4',
+                'email' => 'vetenskap2@yandex.ru',
+                'filename' => 'price',
+                'header_start' => 1,
+                'header_article_supplier' => 'Артикул',
+                'header_article_manufacturer' => 'Артикул производителя',
+                'header_brand' => 'Номенклатура.Производитель',
+                'header_price' => 'Цена',
+                'header_count' => 'Остаток'
+            ],
+        ];
+
+        foreach ($emailSuppliers as $emailSupplier) {
+            EmailSupplier::create($emailSupplier);
+        }
+
     }
 }

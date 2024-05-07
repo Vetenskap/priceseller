@@ -2,6 +2,7 @@
 
 namespace App\Imports;
 
+use App\Models\EmailSupplier;
 use App\Models\Supplier;
 
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -10,21 +11,22 @@ use Maatwebsite\Excel\Concerns\Importable;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
+use Maatwebsite\Excel\Concerns\WithProgressBar;
 
 class SupplierImport implements ToCollection, WithHeadingRow, WithChunkReading, WithProgressBar, ShouldQueue
 {
     use Importable;
 
-    private Supplier $supplier;
+    private EmailSupplier $emailSupplier;
 
-    public function __construct(string $supplierId)
+    public function __construct(string $emailSupplierId)
     {
-        $this->supplier = Supplier::findOrFail($supplierId);
+        $this->emailSupplier = EmailSupplier::findOrFail($emailSupplierId);
     }
 
     public function collection(Collection $rows)
     {
-        dump($rows);
+        dd($rows);
     }
 
     public function chunkSize(): int
@@ -34,6 +36,6 @@ class SupplierImport implements ToCollection, WithHeadingRow, WithChunkReading, 
 
     public function headingRow(): int
     {
-        return 9;
+        return $this->emailSupplier->header_start;
     }
 }

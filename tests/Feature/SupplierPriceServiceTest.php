@@ -2,13 +2,11 @@
 
 namespace Tests\Feature;
 
-use App\Components\SupplierPriceHandler;
 use App\Exceptions\Components\SupplierPriceHandler\SupplierPriceHandlerException;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Foundation\Testing\WithFaker;
+use App\Services\SupplierPriceService;
 use Tests\TestCase;
 
-class SupplierPriceHandlerTest extends TestCase
+class SupplierPriceServiceTest extends TestCase
 {
     /**
      * A basic feature test example.
@@ -17,12 +15,12 @@ class SupplierPriceHandlerTest extends TestCase
     {
         $this->expectException(SupplierPriceHandlerException::class);
 
-        $handler = new SupplierPriceHandler('other', 1, 'disk');
+        $handler = new SupplierPriceService('other', 1, 'disk');
     }
 
     public function test_xlsx_handle()
     {
-        $mock = $this->getMockBuilder(SupplierPriceHandler::class)
+        $mock = $this->getMockBuilder(SupplierPriceService::class)
             ->setConstructorArgs(['test/test_trast.xlsx', '9bd1f334-9270-429e-b225-8382d3f16ba9', 'public'])
             ->onlyMethods(['xlsxHandle', 'otherHandle'])
             ->getMock();
@@ -34,7 +32,7 @@ class SupplierPriceHandlerTest extends TestCase
 
     public function test_other_handle()
     {
-        $mock = $this->getMockBuilder(SupplierPriceHandler::class)
+        $mock = $this->getMockBuilder(SupplierPriceService::class)
             ->setConstructorArgs(['test/test_trast.txt', '9bd1f334-9270-429e-b225-8382d3f16ba9', 'public'])
             ->onlyMethods(['otherHandle', 'xlsxHandle'])
             ->getMock();

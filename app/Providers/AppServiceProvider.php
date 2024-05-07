@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Components\EmailClient\EmailClient;
 use App\Components\EmailClient\EmailHandlerLaravelImap;
+use App\Jobs\Email\CheckEmails;
+use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        Collection::macro('toJob', function (string $job, ...$arguments) {
+            return $this->each(function ($item) use ($arguments, $job) {
+                dispatch(new $job($item, ...$arguments));
+            });
+        });
     }
 }

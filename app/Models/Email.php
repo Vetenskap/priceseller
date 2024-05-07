@@ -20,4 +20,20 @@ class Email extends Model
         'password',
         'user_id',
     ];
+
+    public function suppliers()
+    {
+        return $this->belongsToMany(Supplier::class, 'email_suppliers')
+            ->withPivot([
+                'id',
+                'header_start',
+                'header_article_supplier',
+                'header_article_manufacturer',
+                'header_brand',
+                'header_price',
+                'header_count',
+                'email',
+                'filename'
+            ]);
+    }
 }
