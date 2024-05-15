@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('address')->unique();
             $table->string('password');
-            $table->boolean('open')->nullable()->default(true);
+            $table->boolean('open')->nullable()->default(false);
             $table->foreignId('user_id')->constrained('users');
             $table->softDeletes();
             $table->timestamps();

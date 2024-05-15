@@ -15,12 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('email')->nullable();
             $table->string('filename')->nullable();
-            $table->integer('header_start')->nullable();
-            $table->string('header_article_supplier')->nullable();
-            $table->string('header_article_manufacturer')->nullable();
-            $table->string('header_brand')->nullable();
-            $table->string('header_price')->nullable();
-            $table->string('header_count')->nullable();
+            $table->unsignedInteger('header_article')->nullable();
+            $table->unsignedInteger('header_brand')->nullable();
+            $table->unsignedInteger('header_price')->nullable();
+            $table->unsignedInteger('header_count')->nullable();
             $table->foreignUuid('email_id')->constrained('emails');
             $table->foreignUuid('supplier_id')->constrained('suppliers');
             $table->timestamps();

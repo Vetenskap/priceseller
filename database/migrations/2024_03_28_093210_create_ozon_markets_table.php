@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('ozon_markets', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
-            $table->string('client_id')->unique();
+            $table->unsignedBigInteger('client_id')->unique();
             $table->string('api_key')->unique();
             $table->unsignedInteger('min_price_percent')->nullable();
             $table->unsignedInteger('max_price_percent')->nullable();
@@ -26,7 +26,7 @@ return new class extends Migration
             $table->boolean('seller_price')->nullable()->default(true);
             $table->float('acquiring')->nullable();
             $table->float('last_mile')->nullable();
-            $table->float('max_mile')->nullable();
+            $table->unsignedInteger('max_mile')->nullable();
             $table->foreignId('user_id')->constrained('users');
             $table->softDeletes();
             $table->timestamps();

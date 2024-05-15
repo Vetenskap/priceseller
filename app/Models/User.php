@@ -88,4 +88,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasMany(Supplier::class);
     }
+
+    public function ozonMarkets()
+    {
+        return $this->hasMany(OzonMarket::class);
+    }
+
+    public function wbMarkets()
+    {
+        return $this->hasMany(WbMarket::class);
+    }
 }

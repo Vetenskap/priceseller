@@ -14,9 +14,8 @@ return new class extends Migration
         Schema::create('suppliers', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
-            $table->uuid('ms_uuid')->nullable()->index('ms_uuid_index');
-            $table->boolean('open')->nullable()->default(true);
-            $table->string('use_article')->nullable()->default('article_supplier');
+            $table->uuid('ms_uuid')->nullable()->unique();
+            $table->boolean('open')->nullable()->default(false);
             $table->boolean('use_brand')->nullable()->default(false);
             $table->foreignId('user_id')->constrained('users');
             $table->softDeletes();

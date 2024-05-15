@@ -18,14 +18,22 @@ class Supplier extends Model
         return $this->belongsToMany(Email::class, 'email_suppliers')
             ->withPivot([
                 'id',
-                'header_start',
-                'header_article_supplier',
-                'header_article_manufacturer',
+                'header_article',
                 'header_brand',
                 'header_price',
                 'header_count',
                 'email',
                 'filename'
             ]);
+    }
+
+    public function items()
+    {
+        return $this->hasMany(Item::class);
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(SupplierReport::class);
     }
 }

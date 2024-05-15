@@ -16,9 +16,11 @@ class Item extends Model
     protected $fillable = [
         'code',
         'supplier_id',
-        'article_supplier',
+        'article',
         'brand',
-        'article_manufacture',
-        'user_id'
+        'user_id',
+        'ms_uuid',
+        'name',
+        'multiplicity'
     ];
 }

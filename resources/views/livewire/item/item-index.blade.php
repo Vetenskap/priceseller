@@ -58,5 +58,7 @@
                 <x-layouts.simple-text :name="$item->article_supplier"/>
             </x-table.table-item>
         @endforeach
+
+        {{ $items->links() }}
     </x-layouts.main-container>
 </div>

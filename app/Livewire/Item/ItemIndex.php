@@ -12,19 +12,12 @@ class ItemIndex extends Component
 {
     use WithFileUploads;
 
-    public $items;
-
     public $table;
 
     #[On('livewire-upload-error')]
     public function err()
     {
         $this->js((new Toast('Ошибка', 'Не удалось загрузить файл'))->danger());
-    }
-
-    public function mount()
-    {
-        $this->items = Item::where('user_id', auth()->user()->id)->get();
     }
 
     public function save()
@@ -34,6 +27,8 @@ class ItemIndex extends Component
 
     public function render()
     {
-        return view('livewire.item.item-index');
+        return view('livewire.item.item-index', [
+            'items' => Item::where('user_id', auth()->user()->id)->paginate(100)
+        ]);
     }
 }

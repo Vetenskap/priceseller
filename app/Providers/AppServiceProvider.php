@@ -5,6 +5,8 @@ namespace App\Providers;
 use App\Components\EmailClient\EmailClient;
 use App\Components\EmailClient\EmailHandlerLaravelImap;
 use App\Jobs\Email\CheckEmails;
+use App\Services\Item\ItemPriceService;
+use App\Services\Item\ItemPriceServiceInterface;
 use Illuminate\Support\Collection;
 use Illuminate\Support\ServiceProvider;
 

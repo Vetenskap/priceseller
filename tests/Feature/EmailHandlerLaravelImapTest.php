@@ -3,6 +3,9 @@
 namespace Tests\Feature;
 
 use App\Components\EmailClient\EmailHandlerLaravelImap;
+use App\Models\Email;
+use App\Models\Supplier;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Foundation\Testing\WithFaker;
 use Illuminate\Support\Facades\Storage;
@@ -13,22 +16,19 @@ class EmailHandlerLaravelImapTest extends TestCase
     /**
      * A basic feature test example.
      */
-    public function test_dont_found_file()
+    public function test_example(): void
     {
-        $handler = new EmailHandlerLaravelImap('vetenskap@bk.ru', 'WmGjJBFan0EGta6BtDUw', Storage::disk('public'));
-        $path = $handler->getNewPrice('vetenskap2@yandex.ru', 'any');
+        $user = User::findOrFail(1);
 
-        $this->assertEmpty($path);
+        /** @var Email $email */
+        foreach ($user->emails as $email) {
+            $handler = new EmailHandlerLaravelImap($email->address, $email->password);
+            $email->suppliers->each(function (Supplier $supplier) use ($handler) {
+                $path = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename, 'SEEN');
+                $this->assertNotEmpty($path);
+                $this->assertTrue(Storage::disk('public')->exists($path));
+                Storage::disk('public')->delete($path);
+            });
+        }
     }
-
-    public function test_found_file()
-    {
-        $handler = new EmailHandlerLaravelImap('vetenskap@bk.ru', 'WmGjJBFan0EGta6BtDUw', Storage::disk('public'));
-        $path = $handler->getNewPrice('vetenskap2@yandex.ru', 'BERG_praice.xlsx', 'SEEN');
-
-        $this->assertNotEmpty($path);
-
-        Storage::disk('public')->delete($path);
-    }
-
 }

@@ -17,11 +17,17 @@ use Maatwebsite\Excel\Concerns\WithUpserts;
 use Maatwebsite\Excel\Events\AfterBatch;
 use Maatwebsite\Excel\Events\AfterChunk;
 
-class ItemsImport implements ToModel, WithUpserts, WithHeadingRow, WithBatchInserts, WithChunkReading, WithEvents, WithProgressBar
+class ItemsImport implements ToModel, WithUpserts, WithBatchInserts, WithChunkReading, WithEvents, WithProgressBar
 {
     use Importable, RegistersEventListeners;
 
     private User $user;
+
+    public array $suppliers = [
+        'ООО "ШАТЕ-М ПЛЮС"' => '9bd1f334-9270-429e-b225-8382d3f16ba9',
+        'ООО "ГРИНЛАЙТ"' => '9bd1f334-9270-429e-b335-8382d3f27ba9',
+        'ООО Берг' => '9bd1f334-9270-429e-b335-8382d3f16ba9',
+    ];
 
     public function __construct(int $userId)
     {
@@ -36,15 +42,12 @@ class ItemsImport implements ToModel, WithUpserts, WithHeadingRow, WithBatchInse
     */
     public function model(array $row)
     {
-        if (!$row['kod']) return null;
-
         return new Item([
-            'code' => $row[Str::slug('Код')],
+            'code' => $row[3],
             'supplier_id' => $row[Str::slug('Поставщик')],
-            'article_supplier' => $row[Str::slug('Артикул поставщика', '_')],
-            'multiplicity' => $row[Str::slug('Кратность отгрузки', '_')],
-            'brand' => $row[Str::slug('Бренд')],
-            'article_manufacture' => $row[Str::slug('Артикул производителя', '_')],
+            'article' => $row[71],
+            'multiplicity' => (int)preg_replace("/[^0-9]/", "", $row[73]),
+            'brand' => $row[68],
             'user_id' => $this->user->id
         ]);
     }
