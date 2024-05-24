@@ -27,7 +27,7 @@ return new class extends Migration
             $table->float('acquiring')->nullable();
             $table->float('last_mile')->nullable();
             $table->unsignedInteger('max_mile')->nullable();
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });

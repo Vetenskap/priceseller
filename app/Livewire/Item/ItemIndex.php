@@ -2,33 +2,67 @@
 
 namespace App\Livewire\Item;
 
-use App\Livewire\Components\Toast;
-use App\Models\Item;
-use Livewire\Attributes\On;
+use App\Jobs\Export;
+use App\Jobs\Import;
+use App\Livewire\Traits\WithFilters;
+use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSubscribeNotification;
+use App\Models\User;
+use App\Services\Item\ItemService;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class ItemIndex extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithJsNotifications, WithFilters, WithSubscribeNotification;
 
-    public $table;
+    /** @var TemporaryUploadedFile $file */
+    public $file;
+    public User $user;
 
-    #[On('livewire-upload-error')]
-    public function err()
+    public function mount()
     {
-        $this->js((new Toast('Ошибка', 'Не удалось загрузить файл'))->danger());
+        $this->user = auth()->user();
     }
 
-    public function save()
+    public function export()
     {
-        $this->table->store('tables');
+        Export::dispatch(auth()->user(), ItemService::class);
+
+        $this->dispatch('items-export-report-created');
+    }
+
+    public function import()
+    {
+        $uuid = Str::uuid();
+        $ext = $this->file->getClientOriginalExtension();
+        $path = $this->file->storeAs(ItemService::PATH, $uuid . '.' . $ext);
+
+        if (!Storage::exists($path)) {
+            $this->dispatch('livewire-upload-error');
+            return;
+        }
+
+        Import::dispatch($uuid, $ext, auth()->user(), ItemService::class);
+
+        $this->dispatch('items-import-report-created');
     }
 
     public function render()
     {
+        $items = auth()
+            ->user()
+            ->items()
+            ->orderByDesc('updated_at')
+            ->with('supplier')
+            ->filters()
+            ->paginate(50);
+
         return view('livewire.item.item-index', [
-            'items' => Item::where('user_id', auth()->user()->id)->paginate(100)
+            'items' => $items
         ]);
     }
 }

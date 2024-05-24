@@ -22,7 +22,6 @@ class WbItemsExport implements FromCollection, WithHeadings
 
         return $items->map(function ($item) {
             return [
-                'id' => $item->id,
                 'nmID' => $item->nm_id,
                 'vendor_code' => $item->vendor_code,
                 'item_code' => $item->item->code,
@@ -47,7 +46,6 @@ class WbItemsExport implements FromCollection, WithHeadings
     {
         // Укажите свои собственные названия колонок
         return [
-            'id',
             'nmID',
             'vendorCode',
             'Код',

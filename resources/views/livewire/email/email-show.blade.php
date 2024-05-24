@@ -23,7 +23,13 @@
                                        field="form.address"
             >Адрес
             </x-inputs.input-with-label>
+            <x-inputs.input-with-label name="password"
+                                       type="email"
+                                       field="form.password"
+            >Пароль
+            </x-inputs.input-with-label>
         </x-blocks.flex-block-end>
+        <livewire:email-supplier.email-supplier-index :email="$email" />
     </x-layouts.main-container>
 </div>
 

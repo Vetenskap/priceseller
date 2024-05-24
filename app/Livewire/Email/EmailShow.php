@@ -5,14 +5,22 @@ namespace App\Livewire\Email;
 use App\Exceptions\ItemNotFoundException;
 use App\Livewire\Components\Toast;
 use App\Livewire\Forms\Email\EmailPostForm;
+use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Email;
+use App\Models\Supplier;
+use Livewire\Attributes\On;
 use Livewire\Component;
 
 class EmailShow extends Component
 {
+    use WithJsNotifications, WithSubscribeNotification;
+
     public EmailPostForm $form;
 
     public Email $email;
+
+    public $emailSuppliers;
 
     public function mount()
     {
@@ -30,17 +38,17 @@ class EmailShow extends Component
 
     public function save()
     {
-        throw new ItemNotFoundException('товар не найден');
 
         $this->authorize('update', $this->email);
 
         $this->form->update();
 
-        $this->js((new Toast("Почта: {$this->email->name}", 'Данные успешно обновлены'))->success());
+        $this->addSuccessSaveNotification();
     }
 
     public function render()
     {
         return view('livewire.email.email-show');
     }
+
 }

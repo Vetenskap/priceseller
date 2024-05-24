@@ -19,8 +19,8 @@ return new class extends Migration
             $table->unsignedInteger('header_brand')->nullable();
             $table->unsignedInteger('header_price')->nullable();
             $table->unsignedInteger('header_count')->nullable();
-            $table->foreignUuid('email_id')->constrained('emails');
-            $table->foreignUuid('supplier_id')->constrained('suppliers');
+            $table->foreignUuid('email_id')->constrained('emails')->cascadeOnDelete();
+            $table->foreignUuid('supplier_id')->constrained('suppliers')->cascadeOnDelete();
             $table->timestamps();
         });
     }

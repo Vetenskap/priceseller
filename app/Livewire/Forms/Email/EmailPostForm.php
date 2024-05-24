@@ -23,6 +23,8 @@ class EmailPostForm extends Form
     #[Validate]
     public $open = true;
 
+    public $suppliers;
+
     public function setEmail(Email $email)
     {
         $this->email = $email;
@@ -30,6 +32,7 @@ class EmailPostForm extends Form
         $this->address = $email->address;
         $this->password = $email->password;
         $this->open = $email->open;
+        $this->suppliers = $email->suppliers;
     }
 
     public function rules()

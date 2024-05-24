@@ -13,6 +13,14 @@ class Supplier extends Model
     use HasUuids;
     use SoftDeletes;
 
+    protected $fillable = [
+        'name',
+        'ms_uuid',
+        'open',
+        'use_brand',
+        'user_id',
+    ];
+
     public function emails()
     {
         return $this->belongsToMany(Email::class, 'email_suppliers')
@@ -35,5 +43,10 @@ class Supplier extends Model
     public function reports()
     {
         return $this->hasMany(SupplierReport::class);
+    }
+
+    public function priceItems()
+    {
+        return $this->hasMany(EmailPriceItem::class);
     }
 }

@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 class WbItem extends Model
 {
     use HasFactory;
-    use SoftDeletes;
     use HasUuids;
 
     protected $fillable = [

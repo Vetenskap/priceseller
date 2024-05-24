@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('wb_markets', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('name');
-            $table->text('api_key')->unique();
+            $table->string('api_key', 400)->unique();
             $table->float('coefficient')->nullable()->default(1.0);
             $table->unsignedInteger('basic_logistics')->nullable();
             $table->unsignedInteger('price_one_liter')->nullable();
@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unsignedInteger('min')->nullable()->default(2);
             $table->unsignedInteger('max')->nullable()->default(5);
             $table->unsignedInteger('volume')->nullable();
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });

@@ -8,4 +8,15 @@ use Illuminate\Database\Eloquent\Model;
 class EmailSupplierStockValue extends Model
 {
     use HasFactory;
+
+    protected $fillable = [
+        'name',
+        'value',
+        'email_supplier_id',
+    ];
+
+    public function emailSupplier()
+    {
+        return $this->belongsTo(EmailSupplier::class);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -23,4 +24,24 @@ class Item extends Model
         'name',
         'multiplicity'
     ];
+
+    public function supplier()
+    {
+        return $this->belongsTo(Supplier::class);
+    }
+
+    public function scopeFilters(Builder $query)
+    {
+        return $query->when(request('filters.code'), function (Builder $query) {
+            $query->where('code', 'like', '%' . request('filters.code') . '%');
+        })
+            ->when(request('filters.article'), function (Builder $query) {
+                $query->where('article', 'like', '%' . request('filters.article') . '%');
+            });
+    }
+
+    public function fromPrice()
+    {
+        return $this->hasOne(EmailPriceItem::class);
+    }
 }

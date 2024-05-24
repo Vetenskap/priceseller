@@ -13,9 +13,9 @@ return new class extends Migration
     {
         Schema::create('email_supplier_stock_values', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->unsignedInteger('value');
-            $table->foreignId('email_supplier_id')->constrained('email_suppliers');
+            $table->string('name')->nullable();
+            $table->unsignedInteger('value')->nullable();
+            $table->foreignId('email_supplier_id')->constrained('email_suppliers')->cascadeOnDelete();
             $table->timestamps();
         });
     }

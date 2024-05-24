@@ -11,11 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('market_export_reports', function (Blueprint $table) {
+        Schema::create('items_import_reports', function (Blueprint $table) {
             $table->id();
-            $table->uuid();
+            $table->unsignedInteger('correct')->nullable()->default(0);
+            $table->unsignedInteger('error')->nullable()->default(0);
             $table->string('message');
             $table->tinyInteger('status');
+            $table->uuid()->nullable();
             $table->string('reportable_id');
             $table->string('reportable_type');
             $table->timestamps();
@@ -27,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('market_export_reports');
+        Schema::dropIfExists('items_import_reports');
     }
 };

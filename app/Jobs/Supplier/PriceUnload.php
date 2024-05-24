@@ -10,6 +10,8 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class PriceUnload implements ShouldQueue
@@ -21,7 +23,6 @@ class PriceUnload implements ShouldQueue
      */
     public function __construct(public int $emailSupplierId, public string $path)
     {
-        //
     }
 
     /**
@@ -40,8 +41,19 @@ class PriceUnload implements ShouldQueue
         $service = new EmailSupplierService($emailSupplier, Storage::disk('public')->path($this->path));
         $service->unload();
 
-        \App\Jobs\Wb\Unload::dispatch($emailSupplier->supplier_id);
-        \App\Jobs\Ozon\Unload::dispatch($emailSupplier->supplier_id);
+        Bus::batch([
+            [
+                \App\Jobs\Wb\Unload::dispatch($emailSupplier->supplier_id)
+            ],
+            [
+                \App\Jobs\Ozon\Unload::dispatch($emailSupplier->supplier_id)
+            ]
+        ])->then(function () use ($emailSupplier) {
+            SupplierReportService::success($emailSupplier->supplier);
+        })->catch(function () use ($emailSupplier) {
+            SupplierReportService::error($emailSupplier->supplier);
+        });
+
     }
 
     public function failed(\Throwable $th)

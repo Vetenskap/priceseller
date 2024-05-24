@@ -8,6 +8,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
 class OzonClient
 {
@@ -55,17 +56,6 @@ class OzonClient
                 }
             }
 
-            Log::warning('Ozon getProductList RequestException', [
-                'message' => $e->getMessage(),
-                'response' => [
-                    'status' => $response->status(),
-                    'body' => $response->body(),
-                ],
-                'request' => [
-                    'data' => $data
-                ]
-            ]);
-
             throw $e;
         }
 
@@ -73,6 +63,30 @@ class OzonClient
         $lastId = $result->get('last_id');
 
         return collect(['last_id' => $lastId, 'items' => $items]);
+
+    }
+
+    public function getWarehouses(): Collection
+    {
+        return $this->request->post('/v1/warehouse/list', ['data' => []])->throw()->collect('result');
+    }
+
+    public function putPrices(array $data): Collection
+    {
+        return $this->request->post('/v1/product/import/prices', ['prices' => $data])->collect('result');
+    }
+
+    public function putStocks(array $data)
+    {
+        while (RateLimiter::attempts('ozon_put_stocks') >= 80) {
+            sleep(2);
+        }
+
+        return RateLimiter::attempt(
+            'ozon_put_stocks',
+            80,
+            fn() => $this->request->post('/v2/products/stocks', ['stocks' => $data])->collect('result')
+        );
 
     }
 }

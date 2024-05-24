@@ -19,6 +19,7 @@ class Email extends Model
         'address',
         'password',
         'user_id',
+        'open'
     ];
 
     public function suppliers()

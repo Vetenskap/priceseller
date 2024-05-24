@@ -3,14 +3,15 @@
 namespace App\Livewire\WbMarket;
 
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
+use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\WbMarket;
 use Livewire\Component;
 
 class WbMarketIndex extends Component
 {
-    public WbMarketPostForm $form;
+    use WithSubscribeNotification;
 
-    public $markets;
+    public WbMarketPostForm $form;
 
     public $showCreateForm = false;
 
@@ -19,26 +20,38 @@ class WbMarketIndex extends Component
         $this->showCreateForm = ! $this->showCreateForm;
     }
 
-    public function mount()
-    {
-        $this->markets = WbMarket::where('user_id', auth()->user()->id)->get();
-    }
-
     public function create()
     {
         $this->authorize('create', WbMarket::class);
 
-        $market = $this->form->store();
-
-        $this->markets->add($market);
+        $this->form->store();
 
         $this->reset('showCreateForm');
     }
 
-    public function destroy(WbMarket $market)
+    public function destroy($market)
     {
+        $market = WbMarket::find($market['id']);
+
         $this->authorize('delete', $market);
 
         $market->delete();
+    }
+
+    public function changeOpen($market)
+    {
+        $market = WbMarket::find($market['id']);
+
+        $this->authorize('update', $market);
+
+        $market->open = !$market->open;
+        $market->save();
+    }
+
+    public function render()
+    {
+        return view('livewire.wb-market.wb-market-index', [
+            'markets' => WbMarket::where('user_id', auth()->user()->id)->get()
+        ]);
     }
 }

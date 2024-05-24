@@ -44,10 +44,14 @@ class WbClient
             $data['settings']['cursor']['updatedAt'] = $updatedAt;
         }
 
+        while (RateLimiter::attempts('wb_get_cards_list') >= 100) {
+            sleep(2);
+        }
+
         $response = RateLimiter::attempt(
             'wb_get_cards_list',
             100,
-            fn () => $this->request->post('/content/v2/get/cards/list', $data)->throw()->collect()
+            fn() => $this->request->post('/content/v2/get/cards/list', $data)->throw()->collect()
         );
 
         $cards = collect($response->get('cards'));
@@ -57,5 +61,38 @@ class WbClient
             'cards' => $cards,
             'cursor' => $cursor
         ]);
+    }
+
+    public function getWarehouses()
+    {
+        return $this->request->get('/api/v3/warehouses')->throw()->collect();
+    }
+
+    public function putStocks(array $data, int $warehouseId)
+    {
+        while (RateLimiter::attempts('wb_get_cards_list') >= 300) {
+            sleep(2);
+        }
+
+        RateLimiter::attempt(
+            'wb_put_stocks',
+            300,
+            fn() => $this->request->put("/api/v3/stocks/{$warehouseId}", ['stocks' => $data])
+        );
+
+    }
+
+    public function putPrices(array $data)
+    {
+        while (RateLimiter::attempts('wb_get_cards_list') >= 10) {
+            sleep(2);
+        }
+
+        RateLimiter::attempt(
+            'wb_put_prices',
+            10,
+            fn() => $this->request->baseUrl('https://discounts-prices-api.wb.ru')->post("/api/v2/upload/task", ['data' => $data]),
+            6
+        );
     }
 }

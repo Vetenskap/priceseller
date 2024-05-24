@@ -26,28 +26,40 @@
         </x-layouts.main-container>
     @endif
     <x-layouts.main-container>
-        @empty($suppliers->count())
+        @if($suppliers->count() > 0)
+            <x-table.table-layout>
+                <x-table.table-header>
+                    <x-table.table-child>
+                        <x-layouts.simple-text name="Наименование"/>
+                    </x-table.table-child>
+                    <x-table.table-child>
+                        <x-layouts.simple-text name="Включен"/>
+                    </x-table.table-child>
+                    <x-table.table-child>
+
+                    </x-table.table-child>
+                </x-table.table-header>
+                @foreach($suppliers as $supplier)
+                    <x-table.table-item wire:key="{{$supplier->getKey()}}" wire:poll>
+                        <x-table.table-child>
+                            <a href="{{route('supplier-edit', ['supplier' => $supplier->getKey()])}}" wire:navigate.hover>
+                                <x-layouts.simple-text :name="$supplier->name"/>
+                            </a>
+                        </x-table.table-child>
+                        <x-table.table-child>
+                            <x-inputs.switcher :checked="$supplier->open" wire:click="changeOpen({{$supplier}})"/>
+                        </x-table.table-child>
+                        <x-table.table-child>
+                            <x-danger-button wire:click="destroy({{$supplier}})">Удалить</x-danger-button>
+                        </x-table.table-child>
+                    </x-table.table-item>
+                @endforeach
+            </x-table.table-layout>
+        @else
             <x-blocks.main-block>
                 <x-layouts.simple-text name="Сейчас у вас нет поставщиков"/>
             </x-blocks.main-block>
-        @endempty
-        @foreach($suppliers as $supplier)
-            <x-table.table-item wire:key="{{$supplier->getKey()}}" wire:poll>
-                <a href="{{route('supplier-edit', ['supplier' => $supplier->getKey()])}}" wire:navigate.hover>
+        @endif
 
-                    <x-layouts.simple-text :name="$supplier->name"/>
-
-                </a>
-                @if(auth()->user()->is_ms_sub())
-                    <a href="{{route('supplier-edit', ['supplier' => $supplier->getKey()])}}" wire:navigate.hover>
-
-                        <x-layouts.simple-text :name="$supplier->ms_uuid"/>
-
-                    </a>
-                @endif
-                <x-danger-button wire:click="destroy({{$supplier}})">Удалить</x-danger-button>
-                <x-inputs.switcher :checked="$supplier->open"/>
-            </x-table.table-item>
-        @endforeach
     </x-layouts.main-container>
 </div>

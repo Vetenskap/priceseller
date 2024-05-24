@@ -5,9 +5,21 @@ namespace App\Providers;
 use App\Components\EmailClient\EmailClient;
 use App\Components\EmailClient\EmailHandlerLaravelImap;
 use App\Jobs\Email\CheckEmails;
-use App\Services\Item\ItemPriceService;
+use App\Jobs\Export;
+use App\Jobs\Import;
+use App\Listeners\ResponseReceivedLogging;
+use App\Services\Item\ItemPriceWithCacheService;
 use App\Services\Item\ItemPriceServiceInterface;
+use App\Services\ItemsExportReportService;
+use App\Services\ItemsImportReportService;
+use Illuminate\Http\Client\Events\ResponseReceived;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Queue\Events\JobProcessed;
+use Illuminate\Queue\Jobs\RedisJob;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -30,5 +42,7 @@ class AppServiceProvider extends ServiceProvider
                 dispatch(new $job($item, ...$arguments));
             });
         });
+
+        Event::listen(ResponseReceived::class, ResponseReceivedLogging::class);
     }
 }

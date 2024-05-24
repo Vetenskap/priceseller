@@ -31,7 +31,7 @@ new class extends Component
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate.hover>
-                        {{ __('Dashboard') }}
+                        {{ __('Главная') }}
                     </x-nav-link>
                     <x-nav-link :href="route('moysklad')" :active="request()->routeIs('moysklad')" wire:navigate.hover>
                         {{ __('Мой склад') }}
@@ -57,9 +57,12 @@ new class extends Component
                 </div>
             </div>
 
-            <div class="sm:flex sm:items-center">
-                <i class="fa-regular fa-bell fa-lg cursor-pointer"></i>
-            </div>
+{{--            <div class="flex sm:items-center">--}}
+{{--                <i class="fa-regular fa-bell fa-lg cursor-pointer"></i>--}}
+{{--            </div>--}}
+{{--            <div class="bg-red-300 rounded position-absolute w-72 h-72 flex justify-center top-14">--}}
+{{--                <h1>Hello</h1>--}}
+{{--            </div>--}}
 
             <!-- Settings Dropdown -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
@@ -78,13 +81,13 @@ new class extends Component
 
                     <x-slot name="content">
                         <x-dropdown-link :href="route('profile')" wire:navigate>
-                            {{ __('Profile') }}
+                            {{ __('Профиль') }}
                         </x-dropdown-link>
 
                         <!-- Authentication -->
                         <button wire:click="logout" class="w-full text-start">
                             <x-dropdown-link>
-                                {{ __('Log Out') }}
+                                {{ __('Выйти') }}
                             </x-dropdown-link>
                         </button>
                     </x-slot>
@@ -107,7 +110,28 @@ new class extends Component
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
-                {{ __('Dashboard') }}
+                {{ __('Главная') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('moysklad')" :active="request()->routeIs('moysklad')" wire:navigate.hover>
+                {{ __('Мой склад') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('avito')" :active="request()->routeIs('avito')" wire:navigate.hover>
+                {{ __('Авито') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('emails')" :active="request()->routeIs('emails', 'email-show')" wire:navigate.hover>
+                {{ __('Почта') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('suppliers')" :active="request()->routeIs('suppliers', 'supplier-edit')" wire:navigate.hover>
+                {{ __('Поставщики') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('items')" :active="request()->routeIs('items', 'item-edit')" wire:navigate.hover>
+                {{ __('Товары') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('ozon')" :active="request()->routeIs('ozon', 'ozon-market-edit')" wire:navigate.hover>
+                {{ __('ОЗОН') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('wb')" :active="request()->routeIs('wb', 'wb-market-edit')" wire:navigate.hover>
+                {{ __('ВБ') }}
             </x-responsive-nav-link>
         </div>
 
@@ -120,13 +144,13 @@ new class extends Component
 
             <div class="mt-3 space-y-1">
                 <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Profile') }}
+                    {{ __('Профиль') }}
                 </x-responsive-nav-link>
 
                 <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start">
                     <x-responsive-nav-link>
-                        {{ __('Log Out') }}
+                        {{ __('Выйти') }}
                     </x-responsive-nav-link>
                 </button>
             </div>

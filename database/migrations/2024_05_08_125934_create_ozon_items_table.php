@@ -27,9 +27,8 @@ return new class extends Migration
             $table->unsignedInteger('price_max')->nullable();
             $table->unsignedInteger('price_market')->nullable();
             $table->unsignedInteger('count')->nullable();
-            $table->foreignUuid('item_id')->constrained('items');
-            $table->foreignUuid('ozon_market_id')->constrained('ozon_markets');
-            $table->softDeletes();
+            $table->foreignUuid('item_id')->constrained('items')->cascadeOnDelete();
+            $table->foreignUuid('ozon_market_id')->constrained('ozon_markets')->cascadeOnDelete();
             $table->timestamps();
         });
     }

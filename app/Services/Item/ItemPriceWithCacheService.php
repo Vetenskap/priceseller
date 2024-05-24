@@ -4,6 +4,7 @@ namespace App\Services\Item;
 
 use App\Models\Item;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Cache;
 
 class ItemPriceWithCacheService
 {
@@ -25,16 +26,20 @@ class ItemPriceWithCacheService
     }
     public function find(): ?Item
     {
-        return Item::query()
-            ->where('supplier_id', $this->supplierId)
-            ->where('article', $this->article)
-            ->when($this->brand, fn(Builder $query) => $query->where('brand', $this->brand))
-            ->first();
+        return Cache::rememberForever($this->supplierId . '_' . $this->article . '_' . $this->brand, function () {
+            return Item::query()
+                ->where('supplier_id', $this->supplierId)
+                ->where('article', $this->article)
+                ->when($this->brand, fn (Builder $query) => $query->where('brand', $this->brand))
+                ->first();
+        });
     }
 
     public function save(Item $item)
     {
         $item->updated = true;
         $item->save();
+
+        Cache::set($this->supplierId . '_' . $this->article . '_' . $this->brand, $item);
     }
 }

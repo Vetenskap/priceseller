@@ -306,7 +306,7 @@ return [
     |
     */
     'transactions' => [
-        'handler' => 'db',
+        'handler' => 'null',
         'db'      => [
             'connection' => null,
         ],

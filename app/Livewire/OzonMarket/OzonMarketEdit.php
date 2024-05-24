@@ -2,13 +2,23 @@
 
 namespace App\Livewire\OzonMarket;
 
-use App\Livewire\Components\Toast;
+use App\Jobs\Export;
+use App\Jobs\Import;
+use App\Jobs\MarketRelationshipsAndCommissions;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
+use App\Livewire\Traits\WithFilters;
+use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\OzonMarket;
+use App\Models\OzonWarehouse;
+use App\Models\Supplier;
+use App\Services\ItemsImportReportService;
+use App\Services\OzonItemPriceService;
 use App\Services\OzonMarketService;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
@@ -16,106 +26,175 @@ use Livewire\WithFileUploads;
 
 class OzonMarketEdit extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithJsNotifications, WithFilters, WithSubscribeNotification;
 
     public OzonMarketPostForm $form;
 
     public OzonMarket $market;
 
-    #[Session]
+    public array $apiWarehouses = [];
+
+    public int $selectedWarehouse;
+
+    #[Session('OzonMarketEdit.{market.id}')]
     public $selectedTab = 'main';
 
-    /** @var TemporaryUploadedFile $table */
-    public $table;
+    /** @var TemporaryUploadedFile $file */
+    public $file;
 
-    #[Session]
+    #[Session('OzonMarketEdit.min_price_percent.{market.id}')]
     public $min_price_percent = null;
 
-    #[Session]
+    #[Session('OzonMarketEdit.min_price.{market.id}')]
     public $min_price = null;
 
-    #[Session]
+    #[Session('OzonMarketEdit.shipping_processing.{market.id}')]
     public $shipping_processing = null;
 
-    #[On('livewire-upload-error')]
-    public function err()
+    public function export(): void
     {
-        $this->js((new Toast('Ошибка', 'Не удалось загрузить файл'))->danger());
+        Export::dispatch($this->market, OzonMarketService::class);
+
+        $this->dispatch('items-export-report-created');
     }
 
-    public function saveFile()
-    {
-
-    }
-
-    public function export()
-    {
-        ini_set('max_execution_time', 1200); // TODO remove
-
-        $service = new OzonMarketService($this->market);
-        $path = $service->exportItems();
-
-        $date = now()->toDateTimeString();
-        return response()->download(Storage::disk('public')->path($path), "{$this->market->name}_{$date}.xlsx");
-    }
-
-    public function import()
+    public function import(): void
     {
         $uuid = Str::uuid();
-        $report = $this->market->importReports()->create([
-            'uuid' => $uuid,
-            'status' => 2,
-            'message' => 'В процессе'
-        ]);
-        $path = $this->table->storeAs('users/ozon', $uuid . '.' . $this->table->getClientOriginalExtension(), 'public');
-        $service = new OzonMarketService($this->market);
-        $result = $service->importItems($path);
-        $report->update([
-            'correct' => $result->get('correct'),
-            'error' => $result->get('error'),
-            'status' => 0,
-            'message' => 'Импорт завершён'
-        ]);
+        $ext = $this->file->getClientOriginalExtension();
+        $path = $this->file->storeAs(OzonMarketService::PATH, $uuid . '.' . $ext);
 
+        if (!Storage::exists($path)) {
+            $this->dispatch('livewire-upload-error');
+            return;
+        }
+
+        Import::dispatch($uuid, $ext, $this->market, OzonMarketService::class);
+
+        $this->dispatch('items-import-report-created');
     }
 
-    public function relationshipsAndCommissions()
+    public function relationshipsAndCommissions(): void
     {
-        ini_set('max_execution_time', 1200); // TODO remove
+        if (ItemsImportReportService::get($this->market)) {
+            $this->addWarningImportNotification();
+            return;
+        }
 
-        $report = $this->market->importReports()->create([
-            'status' => 2,
-            'message' => 'В процессе',
-        ]);
+        MarketRelationshipsAndCommissions::dispatch(
+            defaultFields: collect($this->only(['shipping_processing', 'min_price', 'min_price_percent'])),
+            model: $this->market,
+            service: OzonMarketService::class
+        );
 
-        $service = new OzonMarketService($this->market);
-        $result = $service->directRelationships(collect($this->only(['shipping_processing', 'min_price', 'min_price_percent'])));
-        $report->update([
-            'correct' => $result->get('correct'),
-            'error' => $result->get('error'),
-            'status' => 0,
-            'message' => 'Импорт завершён',
-        ]);
+        $this->dispatch('items-import-report-created');
     }
 
-    public function mount()
+    public function clearRelationships()
+    {
+        $service = new OzonMarketService($this->market);
+        $deleted = $service->clearRelationships();
+
+        $this->addSuccessClearRelationshipsNotification($deleted);
+    }
+
+    public function mount(): void
     {
         $this->form->setMarket($this->market);
+
+        $this->getWarehouses();
+
     }
 
-    public function save()
+    public function getWarehouses()
+    {
+        try {
+            $service = new OzonMarketService($this->market);
+            $warehouses = $service->getWarehouses();
+            $this->apiWarehouses = $warehouses->all();
+            $this->selectedWarehouse = $warehouses->first()['warehouse_id'];
+        } catch (RequestException $e) {
+            if ($e->response->unauthorized()) {
+                $this->setErrorBag(new MessageBag([
+                    'error' => 'Не верно ведён АПИ ключ или Идентификатор клиента',
+                    'form.client_id' => 'Не верно ведён Идентификатор клиента',
+                    'form.api_key' => 'Не верно ведён АПИ ключ',
+                ]));
+            } else {
+                $this->setErrorBag(new MessageBag([
+                    'error' => 'Неизвестная ошибка от сервера ОЗОН',
+                ]));
+            }
+        }
+    }
+
+    public function save(): void
     {
         $this->authorize('update', $this->market);
 
         $this->form->update();
+
+        $this->addSuccessSaveNotification();
     }
 
-    public function destroy()
+    public function destroy(): void
     {
         $this->authorize('delete', $this->market);
 
         $this->market->delete();
 
         $this->redirectRoute('ozon', navigate: true);
+    }
+
+    public function render()
+    {
+        $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
+
+        return view('livewire.ozon-market.ozon-market-edit', [
+            'items' => $items
+        ]);
+    }
+
+    public function addWarehouse()
+    {
+
+        $this->authorize('create', OzonWarehouse::class);
+
+        $name = collect($this->apiWarehouses)->firstWhere('warehouse_id', $this->selectedWarehouse)['name'];
+
+        $this->market->warehouses()->updateOrCreate([
+            'id' => $this->selectedWarehouse,
+        ], [
+            'id' => $this->selectedWarehouse,
+            'name' => $name
+        ]);
+    }
+
+    public function deleteWarehouse(OzonWarehouse $warehouse)
+    {
+        $this->authorize('delete', $warehouse);
+
+        $warehouse->delete();
+    }
+
+    public function testPrice()
+    {
+        auth()->user()->suppliers->each(function (Supplier $supplier) {
+            $service = new OzonItemPriceService($supplier, $this->market);
+            $service->updatePriceTest();
+        });
+
+        $this->addSuccessTestPriceNotification();
+    }
+
+    public function nullStocks()
+    {
+        auth()->user()->suppliers->each(function (Supplier $supplier) {
+            $service = new OzonItemPriceService($supplier, $this->market);
+            $service->nullAllStocks();
+            $service->unloadAllStocks();
+        });
+
+        $this->addSuccessNullStocksNotification();
     }
 }

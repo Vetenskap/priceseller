@@ -4,36 +4,27 @@ namespace App\Imports;
 
 use App\Models\Item;
 use App\Models\User;
-use Illuminate\Support\Str;
-use Maatwebsite\Excel\Concerns\Importable;
-use Maatwebsite\Excel\Concerns\RegistersEventListeners;
+use App\Services\ItemsImportReportService;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
+use Maatwebsite\Excel\Concerns\SkipsOnError;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
-use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
-use Maatwebsite\Excel\Concerns\WithProgressBar;
-use Maatwebsite\Excel\Concerns\WithUpserts;
-use Maatwebsite\Excel\Events\AfterBatch;
-use Maatwebsite\Excel\Events\AfterChunk;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Validators\Failure;
 
-class ItemsImport implements ToModel, WithUpserts, WithBatchInserts, WithChunkReading, WithEvents, WithProgressBar
+class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError
 {
-    use Importable, RegistersEventListeners;
-
-    private User $user;
-
-    public array $suppliers = [
-        'ООО "ШАТЕ-М ПЛЮС"' => '9bd1f334-9270-429e-b225-8382d3f16ba9',
-        'ООО "ГРИНЛАЙТ"' => '9bd1f334-9270-429e-b335-8382d3f27ba9',
-        'ООО Берг' => '9bd1f334-9270-429e-b335-8382d3f16ba9',
-    ];
+    public int $correct = 0;
+    public int $error = 0;
+    public User $user;
 
     public function __construct(int $userId)
     {
-        $this->user = User::findOrFail($userId);
+        $this->user = User::find($userId);
     }
-
 
     /**
     * @param array $row
@@ -42,28 +33,115 @@ class ItemsImport implements ToModel, WithUpserts, WithBatchInserts, WithChunkRe
     */
     public function model(array $row)
     {
+        $row = collect($row);
+
+        $supplier = $this->user->suppliers()->where('name', $row->get('Поставщик'))->first();
+
+        if (!$supplier) {
+            ItemsImportReportService::addBadItem(
+                $this->user,
+                0,
+                'Поставщик',
+                ['Не найден поставщик'],
+                $row->all()
+            );
+
+            $this->error++;
+
+            return null;
+        }
+
+        $this->correct++;
+
+        if ($item = $this->user->items()->where('code', $row->get('Код'))->first()) {
+            $item->update([
+                'ms_uuid' => $row->get('МС UUID'),
+                'name' => $row->get('Наименование'),
+                'supplier_id' => $supplier->id,
+                'article' => $row->get('Артикул'),
+                'brand' => $row->get('Бренд'),
+                'multiplicity' => $row->get('Кратность отгрузки'),
+            ]);
+            return null;
+        }
+
         return new Item([
-            'code' => $row[3],
-            'supplier_id' => $row[Str::slug('Поставщик')],
-            'article' => $row[71],
-            'multiplicity' => (int)preg_replace("/[^0-9]/", "", $row[73]),
-            'brand' => $row[68],
-            'user_id' => $this->user->id
+            'ms_uuid' => $row->get('МС UUID'),
+            'code' => $row->get('Код'),
+            'name' => $row->get('Наименование'),
+            'supplier_id' => $supplier->id,
+            'article' => $row->get('Артикул'),
+            'brand' => $row->get('Бренд'),
+            'multiplicity' => $row->get('Кратность отгрузки'),
+            'user_id' => $this->user->id,
         ]);
     }
 
-    public function uniqueBy()
+    public function prepareForValidation($data, $index)
     {
-        return ['user_id', 'code', 'ms_uuid'];
+        if ($index % 1000 === 0) ItemsImportReportService::flush($this->user, $this->correct, $this->error);
+
+        $data['Кратность отгрузки'] = preg_replace("/[^0-9]/", "", $data['Кратность отгрузки']);
+
+        return $data;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'МС UUID' => ['nullable'],
+            'Код' => ['required'],
+            'Наименование' => ['nullable'],
+            'Артикул' => ['required'],
+            'Бренд' => ['nullable'],
+            'Кратность отгрузки' => ['required', 'integer', 'min:1'],
+        ];
+    }
+
+    public function customValidationMessages()
+    {
+        return [
+            'Код.required' => 'Поле обязательно',
+            'Артикул.required' => 'Поле обязательно',
+            'Кратность отгрузки.required' => 'Поле обязательно',
+            'Кратность отгрузки.integer' => 'Поле должно быть целым числом',
+            'Кратность отгрузки.min' => 'Поле должно быть не меньше 1',
+        ];
+    }
+
+    public function onError(\Throwable $e)
+    {
+        $this->error++;
+
+        logger('Товар не создан', [
+            'message' => $e->getMessage()
+        ]);
+    }
+
+    public function onFailure(Failure ...$failures)
+    {
+        foreach ($failures as $failure) {
+
+            $this->error++;
+
+            ItemsImportReportService::addBadItem(
+                $this->user,
+                $failure->row(),
+                $failure->attribute(),
+                $failure->errors(),
+                $failure->values()
+            );
+
+        }
     }
 
     public function batchSize(): int
     {
-        return 100;
+        return 1000;
     }
 
     public function chunkSize(): int
     {
-        return 100;
+        return 1000;
     }
 }

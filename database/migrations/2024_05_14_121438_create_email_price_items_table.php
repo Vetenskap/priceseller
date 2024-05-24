@@ -19,8 +19,8 @@ return new class extends Migration
             $table->string('stock');
             $table->string('message');
             $table->tinyInteger('status');
-            $table->foreignUuid('supplier_id')->constrained('suppliers');
-            $table->foreignUuid('item_id')->nullable()->constrained('items');
+            $table->foreignUuid('supplier_id')->constrained('suppliers')->cascadeOnDelete();
+            $table->foreignUuid('item_id')->nullable()->constrained('items')->cascadeOnDelete();
             $table->timestamps();
         });
     }

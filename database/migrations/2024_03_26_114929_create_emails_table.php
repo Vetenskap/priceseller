@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('address')->unique();
             $table->string('password');
             $table->boolean('open')->nullable()->default(false);
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
 

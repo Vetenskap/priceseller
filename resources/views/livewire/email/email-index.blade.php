@@ -34,26 +34,51 @@
         </x-layouts.main-container>
     @endif
     <x-layouts.main-container>
-        @empty($emails->count())
+        @if($emails->count() > 0)
+            <x-table.table-layout>
+                <x-table.table-header>
+                    <x-table.table-child>
+                        <x-layouts.simple-text name="Наименование"/>
+                    </x-table.table-child>
+                    <x-table.table-child>
+                        <x-layouts.simple-text name="Адрес"/>
+                    </x-table.table-child>
+                    <x-table.table-child>
+
+                    </x-table.table-child>
+                    <x-table.table-child>
+
+                    </x-table.table-child>
+                </x-table.table-header>
+                @foreach($emails as $email)
+                    <x-table.table-item wire:key="{{$email->getKey()}}" wire:poll>
+                        <x-table.table-child>
+                            <a href="{{route('email-show', ['email' => $email->getKey()])}}" wire:navigate.hover>
+
+                                <x-layouts.simple-text :name="$email->name"/>
+
+                            </a>
+                        </x-table.table-child>
+                        <x-table.table-child>
+                            <a href="{{route('email-show', ['email' => $email->getKey()])}}" wire:navigate.hover>
+
+                                <x-layouts.simple-text :name="$email->address"/>
+
+                            </a>
+                        </x-table.table-child>
+                        <x-table.table-child>
+                            <x-inputs.switcher :checked="$email->open" wire:change="changeOpen({{$email}})"/>
+                        </x-table.table-child>
+                        <x-table.table-child>
+                            <x-danger-button wire:click="destroy({{$email}})">Удалить</x-danger-button>
+                        </x-table.table-child>
+                    </x-table.table-item>
+                @endforeach
+            </x-table.table-layout>
+        @else
             <x-blocks.main-block>
                 <x-layouts.simple-text name="Сейчас у вас нет почты"/>
             </x-blocks.main-block>
-        @endempty
-        @foreach($emails as $email)
-            <x-table.table-item wire:key="{{$email->getKey()}}" wire:poll>
-                <a href="{{route('email-show', ['email' => $email->getKey()])}}" wire:navigate.hover>
-
-                    <x-layouts.simple-text :name="$email->name"/>
-
-                </a>
-                <a href="{{route('email-show', ['email' => $email->getKey()])}}" wire:navigate.hover>
-
-                    <x-layouts.simple-text :name="$email->address"/>
-
-                </a>
-                <x-danger-button wire:click="destroy({{$email}})">Удалить</x-danger-button>
-                <x-inputs.switcher :checked="$email->open" wire:change="changeOpen({{$email}})"/>
-            </x-table.table-item>
-        @endforeach
+        @endif
     </x-layouts.main-container>
 </div>

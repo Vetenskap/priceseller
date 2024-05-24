@@ -22,7 +22,6 @@ class OzonItemsExport implements FromCollection, WithHeadings
 
         return $items->map(function ($item) {
             return [
-                'id' => $item->id,
                 'product_id' => $item->product_id,
                 'offer_id' => $item->offer_id,
                 'item_code' => $item->item->code,
@@ -49,7 +48,6 @@ class OzonItemsExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'id',
             'product_id',
             'offer_id',
             'Код',

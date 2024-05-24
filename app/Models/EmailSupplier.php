@@ -9,6 +9,17 @@ class EmailSupplier extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'email',
+        'filename',
+        'header_article',
+        'header_brand',
+        'header_price',
+        'header_count',
+        'email_id',
+        'supplier_id',
+    ];
+
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);

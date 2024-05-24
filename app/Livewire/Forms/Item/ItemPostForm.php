@@ -13,26 +13,26 @@ class ItemPostForm extends Form
 
     public $code;
 
-    public $article_supplier;
+    public $article;
 
     public $brand;
 
-    public $article_manufactor;
-
-    public $article_manufactor_brand;
-
     public $multiplicity;
+
+    public $name;
+
+    public $supplier_id;
 
     public function setItem(Item $item)
     {
         $this->item = $item;
         $this->ms_uuid = $item->ms_uuid;
         $this->code = $item->code;
-        $this->article_supplier = $item->article_supplier;
         $this->brand = $item->brand;
-        $this->article_manufactor = $item->article_manufactor;
-        $this->article_manufactor_brand = $item->article_manufactor_brand;
         $this->multiplicity = $item->multiplicity;
+        $this->article = $item->article;
+        $this->name = $item->name;
+        $this->supplier_id = $item->supplier_id;
     }
 
     public function update()

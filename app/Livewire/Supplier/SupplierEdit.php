@@ -4,14 +4,31 @@ namespace App\Livewire\Supplier;
 
 use App\Livewire\Components\Toast;
 use App\Livewire\Forms\Supplier\SupplierPostForm;
+use App\Livewire\Traits\WithFilters;
+use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Supplier;
+use Livewire\Attributes\On;
+use Livewire\Attributes\Session;
 use Livewire\Component;
 
 class SupplierEdit extends Component
 {
+    use WithJsNotifications, WithFilters, WithSubscribeNotification;
+
     public SupplierPostForm $form;
 
     public Supplier $supplier;
+
+    public function getListeners()
+    {
+        return [
+            "echo:supplier.report.{$this->supplier->id},.change-message" => 'render'
+        ];
+    }
+
+    #[Session('supplierEdit.{supplier.id}')]
+    public $selectedTab = 'main';
 
     public function mount()
     {
@@ -24,16 +41,20 @@ class SupplierEdit extends Component
 
         $this->form->update();
 
-        $this->js((new Toast("Поставщик: {$this->supplier->name}", 'Данные успешно обновлены'))->success());
+        $this->addSuccessSaveNotification();
     }
 
     public function destroy()
     {
         $this->authorize('delete', $this->supplier);
+
+        $this->supplier->delete();
     }
 
     public function render()
     {
-        return view('livewire.supplier.supplier-edit');
+        return view('livewire.supplier.supplier-edit', [
+            'priceItems' => $this->supplier->priceItems()->filters()->paginate(100)
+        ]);
     }
 }

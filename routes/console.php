@@ -1,8 +1,21 @@
 <?php
 
-use Illuminate\Foundation\Inspiring;
-use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Schedule;
 
-//Artisan::command('inspire', function () {
-//    $this->comment(Inspiring::quote());
-//})->purpose('Display an inspiring quote')->hourly();
+Schedule::call(function () {
+    \App\Services\ItemsExportReportService::timeout();
+    \App\Services\ItemsImportReportService::timeout();
+    \App\Services\SupplierReportService::timeout();
+})->everyMinute();
+
+Schedule::command('user:process')->everyMinute();
+
+Schedule::command('horizon:snapshot')->everyFiveMinutes();
+
+Schedule::command('telescope:prune')->daily();
+
+Schedule::call(function () {
+    \App\Services\ItemsExportReportService::prune();
+    \App\Services\ItemsImportReportService::prune();
+    \App\Services\SupplierReportService::prune();
+})->daily();

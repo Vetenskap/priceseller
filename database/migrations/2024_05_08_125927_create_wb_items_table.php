@@ -24,9 +24,8 @@ return new class extends Migration
             $table->unsignedInteger('price')->nullable();
             $table->unsignedInteger('price_market')->nullable();
             $table->unsignedInteger('count')->nullable();
-            $table->foreignUuid('item_id')->constrained('items');
-            $table->foreignUuid('wb_market_id')->constrained('wb_markets');
-            $table->softDeletes();
+            $table->foreignUuid('item_id')->constrained('items')->cascadeOnDelete();
+            $table->foreignUuid('wb_market_id')->constrained('wb_markets')->cascadeOnDelete();
             $table->timestamps();
         });
     }

@@ -2,63 +2,64 @@
 
 namespace App\Livewire\WbMarket;
 
-use App\Livewire\Components\Toast;
+use App\Jobs\Export;
+use App\Jobs\Import;
+use App\Jobs\MarketRelationshipsAndCommissions;
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
+use App\Livewire\Traits\WithFilters;
+use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSubscribeNotification;
+use App\Models\Supplier;
 use App\Models\WbMarket;
-use App\Services\MarketImportReportService;
+use App\Models\WbWarehouse;
+use App\Services\ItemsImportReportService;
+use App\Services\WbItemPriceService;
 use App\Services\WbMarketService;
+use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class WbMarketEdit extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithJsNotifications, WithFilters, WithSubscribeNotification;
 
     public WbMarketPostForm $form;
 
     public WbMarket $market;
 
-    #[Session]
+    #[Session('WbMarketEdit.{market.id}')]
     public $selectedTab = 'main';
 
-    public $table;
+    /** @var TemporaryUploadedFile $file */
+    public $file;
 
-    #[Session]
+    #[Session('WbMarketEdit.sales_percent.{market.id}')]
     public $sales_percent = null;
 
-    #[Session]
+    #[Session('WbMarketEdit.min_price.{market.id}')]
     public $min_price = null;
 
-    #[Session]
+    #[Session('WbMarketEdit.retail_markup_percent.{market.id}')]
     public $retail_markup_percent = null;
 
-    #[Session]
+    #[Session('WbMarketEdit.package.{market.id}')]
     public $package = null;
 
-    #[On('livewire-upload-error')]
-    public function err()
-    {
-        $this->js((new Toast('Ошибка', 'Не удалось загрузить файл'))->danger());
-    }
+    public $apiWarehouses = [];
 
-    public function saveFile()
-    {
-        $path = storage_path('app\\' . $this->table->store('test'));
+    public int $selectedWarehouse;
 
-        $handler = new FileParse($path);
-
-        $handler->start(function ($data) {
-            dd($data);
-        });
-    }
 
     public function mount()
     {
         $this->form->setMarket($this->market);
+
+        $this->getWarehouses();
     }
 
     public function save()
@@ -66,6 +67,8 @@ class WbMarketEdit extends Component
         $this->authorize('update', $this->market);
 
         $this->form->update();
+
+        $this->addSuccessSaveNotification();
     }
 
     public function destroy()
@@ -77,38 +80,126 @@ class WbMarketEdit extends Component
         $this->redirectRoute('ozon', navigate: true);
     }
 
-    public function export()
+    public function export(): void
     {
-        ini_set('max_execution_time', 1200); // TODO remove
+        Export::dispatch($this->market, WbMarketService::class);
 
-        $service = new WbMarketService($this->market);
-        $path = $service->exportItems();
+        $this->dispatch('items-export-report-created');
 
-        $date = now()->toDateTimeString();
-        return response()->download(Storage::disk('public')->path($path), "{$this->market->name}_{$date}.xlsx");
     }
 
-    public function import()
+    public function import(): void
     {
         $uuid = Str::uuid();
-        MarketImportReportService::newOrFirst($this->market);
+        $ext = $this->file->getClientOriginalExtension();
 
-        $path = $this->table->storeAs('users/wb', $uuid . '.' . $this->table->getClientOriginalExtension(), 'public');
-        $service = new WbMarketService($this->market);
-        $result = $service->importItems($path);
-        MarketImportReportService::success($this->market, $result->get('correct'), $result->get('error'), $uuid);
+        $path = $this->file->storeAs(WbMarketService::PATH, $uuid . '.' . $ext);
 
+        if (!Storage::exists($path)) {
+            $this->dispatch('livewire-upload-error');
+            return;
+        }
+
+        Import::dispatch($uuid, $ext, $this->market, WbMarketService::class);
+
+        $this->dispatch('items-import-report-created');
     }
 
-    public function relationshipsAndCommissions()
+    public function relationshipsAndCommissions(): void
     {
-        ini_set('max_execution_time', 1200); // TODO remove
+        if (ItemsImportReportService::get($this->market)) {
+            $this->addWarningImportNotification();
+            return;
+        }
 
-        MarketImportReportService::newOrFirst($this->market);
+        MarketRelationshipsAndCommissions::dispatch(
+            defaultFields: collect($this->only(['package', 'retail_markup_percent', 'min_price', 'sales_percent'])),
+            model: $this->market,
+            service: WbMarketService::class
+        );
 
-        $service = new WbMarketService($this->market);
-        $result = $service->directRelationships(collect($this->only(['package', 'retail_markup_percent', 'min_price', 'sales_percent'])));
-
-        MarketImportReportService::success($this->market, $result->get('correct'), $result->get('error'));
+        $this->dispatch('items-import-report-created');
     }
+
+    public function getWarehouses()
+    {
+        $service = new WbMarketService($this->market);
+
+        try {
+            $warehouses = $service->getWarehouses();
+            $this->apiWarehouses = $warehouses->all();
+            $this->selectedWarehouse = $warehouses->first()['id'];
+        } catch (RequestException $e) {
+            if ($e->response->unauthorized()) {
+                $this->setErrorBag(new MessageBag([
+                    'error' => 'Не верно ведён АПИ ключ',
+                    'form.api_key' => 'Не верно ведён АПИ ключ'
+                ]));
+            } else {
+                $this->setErrorBag(new MessageBag([
+                    'error' => 'Неизвестная ошибка от сервера ВБ',
+                ]));
+            }
+        }
+    }
+
+    public function addWarehouse()
+    {
+        $this->authorize('create', WbWarehouse::class);
+
+        $name = collect($this->apiWarehouses)->firstWhere('id', $this->selectedWarehouse)['name'];
+
+        $this->market->warehouses()->updateOrCreate([
+            'id' => $this->selectedWarehouse,
+        ], [
+            'id' => $this->selectedWarehouse,
+            'name' => $name
+        ]);
+    }
+
+    public function deleteWarehouse(WbWarehouse $warehouse)
+    {
+        $this->authorize('delete', $warehouse);
+
+        $warehouse->delete();
+    }
+
+    public function clearRelationships()
+    {
+        $service = new WbMarketService($this->market);
+        $deleted = $service->clearRelationships();
+
+        $this->addSuccessClearRelationshipsNotification($deleted);
+    }
+
+    public function render()
+    {
+        $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
+
+        return view('livewire.wb-market.wb-market-edit', [
+            'items' => $items
+        ]);
+    }
+
+    public function testPrice()
+    {
+        auth()->user()->suppliers->each(function (Supplier $supplier) {
+            $service = new WbItemPriceService($supplier, $this->market);
+            $service->updatePriceTest();
+        });
+
+        $this->addSuccessTestPriceNotification();
+    }
+
+    public function nullStocks()
+    {
+        auth()->user()->suppliers->each(function (Supplier $supplier) {
+            $service = new WbItemPriceService($supplier, $this->market);
+            $service->nullAllStocks();
+            $service->unloadAllStocks();
+        });
+
+        $this->addSuccessNullStocksNotification();
+    }
+
 }

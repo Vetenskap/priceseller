@@ -13,14 +13,12 @@ class UserAvitoSubPermission
     /**
      * Handle an incoming request.
      *
-     * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
+     * @param \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response) $next
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if (App::environment('production')) {
-            if ($request->user() && ! $request->user()->is_avito_sub()) {
-                return redirect()->route('subscribe.avito');
-            }
+        if ($request->user() && !$request->user()->is_avito_sub()) {
+            return redirect()->route('subscribe.avito');
         }
 
         Context::add('subscribe', 'avito');

@@ -13,23 +13,42 @@ class WbMarket extends Model
     use HasUuids;
     use SoftDeletes;
 
+    protected $fillable = [
+        'name',
+        'api_key',
+        'coefficient',
+        'basic_logistics',
+        'price_one_liter',
+        'open',
+        'max_count',
+        'min',
+        'max',
+        'volume',
+        'user_id',
+    ];
+
     public function items()
     {
         return $this->hasMany(WbItem::class);
     }
 
-    public function importReports()
+    public function itemsImportReports()
     {
-        return $this->morphMany(MarketImportReport::class, 'reportable');
+        return $this->morphMany(ItemsImportReport::class, 'reportable');
     }
 
-    public function exportReports()
+    public function itemsExportReports()
     {
-        return $this->morphMany(MarketExportReport::class, 'reportable');
+        return $this->morphMany(ItemsExportReport::class, 'reportable');
     }
 
     public function relationships()
     {
         return $this->morphMany(MarketItemRelationship::class, 'relationshipable');
+    }
+
+    public function warehouses()
+    {
+        return $this->hasMany(WbWarehouse::class);
     }
 }

@@ -16,13 +16,13 @@ return new class extends Migration
             $table->uuid('ms_uuid')->nullable()->unique();
             $table->string('code')->index();
             $table->text('name')->nullable();
-            $table->foreignUuid('supplier_id')->constrained('suppliers');
+            $table->foreignUuid('supplier_id')->constrained('suppliers')->cascadeOnDelete();
             $table->string('article')->nullable()->index();
             $table->string('brand')->nullable()->index();
             $table->double('price')->nullable()->default(0);
             $table->unsignedInteger('count')->nullable()->default(0);
             $table->unsignedInteger('multiplicity')->nullable()->default(1);
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->boolean('updated')->nullable()->default(false);
             $table->softDeletes();
             $table->timestamps();

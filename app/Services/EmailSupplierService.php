@@ -5,6 +5,8 @@ namespace App\Services;
 use App\Imports\SupplierPriceImport;
 use App\Models\EmailSupplier;
 use App\Services\Item\ItemPriceService;
+use App\Services\Item\ItemPriceWithCacheService;
+use Box\Spout\Common\Exception\IOException;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
@@ -12,6 +14,7 @@ use Maatwebsite\Excel\Facades\Excel;
 class EmailSupplierService
 {
     protected Collection $stockValues;
+    protected int $totalRows = 0;
 
     public function __construct(protected EmailSupplier $supplier, protected string $path)
     {
@@ -27,10 +30,20 @@ class EmailSupplierService
         $ext = pathinfo($this->path, PATHINFO_EXTENSION);
 
         if ($ext === 'xlsx') {
-            $this->xlsxHandle();
+
+            try {
+                $this->xlsxHandle();
+            } catch (IOException $e) {
+
+                report($e);
+
+                $this->anotherHandle();
+            }
         } else {
             $this->anotherHandle();
         }
+
+        SupplierReportService::changeMessage($this->supplier->supplier, 'Прайс прочитан');
     }
 
     protected function xlsxHandle(): void
@@ -83,6 +96,10 @@ class EmailSupplierService
         } else {
             EmailPriceItemService::handleNotFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock);
         }
+
+        $this->totalRows++;
+
+        if ($this->totalRows % 1000 === 0) SupplierReportService::changeMessage($this->supplier->supplier, 'Выгружено: ' . $this->totalRows);
     }
 
     public function prepareStock(string $stock): int

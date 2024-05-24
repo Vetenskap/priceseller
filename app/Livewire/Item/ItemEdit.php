@@ -3,11 +3,15 @@
 namespace App\Livewire\Item;
 
 use App\Livewire\Forms\Item\ItemPostForm;
+use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Item;
 use Livewire\Component;
 
 class ItemEdit extends Component
 {
+    use WithJsNotifications, WithSubscribeNotification;
+
     public ItemPostForm $form;
 
     public Item $item;
@@ -17,6 +21,8 @@ class ItemEdit extends Component
         $this->authorize('update', $this->item);
 
         $this->form->update();
+
+        $this->addSuccessSaveNotification();
     }
 
     public function destroy()

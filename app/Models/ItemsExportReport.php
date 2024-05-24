@@ -5,13 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class MarketImportReport extends Model
+class ItemsExportReport extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'correct',
-        'error',
         'uuid',
         'message',
         'status',

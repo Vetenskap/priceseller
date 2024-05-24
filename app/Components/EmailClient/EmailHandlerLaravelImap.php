@@ -2,6 +2,7 @@
 
 namespace App\Components\EmailClient;
 
+use App\Services\SupplierService;
 use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
@@ -18,9 +19,12 @@ class EmailHandlerLaravelImap
 {
     public $connection;
     public Filesystem $storage;
-    const SAVE_PATH = "/users/prices/";
     const ZIP_TYPES = ['application/x-zip-compressed'];
-    const TABLE_TYPES = ['application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+    const TABLE_TYPES = [
+        'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+        'application/octet-stream',
+        'application/excel'
+    ];
 
     public function __construct(string $address, string $password, ?Filesystem $storage = null)
     {
@@ -102,7 +106,7 @@ class EmailHandlerLaravelImap
                             !in_array($file->getContentType(), self::ZIP_TYPES)
                         ) continue;
 
-                        $fullPath = self::SAVE_PATH . uniqid() . '_';
+                        $fullPath = SupplierService::PATH . uniqid() . '_';
 
                         $this->storage->put($fullPath . $name, $file->getContent());
 

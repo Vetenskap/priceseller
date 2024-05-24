@@ -5,36 +5,74 @@ namespace App\Imports;
 use App\Models\Item;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
+use App\Models\User;
+use App\Services\ItemsImportReportService;
 use App\Services\MarketItemRelationshipService;
+use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
+use Maatwebsite\Excel\Concerns\SkipsOnError;
+use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithUpserts;
+use Maatwebsite\Excel\Concerns\WithValidation;
+use Maatwebsite\Excel\Validators\Failure;
 
-class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithUpserts
+class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError
 {
     public int $correct = 0;
     public int $error = 0;
 
+    public User $user;
+
     public function __construct(public OzonMarket $market)
     {
+        $this->user = User::findOrFail($this->market->user_id);
     }
 
     public function model(array $row)
     {
         $row = collect($row);
 
-        $item = Item::where('code', $row->get('Код'))->first();
+        $item = $this->user->items()->where('code', $row->get('Код'))->first();
 
         if (!$item) {
-            MarketItemRelationshipService::handleNotFoundItem($row->get('offer_id'), $this->market->id, 'App\Models\OzonMarket', $row->get('Код'));
+
+            MarketItemRelationshipService::handleNotFoundItem(
+                externalCode: $row->get('offer_id'),
+                marketId: $this->market->id,
+                marketType: 'App\Models\OzonMarket',
+                code: $row->get('Код')
+            );
+
             $this->error++;
+
             return null;
         }
 
+        MarketItemRelationshipService::handleFoundItem(
+            externalCode: $row->get('offer_id'),
+            code: $row->get('Код'),
+            marketId: $this->market->id,
+            marketType: 'App\Models\OzonMarket'
+        );
+
         $this->correct++;
-        MarketItemRelationshipService::handleFoundItem($row->get('offer_id'), $row->get('Код'), $this->market->id, 'App\Models\OzonMarket');
+
+        if ($ozonItem = $this->market->items()->where('offer_id', $row->get('offer_id'))->first()) {
+            $ozonItem->update([
+                'product_id' => $row->get('product_id'),
+                'offer_id' => $row->get('offer_id'),
+                'min_price_percent' => $row->get('Мин. Цена, процент'),
+                'min_price' => $row->get('Мин. Цена'),
+                'shipping_processing' => $row->get('Обработка отправления'),
+                'direct_flow_trans' => $row->get('Магистраль'),
+                'deliv_to_customer' => $row->get('Последняя миля'),
+                'sales_percent' => (int) $row->get('Комиссия'),
+            ]);
+            return null;
+        }
 
         return new OzonItem([
             'ozon_market_id' => $this->market->id,
@@ -50,9 +88,83 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
         ]);
     }
 
-    public function uniqueBy()
+    public function prepareForValidation($data, $index)
     {
-        return ['offer_id', 'ozon_market_id'];
+        if ($index % 1000 === 0) ItemsImportReportService::flush($this->market, $this->correct, $this->error);
+
+        return $data;
+    }
+
+    public function rules(): array
+    {
+        return [
+            'product_id' => ['nullable'],
+            'offer_id' => ['required'],
+            'Мин. Цена, процент' => ['nullable', 'integer', 'min:0'],
+            'Мин. Цена' => ['nullable', 'integer', 'min:0'],
+            'Обработка отправления' => ['nullable', 'numeric', 'min:0'],
+            'Магистраль' => ['nullable', 'numeric', 'min:0'],
+            'Последняя миля' => ['nullable', 'numeric', 'min:0'],
+            'Комиссия' => ['nullable', 'integer', 'min:0'],
+            'Код' => ['required'],
+        ];
+    }
+
+    public function customValidationMessages()
+    {
+        return [
+            'offer_id.required' => 'Поле обязательно',
+            'Мин. Цена, процент.integer' => 'Поле должно быть целым числом',
+            'Мин. Цена, процент.min' => 'Поле должно быть больше 0',
+            'Мин. Цена.integer' => 'Поле должно быть целым числом',
+            'Мин. Цена.min' => 'Поле должно быть больше 0',
+            'Обработка отправления.numeric' => 'Поле должно быть числом',
+            'Обработка отправления.min' => 'Поле должно быть больше 0',
+            'Магистраль.numeric' => 'Поле должно быть числом',
+            'Магистраль.min' => 'Поле должно быть больше 0',
+            'Последняя миля.numeric' => 'Поле должно быть числом',
+            'Последняя миля.min' => 'Поле должно быть больше 0',
+            'Комиссия.integer' => 'Поле должно быть целым числом',
+            'Комиссия.min' => 'Поле должно быть больше 0',
+            'Код.required' => 'Поле обязательно',
+        ];
+    }
+
+    public function onError(\Throwable $e)
+    {
+        $this->error++;
+
+        logger('Товар не создан', [
+            'message' => $e->getMessage()
+        ]);
+    }
+
+    public function onFailure(Failure ...$failures)
+    {
+        foreach ($failures as $failure) {
+
+            $this->error++;
+
+            ItemsImportReportService::addBadItem(
+                $this->market,
+                $failure->row(),
+                $failure->attribute(),
+                $failure->errors(),
+                $failure->values()
+            );
+
+            $values = collect($failure->values());
+
+            if ($failure->attribute() == 'Код') {
+                MarketItemRelationshipService::handleNotFoundItem(
+                    externalCode: $values->get('offer_id'),
+                    marketId: $this->market->id,
+                    marketType: 'App\Models\OzonMarket',
+                    code: $values->get('Код')
+                );
+            }
+
+        }
     }
 
     public function batchSize(): int

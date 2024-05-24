@@ -17,7 +17,7 @@ return new class extends Migration
             $table->uuid('ms_uuid')->nullable()->unique();
             $table->boolean('open')->nullable()->default(false);
             $table->boolean('use_brand')->nullable()->default(false);
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->softDeletes();
             $table->timestamps();
         });

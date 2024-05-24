@@ -1,0 +1,78 @@
+<?php
+
+namespace App\Console\Commands\Import;
+
+use App\Models\OzonMarket;
+use App\Models\User;
+use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Storage;
+
+class ImportOzonMarkets extends Command
+{
+    /**
+     * The name and signature of the console command.
+     *
+     * @var string
+     */
+    protected $signature = 'import:ozon-markets';
+
+    /**
+     * The console command description.
+     *
+     * @var string
+     */
+    protected $description = 'Command description';
+
+    /**
+     * Execute the console command.
+     */
+    public function handle()
+    {
+        $users = [
+            4 => User::where('name', 'Иван')->first()->id,
+            5 => User::where('name', 'Sergiyst')->first()->id,
+            6 => User::where('name', 'Владимир')->first()->id,
+            7 => User::where('name', 'Вячеслав')->first()->id,
+            2 => User::where('name', 'Danil')->first()->id,
+        ];
+
+        $reader = new \SplFileObject(Storage::path('test/market_ozons.csv'));
+
+        while (!$reader->eof()) {
+
+            $row = $reader->fgetcsv(';');
+
+            if ($row[0] && $row[0] != 'id') {
+
+                if (isset($users[$row[22]])) {
+
+                    try {
+                        OzonMarket::updateOrCreate([
+                            'client_id' => $row[2],
+                            'user_id' => $users[$row[22]]
+                        ], [
+                            'name' => $row['1'],
+                            'client_id' => $row[2],
+                            'api_key' => $row[3],
+                            'min_price_percent' => $row[6],
+                            'max_price_percent' => $row[7],
+                            'seller_price_percent' => $row[8],
+                            'open' => $row[12],
+                            'max_count' => $row[16],
+                            'min' => $row[17],
+                            'max' => $row[18],
+                            'seller_price' => $row[15],
+                            'acquiring' => $row[9],
+                            'last_mile' => $row[10],
+                            'max_mile' => $row[11],
+                            'user_id' => $users[$row[22]]
+                        ]);
+                    } catch (\Throwable) {
+
+                    }
+                }
+
+            }
+        }
+    }
+}

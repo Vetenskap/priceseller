@@ -4,21 +4,17 @@ namespace App\Livewire\Email;
 
 use App\Livewire\Components\Toast;
 use App\Livewire\Forms\Email\EmailPostForm;
+use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Email;
 use Livewire\Component;
 
 class EmailIndex extends Component
 {
+    use WithSubscribeNotification;
+
     public EmailPostForm $form;
 
-    public $emails;
-
     public $showCreateBlock = false;
-
-    public function mount()
-    {
-        $this->emails = Email::where('user_id', \auth()->user()->id)->get();
-    }
 
     public function add()
     {
@@ -29,24 +25,25 @@ class EmailIndex extends Component
     {
         $this->authorize('create', Email::class);
 
-        $email = $this->form->store();
-
-        $this->emails->add($email);
+        $this->form->store();
 
         $this->reset('showCreateBlock');
     }
 
-    public function changeOpen(Email $email)
+    public function changeOpen($email)
     {
+        $email = Email::find($email['id']);
+
         $this->authorize('update', $email);
 
-        $email->update(['open' => ! $email->open]);
-
-        $this->js((new Toast("Почта: {$email->name}", 'Данные успешно применены'))->success());
+        $email->open = !$email->open;
+        $email->save();
     }
 
-    public function destroy(Email $email)
+    public function destroy($email)
     {
+        $email = Email::find($email['id']);
+
         $this->authorize('delete', $email);
 
         $email->delete();
@@ -54,6 +51,8 @@ class EmailIndex extends Component
 
     public function render()
     {
-        return view('livewire.email.email-index');
+        return view('livewire.email.email-index', [
+            'emails' => Email::where('user_id', \auth()->user()->id)->get()
+        ]);
     }
 }

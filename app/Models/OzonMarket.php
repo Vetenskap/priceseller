@@ -13,19 +13,42 @@ class OzonMarket extends Model
     use HasUuids;
     use SoftDeletes;
 
+    protected $fillable = [
+        'name',
+        'client_id',
+        'api_key',
+        'min_price_percent',
+        'max_price_percent',
+        'seller_price_percent',
+        'open',
+        'max_count',
+        'min',
+        'max',
+        'seller_price',
+        'acquiring',
+        'last_mile',
+        'max_mile',
+        'user_id',
+    ];
+
     public function items()
     {
         return $this->hasMany(OzonItem::class);
     }
 
-    public function importReports()
+    public function warehouses()
     {
-        return $this->morphMany(MarketImportReport::class, 'reportable');
+        return $this->hasMany(OzonWarehouse::class);
     }
 
-    public function exportReports()
+    public function itemsImportReports()
     {
-        return $this->morphMany(MarketExportReport::class, 'reportable');
+        return $this->morphMany(ItemsImportReport::class, 'reportable');
+    }
+
+    public function itemsExportReports()
+    {
+        return $this->morphMany(ItemsExportReport::class, 'reportable');
     }
 
     public function relationships()
