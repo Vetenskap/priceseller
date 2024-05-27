@@ -43,6 +43,7 @@ class WbMarketService
 
     public function directRelationships(Collection $defaultFields): Collection
     {
+        $defaultFields = $defaultFields->filter();
 
         $correct = 0;
         $error = 0;
