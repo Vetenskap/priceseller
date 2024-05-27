@@ -46,30 +46,26 @@ class ImportOzonMarkets extends Command
 
                 if (isset($users[$row[22]])) {
 
-                    try {
-                        OzonMarket::updateOrCreate([
-                            'client_id' => $row[2],
-                            'user_id' => $users[$row[22]]
-                        ], [
-                            'name' => $row['1'],
-                            'client_id' => $row[2],
-                            'api_key' => $row[3],
-                            'min_price_percent' => $row[6],
-                            'max_price_percent' => $row[7],
-                            'seller_price_percent' => $row[8],
-                            'open' => $row[12],
-                            'max_count' => $row[16],
-                            'min' => $row[17],
-                            'max' => $row[18],
-                            'seller_price' => $row[15],
-                            'acquiring' => $row[9],
-                            'last_mile' => $row[10],
-                            'max_mile' => $row[11],
-                            'user_id' => $users[$row[22]]
-                        ]);
-                    } catch (\Throwable) {
-
-                    }
+                    OzonMarket::updateOrCreate([
+                        'client_id' => $row[2],
+                        'user_id' => $users[$row[22]]
+                    ], [
+                        'name' => $row['1'],
+                        'client_id' => $row[2],
+                        'api_key' => $row[3],
+                        'min_price_percent' => $row[6],
+                        'max_price_percent' => $row[7],
+                        'seller_price_percent' => $row[8],
+                        'open' => $row[12],
+                        'max_count' => $row[16],
+                        'min' => $row[17],
+                        'max' => $row[18],
+                        'seller_price' => $row[15],
+                        'acquiring' => $row[9],
+                        'last_mile' => $row[10],
+                        'max_mile' => $row[11],
+                        'user_id' => $users[$row[22]]
+                    ]);
                 }
 
             }
