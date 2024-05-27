@@ -68,7 +68,7 @@ class User extends Authenticatable implements MustVerifyEmail
         return $this->permissions()->where('value', 'avito_sub')->where('expires', '>', now()->timestamp)->exists();
     }
 
-    public function is_admin()
+    public function isAdmin()
     {
         return $this->permissions()->where('value', 'admin')->where('expires', '>', now()->timestamp)->exists();
     }

@@ -8,10 +8,12 @@ use App\Jobs\Email\CheckEmails;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Listeners\ResponseReceivedLogging;
+use App\Models\User;
 use App\Services\Item\ItemPriceWithCacheService;
 use App\Services\Item\ItemPriceServiceInterface;
 use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
+use Illuminate\Auth\Access\Gate;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Queue\Events\JobProcessed;
@@ -46,7 +48,11 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(ResponseReceived::class, ResponseReceivedLogging::class);
 
         \LogViewer::auth(function ($request) {
-            return $request->user() && $request->user()->is_admin();
+            return $request->user() && $request->user()->isAdmin();
+        });
+
+        Gate::define('viewPulse', function (User $user) {
+            return $user->isAdmin();
         });
     }
 }
