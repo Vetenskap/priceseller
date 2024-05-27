@@ -44,7 +44,10 @@ class ImportOzonMarkets extends Command
 
                 if (isset($users[$row[22]]) && !in_array($row[22], [2, 4])) {
 
-                    if (OzonMarket::where('client_id', $row[2])->where('user_id', $users[$row[22]])->exists()) continue;
+                    if (OzonMarket::where('client_id', $row[2])->where('user_id', $users[$row[22]])->exists()) {
+                        $this->info("Кабинет $row[1]: уже существует");
+                        continue;
+                    }
 
                     OzonMarket::updateOrCreate([
                         'client_id' => $row[2],
@@ -66,6 +69,8 @@ class ImportOzonMarkets extends Command
                         'max_mile' => (int) $row[11],
                         'user_id' => $users[$row[22]]
                     ]);
+                } else {
+                    $this->info("Кабинет $row[1]: Не найден юзер - $row[22]");
                 }
 
             }
