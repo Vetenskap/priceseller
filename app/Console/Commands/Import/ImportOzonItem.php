@@ -59,23 +59,27 @@ class ImportOzonItem extends Command
 
                     if ($market = OzonMarket::where('name', $markets[$row[18]] ?? null)->first())
 
-                        OzonItem::updateOrCreate([
-                            'offer_id' => $row[2],
-                            'ozon_market_id' => $market->id
-                        ], [
-                            'product_id' => $row[1],
-                            'offer_id' => $row[2],
-                            'min_price_percent' => (int) $row[3],
-                            'min_price' => (int) $row[4],
-                            'shipping_processing' => (float) $row[5],
-                            'direct_flow_trans' => (float) $row[6],
-                            'deliv_to_customer' => (float) $row[7],
-                            'sales_percent' => (int) $row[8],
-                            'price_seller' => (int) $row[10],
-                            'price_market' => (int) $row[13],
-                            'item_id' => $itemId,
-                            'ozon_market_id' => $market->id
-                        ]);
+                        try {
+                            OzonItem::updateOrCreate([
+                                'offer_id' => $row[2],
+                                'ozon_market_id' => $market->id
+                            ], [
+                                'product_id' => $row[1],
+                                'offer_id' => $row[2],
+                                'min_price_percent' => (int) $row[3],
+                                'min_price' => (int) $row[4],
+                                'shipping_processing' => (float) $row[5],
+                                'direct_flow_trans' => (float) $row[6],
+                                'deliv_to_customer' => (float) $row[7],
+                                'sales_percent' => (int) $row[8],
+                                'price_seller' => (int) $row[10],
+                                'price_market' => (int) $row[13],
+                                'item_id' => $itemId,
+                                'ozon_market_id' => $market->id
+                            ]);
+                        } catch (\Throwable) {
+                            continue;
+                        }
 
                 }
 
