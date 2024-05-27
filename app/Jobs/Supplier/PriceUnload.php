@@ -3,8 +3,12 @@
 namespace App\Jobs\Supplier;
 
 use App\Models\EmailSupplier;
+use App\Models\Supplier;
+use App\Models\User;
 use App\Services\EmailSupplierService;
+use App\Services\OzonItemPriceService;
 use App\Services\SupplierReportService;
+use App\Services\WbItemPriceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -41,18 +45,26 @@ class PriceUnload implements ShouldQueue
         $service = new EmailSupplierService($emailSupplier, Storage::disk('public')->path($this->path));
         $service->unload();
 
-        Bus::batch([
-            [
-                \App\Jobs\Wb\Unload::dispatch($emailSupplier->supplier_id)
-            ],
-            [
-                \App\Jobs\Ozon\Unload::dispatch($emailSupplier->supplier_id)
-            ]
-        ])->then(function () use ($emailSupplier) {
-            SupplierReportService::success($emailSupplier->supplier);
-        })->catch(function () use ($emailSupplier) {
-            SupplierReportService::error($emailSupplier->supplier);
-        });
+        $supplier = $emailSupplier->supplier;
+        $user = User::findOrFail($supplier->user_id);
+
+        foreach ($user->ozonMarkets()->where('open', true)->get() as $market) {
+            $service = new OzonItemPriceService($supplier, $market);
+            $service->updateStock();
+            $service->updatePrice();
+            $service->unloadAllStocks();
+            $service->unloadAllPrices();
+        }
+
+        foreach ($user->wbMarkets()->where('open', true)->get() as $market) {
+            $service = new WbItemPriceService($supplier, $market);
+            $service->updateStock();
+            $service->updatePrice();
+            $service->unloadAllStocks();
+            $service->unloadAllPrices();
+        }
+
+        SupplierReportService::success($emailSupplier->supplier);
 
     }
 
