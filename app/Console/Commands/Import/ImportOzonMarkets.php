@@ -29,11 +29,9 @@ class ImportOzonMarkets extends Command
     public function handle()
     {
         $users = [
-            4 => User::where('name', 'Иван')->first()->id,
             5 => User::where('name', 'Sergiyst')->first()->id,
             6 => User::where('name', 'Владимир')->first()->id,
             7 => User::where('name', 'Вячеслав')->first()->id,
-            2 => User::where('name', 'Danil')->first()->id,
         ];
 
         $reader = new \SplFileObject(Storage::path('test/market_ozons.csv'));
@@ -44,7 +42,7 @@ class ImportOzonMarkets extends Command
 
             if ($row[0] && $row[0] != 'id') {
 
-                if (isset($users[$row[22]])) {
+                if (isset($users[$row[22]]) && !in_array($row[22], [2, 4])) {
 
                     OzonMarket::updateOrCreate([
                         'client_id' => $row[2],
