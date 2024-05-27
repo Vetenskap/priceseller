@@ -13,6 +13,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 
 class CheckEmails implements ShouldQueue, ShouldBeUnique
@@ -47,6 +48,11 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
             foreach ($email->suppliers()->where('open', true)->get() as $supplier) {
 
                 if (!SupplierReportService::get($supplier)) {
+
+                    Context::push('unload', [
+                        'Пользователь' => $user->name,
+                    ]);
+
                     $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
 
                     PriceUnload::dispatchIf((boolean) $pricePath, $supplier->pivot->id, $pricePath);

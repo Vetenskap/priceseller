@@ -61,8 +61,10 @@ class EmailHandlerLaravelImap
      */
     public function getNewPrice(string $supplierEmail, string $supplierFilename, string $criteria = 'UNSEEN'): ?string
     {
-        Context::forget('emailHandler');
-        Context::push('emailHandler', ['Поставщик' => $supplierEmail]);
+        Context::forget('unload');
+        Context::push('unload', [
+            'Поставщик' => $supplierEmail,
+        ]);
 
         /** @var Folder $folder */
         foreach ($this->connection->getFolders()->paginate()->getIterator() as $folder) {
@@ -81,14 +83,14 @@ class EmailHandlerLaravelImap
             foreach ($query->paginate()->getIterator() as $message) {
                 if ($message->hasAttachments()) {
 
-                    Context::push('emailHandler', ['Информация' => 'Есть вложения']);
+                    Context::push('unload', ['Информация' => 'Есть вложения']);
 
                     /** @var Attachment $file */
                     foreach ($message->getAttachments()->paginate()->getIterator() as $file) {
 
                         $name = $file->getName();
 
-                        Context::push('emailHandler', [
+                        Context::push('unload', [
                             'Название файла' => $name,
                             'Наше название' => $supplierFilename
                         ]);
@@ -97,7 +99,7 @@ class EmailHandlerLaravelImap
                             continue;
                         }
 
-                        Context::push('emailHandler', [
+                        Context::push('unload', [
                             'Тип файла' => $file->getContentType(),
                         ]);
 
@@ -110,7 +112,7 @@ class EmailHandlerLaravelImap
 
                         $this->storage->put($fullPath . $name, $file->getContent());
 
-                        Context::push('emailHandler', [
+                        Context::push('unload', [
                             'Информация' => 'Файл сохранен',
                         ]);
 
@@ -132,12 +134,12 @@ class EmailHandlerLaravelImap
 
                                 $fullPath = $fullPath . $nameZip;
 
-                                Context::push('emailHandler', [
+                                Context::push('unload', [
                                     'Информация' => 'Архивный файл сохранен',
                                 ]);
 
                             } else {
-                                Context::push('emailHandler', [
+                                Context::push('unload', [
                                     'Ошибка' => 'Ошибка открытия архива',
                                 ]);
                             }
