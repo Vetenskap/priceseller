@@ -45,7 +45,7 @@ class ImportOzonMarkets extends Command
                 if (isset($users[$row[22]]) && !in_array($row[22], [2, 4])) {
 
                     OzonMarket::updateOrCreate([
-                        'name' => $row[1],
+                        'api_key' => $row[3],
                         'user_id' => $users[$row[22]]
                     ], [
                         'name' => $row[1],
