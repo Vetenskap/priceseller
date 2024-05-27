@@ -59,8 +59,6 @@ class ImportOzonItem extends Command
 
                     if ($market = OzonMarket::where('name', $markets[$row[18]] ?? null)->first())
 
-                        if (OzonItem::where('offer_id', $row[2])->where('ozon_market_id', $market->id)->exists()) continue;
-
                         OzonItem::updateOrCreate([
                             'offer_id' => $row[2],
                             'ozon_market_id' => $market->id
