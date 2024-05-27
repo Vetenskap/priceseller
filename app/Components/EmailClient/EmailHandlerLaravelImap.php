@@ -110,7 +110,7 @@ class EmailHandlerLaravelImap
 
                         $fullPath = SupplierService::PATH . uniqid() . '_';
 
-                        $this->storage->put($fullPath . $name, $file->getContent());
+                        $this->storage->put($fullPath . Str::slug($name, '_'), $file->getContent());
 
                         Context::push('unload', [
                             'Информация' => 'Файл сохранен',
@@ -120,19 +120,19 @@ class EmailHandlerLaravelImap
 
                             $zip = new ZipArchive;
 
-                            $res = $zip->open($this->storage->path($fullPath . $name));
+                            $res = $zip->open($this->storage->path($fullPath . Str::slug($name, '_')));
 
                             if ($res === TRUE) {
 
                                 $nameZip = $zip->getNameIndex(0);
 
-                                $this->storage->put($fullPath . $nameZip, $zip->getFromIndex(0));
+                                $this->storage->put($fullPath . Str::slug($nameZip, '_'), $zip->getFromIndex(0));
 
                                 $zip->close();
 
                                 $this->storage->delete($fullPath . $name);
 
-                                $fullPath = $fullPath . $nameZip;
+                                $fullPath = $fullPath . Str::slug($nameZip, '_');
 
                                 Context::push('unload', [
                                     'Информация' => 'Архивный файл сохранен',
@@ -145,7 +145,7 @@ class EmailHandlerLaravelImap
                             }
                         } else {
 
-                            $fullPath = $fullPath . $name;
+                            $fullPath = $fullPath . Str::slug($name, '_');
 
                         }
 
@@ -161,8 +161,6 @@ class EmailHandlerLaravelImap
 
             unset($folder);
         }
-
-        Log::info('Не найден прайс');
 
         return null;
     }
