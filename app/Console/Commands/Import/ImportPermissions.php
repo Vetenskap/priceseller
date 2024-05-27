@@ -29,8 +29,9 @@ class ImportPermissions extends Command
     public function handle()
     {
         $permission = Permission::where('value', 'main_sub')->first();
+        $admin = Permission::where('value', 'admin')->first();
 
-        User::all()->each(function (User $user) use ($permission) {
+        User::all()->each(function (User $user) use ($permission, $admin) {
              UserPermission::updateOrCreate([
                  'user_id' => $user->id,
                  'permission_id' => $permission->id
@@ -39,6 +40,17 @@ class ImportPermissions extends Command
                  'permission_id' => $permission->id,
                  'expires' => now()->addWeeks(2)->timestamp
              ]);
+
+             if ($user->email === 'vetenskap2@gmail.com') {
+                 UserPermission::updateOrCreate([
+                     'user_id' => $user->id,
+                     'permission_id' => $admin->id
+                 ], [
+                     'user_id' => $user->id,
+                     'permission_id' => $admin->id,
+                     'expires' => now()->addCentury()->timestamp
+                 ]);
+             }
         });
     }
 }
