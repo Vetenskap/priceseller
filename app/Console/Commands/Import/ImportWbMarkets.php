@@ -44,6 +44,8 @@ class ImportWbMarkets extends Command
 
                 if (isset($users[$row[18]]) && !in_array($row[18], [2, 4])) {
 
+                    if (WbMarket::where('api_key', $row[2])->where('user_id', $users[$row[18]])->exists()) continue;
+
                     try {
                         WbMarket::updateOrCreate([
                             'api_key' => $row[2],
@@ -51,13 +53,13 @@ class ImportWbMarkets extends Command
                         ], [
                             'name' => $row[1],
                             'api_key' => $row[2],
-                            'coefficient' => $row[5],
-                            'basic_logistics' => $row[6],
-                            'price_one_liter' => $row[7],
-                            'open' => $row[9],
-                            'max_count' => $row[12],
-                            'min' => $row[13],
-                            'max' => $row[14],
+                            'coefficient' => (int) $row[5],
+                            'basic_logistics' => (int) $row[6],
+                            'price_one_liter' => (int) $row[7],
+                            'open' => (int) $row[9],
+                            'max_count' => (int) $row[12],
+                            'min' => (int) $row[13],
+                            'max' => (int) $row[14],
                             'volume' => $row[8],
                             'user_id' => $users[$row[18]]
                         ]);

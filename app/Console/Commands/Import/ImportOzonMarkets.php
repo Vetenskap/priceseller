@@ -44,24 +44,26 @@ class ImportOzonMarkets extends Command
 
                 if (isset($users[$row[22]]) && !in_array($row[22], [2, 4])) {
 
+                    if (OzonMarket::where('client_id', $row[2])->where('user_id', $users[$row[22]])->exists()) continue;
+
                     OzonMarket::updateOrCreate([
                         'client_id' => $row[2],
                         'user_id' => $users[$row[22]]
                     ], [
-                        'name' => $row['1'],
-                        'client_id' => $row[2],
+                        'name' => $row[1],
+                        'client_id' => (int) $row[2],
                         'api_key' => $row[3],
-                        'min_price_percent' => $row[6],
-                        'max_price_percent' => $row[7],
-                        'seller_price_percent' => $row[8],
-                        'open' => $row[12],
-                        'max_count' => $row[16],
-                        'min' => $row[17],
-                        'max' => $row[18],
-                        'seller_price' => $row[15],
-                        'acquiring' => $row[9],
-                        'last_mile' => $row[10],
-                        'max_mile' => $row[11],
+                        'min_price_percent' => (int) $row[6],
+                        'max_price_percent' => (int) $row[7],
+                        'seller_price_percent' => (int) $row[8],
+                        'open' => (int) $row[12],
+                        'max_count' => (int) $row[16],
+                        'min' => (int) $row[17],
+                        'max' => (int) $row[18],
+                        'seller_price' => (int) $row[15],
+                        'acquiring' => (int) $row[9],
+                        'last_mile' => (int) $row[10],
+                        'max_mile' => (int) $row[11],
                         'user_id' => $users[$row[22]]
                     ]);
                 }
