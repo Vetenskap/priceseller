@@ -46,7 +46,7 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(ResponseReceived::class, ResponseReceivedLogging::class);
 
         \LogViewer::auth(function ($request) {
-            return $request->user() && $request->user()->is_admin;
+            return $request->user() && $request->user()->is_admin();
         });
     }
 }
