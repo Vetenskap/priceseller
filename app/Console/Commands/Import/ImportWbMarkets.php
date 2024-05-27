@@ -29,11 +29,9 @@ class ImportWbMarkets extends Command
     public function handle()
     {
         $users = [
-            4 => User::where('name', 'Иван')->first()->id,
             5 => User::where('name', 'Sergiyst')->first()->id,
             6 => User::where('name', 'Владимир')->first()->id,
             7 => User::where('name', 'Вячеслав')->first()->id,
-            2 => User::where('name', 'Danil')->first()->id,
         ];
 
         $reader = new \SplFileObject(Storage::path('test/market_wbs.csv'));
@@ -44,7 +42,7 @@ class ImportWbMarkets extends Command
 
             if ($row[0] && $row[0] != 'id') {
 
-                if (isset($users[$row[18]])) {
+                if (isset($users[$row[18]]) && !in_array($row[18], [2, 4])) {
 
                     try {
                         WbMarket::updateOrCreate([
