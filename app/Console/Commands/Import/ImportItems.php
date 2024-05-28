@@ -31,11 +31,9 @@ class ImportItems extends Command
     public function handle()
     {
         $users = [
-            4 => User::where('name', 'Иван')->first()->id,
             5 => User::where('name', 'Sergiyst')->first()->id,
             6 => User::where('name', 'Владимир')->first()->id,
             7 => User::where('name', 'Вячеслав')->first()->id,
-            2 => User::where('name', 'Danil')->first()->id,
         ];
 
         $reader = new \SplFileObject(Storage::path('test/items.csv'));
