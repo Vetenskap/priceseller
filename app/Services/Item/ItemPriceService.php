@@ -34,7 +34,6 @@ class ItemPriceService
 
     public function save(Item $item)
     {
-        $item->updated = true;
         $item->save();
     }
 }

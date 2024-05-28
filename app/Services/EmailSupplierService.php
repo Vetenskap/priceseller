@@ -89,6 +89,7 @@ class EmailSupplierService
             if ($item->count !== $stock || $item->price !== $price) {
                 $item->count = $stock;
                 $item->price = $price;
+                $item->updated = true;
 
                 $itemService->save($item);
             }
