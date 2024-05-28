@@ -110,32 +110,34 @@ class EmailHandlerLaravelImap
 
                         $fullPath = SupplierService::PATH . uniqid() . '_';
 
-                        $this->storage->put($fullPath . Str::slug($name, '_'), $file->getContent());
+                        $this->storage->put($fullPath . Str::ascii($name), $file->getContent());
 
                         Context::push('unload', [
                             'Информация' => 'Файл сохранен',
+                            'Путь' => $fullPath . Str::ascii($name)
                         ]);
 
                         if (in_array($file->getContentType(), self::ZIP_TYPES)) {
 
                             $zip = new ZipArchive;
 
-                            $res = $zip->open($this->storage->path($fullPath . Str::slug($name, '_')));
+                            $res = $zip->open($this->storage->path($fullPath . Str::ascii($name)));
 
                             if ($res === TRUE) {
 
                                 $nameZip = $zip->getNameIndex(0);
 
-                                $this->storage->put($fullPath . Str::slug($nameZip, '_'), $zip->getFromIndex(0));
+                                $this->storage->put($fullPath . Str::ascii($nameZip), $zip->getFromIndex(0));
 
                                 $zip->close();
 
-                                $this->storage->delete($fullPath . $name);
+                                $this->storage->delete($fullPath . Str::ascii($name));
 
-                                $fullPath = $fullPath . Str::slug($nameZip, '_');
+                                $fullPath = $fullPath . Str::ascii($nameZip);
 
                                 Context::push('unload', [
                                     'Информация' => 'Архивный файл сохранен',
+                                    'Путь' => $fullPath
                                 ]);
 
                             } else {
@@ -145,7 +147,7 @@ class EmailHandlerLaravelImap
                             }
                         } else {
 
-                            $fullPath = $fullPath . Str::slug($name, '_');
+                            $fullPath = $fullPath . Str::ascii($name);
 
                         }
 

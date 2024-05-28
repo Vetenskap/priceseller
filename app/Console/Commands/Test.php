@@ -8,8 +8,10 @@ use App\Models\EmailSupplier;
 use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\WbItem;
 use App\Services\SupplierReportService;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redis;
@@ -36,7 +38,15 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(bcrypt('test'));
+
+        dd(
+            WbItem::where(function (Builder $query) {
+                $query->where('nm_id', 103118301)
+                    ->orWhere('sku', 2036851595189);
+            })
+                ->whereNot('vendor_code', 'smsoptvvs103731')
+                ->exists()
+        );
 
         for ($i = 0; $i < 10000; $i++) {
             event(new NotificationEvent(1, 'Тест', 'Тестовое сообщение', 0));

@@ -37,4 +37,20 @@ class MarketItemRelationshipService
             'relationshipable_type' => $marketType
         ]);
     }
+
+    public static function handleItemWithMessage(string $externalCode, string $marketId, string $marketType, string $code, string $message): void
+    {
+        MarketItemRelationship::updateOrCreate([
+            'external_code' => $externalCode,
+            'relationshipable_id' => $marketId,
+            'relationshipable_type' => $marketType
+        ], [
+            'external_code' => $externalCode,
+            'code' => $code,
+            'status' => 1,
+            'message' => $message,
+            'relationshipable_id' => $marketId,
+            'relationshipable_type' => $marketType
+        ]);
+    }
 }

@@ -9,6 +9,7 @@ use App\Imports\WbItemsImport;
 use App\Models\Item;
 use App\Models\WbItem;
 use App\Models\WbMarket;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
@@ -84,10 +85,6 @@ class WbMarketService
                     }
                 }
 
-                $correct++;
-
-                MarketItemRelationshipService::handleFoundItem($wbItem['vendorCode'], $item->code, $this->market->id, 'App\Models\WbMarket');
-
                 $sku = collect(collect($wbItem['sizes'])->first(fn(array $size) => isset($size['skus'])))->first();
 
 //                    /** @var Collection $info */
@@ -97,6 +94,32 @@ class WbMarketService
 //                            now()->addDay(),
 //                            fn() => $externalClient->getCardDetail($wbItem['nmID'])
 //                        );
+
+                if (
+                    WbItem::where(function (Builder $query) use ($wbItem, $sku) {
+                        $query->where('nm_id', $wbItem['nmID'])
+                            ->orWhere('sku', $sku);
+
+                    })
+                        ->whereNot('vendor_code', $wbItem['vendorCode'])
+                        ->exists()
+                ) {
+                    MarketItemRelationshipService::handleItemWithMessage(
+                        externalCode: $wbItem['vendorCode'],
+                        marketId: $this->market->id,
+                        marketType: 'App\Models\WbMarket',
+                        code: $wbItem['vendorCode'],
+                        message: "Уже существует такой nmID или sku"
+                    );
+
+                    $error++;
+
+                    return;
+                }
+
+                $correct++;
+
+                MarketItemRelationshipService::handleFoundItem($wbItem['vendorCode'], $item->code, $this->market->id, 'App\Models\WbMarket');
 
                 WbItem::updateOrCreate([
                     'vendor_code' => $wbItem['vendorCode'],

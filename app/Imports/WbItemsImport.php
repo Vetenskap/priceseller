@@ -8,6 +8,7 @@ use App\Models\WbItem;
 use App\Models\WbMarket;
 use App\Services\ItemsImportReportService;
 use App\Services\MarketItemRelationshipService;
+use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
@@ -44,6 +45,27 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
                 marketId: $this->market->id,
                 marketType: 'App\Models\WbMarket',
                 code: $row->get('Код')
+            );
+
+            $this->error++;
+
+            return null;
+        }
+
+        if (
+            WbItem::where(function (Builder $query) use ($row) {
+                $query->where('nm_id', $row->get('nmID'))
+                    ->orWhere('sku', $row->get('sku'));
+            })
+                ->whereNot('vendor_code', $row->get('vendorCode'))
+                ->exists()
+        ) {
+            MarketItemRelationshipService::handleItemWithMessage(
+                externalCode: $row->get('vendorCode'),
+                marketId: $this->market->id,
+                marketType: 'App\Models\WbMarket',
+                code: $row->get('Код'),
+                message: "Уже существует такой nmID или sku"
             );
 
             $this->error++;

@@ -1,11 +1,11 @@
 <div>
     <x-layouts.header :name="$form->name"/>
     @error('error')
-        <x-notify-top>
-            <div class="bg-red-400 w-full p-2">
-                <x-layouts.simple-text :name="$message"/>
-            </div>
-        </x-notify-top>
+    <x-notify-top>
+        <div class="bg-red-400 w-full p-2">
+            <x-layouts.simple-text :name="$message"/>
+        </div>
+    </x-notify-top>
     @enderror
     <x-layouts.actions>
         <a href="{{route('wb')}}" wire:navigate.hover>
@@ -234,6 +234,12 @@
                                            field="filters.code"
                 >Ваш код
                 </x-inputs.input-with-label>
+                <x-dropdown-select name="status"
+                                   field="filters.status"
+                                   :options="$statusFilters"
+                                   value="status">
+                    Статус
+                </x-dropdown-select>
             </x-blocks.flex-block>
             <x-blocks.main-block>
                 <x-layouts.title name="Все связи"/>
@@ -279,7 +285,8 @@
             </x-blocks.main-block>
         </x-layouts.main-container>
     @endif
-    <div wire:loading wire:target="export, import, relationshipsAndCommissions, getWarehouses, clearRelationships, testPrice, nullStocks">
+    <div wire:loading
+         wire:target="export, import, relationshipsAndCommissions, getWarehouses, clearRelationships, testPrice, nullStocks">
         <x-loader/>
     </div>
 </div>

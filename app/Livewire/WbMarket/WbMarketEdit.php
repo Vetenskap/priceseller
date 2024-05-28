@@ -54,6 +54,17 @@ class WbMarketEdit extends Component
 
     public int $selectedWarehouse;
 
+    public array $statusFilters = [
+        [
+            'status' => 1,
+            'name' => 'Связь не создана'
+        ],
+        [
+            'status' => 0,
+            'name' => 'Связь создана'
+        ],
+    ];
+
 
     public function mount()
     {
