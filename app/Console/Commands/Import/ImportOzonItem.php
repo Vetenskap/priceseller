@@ -59,6 +59,8 @@ class ImportOzonItem extends Command
 
                     if ($market = OzonMarket::where('name', $markets[$row[18]] ?? null)->first())
 
+                        if ($market->user_id != 5) continue;
+
                         try {
                             OzonItem::updateOrCreate([
                                 'offer_id' => $row[2],

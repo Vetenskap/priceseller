@@ -48,6 +48,8 @@ class ImportItems extends Command
 
             if ($row[0] && $row[0] != 'id') {
 
+                if ($row[12] != 5) continue;
+
                 if ($supplier = Supplier::where('name', $row[2])->first()) {
                     try {
 

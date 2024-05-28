@@ -59,6 +59,9 @@ class ImportWbItem extends Command
                 if ($itemId = Cache::tags(['item', 'import'])->get($row[16])) {
 
                     if ($market = WbMarket::where('name', $markets[$row[15]] ?? null)->first()) {
+
+                        if ($market->user_id != 5) continue;
+
                         if (WbItem::where('nm_id', $row[1])->exists()) continue;
 
                         WbItem::updateOrCreate([
