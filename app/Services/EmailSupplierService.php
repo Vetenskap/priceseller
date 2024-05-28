@@ -86,13 +86,13 @@ class EmailSupplierService
 
             $stock = $this->prepareStock($stock);
 
-            if ($item->count !== $stock || $item->price !== $price) {
+//            if ($item->count !== $stock || $item->price !== $price) {
                 $item->count = $stock;
                 $item->price = $price;
                 $item->updated = true;
 
                 $itemService->save($item);
-            }
+//            }
 
         } else {
             EmailPriceItemService::handleNotFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock);
