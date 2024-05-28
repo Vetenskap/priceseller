@@ -9,6 +9,7 @@ use App\Models\WbMarket;
 use App\Services\ItemsImportReportService;
 use App\Services\MarketItemRelationshipService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
@@ -106,7 +107,8 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
             'retail_markup_percent' => $row->get('Розничная наценка, процент'),
             'package' => $row->get('Упаковка'),
             'volume' => $row->get('Объем'),
-            'item_id' => $item->id
+            'item_id' => $item->id,
+            'id' => Str::uuid()
         ]);
     }
 

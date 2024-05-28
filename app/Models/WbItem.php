@@ -24,6 +24,7 @@ class WbItem extends Model
         'price_market',
         'item_id',
         'wb_market_id',
+        'id'
     ];
 
     public function item()

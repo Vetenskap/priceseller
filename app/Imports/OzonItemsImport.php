@@ -8,6 +8,7 @@ use App\Models\OzonMarket;
 use App\Models\User;
 use App\Services\ItemsImportReportService;
 use App\Services\MarketItemRelationshipService;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
@@ -84,7 +85,8 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
             'direct_flow_trans' => $row->get('Магистраль'),
             'deliv_to_customer' => $row->get('Последняя миля'),
             'sales_percent' => (int) $row->get('Комиссия'),
-            'item_id' => $item->id
+            'item_id' => $item->id,
+            'id' => Str::uuid()
         ]);
     }
 

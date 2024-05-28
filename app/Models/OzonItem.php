@@ -29,7 +29,8 @@ class OzonItem extends Model
         'price_market',
         'count',
         'item_id',
-        'ozon_market_id'
+        'ozon_market_id',
+        'id'
     ];
 
     public function item()
