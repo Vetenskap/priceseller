@@ -13,7 +13,6 @@ class WbItem extends Model
     use HasUuids;
 
     protected $fillable = [
-        'id',
         'nm_id',
         'vendor_code',
         'sku',

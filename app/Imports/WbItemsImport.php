@@ -20,7 +20,7 @@ use Maatwebsite\Excel\Concerns\WithUpserts;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 
-class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError
+class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure
 {
 
     public int $correct = 0;
@@ -149,15 +149,6 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
             'Объем.numeric' => 'Поле должно быть числом',
             'Код.required' => 'Поле обязательно',
         ];
-    }
-
-    public function onError(\Throwable $e)
-    {
-        $this->error++;
-
-        logger('Товар не создан', [
-            'message' => $e->getMessage()
-        ]);
     }
 
     public function onFailure(Failure ...$failures)
