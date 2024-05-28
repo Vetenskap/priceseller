@@ -68,31 +68,81 @@ class WbClient
         return $this->request->get('/api/v3/warehouses')->throw()->collect();
     }
 
-    public function putStocks(array $data, int $warehouseId)
+    public function putStocks(Collection $data, int $warehouseId): void
     {
+        $limits = 5;
+
         while (RateLimiter::attempts('wb_get_cards_list') >= 300) {
             sleep(2);
         }
 
-        RateLimiter::attempt(
-            'wb_put_stocks',
-            300,
-            fn() => $this->request->put("/api/v3/stocks/{$warehouseId}", ['stocks' => $data])
-        );
+        while ($limits > 0) {
+
+            $limits--;
+
+            try {
+
+                RateLimiter::attempt(
+                    'wb_put_stocks',
+                    300,
+                    fn() => $this->request->put("/api/v3/stocks/{$warehouseId}", ['stocks' => $data])->throw()
+                );
+
+                return;
+
+            } catch (RequestException $e) {
+                $response = $e->response;
+
+                if ($response->status() === 409) {
+                    $errors = $response->collect();
+
+                    $errors->each(function (array $error) use (&$data, $e) {
+                        $error = collect($error);
+
+                        $badItems = collect($error->get('data'));
+
+                        $badItems->each(function (array $badItem) use (&$data) {
+                            $badItem = collect($badItem);
+
+                            $data = $data->filter(fn(array $item) => $item['sku'] !== $badItem->get('sku'));
+                        });
+                    });
+
+                    continue;
+                }
+
+                throw $e;
+            }
+
+        }
 
     }
 
-    public function putPrices(array $data)
+    public function putPrices(array $data): void
     {
+
         while (RateLimiter::attempts('wb_get_cards_list') >= 10) {
             sleep(2);
         }
 
-        RateLimiter::attempt(
-            'wb_put_prices',
-            10,
-            fn() => $this->request->baseUrl('https://discounts-prices-api.wb.ru')->post("/api/v2/upload/task", ['data' => $data]),
-            6
-        );
+
+        try {
+            RateLimiter::attempt(
+                'wb_put_prices',
+                10,
+                fn() => $this->request->baseUrl('https://discounts-prices-api.wb.ru')->post("/api/v2/upload/task", ['data' => $data])->throw(),
+                6
+            );
+
+            return;
+        } catch (RequestException $e) {
+            $response = $e->response;
+
+            $data = $response->collect();
+
+            if ($data->get('errorText') === 'No goods for process') return;
+
+            throw $e;
+        }
     }
 }
