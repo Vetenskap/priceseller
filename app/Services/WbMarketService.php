@@ -121,7 +121,7 @@ class WbMarketService
 
                 MarketItemRelationshipService::handleFoundItem($wbItem['vendorCode'], $item->code, $this->market->id, 'App\Models\WbMarket');
 
-                WbItem::updateOrCreate([
+                $newWbItem = WbItem::updateOrCreate([
                     'vendor_code' => $wbItem['vendorCode'],
                     'wb_market_id' => $this->market->id,
                 ], [
@@ -130,13 +130,13 @@ class WbMarketService
                     'sku' => $sku,
                     'wb_market_id' => $this->market->id,
                     'item_id' => $item->id,
-//                        'volume' => $info->get('volume') / 10,
-//                        'sales_percent' => $info->get('sale'),
-                    'min_price' => $defaultFields->get('min_price'),
-                    'retail_markup_percent' => $defaultFields->get('retail_markup_percent'),
-                    'package' => $defaultFields->get('package'),
-//                        'price_market' => $info->get('priceU') / 100
                 ]);
+
+                $defaultFields->each(function ($value, $key) use ($newWbItem) {
+                    $newWbItem->{$key} = $value;
+                });
+
+                $newWbItem->save();
             });
 
             ItemsImportReportService::flush($this->market, $correct, $error);

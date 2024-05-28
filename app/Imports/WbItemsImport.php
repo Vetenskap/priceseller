@@ -20,6 +20,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithUpserts;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
+use PHPUnit\Logging\Exception;
 
 class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure
 {
@@ -36,6 +37,7 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
 
     public function model(array $row)
     {
+
         $row = collect($row);
 
         $item = $this->user->items()->where('code', $row->get('Код'))->first();

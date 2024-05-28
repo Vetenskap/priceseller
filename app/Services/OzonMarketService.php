@@ -97,7 +97,7 @@ class OzonMarketService
 
                 MarketItemRelationshipService::handleFoundItem($ozonItem['offer_id'], $item->code, $this->market->id, 'App\Models\OzonMarket');
 
-                OzonItem::updateOrCreate([
+                $newOzonItem = OzonItem::updateOrCreate([
                     'offer_id' => $ozonItem['offer_id'],
                     'ozon_market_id' => $this->market->id,
                 ], [
@@ -110,10 +110,13 @@ class OzonMarketService
                     'price_seller' => (int)collect($priceIndexes->get('ozon_index_data'))->get('minimal_price'),
                     'ozon_market_id' => $this->market->id,
                     'item_id' => $item->id,
-                    'min_price_percent' => $defaultFields->get('min_price_percent'),
-                    'min_price' => $defaultFields->get('min_price'),
-                    'shipping_processing' => $defaultFields->get('shipping_processing'),
                 ]);
+
+                $defaultFields->each(function ($value, $key) use ($newOzonItem) {
+                    $newOzonItem->{$key} = $value;
+                });
+
+                $newOzonItem->save();
             });
 
             ItemsImportReportService::flush($this->market, $correct, $error);
