@@ -143,9 +143,9 @@ class WbClient
 
             $data = $response->collect();
 
-            if ($data->get('errorText') === 'No goods for process') return;
+            return;
 
-            throw $e;
+//            throw $e;
         }
     }
 }
