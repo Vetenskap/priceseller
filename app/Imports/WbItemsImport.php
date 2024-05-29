@@ -65,16 +65,18 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
         $this->correct++;
 
         if ($wbItem = $this->market->items()->where('vendor_code', $row->get('vendorCode'))->first()) {
-            $wbItem->update([
-                'nm_id' => $row->get('nmID'),
-                'vendor_code' => $row->get('vendorCode'),
-                'sku' => $row->get('sku'),
-                'sales_percent' => $row->get('Комиссия, процент'),
-                'min_price' => $row->get('Мин. цена'),
-                'retail_markup_percent' => $row->get('Розничная наценка, процент'),
-                'package' => $row->get('Упаковка'),
-                'volume' => $row->get('Объем'),
-            ]);
+
+            $wbItem->nm_id = $row->get('nmID');
+            $wbItem->vendor_code = $row->get('vendorCode');
+            $wbItem->sku = $row->get('sku');
+            $wbItem->sales_percent = $row->get('Комиссия, процент');
+            $wbItem->min_price = $row->get('Мин. цена');
+            $wbItem->retail_markup_percent = $row->get('Розничная наценка, процент');
+            $wbItem->package = $row->get('Упаковка');
+            $wbItem->volume = $row->get('Объем');
+
+            $wbItem->save();
+
             return null;
         }
 
