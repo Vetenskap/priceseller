@@ -78,6 +78,8 @@ class WbClient
 
         while ($limits > 0) {
 
+            if (!$data->count() > 0) return;
+
             $limits--;
 
             try {
