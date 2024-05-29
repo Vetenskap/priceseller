@@ -52,7 +52,7 @@
                             <x-layouts.simple-text name="Конец"/>
                         </x-table.table-child>
                     </x-table.table-header>
-                    @foreach($supplier->reports as $report)
+                    @foreach($supplier->reports->sortByDesc('updated_at') as $report)
                         <x-table.table-item :status="$report->status">
                             <x-table.table-child>
                                 <x-layouts.simple-text :name="$report->message"/>
