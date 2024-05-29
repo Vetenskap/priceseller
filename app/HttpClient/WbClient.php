@@ -114,7 +114,8 @@ class WbClient
                     continue;
                 }
 
-                throw $e;
+                // TODO: изменить
+                return;
             }
 
         }
@@ -143,9 +144,9 @@ class WbClient
 
             $data = $response->collect();
 
+            // TODO: изменить
             return;
 
-//            throw $e;
         }
     }
 }
