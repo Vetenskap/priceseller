@@ -4,6 +4,7 @@ namespace App\Livewire\Forms\WbMarket;
 
 use App\Models\WbMarket;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Form;
 
 class WbMarketPostForm extends Form
@@ -59,5 +60,7 @@ class WbMarketPostForm extends Form
     public function update()
     {
         $this->market->update($this->except('market'));
+
+        Cache::tags(['wb', 'warehouses'])->forget($this->market->id);
     }
 }

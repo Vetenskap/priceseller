@@ -102,6 +102,7 @@ class WbMarketService
 
                     })
                         ->whereNot('vendor_code', $wbItem['vendorCode'])
+                        ->whereNot('wb_market_id', $this->market->id)
                         ->exists()
                 ) {
                     MarketItemRelationshipService::handleItemWithMessage(

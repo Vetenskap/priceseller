@@ -22,7 +22,8 @@ class Item extends Model
         'user_id',
         'ms_uuid',
         'name',
-        'multiplicity'
+        'multiplicity',
+        'id'
     ];
 
     public function supplier()

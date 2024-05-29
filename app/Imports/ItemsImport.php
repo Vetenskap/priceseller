@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\Item;
 use App\Models\User;
 use App\Services\ItemsImportReportService;
+use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
 use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
@@ -15,7 +16,7 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Validators\Failure;
 
-class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError
+class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure
 {
     public int $correct = 0;
     public int $error = 0;
@@ -74,6 +75,7 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'brand' => $row->get('Бренд'),
             'multiplicity' => $row->get('Кратность отгрузки'),
             'user_id' => $this->user->id,
+            'id' => Str::uuid()
         ]);
     }
 
@@ -107,15 +109,6 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'Кратность отгрузки.integer' => 'Поле должно быть целым числом',
             'Кратность отгрузки.min' => 'Поле должно быть не меньше 1',
         ];
-    }
-
-    public function onError(\Throwable $e)
-    {
-        $this->error++;
-
-        logger('Товар не создан', [
-            'message' => $e->getMessage()
-        ]);
     }
 
     public function onFailure(Failure ...$failures)

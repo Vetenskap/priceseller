@@ -13,6 +13,7 @@ use App\Services\Item\ItemPriceWithCacheService;
 use App\Services\Item\ItemPriceServiceInterface;
 use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Client\Events\ResponseReceived;
 use Illuminate\Queue\Events\JobFailed;
@@ -48,10 +49,16 @@ class AppServiceProvider extends ServiceProvider
         Event::listen(ResponseReceived::class, ResponseReceivedLogging::class);
 
         \LogViewer::auth(function ($request) {
+
+            if (App::isLocal()) return true;
+
             return $request->user() && $request->user()->isAdmin();
         });
 
         Gate::define('viewPulse', function (User $user) {
+
+            if (App::isLocal()) return true;
+
             return $user->isAdmin();
         });
     }
