@@ -11,17 +11,24 @@ class EmailSupplierIndex extends Component
 {
     public Email $email;
 
+    public $selectedSupplier;
+
+    public function mount()
+    {
+        $this->selectedSupplier = auth()->user()->suppliers->first()->id;
+    }
+
     public function render()
     {
         return view('livewire.email-supplier.email-supplier-index');
     }
 
-    public function store($id)
+    public function store()
     {
 
         $this->authorize('create', EmailSupplier::class);
 
-        $this->email->suppliers()->attach($id, [
+        $this->email->suppliers()->attach($this->selectedSupplier, [
             'created_at' => now(),
             'updated_at' => now(),
         ]);

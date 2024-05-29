@@ -39,23 +39,6 @@ class Test extends Command
     public function handle()
     {
 
-        $test = collect([
-            [
-                'nm_id' => 1,
-                'value' => 3
-            ],
-            [
-                'nm_id' => 2,
-                'value' => 6
-            ],
-            [
-                'nm_id' => 3,
-                'value' => 7
-            ],
-        ]);
-
-        $test = $test->filter(fn ($item) => $item['nm_id'] != 3);
-
-        dd($test->all());
+        dd(now()->addCentury()->timestamp);
     }
 }
