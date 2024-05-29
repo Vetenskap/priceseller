@@ -60,8 +60,10 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
                 $query->where('nm_id', $row->get('nmID'))
                     ->orWhere('sku', $row->get('sku'));
             })
-                ->whereNot('vendor_code', $row->get('vendorCode'))
-                ->whereNot('wb_market_id', $this->market->id)
+                ->where(function (Builder $query) use ($row) {
+                    $query->where('vendor_code', '<>', $row->get('vendorCode'))
+                        ->orWhere('wb_market_id', '<>', $this->market->id);
+                })
                 ->exists()
         ) {
             MarketItemRelationshipService::handleItemWithMessage(

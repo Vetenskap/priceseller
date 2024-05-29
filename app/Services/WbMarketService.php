@@ -99,12 +99,13 @@ class WbMarketService
                     WbItem::where(function (Builder $query) use ($wbItem, $sku) {
                         $query->where('nm_id', $wbItem['nmID'])
                             ->orWhere('sku', $sku);
-
                     })
-                        ->whereNot('vendor_code', $wbItem['vendorCode'])
-                        ->whereNot('wb_market_id', $this->market->id)
+                        ->where(function (Builder $query) use ($wbItem) {
+                            $query->where('vendor_code', '<>', $wbItem['vendorCode'])
+                                ->orWhere('wb_market_id', '<>', $this->market->id);
+                        })
                         ->exists()
-                ) {
+            ) {
                     MarketItemRelationshipService::handleItemWithMessage(
                         externalCode: $wbItem['vendorCode'],
                         marketId: $this->market->id,
