@@ -9,6 +9,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 
 class WbClient
@@ -150,6 +151,13 @@ class WbClient
             $response = $e->response;
 
             $body = $response->collect();
+
+            if (!$body) {
+                Log::alert('Обновленеи цен вб: не найдено тело ошибки', [
+                    'status' => $response->status(),
+                    'body' => $response->body()
+                ]);
+            }
 
             $data->each(function (array $item) use ($supplier, $body) {
                 SupplierReportService::addLog($supplier, "nmId: " . $item['nmId'] . " - " . $body->get('errorText'));
