@@ -55,30 +55,6 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
             return null;
         }
 
-        if (
-            WbItem::where(function (Builder $query) use ($row) {
-                $query->where('nm_id', $row->get('nmID'))
-                    ->orWhere('sku', $row->get('sku'));
-            })
-                ->where(function (Builder $query) use ($row) {
-                    $query->where('vendor_code', '<>', $row->get('vendorCode'))
-                        ->orWhere('wb_market_id', '<>', $this->market->id);
-                })
-                ->exists()
-        ) {
-            MarketItemRelationshipService::handleItemWithMessage(
-                externalCode: $row->get('vendorCode'),
-                marketId: $this->market->id,
-                marketType: 'App\Models\WbMarket',
-                code: $row->get('Код'),
-                message: "Уже существует такой nmID или sku"
-            );
-
-            $this->error++;
-
-            return null;
-        }
-
         MarketItemRelationshipService::handleFoundItem(
             externalCode: $row->get('vendorCode'),
             code: $row->get('Код'),

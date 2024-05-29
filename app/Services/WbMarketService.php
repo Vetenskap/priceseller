@@ -95,30 +95,6 @@ class WbMarketService
 //                            fn() => $externalClient->getCardDetail($wbItem['nmID'])
 //                        );
 
-                if (
-                    WbItem::where(function (Builder $query) use ($wbItem, $sku) {
-                        $query->where('nm_id', $wbItem['nmID'])
-                            ->orWhere('sku', $sku);
-                    })
-                        ->where(function (Builder $query) use ($wbItem) {
-                            $query->where('vendor_code', '<>', $wbItem['vendorCode'])
-                                ->orWhere('wb_market_id', '<>', $this->market->id);
-                        })
-                        ->exists()
-            ) {
-                    MarketItemRelationshipService::handleItemWithMessage(
-                        externalCode: $wbItem['vendorCode'],
-                        marketId: $this->market->id,
-                        marketType: 'App\Models\WbMarket',
-                        code: $wbItem['vendorCode'],
-                        message: "Уже существует такой nmID или sku"
-                    );
-
-                    $error++;
-
-                    return;
-                }
-
                 $correct++;
 
                 MarketItemRelationshipService::handleFoundItem($wbItem['vendorCode'], $item->code, $this->market->id, 'App\Models\WbMarket');
