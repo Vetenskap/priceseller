@@ -164,6 +164,8 @@ class EmailHandlerLaravelImap
             unset($folder);
         }
 
+        Log::debug('Прайс не найден');
+
         return null;
     }
 }

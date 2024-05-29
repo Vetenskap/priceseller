@@ -22,7 +22,9 @@ class MarketRelationshipsAndCommissions implements ShouldQueue
      */
     public function __construct(public Collection $defaultFields, public OzonMarket|WbMarket $model, public string $service)
     {
-        ItemsImportReportService::new($this->model, '');
+        if (!ItemsImportReportService::new($this->model, '') ){
+            throw new \Exception("Уже идёт импорт");
+        }
     }
 
     /**
