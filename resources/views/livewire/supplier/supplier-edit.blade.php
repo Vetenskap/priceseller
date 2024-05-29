@@ -61,7 +61,7 @@
                                 <x-layouts.simple-text :name="$report->created_at"/>
                             </x-table.table-child>
                             <x-table.table-child>
-                                <x-layouts.simple-text :name="$report->status !== 2 ? $report->created_at : ''"/>
+                                <x-layouts.simple-text :name="$report->status !== 2 ? $report->updated_at : ''"/>
                             </x-table.table-child>
                         </x-table.table-item>
                     @endforeach
