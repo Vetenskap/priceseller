@@ -85,7 +85,7 @@ class WbMarketService
                     }
                 }
 
-                $sku = collect(collect($wbItem['sizes'])->first(fn(array $size) => isset($size['skus'])))->first();
+                $sku = collect(collect(collect(collect($wbItem['sizes'])->first(fn(array $size) => isset($size['skus'])))->first())->get('skus'))->first();
 
 //                    /** @var Collection $info */
 //                    $info = Cache::tags(['wb', 'external_card'])

@@ -38,7 +38,12 @@ class Test extends Command
      */
     public function handle()
     {
+        $wbItem = [
+            'sizes' => [
 
-        dd(now()->addCentury()->timestamp);
+            ]
+        ];
+
+        collect(collect(collect(collect($wbItem['sizes'])->first(fn(array $size) => isset($size['skus'])))->first())->get('skus'))->first();
     }
 }
