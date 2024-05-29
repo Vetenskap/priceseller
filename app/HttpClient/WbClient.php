@@ -85,7 +85,7 @@ class WbClient
                 RateLimiter::attempt(
                     'wb_put_stocks',
                     300,
-                    fn() => $this->request->put("/api/v3/stocks/{$warehouseId}", ['stocks' => $data])->throw()
+                    fn() => $this->request->put("/api/v3/stocks/{$warehouseId}", ['stocks' => $data->values()->all()])->throw()
                 );
 
                 return;
@@ -93,6 +93,7 @@ class WbClient
             } catch (RequestException $e) {
                 $response = $e->response;
 
+                // TODO: переделать
                 if ($response->status() === 409) {
                     $errors = $response->collect();
 
@@ -104,7 +105,7 @@ class WbClient
                         $badItems->each(function (array $badItem) use (&$data) {
                             $badItem = collect($badItem);
 
-                            $data = $data->filter(fn(array $item) => $item['sku'] !== $badItem->get('sku'));
+                            $data = $data->filter(fn (array $item) => $item['sku'] !== $badItem->get('sku'));
                         });
                     });
 

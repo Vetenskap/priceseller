@@ -39,20 +39,23 @@ class Test extends Command
     public function handle()
     {
 
-        dd(
-            WbItem::where(function (Builder $query) {
-                $query->where('nm_id', 103118301)
-                    ->orWhere('sku', 2036851595189);
-            })
-                ->whereNot('vendor_code', 'smsoptvvs103731')
-                ->exists()
-        );
+        $test = collect([
+            [
+                'nm_id' => 1,
+                'value' => 3
+            ],
+            [
+                'nm_id' => 2,
+                'value' => 6
+            ],
+            [
+                'nm_id' => 3,
+                'value' => 7
+            ],
+        ]);
 
-        for ($i = 0; $i < 10000; $i++) {
-            event(new NotificationEvent(1, 'Тест', 'Тестовое сообщение', 0));
-            event(new NotificationEvent(1, 'Тест', 'Тестовое сообщение', 1));
-            event(new NotificationEvent(1, 'Тест', 'Тестовое сообщение', 2));
-            sleep(1);
-        }
+        $test = $test->filter(fn ($item) => $item['nm_id'] != 3);
+
+        dd($test->all());
     }
 }
