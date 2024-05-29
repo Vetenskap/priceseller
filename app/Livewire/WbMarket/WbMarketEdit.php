@@ -101,6 +101,8 @@ class WbMarketEdit extends Component
 
     public function import(): void
     {
+        if (!$this->file) $this->dispatch('livewire-upload-error');
+
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
 

@@ -172,6 +172,12 @@
                             <x-file-progress x-bind:style="{ width: progress + '%' }"/>
                         </x-blocks.main-block>
 
+                        <x-blocks.center-block>
+                            @error('file')
+                                {{ $message }}
+                            @enderror
+                        </x-blocks.center-block>
+
                         <x-blocks.main-block class="text-center" wire:loading.remove x-show="$wire.file">
                             <x-success-button>Загрузить</x-success-button>
                         </x-blocks.main-block>
