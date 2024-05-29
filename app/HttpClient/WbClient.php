@@ -2,6 +2,8 @@
 
 namespace App\HttpClient;
 
+use App\Models\Supplier;
+use App\Services\SupplierReportService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
@@ -68,7 +70,7 @@ class WbClient
         return $this->request->get('/api/v3/warehouses')->throw()->collect();
     }
 
-    public function putStocks(Collection $data, int $warehouseId): void
+    public function putStocks(Collection $data, int $warehouseId, Supplier $supplier): void
     {
         $limits = 5;
 
@@ -99,22 +101,27 @@ class WbClient
                 if ($response->status() === 409) {
                     $errors = $response->collect();
 
-                    $errors->each(function (array $error) use (&$data, $e) {
+                    $errors->each(function (array $error) use (&$data, $e, $supplier) {
                         $error = collect($error);
 
                         $badItems = collect($error->get('data'));
 
-                        $badItems->each(function (array $badItem) use (&$data) {
+                        $badItems->each(function (array $badItem) use (&$data, $supplier, $error) {
                             $badItem = collect($badItem);
 
                             $data = $data->filter(fn (array $item) => $item['sku'] !== $badItem->get('sku'));
+
+                            SupplierReportService::addLog($supplier, "sku: " . $badItem->get('sku') . " - " . $error->get('message'));
                         });
                     });
 
                     continue;
                 }
 
-                // TODO: изменить
+                $data->each(function (array $item) use ($supplier, $response) {
+                    SupplierReportService::addLog($supplier, "sku: " . $item['sku'] . " - Статус: " . $response->status() . ", Тело: " . $response->body());
+                });
+
                 return;
             }
 
@@ -122,7 +129,7 @@ class WbClient
 
     }
 
-    public function putPrices(array $data): void
+    public function putPrices(Collection $data, Supplier $supplier): void
     {
 
         while (RateLimiter::attempts('wb_get_cards_list') >= 10) {
@@ -134,7 +141,7 @@ class WbClient
             RateLimiter::attempt(
                 'wb_put_prices',
                 10,
-                fn() => $this->request->baseUrl('https://discounts-prices-api.wb.ru')->post("/api/v2/upload/task", ['data' => $data])->throw(),
+                fn() => $this->request->baseUrl('https://discounts-prices-api.wb.ru')->post("/api/v2/upload/task", ['data' => $data->values()->all()])->throw(),
                 6
             );
 
@@ -142,9 +149,12 @@ class WbClient
         } catch (RequestException $e) {
             $response = $e->response;
 
-            $data = $response->collect();
+            $body = $response->collect();
 
-            // TODO: изменить
+            $data->each(function (array $item) use ($supplier, $body) {
+                SupplierReportService::addLog($supplier, "nmId: " . $item['nmId'] . " - " . $body->get('errorText'));
+            });
+
             return;
 
         }

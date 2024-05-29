@@ -28,8 +28,23 @@ class SupplierReportService
                 'path' => $path
             ]);
 
+            static::addLog($supplier, 'Начало выгрузки');
+
             return true;
         }
+    }
+
+    public static function addLog(Supplier $supplier, string $message): bool
+    {
+        if ($report = static::get($supplier)) {
+
+            $report->logs()->create([
+                'message' => $message
+            ]);
+
+            return true;
+        }
+        return false;
     }
 
     public static function changeMessage(Supplier $supplier, string $message): bool
@@ -44,6 +59,8 @@ class SupplierReportService
 
             }
 
+            static::addLog($supplier, $message);
+
             return true;
         }
         return false;
@@ -52,9 +69,13 @@ class SupplierReportService
     public static function success(Supplier $supplier): bool
     {
         if ($report = static::get($supplier)) {
+
+            static::addLog($supplier, 'Поставщик успешно выгружен');
+
             $report->message = 'Поставщик успешно выгружен';
             $report->status = 0;
             $report->save();
+
             return true;
         }
 
@@ -64,9 +85,13 @@ class SupplierReportService
     public static function error(Supplier $supplier): bool
     {
         if ($report = static::get($supplier)) {
+
+            static::addLog($supplier, 'Ошибка в выгрузке');
+
             $report->message = 'Ошибка в выгрузке';
             $report->status = 1;
             $report->save();
+
             return true;
         }
 
@@ -79,6 +104,9 @@ class SupplierReportService
             ->where('status', 2)
             ->chunk(100, function (Collection $reports) {
                 $reports->each(function (SupplierReport $report) {
+
+                    static::addLog($report->supplier, 'Вышло время выгрузки');
+
                     $report->update([
                         'status' => 1,
                         'message' => 'Вышло время выгрузки'
@@ -98,7 +126,7 @@ class SupplierReportService
         $totalDeleted = 0;
 
         do {
-            $reports = SupplierReport::where('updated_at', '<', now()->subWeek())->limit(100)->get();
+            $reports = SupplierReport::where('updated_at', '<', now()->subDay())->limit(100)->get();
 
             foreach ($reports as $report) {
                 Storage::delete(SupplierService::PATH . "{$report->uuid}.xlsx");

@@ -23,4 +23,9 @@ class SupplierReport extends Model
     {
         return $this->belongsTo(Supplier::class);
     }
+
+    public function logs()
+    {
+        return $this->hasMany(SupplierReportLog::class);
+    }
 }

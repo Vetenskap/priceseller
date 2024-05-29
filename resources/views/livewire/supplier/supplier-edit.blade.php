@@ -36,37 +36,7 @@
                 <x-inputs.switcher :checked="$supplier->use_brand" wire:model="form.use_brand"/>
                 <x-layouts.simple-text name="Использовать бренд"/>
             </x-blocks.flex-block>
-            <x-blocks.main-block>
-                <x-layouts.title name="Отчёты"/>
-            </x-blocks.main-block>
-            @if($supplier->reports->count() > 0)
-                <x-table.table-layout>
-                    <x-table.table-header>
-                        <x-table.table-child>
-                            <x-layouts.simple-text name="Статус"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-layouts.simple-text name="Начало"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-layouts.simple-text name="Конец"/>
-                        </x-table.table-child>
-                    </x-table.table-header>
-                    @foreach($supplier->reports->sortByDesc('updated_at') as $report)
-                        <x-table.table-item :status="$report->status">
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$report->message"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$report->created_at"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$report->status !== 2 ? $report->updated_at : ''"/>
-                            </x-table.table-child>
-                        </x-table.table-item>
-                    @endforeach
-                </x-table.table-layout>
-            @endif
+            <livewire:supplier-report.supplier-report-index :supplier="$supplier" />
         @elseif($selectedTab === 'price')
             <x-blocks.main-block>
                 <x-layouts.title name="Прайс" />

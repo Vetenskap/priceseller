@@ -13,6 +13,7 @@ Route::middleware(['user_main_sub', 'auth'])->group(function () {
 
     Route::get('/suppliers', \App\Livewire\Supplier\SupplierIndex::class)->name('suppliers');
     Route::get('/suppliers/{supplier}', \App\Livewire\Supplier\SupplierEdit::class)->name('supplier-edit')->whereUuid('supplier');
+    Route::get('/suppliers/{supplier}/reports/{report}', \App\Livewire\SupplierReport\SupplierReportEdit::class)->name('supplier-report-edit')->whereUuid(['supplier', 'report']);
 
     Route::middleware(['user_ms_sub'])->group(function () {
         Route::get('/moysklad', \App\Livewire\Moysklad\MoyskladIndex::class)->name('moysklad');

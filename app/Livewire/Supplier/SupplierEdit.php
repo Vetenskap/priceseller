@@ -20,13 +20,6 @@ class SupplierEdit extends Component
 
     public Supplier $supplier;
 
-    public function getListeners()
-    {
-        return [
-            "echo:supplier.report.{$this->supplier->id},.change-message" => 'render'
-        ];
-    }
-
     #[Session('supplierEdit.{supplier.id}')]
     public $selectedTab = 'main';
 
