@@ -130,6 +130,7 @@ class SupplierReportService
 
             foreach ($reports as $report) {
                 Storage::delete(SupplierService::PATH . "{$report->uuid}.xlsx");
+                $report->delete();
             }
 
             $totalDeleted += $reports->count();

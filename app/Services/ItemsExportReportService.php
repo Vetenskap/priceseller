@@ -107,6 +107,8 @@ class ItemsExportReportService
                 } else if ($report->reportable instanceof User) {
                     Storage::delete(ItemService::PATH . "{$report->uuid}.xlsx");
                 }
+
+                $report->delete();
             }
 
             $totalDeleted += $reports->count();
