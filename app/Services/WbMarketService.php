@@ -60,7 +60,7 @@ class WbMarketService
             $result = Cache::tags(['wb', 'direct_relation'])
                 ->remember(
                     $this->market->id . '_' . $updatedAt . '_' . $nmId,
-                    now()->addDay(),
+                    now()->addHours(2),
                     fn() => $client->getCardsList($updatedAt, $nmId)
                 );
 
