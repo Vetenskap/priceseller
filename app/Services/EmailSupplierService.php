@@ -37,10 +37,17 @@ class EmailSupplierService
 
                 report($e);
 
-                $this->anotherHandle();
+                $this->importHandle();
             }
         } else {
-            $this->anotherHandle();
+
+            try {
+                $this->importHandle();
+            } catch (\TypeError $e) {
+
+                $this->anotherHandle();
+
+            }
         }
 
         SupplierReportService::changeMessage($this->supplier->supplier, 'Прайс прочитан');
@@ -61,6 +68,17 @@ class EmailSupplierService
     }
 
     protected function anotherHandle(): void
+    {
+        $sheets = Excel::toCollection(new Collection(), $this->path);
+
+        $sheets->each(function (Collection $sheet) {
+            $sheet->each(function (Collection $row) {
+                $this->processData($row);
+            });
+        });
+    }
+
+    protected function importHandle(): void
     {
         Excel::import(new SupplierPriceImport($this), $this->path);
     }

@@ -9,6 +9,7 @@ use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbItem;
+use App\Services\EmailSupplierService;
 use App\Services\SupplierReportService;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\Facades\Excel;
 
 class Test extends Command
 {
@@ -38,12 +40,7 @@ class Test extends Command
      */
     public function handle()
     {
-        $wbItem = [
-            'sizes' => [
-
-            ]
-        ];
-
-        collect(collect(collect(collect($wbItem['sizes'])->first(fn(array $size) => isset($size['skus'])))->first())->get('skus'))->first();
+        $service = new EmailSupplierService(EmailSupplier::first(), 'test/6659e6abae365_Aaass_3632_aeAECEAaeAEeiC_e_e_.xls');
+        $service->unload();
     }
 }
