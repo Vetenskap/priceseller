@@ -108,7 +108,7 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
             'nmID' => ['nullable', 'integer'],
             'vendorCode' => ['required'],
             'sku' => ['nullable'],
-            'Комиссия, процент' => ['nullable', 'integer', 'min:0'],
+            'Комиссия, процент' => ['nullable', 'numeric', 'min:0'],
             'Мин. цена' => ['nullable', 'integer', 'min:0'],
             'Розничная наценка, процент' => ['nullable', 'numeric', 'min:0'],
             'Упаковка' => ['nullable', 'numeric', 'min:0'],
@@ -122,7 +122,7 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
         return [
             'nmID.integer' => 'Поле должно быть целым числом',
             'vendorCode.required' => 'Поле обязательно',
-            'Комиссия, процент.integer' => 'Поле должно быть целым числом',
+            'Комиссия, процент.numeric' => 'Поле должно быть числом',
             'Комиссия, процент.min' => 'Поле должно быть больше 0',
             'Мин. цена.integer' => 'Поле должно быть целым числом',
             'Мин. цена.min' => 'Поле должно быть больше 0',
