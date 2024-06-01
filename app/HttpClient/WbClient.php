@@ -76,6 +76,7 @@ class WbClient
         $limits = 5;
 
         while (RateLimiter::attempts('wb_get_cards_list') >= 300) {
+            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 2 сек.');
             sleep(2);
         }
 
@@ -134,6 +135,7 @@ class WbClient
     {
 
         while (RateLimiter::attempts('wb_get_cards_list') >= 10) {
+            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 2 сек.');
             sleep(2);
         }
 

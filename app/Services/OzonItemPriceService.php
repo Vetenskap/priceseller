@@ -184,7 +184,7 @@ class OzonItemPriceService
                     });
 
                     if (App::isProduction()) {
-                        $this->ozonClient->putStocks($data->all());
+                        $this->ozonClient->putStocks($data->all(), $this->supplier);
                     } else {
 //                        Log::debug('Озон: обновление остатков', [
 //                            'market' => $this->market->name,

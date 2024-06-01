@@ -2,6 +2,8 @@
 
 namespace App\HttpClient;
 
+use App\Models\Supplier;
+use App\Services\SupplierReportService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
@@ -76,9 +78,10 @@ class OzonClient
         return $this->request->post('/v1/product/import/prices', ['prices' => $data])->collect('result');
     }
 
-    public function putStocks(array $data)
+    public function putStocks(array $data, Supplier $supplier)
     {
         while (RateLimiter::attempts('ozon_put_stocks') >= 80) {
+            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 2 сек.');
             sleep(2);
         }
 
