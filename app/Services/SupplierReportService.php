@@ -59,8 +59,6 @@ class SupplierReportService
 
             }
 
-            sleep(1);
-
             static::addLog($supplier, $message);
 
             return true;
@@ -71,8 +69,6 @@ class SupplierReportService
     public static function success(Supplier $supplier): bool
     {
         if ($report = static::get($supplier)) {
-
-            sleep(1);
 
             static::addLog($supplier, 'Поставщик успешно выгружен');
 
@@ -89,8 +85,6 @@ class SupplierReportService
     public static function error(Supplier $supplier): bool
     {
         if ($report = static::get($supplier)) {
-
-            sleep(1);
 
             static::addLog($supplier, 'Ошибка в выгрузке');
 
