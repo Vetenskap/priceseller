@@ -96,21 +96,23 @@ class EmailSupplierService
         $stock = $row->get($this->supplier->header_count - 1);
 
         $itemService = new ItemPriceService($article, $this->supplier->supplier->id);
-        $item = $this->supplier->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
+        $items = $this->supplier->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
 
-        if ($item) {
+        if ($items) {
 
-            EmailPriceItemService::handleFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock, $item->id);
+            foreach ($items as $item) {
 
-            $stock = $this->prepareStock($stock);
+                EmailPriceItemService::handleFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock, $item->id);
 
-//            if ($item->count !== $stock || $item->price !== $price) {
+                $stock = $this->prepareStock($stock);
+
                 $item->count = $stock;
                 $item->price = $price;
                 $item->updated = true;
 
                 $itemService->save($item);
-//            }
+            }
+
 
         } else {
             EmailPriceItemService::handleNotFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock);

@@ -4,6 +4,7 @@ namespace App\Services\Item;
 
 use App\Models\Item;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 
 class ItemPriceService
 {
@@ -23,13 +24,13 @@ class ItemPriceService
 
         return $this;
     }
-    public function find(): ?Item
+    public function find(): ?Collection
     {
         return Item::query()
             ->where('supplier_id', $this->supplierId)
             ->where('article', $this->article)
             ->when($this->brand, fn(Builder $query) => $query->where('brand', $this->brand))
-            ->first();
+            ->get();
     }
 
     public function save(Item $item)
