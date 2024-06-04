@@ -99,6 +99,11 @@
                 <x-blocks.main-block>
                     <x-layouts.title name="Остатки"/>
                 </x-blocks.main-block>
+                @if(!$market->warehouses()->count())
+                    <x-blocks.center-block class="w-full bg-yellow-200 p-6">
+                        <x-layouts.simple-text name="Ни один склад не добавлен. Остатки не будут выгружаться"/>
+                    </x-blocks.center-block>
+                @endif
                 <x-blocks.flex-block>
                     <x-inputs.input-with-label name="max_count"
                                                type="number"
@@ -309,7 +314,8 @@
             </x-blocks.main-block>
         </x-layouts.main-container>
     @endif
-    <div wire:loading wire:target="import, relationshipsAndCommissions, clearRelationships, getWarehouses, testPrice, nullStocks">
+    <div wire:loading
+         wire:target="import, relationshipsAndCommissions, clearRelationships, getWarehouses, testPrice, nullStocks">
         <x-loader/>
     </div>
 </div>

@@ -131,7 +131,7 @@ class OzonItemPriceService
     public function recountStockOzonItem(OzonItem $ozonItem): OzonItem
     {
         $new_count = $ozonItem->item->count < $this->market->min ? 0 : $ozonItem->item->count;
-        $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $ozonItem->item->multiplicity = 1) ? 1 : $new_count;
+        $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $ozonItem->item->multiplicity === 1) ? 1 : $new_count;
         $new_count = $new_count / $ozonItem->item->multiplicity;
         $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
         $new_count = (int)max($new_count, 0);
@@ -165,6 +165,11 @@ class OzonItemPriceService
     public function unloadAllStocks(): void
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: выгрузка остатков в кабинет");
+
+        if (!$this->market->warehouses()->count()) {
+            SupplierReportService::addLog($this->supplier, "Нет складов. Остатки не выгружены");
+            return;
+        }
 
         OzonItem::query()
             ->whereHas('item', function (Builder $query) {

@@ -110,7 +110,7 @@ class WbItemPriceService
     {
 
         $newCount = $wbItem->item->count < $this->market->min ? 0 : $wbItem->item->count;
-        $newCount = ($newCount >= $this->market->min && $newCount <= $this->market->max && $wbItem->item->multiplicity = 1) ? 1 : $newCount;
+        $newCount = ($newCount >= $this->market->min && $newCount <= $this->market->max && $wbItem->item->multiplicity === 1) ? 1 : $newCount;
         $newCount = $newCount / $wbItem->item->multiplicity;
         $newCount = $newCount > $this->market->max_count ? $this->market->max_count : $newCount;
         $newCount = (int)max($newCount, 0);
@@ -144,6 +144,11 @@ class WbItemPriceService
     public function unloadAllStocks(): void
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: выгрузка остатков в кабинет");
+
+        if (!$this->market->warehouses()->count()) {
+            SupplierReportService::addLog($this->supplier, "Нет складов. Остатки не выгружены");
+            return;
+        }
 
         WbItem::query()
             ->whereHas('item', function (Builder $query) {
