@@ -19,7 +19,7 @@ class EmailHandlerLaravelImap
 {
     public $connection;
     public Filesystem $storage;
-    const ZIP_TYPES = ['application/x-zip-compressed'];
+    const ZIP_TYPES = ['application/x-zip-compressed', 'application/zip'];
     const TABLE_TYPES = [
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/octet-stream',

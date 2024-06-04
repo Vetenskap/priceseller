@@ -40,7 +40,8 @@ class Test extends Command
      */
     public function handle()
     {
-        $service = new EmailSupplierService(EmailSupplier::first(), 'test/6659e6abae365_Aaass_3632_aeAECEAaeAEeiC_e_e_.xls');
-        $service->unload();
+        if (!Str::contains("202_13_pricelist_sur10_fc.zi p", "pricelist")) {
+            $this->info("Не найдено");
+        }
     }
 }
