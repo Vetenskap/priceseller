@@ -23,7 +23,8 @@ class EmailHandlerLaravelImap
     const TABLE_TYPES = [
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
         'application/octet-stream',
-        'application/excel'
+        'application/excel',
+        'text/csv'
     ];
 
     public function __construct(string $address, string $password, ?Filesystem $storage = null)
