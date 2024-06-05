@@ -92,7 +92,7 @@ class EmailSupplierService
     {
         $article = $row->get($this->supplier->header_article - 1);
         $brand = $row->get($this->supplier->header_brand - 1);
-        $price = (float) $row->get($this->supplier->header_price - 1);
+        $price = $row->get($this->supplier->header_price - 1);
         $stock = $row->get($this->supplier->header_count - 1);
 
         $itemService = new ItemPriceService($article, $this->supplier->supplier->id);
@@ -105,6 +105,7 @@ class EmailSupplierService
                 EmailPriceItemService::handleFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock, $item->id);
 
                 $stock = $this->prepareStock($stock);
+                $price = $this->preparePrice($price);
 
                 $item->count = $stock;
                 $item->price = $price;
@@ -129,5 +130,12 @@ class EmailSupplierService
         $stock = (int) preg_replace("/[^0-9]/", "", $stock);
 
         return $stock;
+    }
+
+    public function preparePrice(string $price): float
+    {
+        $price = (float) preg_replace("/,/", '.', $price);
+
+        return $price;
     }
 }

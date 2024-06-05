@@ -5,10 +5,12 @@ namespace App\Console\Commands;
 use App\Events\NotificationEvent;
 use App\Events\TestBroadcast;
 use App\Models\EmailSupplier;
+use App\Models\Item;
 use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbItem;
+use App\Services\EmailPriceItemService;
 use App\Services\EmailSupplierService;
 use App\Services\SupplierReportService;
 use Illuminate\Console\Command;
@@ -40,8 +42,7 @@ class Test extends Command
      */
     public function handle()
     {
-        if (!Str::contains("202_13_pricelist_sur10_fc.zi p", "pricelist")) {
-            $this->info("Не найдено");
-        }
+        $service = new EmailSupplierService(EmailSupplier::first(), 'test/20240604_172913_pricelist_sur104351_c48236.csv');
+        $service->unload();
     }
 }
