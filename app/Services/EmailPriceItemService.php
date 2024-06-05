@@ -6,7 +6,7 @@ use App\Models\EmailPriceItem;
 
 class EmailPriceItemService
 {
-    public static function handleFoundItem(string $supplierId, string $article, ?string $brand, ?float $price, ?string $stock, string $itemId): void
+    public static function handleFoundItem(string $supplierId, string $article, ?string $brand, ?string $price, ?string $stock, string $itemId): void
     {
         EmailPriceItem::updateOrCreate([
             'supplier_id' => $supplierId,
@@ -24,7 +24,7 @@ class EmailPriceItemService
         ]);
     }
 
-    public static function handleNotFoundItem(string $supplierId, ?string $article, ?string $brand, ?float $price, ?string $stock): void
+    public static function handleNotFoundItem(string $supplierId, ?string $article, ?string $brand, ?string $price, ?string $stock): void
     {
         EmailPriceItem::updateOrCreate([
             'supplier_id' => $supplierId,
