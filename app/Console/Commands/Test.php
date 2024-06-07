@@ -42,7 +42,7 @@ class Test extends Command
      */
     public function handle()
     {
-        $service = new EmailSupplierService(EmailSupplier::first(), 'test/20240604_172913_pricelist_sur104351_c48236.csv');
-        $service->unload();
+//        $service = new EmailSupplierService(EmailSupplier::first(), 'test/20240604_172913_pricelist_sur104351_c48236.csv');
+//        $service->unload();
     }
 }

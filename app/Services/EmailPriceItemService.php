@@ -11,7 +11,8 @@ class EmailPriceItemService
         EmailPriceItem::updateOrCreate([
             'supplier_id' => $supplierId,
             'article' => $article,
-            'brand' => $brand
+            'brand' => $brand,
+            'item_id' => $itemId
         ], [
             'supplier_id' => $supplierId,
             'article' => $article,

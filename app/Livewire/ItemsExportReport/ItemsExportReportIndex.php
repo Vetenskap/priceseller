@@ -29,11 +29,9 @@ class ItemsExportReportIndex extends Component
 
         $report = ItemsExportReport::find($report['id']);
 
-        $date = now()->toDateTimeString();
-
         return response()->download(
             file: Storage::disk('public')->path($this->getPath() . "{$report->uuid}.xlsx"),
-            name: $this->getFilename() . "_{$date}.xlsx"
+            name: $this->getFilename() . "_{$report->updated_at}.xlsx"
         );
     }
 

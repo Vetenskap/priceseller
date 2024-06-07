@@ -73,13 +73,18 @@ class ItemsImportReportService
     public static function success(OzonMarket|WbMarket|User $model, int $correct, int $error, ?string $uuid = null): bool
     {
         if ($report = static::get($model)) {
-            $report->update([
-                'uuid' => $uuid,
-                'correct' => $correct,
-                'error' => $error,
-                'status' => 0,
-                'message' => 'Импорт завершен'
-            ]);
+
+            $report->correct = $correct;
+            $report->error = $error;
+            $report->status = 0;
+            $report->message = 'Импорт завершен';
+
+            if ($uuid) {
+                $report->uuid = $uuid;
+            }
+
+            $report->save();
+
 
             try {
                 event(new NotificationEvent($model->user_id ?? $model->id, 'Объект: ' . $model->name, 'Импорт завершен', 0));
