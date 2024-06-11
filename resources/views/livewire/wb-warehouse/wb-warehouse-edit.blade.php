@@ -2,6 +2,11 @@
     <x-blocks.main-block>
         <x-layouts.title :name="$name"/>
     </x-blocks.main-block>
+    @if(!$warehouse->suppliers()->count())
+        <x-blocks.center-block class="w-full bg-yellow-200 p-6">
+            <x-layouts.simple-text name="Ни поставщик не добавлен. Остатки не будут выгружаться"/>
+        </x-blocks.center-block>
+    @endif
     <x-layouts.actions>
         <x-success-button wire:click="save">Сохранить</x-success-button>
         <x-danger-button wire:click="$parent.destroy({{$warehouse}})">Удалить</x-danger-button>
