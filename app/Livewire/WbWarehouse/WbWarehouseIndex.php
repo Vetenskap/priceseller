@@ -32,8 +32,10 @@ class WbWarehouseIndex extends Component
         ]);
     }
 
-    public function deleteWarehouse(WbWarehouse $warehouse)
+    public function destroy(array $warehouse)
     {
+        $warehouse = WbWarehouse::findOrFail($warehouse['id']);
+
         $this->authorize('delete', $warehouse);
 
         $warehouse->delete();

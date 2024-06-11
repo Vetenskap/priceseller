@@ -1,4 +1,11 @@
 <div>
+    <x-blocks.main-block>
+        <x-layouts.title :name="$name"/>
+    </x-blocks.main-block>
+    <x-layouts.actions>
+        <x-success-button wire:click="save">Сохранить</x-success-button>
+        <x-danger-button wire:click="$parent.destroy({{$warehouse}})">Удалить</x-danger-button>
+    </x-layouts.actions>
     <x-layouts.main-container class="border-4">
         <div class="bg-white dark:bg-gray-700">
             <nav class="flex flex-col sm:flex-row">

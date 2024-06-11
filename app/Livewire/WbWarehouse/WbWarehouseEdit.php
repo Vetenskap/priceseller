@@ -45,4 +45,11 @@ class WbWarehouseEdit extends Component
         $supplier = WbWarehouseSupplier::findOrFail($supplier['id']);
         $supplier->delete();
     }
+
+    public function destroy()
+    {
+        $this->authorize('delete', $this->warehouse);
+
+        $this->warehouse->delete();
+    }
 }
