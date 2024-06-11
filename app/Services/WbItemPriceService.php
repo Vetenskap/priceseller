@@ -150,32 +150,40 @@ class WbItemPriceService
             return;
         }
 
-        WbItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('supplier_id', $this->supplier->id);
+        $this->market->warehouses()
+            ->whereHas('suppliers', function (Builder $query) {
+                $query->where('supplier_id', $this->supplier->id);
             })
-            ->chunk(1000, function (Collection $items) {
-                $this->market->warehouses->map(function (WbWarehouse $warehouse) use ($items) {
+            ->get()
+            ->map(function (WbWarehouse $warehouse) {
 
-                    $data = $items->map(function (WbItem $item) {
-                        return [
-                            "sku" => (string)$item->sku,
-                            "amount" => (int)$item->count,
-                        ];
-                    });
+                SupplierReportService::addLog($this->supplier, "Склад {$warehouse->name}: выгрузка остатков");
 
-                    if (App::isProduction()) {
-                        $this->wbClient->putStocks($data, $warehouse->warehouse_id, $this->supplier);
-                    } else {
+                WbItem::query()
+                    ->whereHas('item', function (Builder $query) {
+                        $query
+                            ->where('supplier_id', $this->supplier->id);
+                    })
+                    ->chunk(1000, function (Collection $items) use ($warehouse) {
+
+                        $data = $items->map(function (WbItem $item) {
+                            return [
+                                "sku" => (string)$item->sku,
+                                "amount" => (int)$item->count,
+                            ];
+                        });
+
+                        if (App::isProduction()) {
+                            $this->wbClient->putStocks($data, $warehouse->warehouse_id, $this->supplier);
+                        } else {
 //                        Log::debug('Вб: обновление остатков', [
 //                            'market' => $this->market->name,
 //                            'supplier' => $this->supplier->name,
 //                            'data' => $data
 //                        ]);
-                    }
+                        }
 
-                });
+                    });
             });
     }
 

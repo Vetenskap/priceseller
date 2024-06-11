@@ -52,8 +52,6 @@ class WbMarketEdit extends Component
 
     public $apiWarehouses = [];
 
-    public int $selectedWarehouse;
-
     public array $statusFilters = [
         [
             'status' => 1,
@@ -141,7 +139,6 @@ class WbMarketEdit extends Component
         try {
             $warehouses = $service->getWarehouses();
             $this->apiWarehouses = $warehouses->all();
-            $this->selectedWarehouse = $warehouses->first()['id'];
         } catch (RequestException $e) {
             if ($e->response->unauthorized()) {
                 $this->setErrorBag(new MessageBag([
@@ -154,27 +151,6 @@ class WbMarketEdit extends Component
                 ]));
             }
         }
-    }
-
-    public function addWarehouse()
-    {
-        $this->authorize('create', WbWarehouse::class);
-
-        $name = collect($this->apiWarehouses)->firstWhere('id', $this->selectedWarehouse)['name'];
-
-        $this->market->warehouses()->updateOrCreate([
-            'warehouse_id' => $this->selectedWarehouse,
-        ], [
-            'warehouse_id' => $this->selectedWarehouse,
-            'name' => $name
-        ]);
-    }
-
-    public function deleteWarehouse(WbWarehouse $warehouse)
-    {
-        $this->authorize('delete', $warehouse);
-
-        $warehouse->delete();
     }
 
     public function clearRelationships()

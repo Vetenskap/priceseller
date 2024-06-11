@@ -10,6 +10,8 @@ use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbItem;
+use App\Models\WbMarket;
+use App\Models\WbWarehouse;
 use App\Services\EmailPriceItemService;
 use App\Services\EmailSupplierService;
 use App\Services\SupplierReportService;
@@ -42,7 +44,16 @@ class Test extends Command
      */
     public function handle()
     {
-//        $service = new EmailSupplierService(EmailSupplier::first(), 'test/20240604_172913_pricelist_sur104351_c48236.csv');
-//        $service->unload();
+        $market = WbMarket::find('9c2879df-980f-4fc1-b7c4-11c0bd4b3427');
+        $supplier = Supplier::where('name', 'Берг')->first();
+
+        $market->warehouses()
+            ->whereHas('suppliers', function (Builder $query) use ($supplier) {
+                $query->where('supplier_id', $supplier->id);
+            })
+            ->get()
+            ->map(function (WbWarehouse $warehouse) {
+                dd($warehouse);
+            });
     }
 }

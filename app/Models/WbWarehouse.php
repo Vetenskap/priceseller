@@ -12,11 +12,16 @@ class WbWarehouse extends Model
     protected $fillable = [
         'name',
         'wb_market_id',
-        'id'
+        'warehouse_id'
     ];
 
     public function market()
     {
         return $this->belongsTo(WbMarket::class, 'wb_market_id', 'id');
+    }
+
+    public function suppliers()
+    {
+        return $this->hasMany(WbWarehouseSupplier::class);
     }
 }

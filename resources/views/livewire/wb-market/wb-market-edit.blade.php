@@ -102,50 +102,7 @@
                     >Остаток до
                     </x-inputs.input-with-label>
                 </x-blocks.flex-block>
-                <x-blocks.main-block>
-                    <x-layouts.title name="Склады"/>
-                </x-blocks.main-block>
-                <x-blocks.flex-block-end>
-                    <x-dropdown-select name="warehouse"
-                                       field="selectedWarehouse"
-                                       :options="$apiWarehouses">
-                        Выберите склад
-                    </x-dropdown-select>
-                    <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
-                </x-blocks.flex-block-end>
-                @if($market->warehouses()->count() > 0)
-                    <x-table.table-layout>
-                        <x-table.table-header>
-                            <x-table.table-child>
-                                <x-layouts.simple-text name="Наименование"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-layouts.simple-text name="Идентификатор"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-
-                            </x-table.table-child>
-                        </x-table.table-header>
-                        @foreach($market->warehouses as $warehouse)
-                            <x-table.table-item>
-                                <x-table.table-child>
-                                    <x-layouts.simple-text :name="$warehouse->name"/>
-                                </x-table.table-child>
-                                <x-table.table-child>
-                                    <x-layouts.simple-text :name="$warehouse->id"/>
-                                </x-table.table-child>
-                                <x-table.table-child>
-                                    <x-danger-button wire:click="deleteWarehouse({{$warehouse}})">Удалить
-                                    </x-danger-button>
-                                </x-table.table-child>
-                            </x-table.table-item>
-                        @endforeach
-                    </x-table.table-layout>
-                @else
-                    <x-blocks.main-block>
-                        <x-titles.sub-title name="Нет складов"/>
-                    </x-blocks.main-block>
-                @endif
+                <livewire:wb-warehouse.wb-warehouse-index :market="$market" :api-warehouses="$apiWarehouses" />
                 @break
             @case('export')
                 <x-blocks.main-block>
