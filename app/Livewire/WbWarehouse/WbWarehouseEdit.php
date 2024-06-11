@@ -23,6 +23,7 @@ class WbWarehouseEdit extends Component
     {
         $this->name = $this->warehouse->name;
         $this->warehouse_id = $this->warehouse->warehouse_id;
+        $this->selectedSupplier = auth()->user()->suppliers->first()->id;
     }
 
     public function render()
