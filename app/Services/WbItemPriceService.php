@@ -166,7 +166,7 @@ class WbItemPriceService
                     });
 
                     if (App::isProduction()) {
-                        $this->wbClient->putStocks($data, $warehouse->id, $this->supplier);
+                        $this->wbClient->putStocks($data, $warehouse->warehouse_id, $this->supplier);
                     } else {
 //                        Log::debug('Вб: обновление остатков', [
 //                            'market' => $this->market->name,

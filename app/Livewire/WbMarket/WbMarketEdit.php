@@ -163,9 +163,9 @@ class WbMarketEdit extends Component
         $name = collect($this->apiWarehouses)->firstWhere('id', $this->selectedWarehouse)['name'];
 
         $this->market->warehouses()->updateOrCreate([
-            'id' => $this->selectedWarehouse,
+            'warehouse_id' => $this->selectedWarehouse,
         ], [
-            'id' => $this->selectedWarehouse,
+            'warehouse_id' => $this->selectedWarehouse,
             'name' => $name
         ]);
     }
