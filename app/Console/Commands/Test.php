@@ -44,16 +44,7 @@ class Test extends Command
      */
     public function handle()
     {
-        $market = WbMarket::find('9c2879df-980f-4fc1-b7c4-11c0bd4b3427');
-        $supplier = Supplier::where('name', 'Берг')->first();
 
-        $market->warehouses()
-            ->whereHas('suppliers', function (Builder $query) use ($supplier) {
-                $query->where('supplier_id', $supplier->id);
-            })
-            ->get()
-            ->map(function (WbWarehouse $warehouse) {
-                dd($warehouse);
-            });
+        dd(User::first()->permissions);
     }
 }

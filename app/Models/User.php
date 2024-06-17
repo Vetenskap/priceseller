@@ -2,12 +2,14 @@
 
 namespace App\Models;
 
+use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\App;
 
-class User extends Authenticatable implements MustVerifyEmail
+class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 {
     use HasFactory, Notifiable;
 
@@ -49,33 +51,27 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsToMany(Permission::class, 'user_permissions')
             ->withTimestamps()
-            ->wherePivot('expires', '>', now()->timestamp)
             ->withPivot('expires');
     }
 
     public function is_main_sub()
     {
-        return $this->permissions()->where('value', 'main_sub')->where('expires', '>', now()->timestamp)->exists();
+        return $this->permissions()->where('value', 'main_sub')->where('expires', '>', now())->exists();
     }
 
     public function is_ms_sub()
     {
-        return $this->permissions()->where('value', 'ms_sub')->where('expires', '>', now()->timestamp)->exists();
+        return $this->permissions()->where('value', 'ms_sub')->where('expires', '>', now())->exists();
     }
 
     public function is_avito_sub()
     {
-        return $this->permissions()->where('value', 'avito_sub')->where('expires', '>', now()->timestamp)->exists();
+        return $this->permissions()->where('value', 'avito_sub')->where('expires', '>', now())->exists();
     }
 
-    public function isAdmin()
+    public function isAdmin(): bool
     {
-        return $this->permissions()->where('value', 'admin')->where('expires', '>', now()->timestamp)->exists();
-    }
-
-    public function image()
-    {
-        return $this->morphOne(Image::class, 'imageable');
+        return $this->permissions()->where('value', 'admin')->where('expires', '>', now())->exists();
     }
 
     public function emails()
@@ -111,5 +107,12 @@ class User extends Authenticatable implements MustVerifyEmail
     public function items()
     {
         return $this->hasMany(Item::class);
+    }
+
+    public function canAccessPanel(\Filament\Panel $panel): bool
+    {
+        if (App::isProduction()) return $this->isAdmin();
+
+        return true;
     }
 }

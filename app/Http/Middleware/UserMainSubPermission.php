@@ -16,7 +16,7 @@ class UserMainSubPermission
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && !$request->user()->is_main_sub()) {
+        if ($request->user() && !$request->user()->is_main_sub() && App::isProduction()) {
             return redirect()->route('subscribe.main');
         }
 

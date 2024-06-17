@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('wb_warehouses', function (Blueprint $table) {
-            $table->integer('warehouse_id')->nullable()->after('id');
+        Schema::table('user_permissions', function (Blueprint $table) {
+            $table->timestamp('expires')->change();
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('wb_warehouses', function (Blueprint $table) {
-            $table->dropColumn('warehouse_id');
+        Schema::table('user_permissions', function (Blueprint $table) {
+            $table->integer('expires')->change();
         });
     }
 };
