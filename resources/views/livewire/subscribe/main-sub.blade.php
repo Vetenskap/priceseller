@@ -1,6 +1,3 @@
-@php
-dd('тест');
-@endphp
 <div>
     <x-layouts.header name="Требуется подписка"/>
     <x-layouts.main-container>
