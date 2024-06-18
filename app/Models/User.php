@@ -5,6 +5,7 @@ namespace App\Models;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\App;
@@ -47,24 +48,24 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         ];
     }
 
-    public function permissions()
+    public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class, 'user_permissions')
             ->withTimestamps()
             ->withPivot('expires');
     }
 
-    public function is_main_sub()
+    public function isMainSub(): bool
     {
         return $this->permissions()->where('value', 'main_sub')->where('expires', '>', now())->exists();
     }
 
-    public function is_ms_sub()
+    public function isMsSub(): bool
     {
         return $this->permissions()->where('value', 'ms_sub')->where('expires', '>', now())->exists();
     }
 
-    public function is_avito_sub()
+    public function isAvitoSub(): bool
     {
         return $this->permissions()->where('value', 'avito_sub')->where('expires', '>', now())->exists();
     }

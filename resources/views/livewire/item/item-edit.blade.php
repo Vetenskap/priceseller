@@ -22,7 +22,7 @@
                                        field="form.code"
             >Код
             </x-inputs.input-with-label>
-            @if(auth()->user()->is_ms_sub())
+            @if(auth()->user()->isMsSub())
                 <x-inputs.input-with-label name="ms_uuid"
                                            type="text"
                                            field="form.ms_uuid"

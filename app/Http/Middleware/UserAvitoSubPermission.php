@@ -17,12 +17,12 @@ class UserAvitoSubPermission
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && !$request->user()->is_avito_sub()) {
+        if ($request->user() && !$request->user()->isAvitoSub()) {
             return redirect()->route('subscribe.avito');
         }
 
         Context::add('subscribe', 'avito');
-        Context::push('user', ['subscribe_avito' => $request->user()->is_avito_sub() ? 'yes' : 'no']);
+        Context::push('user', ['subscribe_avito' => $request->user()->isAvitoSub() ? 'yes' : 'no']);
         Context::push('user', ['user_id' => $request->user()->id]);
 
         return $next($request);

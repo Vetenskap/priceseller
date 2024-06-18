@@ -11,7 +11,7 @@
                                            field="form.name"
                 >Наименование
                 </x-inputs.input-with-label>
-                @if(auth()->user()->is_ms_sub())
+                @if(auth()->user()->isMsSub())
 
                     <x-inputs.input-with-label name="ms_uuid"
                                                type="text"
@@ -42,7 +42,8 @@
                 @foreach($suppliers as $supplier)
                     <x-table.table-item wire:key="{{$supplier->getKey()}}" wire:poll>
                         <x-table.table-child>
-                            <a href="{{route('supplier-edit', ['supplier' => $supplier->getKey()])}}" wire:navigate.hover>
+                            <a href="{{route('supplier-edit', ['supplier' => $supplier->getKey()])}}"
+                               wire:navigate.hover>
                                 <x-layouts.simple-text :name="$supplier->name"/>
                             </a>
                         </x-table.table-child>
