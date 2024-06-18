@@ -171,33 +171,42 @@ class OzonItemPriceService
             return;
         }
 
-        OzonItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('supplier_id', $this->supplier->id);
+        $this->market->warehouses()
+            ->whereHas('suppliers', function (Builder $query) {
+                $query->where('supplier_id', $this->supplier->id);
             })
-            ->chunk(100, function (Collection $items) {
-                return $this->market->warehouses->map(function (OzonWarehouse $warehouse) use ($items) {
+            ->get()
+            ->map(function (OzonWarehouse $warehouse) {
 
-                    $data = $items->map(function (OzonItem $item) use ($warehouse) {
-                        return [
-                            'offer_id' => (string)$item->offer_id,
-                            'product_id' => (int)$item->product_id,
-                            'stock' => (int)$item->count,
-                            'warehouse_id' => (int)$warehouse->id
-                        ];
-                    });
+                SupplierReportService::addLog($this->supplier, "Склад {$warehouse->name}: выгрузка остатков");
 
-                    if (App::isProduction()) {
-                        $this->ozonClient->putStocks($data->all(), $this->supplier);
-                    } else {
+                OzonItem::query()
+                    ->whereHas('item', function (Builder $query) {
+                        $query
+                            ->where('supplier_id', $this->supplier->id);
+                    })
+                    ->chunk(100, function (Collection $items) use ($warehouse) {
+
+                        $data = $items->map(function (OzonItem $item) use ($warehouse) {
+                            return [
+                                'offer_id' => (string)$item->offer_id,
+                                'product_id' => (int)$item->product_id,
+                                'stock' => (int)$item->count,
+                                'warehouse_id' => (int)$warehouse->id
+                            ];
+                        });
+
+                        if (App::isProduction()) {
+                            $this->ozonClient->putStocks($data->all(), $this->supplier);
+                        } else {
 //                        Log::debug('Озон: обновление остатков', [
 //                            'market' => $this->market->name,
 //                            'supplier' => $this->supplier->name,
 //                            'data' => $data
 //                        ]);
-                    }
-                });
+                        }
+
+                    });
             });
     }
 

@@ -10,7 +10,7 @@ class OzonWarehouse extends Model
     use HasFactory;
 
     protected $fillable = [
-        'id',
+        'warehouse_id',
         'name',
         'ozon_market_id',
     ];
@@ -18,5 +18,10 @@ class OzonWarehouse extends Model
     public function market()
     {
         return $this->belongsTo(OzonMarket::class, 'ozon_market_id', 'id');
+    }
+
+    public function suppliers()
+    {
+        return $this->hasMany(OzonWarehouseSupplier::class);
     }
 }
