@@ -2,22 +2,41 @@
 
 namespace App\Livewire\Moysklad;
 
+use App\Livewire\Forms\MoyskladPostForm;
+use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Moysklad;
+use App\Services\MoyskladService;
 use Livewire\Component;
 
 class MoyskladIndex extends Component
 {
-    public Moysklad $moysklad;
+    use WithJsNotifications;
 
-    public $api_key;
+    public MoyskladPostForm $form;
 
-    public $name;
+    public $selectedTab;
+
+    public $apiWarehouses;
 
     public function mount()
     {
-        $this->moysklad = Moysklad::where('user_id', auth()->user()->id)->first();
-        $this->api_key = $this->moysklad->api_key;
-        $this->name = $this->moysklad->name;
+        $this->form->setMoysklad(auth()->user()->moysklad);
+        if ($this->form->moysklad) {
+            $service = new MoyskladService($this->form->moysklad);
+            $service->setClient();
+            $this->apiWarehouses = $service->getWarehouses();
+        }
+    }
+
+    public function save()
+    {
+        if ($this->form->moysklad) {
+            $this->form->update();
+        } else {
+            $this->form->store();
+        }
+
+        $this->addSuccessSaveNotification();
     }
 
     public function render()

@@ -116,4 +116,9 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 
         return true;
     }
+
+    public function moysklad()
+    {
+        return $this->hasOne(Moysklad::class);
+    }
 }

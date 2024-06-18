@@ -16,7 +16,7 @@ class UserMsSubPermission
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && !$request->user()->isMsSub()) {
+        if ($request->user() && !$request->user()->isMsSub() && App::isProduction() && !$request->user()->isAdmin()) {
             return redirect()->route('subscribe.ms');
         }
 

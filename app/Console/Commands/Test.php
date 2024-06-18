@@ -6,6 +6,7 @@ use App\Events\NotificationEvent;
 use App\Events\TestBroadcast;
 use App\Models\EmailSupplier;
 use App\Models\Item;
+use App\Models\MoyskladWarehouse;
 use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
@@ -14,6 +15,7 @@ use App\Models\WbMarket;
 use App\Models\WbWarehouse;
 use App\Services\EmailPriceItemService;
 use App\Services\EmailSupplierService;
+use App\Services\MoyskladService;
 use App\Services\SupplierReportService;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,6 +47,12 @@ class Test extends Command
     public function handle()
     {
 
-        dd(User::first()->permissions);
+        $moysklad = User::first()->moysklad;
+        $service = new MoyskladService($moysklad);
+        $service->setClient();
+        $warehouse = MoyskladWarehouse::first();
+        $stocks = $service->getWarehouseStocks($warehouse);
+
+        dd($stocks);
     }
 }
