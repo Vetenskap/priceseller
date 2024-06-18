@@ -15,7 +15,8 @@ class OzonWarehouseIndex extends Component
 
     public function mount()
     {
-        $this->selectedWarehouse = collect($this->apiWarehouses)->first()['warehouse_id'];
+        $firstWarehouse = collect($this->apiWarehouses)->first();
+        $this->selectedWarehouse = $firstWarehouse ? $firstWarehouse['warehouse_id'] : null;
     }
 
     public function addWarehouse()

@@ -15,7 +15,8 @@ class WbWarehouseIndex extends Component
 
     public function mount()
     {
-        $this->selectedWarehouse = collect($this->apiWarehouses)->first()['id'];
+        $firstWarehouse = collect($this->apiWarehouses)->first();
+        $this->selectedWarehouse = $firstWarehouse ? $firstWarehouse['id'] : null;
     }
 
     public function addWarehouse()
