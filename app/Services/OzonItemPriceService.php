@@ -192,7 +192,7 @@ class OzonItemPriceService
                                 'offer_id' => (string)$item->offer_id,
                                 'product_id' => (int)$item->product_id,
                                 'stock' => (int)$item->count,
-                                'warehouse_id' => (int)$warehouse->id
+                                'warehouse_id' => (int)$warehouse->warehouse_id
                             ];
                         });
 
