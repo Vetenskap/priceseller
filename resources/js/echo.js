@@ -13,4 +13,5 @@ window.Echo = new Echo({
     wssPort: import.meta.env.VITE_PUSHER_PORT,
     disableStats: true,
     enabledTransports: ["ws", "wss"],
+    cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mlt'
 });
