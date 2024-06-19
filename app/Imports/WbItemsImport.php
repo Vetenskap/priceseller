@@ -46,7 +46,7 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
 
         if (!$item) {
             MarketItemRelationshipService::handleNotFoundItem(
-                externalCode: $row->get('vendorCode'),
+                externalCode: $row->get('Артикул продавца (vendorCode)'),
                 marketId: $this->market->id,
                 marketType: 'App\Models\WbMarket',
                 code: $row->get('Код')
@@ -58,13 +58,13 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
         }
 
         MarketItemRelationshipService::handleFoundItem(
-            externalCode: $row->get('vendorCode'),
+            externalCode: $row->get('Артикул продавца (vendorCode)'),
             code: $row->get('Код'),
             marketId: $this->market->id,
             marketType: 'App\Models\WbMarket',
         );
 
-        if ($wbItem = $this->market->items()->where('vendor_code', $row->get('vendorCode'))->first()) {
+        if ($wbItem = $this->market->items()->where('vendor_code', $row->get('Артикул продавца (vendorCode)'))->first()) {
 
             if ($row->get('Удалить') === 'Да') {
 
@@ -75,9 +75,9 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
 
             $this->updated++;
 
-            $wbItem->nm_id = $row->get('nmID');
-            $wbItem->vendor_code = $row->get('vendorCode');
-            $wbItem->sku = $row->get('sku');
+            $wbItem->nm_id = $row->get('Артикул WB (nmID)');
+            $wbItem->vendor_code = $row->get('Артикул продавца (vendorCode)');
+            $wbItem->sku = $row->get('Баркод (sku)');
             $wbItem->sales_percent = $row->get('Комиссия, процент');
             $wbItem->min_price = $row->get('Мин. цена');
             $wbItem->retail_markup_percent = $row->get('Розничная наценка, процент');
@@ -108,9 +108,9 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
 
         return new WbItem([
             'wb_market_id' => $this->market->id,
-            'nm_id' => $row->get('nmID'),
-            'vendor_code' => $row->get('vendorCode'),
-            'sku' => $row->get('sku'),
+            'nm_id' => $row->get('Артикул WB (nmID)'),
+            'vendor_code' => $row->get('Артикул продавца (vendorCode)'),
+            'sku' => $row->get('Баркод (sku)'),
             'sales_percent' => $row->get('Комиссия, процент'),
             'min_price' => $row->get('Мин. цена'),
             'retail_markup_percent' => $row->get('Розничная наценка, процент'),
@@ -131,9 +131,9 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
     public function rules(): array
     {
         return [
-            'nmID' => ['nullable', 'integer'],
-            'vendorCode' => ['required'],
-            'sku' => ['nullable'],
+            'Артикул WB (nmID)' => ['nullable', 'integer'],
+            'Артикул продавца (vendorCode)' => ['required'],
+            'Баркод (sku)' => ['nullable'],
             'Комиссия, процент' => ['nullable', 'numeric', 'min:0'],
             'Мин. цена' => ['nullable', 'integer', 'min:0'],
             'Розничная наценка, процент' => ['nullable', 'numeric', 'min:0'],
@@ -146,8 +146,8 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
     public function customValidationMessages()
     {
         return [
-            'nmID.integer' => 'Поле должно быть целым числом',
-            'vendorCode.required' => 'Поле обязательно',
+            'Артикул WB (nmID).integer' => 'Поле должно быть целым числом',
+            'Артикул продавца (vendorCode).required' => 'Поле обязательно',
             'Комиссия, процент.numeric' => 'Поле должно быть числом',
             'Комиссия, процент.min' => 'Поле должно быть больше 0',
             'Мин. цена.integer' => 'Поле должно быть целым числом',
@@ -179,7 +179,7 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
 
             if ($failure->attribute() == 'Код') {
                 MarketItemRelationshipService::handleNotFoundItem(
-                    externalCode: $values->get('vendorCode'),
+                    externalCode: $values->get('Артикул продавца (vendorCode)'),
                     marketId: $this->market->id,
                     marketType: 'App\Models\WbMarket',
                     code: $values->get('Код')

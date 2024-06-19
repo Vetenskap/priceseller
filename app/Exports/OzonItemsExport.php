@@ -5,8 +5,11 @@ namespace App\Exports;
 use App\Models\OzonMarket;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class OzonItemsExport implements FromCollection, WithHeadings
+class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
 {
     public function __construct(public OzonMarket $market)
     {
@@ -50,7 +53,7 @@ class OzonItemsExport implements FromCollection, WithHeadings
     {
         return [
             'product_id',
-            'offer_id',
+            'Артикул ozon (offer_id)',
             'Код',
             'Мин. Цена, процент',
             'Мин. Цена',
@@ -70,5 +73,11 @@ class OzonItemsExport implements FromCollection, WithHeadings
             'Загружено',
             'Удалить'
         ];
+    }
+
+    public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
+    {
+        $sheet->getStyle('B1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
+        $sheet->getStyle('C1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
     }
 }

@@ -43,7 +43,7 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
         if (!$item) {
 
             MarketItemRelationshipService::handleNotFoundItem(
-                externalCode: $row->get('offer_id'),
+                externalCode: $row->get('Артикул ozon (offer_id)'),
                 marketId: $this->market->id,
                 marketType: 'App\Models\OzonMarket',
                 code: $row->get('Код')
@@ -55,13 +55,13 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
         }
 
         MarketItemRelationshipService::handleFoundItem(
-            externalCode: $row->get('offer_id'),
+            externalCode: $row->get('Артикул ozon (offer_id)'),
             code: $row->get('Код'),
             marketId: $this->market->id,
             marketType: 'App\Models\OzonMarket'
         );
 
-        if ($ozonItem = $this->market->items()->where('offer_id', $row->get('offer_id'))->first()) {
+        if ($ozonItem = $this->market->items()->where('offer_id', $row->get('Артикул ozon (offer_id)'))->first()) {
 
             if ($row->get('Удалить') === 'Да') {
 
@@ -74,7 +74,7 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
 
             $ozonItem->update([
                 'product_id' => $row->get('product_id'),
-                'offer_id' => $row->get('offer_id'),
+                'offer_id' => $row->get('Артикул ozon (offer_id)'),
                 'min_price_percent' => $row->get('Мин. Цена, процент'),
                 'min_price' => $row->get('Мин. Цена'),
                 'shipping_processing' => $row->get('Обработка отправления'),
@@ -105,7 +105,7 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
         return new OzonItem([
             'ozon_market_id' => $this->market->id,
             'product_id' => $row->get('product_id'),
-            'offer_id' => $row->get('offer_id'),
+            'offer_id' => $row->get('Артикул ozon (offer_id)'),
             'min_price_percent' => $row->get('Мин. Цена, процент'),
             'min_price' => $row->get('Мин. Цена'),
             'shipping_processing' => $row->get('Обработка отправления'),
@@ -128,7 +128,7 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
     {
         return [
             'product_id' => ['nullable'],
-            'offer_id' => ['required'],
+            'Артикул ozon (offer_id)' => ['required'],
             'Мин. Цена, процент' => ['nullable', 'integer', 'min:0'],
             'Мин. Цена' => ['nullable', 'integer', 'min:0'],
             'Обработка отправления' => ['nullable', 'numeric', 'min:0'],
@@ -142,7 +142,7 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
     public function customValidationMessages()
     {
         return [
-            'offer_id.required' => 'Поле обязательно',
+            'Артикул ozon (offer_id).required' => 'Поле обязательно',
             'Мин. Цена, процент.integer' => 'Поле должно быть целым числом',
             'Мин. Цена, процент.min' => 'Поле должно быть больше 0',
             'Мин. Цена.integer' => 'Поле должно быть целым числом',
@@ -186,7 +186,7 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
 
             if ($failure->attribute() == 'Код') {
                 MarketItemRelationshipService::handleNotFoundItem(
-                    externalCode: $values->get('offer_id'),
+                    externalCode: $values->get('Артикул ozon (offer_id)'),
                     marketId: $this->market->id,
                     marketType: 'App\Models\OzonMarket',
                     code: $values->get('Код')
