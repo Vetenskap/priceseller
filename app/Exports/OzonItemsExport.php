@@ -40,7 +40,8 @@ class OzonItemsExport implements FromCollection, WithHeadings
                 'item_price' => $item->item->price,
                 'multiplicity' => $item->item->multiplicity,
                 'updated_at' => $item->updated_at,
-                'created_at' => $item->created_at
+                'created_at' => $item->created_at,
+                'delete' => 'Нет'
             ];
         });
     }
@@ -66,7 +67,8 @@ class OzonItemsExport implements FromCollection, WithHeadings
             'Закупочная цена',
             'Кратность отгрузки',
             'Обновлено',
-            'Загружено'
+            'Загружено',
+            'Удалить'
         ];
     }
 }

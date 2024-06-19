@@ -6,6 +6,7 @@ use App\Exports\ItemsExport;
 use App\Imports\ItemsImport;
 use App\Models\User;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
 class ItemService
@@ -28,8 +29,17 @@ class ItemService
     {
         $import = new ItemsImport($this->user->id);
 
+        Log::debug('Импорт прямо сейчас..');
+
         \Excel::import($import, self::PATH . $uuid . '.' . $ext, 'public');
 
-        return collect(['correct' => $import->correct, 'error' => $import->error]);
+        Log::debug('Импорт завершён, возвращаем результат');
+
+        return collect([
+            'correct' => $import->correct,
+            'error' => $import->error,
+            'updated' => $import->updated,
+            'deleted' => $import->deleted,
+        ]);
     }
 }

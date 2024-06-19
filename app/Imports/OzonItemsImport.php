@@ -24,6 +24,8 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
 {
     public int $correct = 0;
     public int $error = 0;
+    public int $updated = 0;
+    public int $deleted = 0;
 
     public User $user;
 
@@ -59,9 +61,17 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
             marketType: 'App\Models\OzonMarket'
         );
 
-        $this->correct++;
-
         if ($ozonItem = $this->market->items()->where('offer_id', $row->get('offer_id'))->first()) {
+
+            if ($row->get('Удалить') === 'Да') {
+
+                $this->deleted++;
+                $ozonItem->delete();
+                return null;
+            }
+
+            $this->updated++;
+
             $ozonItem->update([
                 'product_id' => $row->get('product_id'),
                 'offer_id' => $row->get('offer_id'),
@@ -74,6 +84,23 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
             ]);
             return null;
         }
+
+        if ($row->get('Удалить') === 'Да') {
+
+            $this->error++;
+
+            ItemsImportReportService::addBadItem(
+                $this->market,
+                0,
+                'Удалить',
+                ['Не удалось создать товар, стоит метка "Удалить"'],
+                $row->all()
+            );
+
+            return null;
+        }
+
+        $this->correct++;
 
         return new OzonItem([
             'ozon_market_id' => $this->market->id,

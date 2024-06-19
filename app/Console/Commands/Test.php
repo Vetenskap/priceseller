@@ -21,6 +21,7 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Str;
+use Maatwebsite\Excel\ChunkReader;
 use Maatwebsite\Excel\Facades\Excel;
 
 class Test extends Command
@@ -44,7 +45,5 @@ class Test extends Command
      */
     public function handle()
     {
-
-        dd(User::first()->permissions);
     }
 }

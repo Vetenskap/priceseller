@@ -18,12 +18,12 @@ class ItemsExportReportService
         return $model->itemsExportReports()->where('status', 2)->first();
     }
 
-    public static function newOrFirst(OzonMarket|WbMarket|User $model): ItemsExportReport
+    public static function newOrFirst(OzonMarket|WbMarket|User $model)
     {
         if ($report = static::get($model)) {
             return $report;
         } else {
-            return $model->itemsExportReports()->create([
+            $model->itemsExportReports()->create([
                 'status' => 2,
                 'message' => 'В процессе'
             ]);

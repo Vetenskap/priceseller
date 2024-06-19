@@ -27,6 +27,8 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
 
     public int $correct = 0;
     public int $error = 0;
+    public int $updated = 0;
+    public int $deleted = 0;
 
     public User $user;
 
@@ -62,9 +64,16 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
             marketType: 'App\Models\WbMarket',
         );
 
-        $this->correct++;
-
         if ($wbItem = $this->market->items()->where('vendor_code', $row->get('vendorCode'))->first()) {
+
+            if ($row->get('Удалить') === 'Да') {
+
+                $this->deleted++;
+                $wbItem->delete();
+                return null;
+            }
+
+            $this->updated++;
 
             $wbItem->nm_id = $row->get('nmID');
             $wbItem->vendor_code = $row->get('vendorCode');
@@ -79,6 +88,23 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
 
             return null;
         }
+
+        if ($row->get('Удалить') === 'Да') {
+
+            $this->error++;
+
+            ItemsImportReportService::addBadItem(
+                $this->market,
+                0,
+                'Удалить',
+                ['Не удалось создать товар, стоит метка "Удалить"'],
+                $row->all()
+            );
+
+            return null;
+        }
+
+        $this->correct++;
 
         return new WbItem([
             'wb_market_id' => $this->market->id,
@@ -97,7 +123,7 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
 
     public function prepareForValidation($data, $index)
     {
-        if ($index % 1000 === 0) ItemsImportReportService::flush($this->market, $this->correct, $this->error);
+        if ($index % 1000 === 0) ItemsImportReportService::flush($this->market, $this->correct, $this->error, $this->updated, $this->deleted);
 
         return $data;
     }

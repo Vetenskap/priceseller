@@ -32,7 +32,12 @@ class WbMarketService
         $import = new WbItemsImport($this->market);
         \Excel::import($import, self::PATH . $uuid . '.' . $ext, 'public');
 
-        return collect(['correct' => $import->correct, 'error' => $import->error]);
+        return collect([
+            'correct' => $import->correct,
+            'error' => $import->error,
+            'updated' => $import->updated,
+            'deleted' => $import->deleted,
+        ]);
     }
 
     public function exportItems(): string
@@ -48,6 +53,7 @@ class WbMarketService
 
         $correct = 0;
         $error = 0;
+        $updated = 0;
 
         $client = new WbClient($this->market->api_key);
         $externalClient = new WbExternalClient();
@@ -68,7 +74,7 @@ class WbMarketService
             $nmId = $result->get('cursor')->get('nmID');
             $total = $result->get('cursor')->get('total');
 
-            $result->get('cards')->each(function (array $wbItem) use ($externalClient, $defaultFields, &$error, &$correct) {
+            $result->get('cards')->each(function (array $wbItem) use ($externalClient, $defaultFields, &$error, &$correct, &$updated) {
 
                 try {
                     $item = Item::where('code', $wbItem['vendorCode'])->where('user_id', $this->market->user_id)->firstOrFail();
@@ -95,9 +101,13 @@ class WbMarketService
 //                            fn() => $externalClient->getCardDetail($wbItem['nmID'])
 //                        );
 
-                $correct++;
-
                 MarketItemRelationshipService::handleFoundItem($wbItem['vendorCode'], $item->code, $this->market->id, 'App\Models\WbMarket');
+
+                if (WbItem::where('vendor_code', $wbItem['vendorCode'])->where('wb_market_id', $this->market->id)->exists()) {
+                    $updated++;
+                } else {
+                    $correct++;
+                }
 
                 $newWbItem = WbItem::updateOrCreate([
                     'vendor_code' => $wbItem['vendorCode'],
@@ -117,11 +127,11 @@ class WbMarketService
                 $newWbItem->save();
             });
 
-            ItemsImportReportService::flush($this->market, $correct, $error);
+            ItemsImportReportService::flush($this->market, $correct, $error, $updated);
 
         } while ($total === 100);
 
-        return collect(['error' => $error, 'correct' => $correct]);
+        return collect(['error' => $error, 'correct' => $correct, 'updated' => $updated]);
     }
 
     public function getWarehouses(): Collection

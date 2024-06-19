@@ -44,6 +44,7 @@ class MarketRelationshipsAndCommissions implements ShouldQueue
                     model: $this->model,
                     correct: $result->get('correct', 0),
                     error: $result->get('error', 0),
+                    updated: $result->get('updated', 0),
                 );
             }
         }

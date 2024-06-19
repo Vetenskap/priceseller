@@ -22,7 +22,9 @@ class Export implements ShouldQueue
      */
     public function __construct(public OzonMarket|WbMarket|User $model, public string $service)
     {
-        ItemsExportReportService::newOrFirst($this->model);
+        if (ItemsExportReportService::newOrFirst($this->model)) {
+            throw new \Exception("Уже идёт экспорт");
+        }
     }
 
     /**

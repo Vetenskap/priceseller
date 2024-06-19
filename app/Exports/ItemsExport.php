@@ -31,9 +31,10 @@ class ItemsExport implements FromCollection, WithHeadings
                 'price' => $item->price,
                 'count' => $item->count,
                 'multiplicity' => $item->multiplicity,
-                'updated' => $item->updated,
+                'updated' => $item->updated ? 'Да' : 'Нет',
                 'updated_at' => $item->updated_at,
-                'created_at' => $item->created_at
+                'created_at' => $item->created_at,
+                'delete' => 'Нет'
             ];
         });
     }
@@ -53,6 +54,7 @@ class ItemsExport implements FromCollection, WithHeadings
             'Был обновлён',
             'Обновлён',
             'Создан',
+            'Удалить'
         ];
     }
 }

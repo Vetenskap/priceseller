@@ -12,6 +12,8 @@ class ItemsImportReport extends Model
     protected $fillable = [
         'correct',
         'error',
+        'updated',
+        'deleted',
         'uuid',
         'message',
         'status',

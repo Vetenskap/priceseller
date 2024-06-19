@@ -3,13 +3,19 @@
         <x-table.table-layout>
             <x-table.table-header>
                 <x-table.table-child>
-                    <x-layouts.simple-text name="Создано/Обновлено"/>
+                    <x-layouts.simple-text name="Статус"/>
+                </x-table.table-child>
+                <x-table.table-child>
+                    <x-layouts.simple-text name="Создано"/>
                 </x-table.table-child>
                 <x-table.table-child>
                     <x-layouts.simple-text name="Не создано"/>
                 </x-table.table-child>
                 <x-table.table-child>
-                    <x-layouts.simple-text name="Статус"/>
+                    <x-layouts.simple-text name="Обновлено"/>
+                </x-table.table-child>
+                <x-table.table-child>
+                    <x-layouts.simple-text name="Удалено"/>
                 </x-table.table-child>
                 <x-table.table-child>
                     <x-layouts.simple-text name="Начало"/>
@@ -25,6 +31,11 @@
                 <x-table.table-item wire:key="{{$report->getKey()}}" :status="$report->status">
                     <x-table.table-child>
                         <a href="{{route('items-import-report-edit', ['report' => $report->id])}}">
+                            <x-layouts.simple-text :name="$report->message"/>
+                        </a>
+                    </x-table.table-child>
+                    <x-table.table-child>
+                        <a href="{{route('items-import-report-edit', ['report' => $report->id])}}">
                             <x-layouts.simple-text :name="$report->correct"/>
                         </a>
                     </x-table.table-child>
@@ -32,14 +43,17 @@
                         <x-layouts.simple-text :name="$report->error"/>
                     </x-table.table-child>
                     <x-table.table-child>
-                        <x-layouts.simple-text :name="$report->message"/>
+                        <x-layouts.simple-text :name="$report->updated"/>
+                    </x-table.table-child>
+                    <x-table.table-child>
+                        <x-layouts.simple-text :name="$report->deleted"/>
                     </x-table.table-child>
                     <x-table.table-child>
                         <x-layouts.simple-text :name="$report->created_at"/>
                     </x-table.table-child>
                     <x-table.table-child>
                         <x-layouts.simple-text
-                                :name="$report->status !== 2 ? $report->updated_at->diffForHumans() : ''"/>
+                            :name="$report->status !== 2 ? $report->updated_at->diffForHumans() : ''"/>
                     </x-table.table-child>
                     <x-table.table-child>
                         <x-danger-button wire:click="deleteImport({{$report}})">Удалить</x-danger-button>
