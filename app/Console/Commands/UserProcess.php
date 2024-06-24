@@ -30,7 +30,7 @@ class UserProcess extends Command
     {
         User::chunk(10, function (Collection $users) {
             $users->each(function (User $user) {
-                if ($user->isMainSub()) CheckEmails::dispatch($user->id);
+                CheckEmails::dispatch($user->id);
             });
         });
     }
