@@ -16,7 +16,7 @@ class UserOzonSubPermission
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && !$request->user()->isOzonFiveSub() && App::isProduction() && !$request->user()->isAdmin()) {
+        if ($request->user() && !$request->user()->isOzonSub() && App::isProduction() && !$request->user()->isAdmin()) {
             return redirect()->route('subscribe.ozon');
         }
 

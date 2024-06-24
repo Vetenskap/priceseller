@@ -16,7 +16,7 @@ class UserWbSubPermission
      */
     public function handle(Request $request, Closure $next): Response
     {
-        if ($request->user() && !$request->user()->isWbFiveSub() && App::isProduction() && !$request->user()->isAdmin()) {
+        if ($request->user() && !$request->user()->isWbSub() && App::isProduction() && !$request->user()->isAdmin()) {
             return redirect()->route('subscribe.wb');
         }
 
