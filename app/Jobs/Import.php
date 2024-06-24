@@ -11,11 +11,13 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 
 class Import implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $timeout = 60;
     /**
      * Create a new job instance.
      */
@@ -33,15 +35,20 @@ class Import implements ShouldQueue
     {
 
         if (class_exists($this->service)) {
+
             $service = new $this->service($this->model);
 
             if (method_exists($service, 'importItems')) {
+
                 $result = $service->importItems($this->uuid, $this->ext);
 
                 ItemsImportReportService::success(
                     model: $this->model,
                     correct: $result->get('correct', 0),
                     error: $result->get('error', 0),
+                    updated: $result->get('updated', 0),
+                    deleted: $result->get('deleted', 0),
+                    uuid: $this->uuid
                 );
             }
         }

@@ -15,9 +15,6 @@
                     <x-layouts.simple-text name="Обновлено"/>
                 </x-table.table-child>
                 <x-table.table-child>
-                    <x-layouts.simple-text name="Удалено"/>
-                </x-table.table-child>
-                <x-table.table-child>
                     <x-layouts.simple-text name="Начало"/>
                 </x-table.table-child>
                 <x-table.table-child>
@@ -44,9 +41,6 @@
                     </x-table.table-child>
                     <x-table.table-child>
                         <x-layouts.simple-text :name="$report->updated"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
-                        <x-layouts.simple-text :name="$report->deleted"/>
                     </x-table.table-child>
                     <x-table.table-child>
                         <x-layouts.simple-text :name="$report->created_at"/>

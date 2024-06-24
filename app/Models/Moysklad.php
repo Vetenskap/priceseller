@@ -16,8 +16,18 @@ class Moysklad extends Model
         'user_id',
     ];
 
+    public function itemsImportReports()
+    {
+        return $this->hasMany(ItemsMoyskladImportReport::class);
+    }
+
     public function warehouses(): HasMany
     {
         return $this->hasMany(MoyskladWarehouse::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }

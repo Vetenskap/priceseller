@@ -3,8 +3,8 @@
         <x-layouts.title :name="$name"/>
     </x-blocks.main-block>
     @if(!$warehouse->suppliers()->count())
-        <x-blocks.center-block class="w-full bg-yellow-200 p-6">
-            <x-layouts.simple-text name="Ни один поставщик не добавлен. Остатки не будут выгружаться"/>
+        <x-blocks.center-block class="w-full bg-yellow-200 p-6 dark:bg-yellow-400">
+            <x-layouts.simple-text class="dark:text-gray-900" name="Ни один поставщик не добавлен. Остатки не будут выгружаться"/>
         </x-blocks.center-block>
     @endif
     <x-layouts.actions>

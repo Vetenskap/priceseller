@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class ItemsImportReport extends Model
+class ItemsMoyskladImportReport extends Model
 {
     use HasFactory;
 
@@ -13,21 +13,14 @@ class ItemsImportReport extends Model
         'correct',
         'error',
         'updated',
-        'deleted',
-        'uuid',
         'message',
         'status',
-        'reportable_id',
-        'reportable_type',
+        'uuid',
+        'moysklad_id',
     ];
-
-    public function reportable()
-    {
-        return $this->morphTo();
-    }
 
     public function badItems()
     {
-        return $this->hasMany(TableBadItem::class);
+        return $this->hasMany(TableMoyskladBadItem::class);
     }
 }

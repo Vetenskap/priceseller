@@ -7,37 +7,113 @@
         <x-blocks.center-block>
             <x-secondary-button wire:click="export">Экспортировать</x-secondary-button>
         </x-blocks.center-block>
-        <livewire:items-export-report.items-export-report-index :model="auth()->user()" />
+        <livewire:items-export-report.items-export-report-index :model="auth()->user()"/>
     </x-layouts.main-container>
     <x-layouts.main-container>
-        <x-blocks.main-block>
-            <x-layouts.title name="Создайте новые товары или обновите старые"/>
-        </x-blocks.main-block>
-        <form wire:submit="import">
-            <div
-                    x-data="{ uploading: false, progress: 0 }"
-                    x-on:livewire-upload-start="uploading = true"
-                    x-on:livewire-upload-finish="uploading = false"
-                    x-on:livewire-upload-cancel="uploading = false"
-                    x-on:livewire-upload-error="uploading = false"
-                    x-on:livewire-upload-progress="progress = $event.detail.progress"
-            >
+        <div class="bg-white dark:bg-gray-700">
+            <nav class="flex flex-col sm:flex-row">
+                <x-links.tab-link name="Базовый" :active="$selectedTab === 'base'"
+                                  wire:click="$set('selectedTab', 'base')"/>
+                <x-links.tab-link name="Мой склад" :active="$selectedTab === 'moysklad'"
+                                  wire:click="$set('selectedTab', 'moysklad')"/>
+            </nav>
+        </div>
+        @switch($selectedTab)
+            @case('base')
                 <x-blocks.main-block>
-                    <x-file-input wire:model="file"/>
+                    <x-layouts.title name="Создайте новые товары или обновите старые"/>
                 </x-blocks.main-block>
+                <form wire:submit="import">
+                    <div
+                        x-data="{ uploading: false, progress: 0 }"
+                        x-on:livewire-upload-start="uploading = true"
+                        x-on:livewire-upload-finish="uploading = false"
+                        x-on:livewire-upload-cancel="uploading = false"
+                        x-on:livewire-upload-error="uploading = false"
+                        x-on:livewire-upload-progress="progress = $event.detail.progress"
+                    >
+                        <x-blocks.main-block>
+                            <x-file-input wire:model="file"/>
+                        </x-blocks.main-block>
 
-                <x-blocks.main-block x-show="uploading">
-                    <x-file-progress x-bind:style="{ width: progress + '%' }"/>
+                        <x-blocks.main-block x-show="uploading">
+                            <x-file-progress x-bind:style="{ width: progress + '%' }"/>
+                        </x-blocks.main-block>
+
+                        @if($file)
+                            <x-blocks.main-block class="text-center">
+                                <x-success-button>Загрузить</x-success-button>
+                            </x-blocks.main-block>
+                        @endif
+                    </div>
+                </form>
+                <livewire:items-import-report.items-import-report-index :model="auth()->user()"/>
+                @break
+            @case('moysklad')
+                <x-blocks.flex-block>
+                    <x-dropdown-select name="code"
+                                       field="selectedCode"
+                                       :options="$itemInfo">
+                        Код
+                    </x-dropdown-select>
+                    <x-dropdown-select name="name"
+                                       field="selectedName"
+                                       :options="$itemInfo">
+                        Наименование
+                    </x-dropdown-select>
+                    <x-dropdown-select name="article"
+                                       field="selectedArticle"
+                                       :options="$itemInfo">
+                        Артикул
+                    </x-dropdown-select>
+                    <x-dropdown-select name="multiplicity"
+                                       field="selectedMultiplicity"
+                                       :options="$itemInfo">
+                        Кратность отгрузки
+                    </x-dropdown-select>
+                    <x-dropdown-select name="brand"
+                                       field="selectedBrand"
+                                       :options="$itemInfo">
+                        Бренд
+                    </x-dropdown-select>
+                </x-blocks.flex-block>
+                <x-blocks.main-block>
+                    <x-layouts.title name="Выгрузить по апи"/>
                 </x-blocks.main-block>
+                <x-blocks.center-block>
+                    <x-primary-button wire:click="importApi">Выгрузить</x-primary-button>
+                </x-blocks.center-block>
+                <x-blocks.main-block>
+                    <x-layouts.title name="Выгрузить с файла"/>
+                </x-blocks.main-block>
+                <form wire:submit="import">
+                    <div
+                        x-data="{ uploading: false, progress: 0 }"
+                        x-on:livewire-upload-start="uploading = true"
+                        x-on:livewire-upload-finish="uploading = false"
+                        x-on:livewire-upload-cancel="uploading = false"
+                        x-on:livewire-upload-error="uploading = false"
+                        x-on:livewire-upload-progress="progress = $event.detail.progress"
+                    >
+                        <x-blocks.main-block>
+                            <x-file-input wire:model="file"/>
+                        </x-blocks.main-block>
 
-                @if($file)
-                    <x-blocks.main-block class="text-center">
-                        <x-success-button>Загрузить</x-success-button>
-                    </x-blocks.main-block>
-                @endif
-            </div>
-        </form>
-        <livewire:items-import-report.items-import-report-index :model="auth()->user()" />
+                        <x-blocks.main-block x-show="uploading">
+                            <x-file-progress x-bind:style="{ width: progress + '%' }"/>
+                        </x-blocks.main-block>
+
+                        @if($file)
+                            <x-blocks.main-block class="text-center">
+                                <x-success-button wire:click="import">Загрузить</x-success-button>
+                            </x-blocks.main-block>
+                        @endif
+                    </div>
+                </form>
+                <livewire:items-moysklad-import-report.items-moysklad-import-report-index
+                    :moysklad="auth()->user()->moysklad"/>
+                @break
+        @endswitch
     </x-layouts.main-container>
     <x-layouts.main-container>
         <x-blocks.main-block>

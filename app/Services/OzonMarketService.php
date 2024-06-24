@@ -29,7 +29,12 @@ class OzonMarketService
     {
         $import = new OzonItemsImport($this->market);
         \Excel::import($import, self::PATH . $uuid . '.' . $ext, 'public');
-        return collect(['correct' => $import->correct, 'error' => $import->error]);
+        return collect([
+            'correct' => $import->correct,
+            'error' => $import->error,
+            'updated' => $import->updated,
+            'deleted' => $import->deleted,
+        ]);
     }
 
     public function exportItems(): string
@@ -59,6 +64,7 @@ class OzonMarketService
 
         $correct = 0;
         $error = 0;
+        $updated = 0;
 
         $client = new OzonClient($this->market->api_key, $this->market->client_id);
 
@@ -72,7 +78,7 @@ class OzonMarketService
 
             $lastId = $result->get('last_id');
 
-            $result->get('items')->each(function (array $ozonItem) use ($defaultFields, &$correct, &$error) {
+            $result->get('items')->each(function (array $ozonItem) use ($defaultFields, &$correct, &$error, &$updated) {
 
                 $commissions = collect($ozonItem['commissions']);
                 $price = collect($ozonItem['price']);
@@ -93,9 +99,13 @@ class OzonMarketService
                     }
                 }
 
-                $correct++;
-
                 MarketItemRelationshipService::handleFoundItem($ozonItem['offer_id'], $item->code, $this->market->id, 'App\Models\OzonMarket');
+
+                if (OzonItem::where('offer_id', $ozonItem['offer_id'])->where('ozon_market_id', $this->market->id)->exists()) {
+                    $updated++;
+                } else {
+                    $correct++;
+                }
 
                 $newOzonItem = OzonItem::updateOrCreate([
                     'offer_id' => $ozonItem['offer_id'],
@@ -119,11 +129,15 @@ class OzonMarketService
                 $newOzonItem->save();
             });
 
-            ItemsImportReportService::flush($this->market, $correct, $error);
+            ItemsImportReportService::flush($this->market, $correct, $error, $updated);
 
         } while ($lastId);
 
-        return collect(['correct' => $correct, 'error' => $error]);
+        return collect([
+            'correct' => $correct,
+            'error' => $error,
+            'updated' => $updated,
+        ]);
 
     }
 

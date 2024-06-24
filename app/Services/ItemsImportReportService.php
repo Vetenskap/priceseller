@@ -10,6 +10,7 @@ use App\Models\User;
 use App\Models\WbMarket;
 use App\Services\Item\ItemService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ItemsImportReportService
@@ -32,13 +33,15 @@ class ItemsImportReportService
         }
     }
 
-    public static function flush(OzonMarket|WbMarket|User $model, int $correct, int $error): bool
+    public static function flush(OzonMarket|WbMarket|User $model, int $correct, int $error, int $updated, int $deleted = 0): bool
     {
         if ($report = static::get($model)) {
 
             $report->update([
                 'correct' => $correct,
                 'error' => $error,
+                'updated' => $updated,
+                'deleted' => $deleted,
             ]);
 
             try {
@@ -70,12 +73,16 @@ class ItemsImportReportService
         }
     }
 
-    public static function success(OzonMarket|WbMarket|User $model, int $correct, int $error, ?string $uuid = null): bool
+    public static function success(OzonMarket|WbMarket|User $model, int $correct, int $error, int $updated, int $deleted = 0, ?string $uuid = null): bool
     {
         if ($report = static::get($model)) {
 
+            Log::debug('Отчёт найден, обновляем');
+
             $report->correct = $correct;
             $report->error = $error;
+            $report->updated = $updated;
+            $report->deleted = $deleted;
             $report->status = 0;
             $report->message = 'Импорт завершен';
 
@@ -84,6 +91,8 @@ class ItemsImportReportService
             }
 
             $report->save();
+
+            Log::debug('Отправляем уведомление');
 
 
             try {

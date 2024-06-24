@@ -5,8 +5,11 @@ namespace App\Exports;
 use App\Models\WbMarket;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
 
-class WbItemsExport implements FromCollection, WithHeadings
+class WbItemsExport implements FromCollection, WithHeadings, WithStyles
 {
     public function __construct(public WbMarket $market)
     {
@@ -37,7 +40,8 @@ class WbItemsExport implements FromCollection, WithHeadings
                 'item_price' => $item->item->price,
                 'multiplicity' => $item->item->multiplicity,
                 'updated_at' => $item->updated_at,
-                'created_at' => $item->created_at
+                'created_at' => $item->created_at,
+                'delete' => 'Нет'
             ];
         });
     }
@@ -46,10 +50,10 @@ class WbItemsExport implements FromCollection, WithHeadings
     {
         // Укажите свои собственные названия колонок
         return [
-            'nmID',
-            'vendorCode',
+            'Артикул WB (nmID)',
+            'Артикул продавца (vendorCode)',
             'Код',
-            'sku',
+            'Баркод (sku)',
             'Комиссия, процент',
             'Мин. цена',
             'Розничная наценка, процент',
@@ -61,7 +65,14 @@ class WbItemsExport implements FromCollection, WithHeadings
             'Закупочная цена',
             'Кратность отгрузки',
             'Обновлено',
-            'Создано'
+            'Создано',
+            'Удалить'
         ];
+    }
+
+    public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
+    {
+        $sheet->getStyle('B1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
+        $sheet->getStyle('C1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
     }
 }

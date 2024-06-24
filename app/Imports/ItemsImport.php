@@ -5,9 +5,9 @@ namespace App\Imports;
 use App\Models\Item;
 use App\Models\User;
 use App\Services\ItemsImportReportService;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
-use Maatwebsite\Excel\Concerns\SkipsOnError;
 use Maatwebsite\Excel\Concerns\SkipsOnFailure;
 use Maatwebsite\Excel\Concerns\ToModel;
 use Maatwebsite\Excel\Concerns\WithBatchInserts;
@@ -20,6 +20,8 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
 {
     public int $correct = 0;
     public int $error = 0;
+    public int $updated = 0;
+    public int $deleted = 0;
     public User $user;
 
     public function __construct(int $userId)
@@ -39,6 +41,7 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         $supplier = $this->user->suppliers()->where('name', $row->get('Поставщик'))->first();
 
         if (!$supplier) {
+
             ItemsImportReportService::addBadItem(
                 $this->user,
                 0,
@@ -52,9 +55,19 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             return null;
         }
 
-        $this->correct++;
-
         if ($item = $this->user->items()->where('code', $row->get('Код'))->first()) {
+
+            if ($row->get('Удалить') === 'Да') {
+
+                $this->deleted++;
+
+                $item->delete();
+
+                return null;
+            }
+
+            $this->updated++;
+
             $item->update([
                 'ms_uuid' => $row->get('МС UUID'),
                 'name' => $row->get('Наименование'),
@@ -65,6 +78,23 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             ]);
             return null;
         }
+
+        if ($row->get('Удалить') === 'Да') {
+
+            $this->error++;
+
+            ItemsImportReportService::addBadItem(
+                $this->user,
+                0,
+                'Удалить',
+                ['Не удалось создать товар, стоит метка "Удалить"'],
+                $row->all()
+            );
+
+            return null;
+        }
+
+        $this->correct++;
 
         return new Item([
             'ms_uuid' => $row->get('МС UUID'),
@@ -81,7 +111,7 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
 
     public function prepareForValidation($data, $index)
     {
-        if ($index % 1000 === 0) ItemsImportReportService::flush($this->user, $this->correct, $this->error);
+        if ($index % 1000 === 0) ItemsImportReportService::flush($this->user, $this->correct, $this->error, $this->updated, $this->deleted);
 
         $data['Кратность отгрузки'] = preg_replace("/[^0-9]/", "", $data['Кратность отгрузки']);
 
