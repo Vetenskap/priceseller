@@ -70,6 +70,26 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         return $this->permissions()->where('value', 'avito_sub')->where('expires', '>', now())->exists();
     }
 
+    public function isOzonFiveSub(): bool
+    {
+        return $this->permissions()->where('value', 'ozon_five_markets')->where('expires', '>', now())->exists();
+    }
+
+    public function isWbFiveSub(): bool
+    {
+        return $this->permissions()->where('value', 'wb_five_markets')->where('expires', '>', now())->exists();
+    }
+
+    public function isOzonTenSub(): bool
+    {
+        return $this->permissions()->where('value', 'ozon_ten_markets')->where('expires', '>', now())->exists();
+    }
+
+    public function isWbTenSub(): bool
+    {
+        return $this->permissions()->where('value', 'wb_ten_markets')->where('expires', '>', now())->exists();
+    }
+
     public function isAdmin(): bool
     {
         return $this->permissions()->where('value', 'admin')->where('expires', '>', now())->exists();

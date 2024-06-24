@@ -8,13 +8,17 @@ use App\Imports\OzonItemsImport;
 use App\Models\Item;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
+use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Excel;
+use function Filament\authorize;
 
 class OzonMarketService
 {
@@ -147,5 +151,20 @@ class OzonMarketService
             $client = new OzonClient($this->market->api_key, $this->market->client_id);
             return $client->getWarehouses();
         });
+    }
+
+    public static function closeMarkets(User $user)
+    {
+        if (App::isLocal() || $user->isAdmin()) return;
+
+        $count = $user->ozonMarkets()->count();
+
+        if ($count > 5 && !$user->isOzonTenSub()) {
+            $user->ozonMarkets()->orderBy('created_at')->get()->skip(5)->each(function (OzonMarket $market) {
+                $market->close = true;
+                $market->open = false;
+                $market->save();
+            });
+        }
     }
 }

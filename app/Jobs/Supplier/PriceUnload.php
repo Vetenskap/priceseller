@@ -48,7 +48,7 @@ class PriceUnload implements ShouldQueue
         $supplier = $emailSupplier->supplier;
         $user = User::findOrFail($supplier->user_id);
 
-        foreach ($user->ozonMarkets()->where('open', true)->get() as $market) {
+        foreach ($user->ozonMarkets()->where('open', true)->where('close', false)->get() as $market) {
             $service = new OzonItemPriceService($supplier, $market);
             $service->updateStock();
             $service->updatePrice();
@@ -56,7 +56,7 @@ class PriceUnload implements ShouldQueue
             $service->unloadAllPrices();
         }
 
-        foreach ($user->wbMarkets()->where('open', true)->get() as $market) {
+        foreach ($user->wbMarkets()->where('open', true)->where('close', false)->get() as $market) {
             $service = new WbItemPriceService($supplier, $market);
             $service->updateStock();
             $service->updatePrice();

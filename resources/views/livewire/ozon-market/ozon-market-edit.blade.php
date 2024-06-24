@@ -34,7 +34,7 @@
         @switch($selectedTab)
             @case('main')
                 <x-blocks.flex-block-end>
-                    <x-inputs.switcher :checked="$form->open" wire:model="form.open"/>
+                    <x-inputs.switcher :disabled="$market->close" :checked="$form->open" wire:model="form.open"/>
                     <x-inputs.input-with-label name="name"
                                                type="text"
                                                field="form.name"

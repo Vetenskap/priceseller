@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\User;
 use App\Models\WbMarket;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\App;
 
 class WbMarketPolicy
 {
@@ -22,6 +23,14 @@ class WbMarketPolicy
 
     public function create(User $user): bool
     {
+        if (App::isLocal() || $user->isAdmin()) return true;
+
+        $count = $user->wbMarkets()->count();
+
+        if ($count >= 5 && !$user->isWbTenSub()) {
+            return false;
+        }
+
         return true;
     }
 

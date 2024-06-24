@@ -2,9 +2,12 @@
 
 namespace App\Policies;
 
+use App\Livewire\Components\Toast;
+use App\Livewire\Subscribe\OzonSub;
 use App\Models\OzonMarket;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\App;
 
 class OzonMarketPolicy
 {
@@ -22,6 +25,14 @@ class OzonMarketPolicy
 
     public function create(User $user): bool
     {
+        if (App::isLocal() || $user->isAdmin()) return true;
+
+        $count = $user->ozonMarkets()->count();
+
+        if ($count >= 5 && !$user->isOzonTenSub()) {
+            return false;
+        }
+
         return true;
     }
 

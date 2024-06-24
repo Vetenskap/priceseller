@@ -3,7 +3,7 @@
 use App\Livewire\ItemsImportReport\ItemsImportReportShow;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['user_main_sub', 'auth'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     Route::view('dashboard', 'dashboard')
         ->name('dashboard');
@@ -26,11 +26,15 @@ Route::middleware(['user_main_sub', 'auth'])->group(function () {
     Route::get('/items', \App\Livewire\Item\ItemIndex::class)->name('items');
     Route::get('/items/{item}', \App\Livewire\Item\ItemEdit::class)->name('item-edit')->whereUuid('item');
 
-    Route::get('/ozon', \App\Livewire\OzonMarket\OzonMarketIndex::class)->name('ozon');
-    Route::get('/ozon/{market}', \App\Livewire\OzonMarket\OzonMarketEdit::class)->name('ozon-market-edit')->whereUuid('market');
+    Route::middleware('user_ozon_sub')->group(function () {
+        Route::get('/ozon', \App\Livewire\OzonMarket\OzonMarketIndex::class)->name('ozon');
+        Route::get('/ozon/{market}', \App\Livewire\OzonMarket\OzonMarketEdit::class)->name('ozon-market-edit')->whereUuid('market');
+    });
 
-    Route::get('/wb', \App\Livewire\WbMarket\WbMarketIndex::class)->name('wb');
-    Route::get('/wb/{market}', \App\Livewire\WbMarket\WbMarketEdit::class)->name('wb-market-edit')->whereUuid('market');
+    Route::middleware('user_wb_sub')->group(function () {
+        Route::get('/wb', \App\Livewire\WbMarket\WbMarketIndex::class)->name('wb');
+        Route::get('/wb/{market}', \App\Livewire\WbMarket\WbMarketEdit::class)->name('wb-market-edit')->whereUuid('market');
+    });
 
     Route::get('/import/report/{report}', ItemsImportReportShow::class)->name('items-import-report-edit');
 });
@@ -40,6 +44,8 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/subscribe/main', \App\Livewire\Subscribe\MainSub::class)->name('subscribe.main');
     Route::get('/subscribe/ms', \App\Livewire\Subscribe\MsSub::class)->name('subscribe.ms');
     Route::get('/subscribe/avito', \App\Livewire\Subscribe\AvitoSub::class)->name('subscribe.avito');
+    Route::get('/subscribe/ozon', \App\Livewire\Subscribe\OzonSub::class)->name('subscribe.ozon');
+    Route::get('/subscribe/wb', \App\Livewire\Subscribe\WbSub::class)->name('subscribe.wb');
 
     Route::view('profile', 'profile')
         ->name('profile');

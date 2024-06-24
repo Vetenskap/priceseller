@@ -2,9 +2,11 @@
 
 namespace App\Livewire\OzonMarket;
 
+use App\Livewire\Components\Toast;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
 use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\OzonMarket;
+use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Component;
 
 class OzonMarketIndex extends Component
@@ -22,7 +24,13 @@ class OzonMarketIndex extends Component
 
     public function create()
     {
-        $this->authorize('create', OzonMarket::class);
+        try {
+            $this->authorize('create', OzonMarket::class);
+        } catch (AuthorizationException) {
+            $this->js((new Toast('Не разрешено', 'Ваша подписка не позволяет добавлять ещё кабинеты'))->warning());
+            $this->reset('showCreateForm');
+            return;
+        }
 
         $this->form->store();
 

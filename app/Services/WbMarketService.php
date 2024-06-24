@@ -7,12 +7,14 @@ use App\HttpClient\WbClient;
 use App\HttpClient\WbExternalClient;
 use App\Imports\WbItemsImport;
 use App\Models\Item;
+use App\Models\User;
 use App\Models\WbItem;
 use App\Models\WbMarket;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
@@ -159,5 +161,20 @@ class WbMarketService
 
         return $totalDeleted;
 
+    }
+
+    public static function closeMarkets(User $user)
+    {
+        if (App::isLocal() || $user->isAdmin()) return;
+
+        $count = $user->wbMarkets()->count();
+
+        if ($count > 5 && !$user->isWbTenSub()) {
+            $user->wbMarkets()->orderBy('created_at')->get()->skip(5)->each(function (WbMarket $market) {
+                $market->close = true;
+                $market->open = false;
+                $market->save();
+            });
+        }
     }
 }

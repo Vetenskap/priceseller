@@ -25,16 +25,20 @@ class DatabaseSeeder extends Seeder
     {
         $permissions = [
             [
-                'name' => 'Основная подписка',
-                'value' => 'main_sub',
+                'name' => 'Подписка ОЗОН до 5 кабинетов',
+                'value' => 'ozon_five_markets'
             ],
             [
-                'name' => 'Подписка на Мой Склад',
-                'value' => 'ms_sub',
+                'name' => 'Подписка ВБ до 5 кабинетов',
+                'value' => 'wb_five_markets'
             ],
             [
-                'name' => 'Подписка на Авито',
-                'value' => 'avito_sub',
+                'name' => 'Подписка ОЗОН до 10 кабинетов',
+                'value' => 'ozon_ten_markets'
+            ],
+            [
+                'name' => 'Подписка ВБ до 10 кабинетов',
+                'value' => 'wb_ten_markets'
             ],
             [
                 'name' => 'Админ',

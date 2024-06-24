@@ -70,6 +70,19 @@ class OzonMarketPostForm extends Form
 
     public function update()
     {
-        $this->market->update($this->except('market'));
+        $this->market->update($this->only([
+            'client_id',
+            'api_key',
+            'min_price_percent',
+            'max_price_percent',
+            'seller_price_percent',
+            'acquiring',
+            'last_mile',
+            'max_mile',
+            'open',
+            'max_count',
+            'min',
+            'max'
+        ]));
     }
 }

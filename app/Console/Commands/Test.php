@@ -14,6 +14,7 @@ use App\Models\WbMarket;
 use App\Models\WbWarehouse;
 use App\Services\EmailPriceItemService;
 use App\Services\EmailSupplierService;
+use App\Services\OzonMarketService;
 use App\Services\SupplierReportService;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,5 +46,9 @@ class Test extends Command
      */
     public function handle()
     {
+        $user = User::first();
+        $user->ozonMarkets()->orderBy('created_at')->get()->skip(5)->each(function (OzonMarket $market) {
+            dump($market->name);
+        });
     }
 }

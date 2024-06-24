@@ -2,9 +2,11 @@
 
 namespace App\Livewire\WbMarket;
 
+use App\Livewire\Components\Toast;
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
 use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\WbMarket;
+use Illuminate\Auth\Access\AuthorizationException;
 use Livewire\Component;
 
 class WbMarketIndex extends Component
@@ -22,7 +24,13 @@ class WbMarketIndex extends Component
 
     public function create()
     {
-        $this->authorize('create', WbMarket::class);
+        try {
+            $this->authorize('create', WbMarket::class);
+        } catch (AuthorizationException) {
+            $this->js((new Toast('Не разрешено', 'Ваша подписка не позволяет добавлять ещё кабинеты'))->warning());
+            $this->reset('showCreateForm');
+            return;
+        }
 
         $this->form->store();
 

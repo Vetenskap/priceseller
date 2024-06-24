@@ -47,7 +47,7 @@
                             </a>
                         </x-table.table-child>
                         <x-table.table-child>
-                            <x-inputs.switcher :checked="$market->open" wire:click="changeOpen({{$market}})"/>
+                            <x-inputs.switcher :disabled="$market->close" :checked="$market->open" wire:click="changeOpen({{$market}})"/>
                         </x-table.table-child>
                         <x-table.table-child>
                             <x-danger-button wire:click="destroy({{$market}})">Удалить</x-danger-button>
