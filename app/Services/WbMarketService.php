@@ -169,7 +169,13 @@ class WbMarketService
 
         $count = $user->wbMarkets()->count();
 
-        if ($count > 5 && !$user->isWbTenSub()) {
+        if ($count > 0 && !$user->isWbFiveSub() && !$user->isWbTenSub()) {
+            $user->wbMarkets()->orderBy('created_at')->get()->each(function (WbMarket $market) {
+                $market->close = true;
+                $market->open = false;
+                $market->save();
+            });
+        } else if ($count > 5 && !$user->isWbTenSub()) {
             $user->wbMarkets()->orderBy('created_at')->get()->skip(5)->each(function (WbMarket $market) {
                 $market->close = true;
                 $market->open = false;

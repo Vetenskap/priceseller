@@ -159,7 +159,13 @@ class OzonMarketService
 
         $count = $user->ozonMarkets()->count();
 
-        if ($count > 5 && !$user->isOzonTenSub()) {
+        if ($count > 0 && !$user->isOzonFiveSub() && !$user->isOzonTenSub()) {
+            $user->ozonMarkets()->orderBy('created_at')->get()->each(function (OzonMarket $market) {
+                $market->close = true;
+                $market->open = false;
+                $market->save();
+            });
+        } else if ($count > 5 && !$user->isOzonTenSub()) {
             $user->ozonMarkets()->orderBy('created_at')->get()->skip(5)->each(function (OzonMarket $market) {
                 $market->close = true;
                 $market->open = false;
