@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\HttpClient\MoyskladClient;
 use App\Imports\ItemsMsImport;
+use App\Jobs\Moysklad\ImportApiAssortmnet;
 use App\Models\Moysklad;
 use App\Models\MoyskladWarehouse;
 use App\Services\Item\ItemService;
@@ -101,74 +102,73 @@ class MoyskladService
         });
     }
 
-    public function importItemsApi(Collection $attributes): Collection
+    public function startImportItemsApi(Collection $attributes)
     {
-        $correct = 0;
-        $error = 0;
-        $updated = 0;
-
         $offset = 0;
         $limit = 1000;
 
-        do {
+        /** @var Collection $result */
+        $result = Cache::tags(['moysklad', 'assortment'])->remember($this->moysklad->id . $offset, now()->addHours(8), function () use ($offset, $limit) {
+            return $this->moyskladClient->getAssortment($offset, $limit);
+        });
 
-            /** @var Collection $result */
-            $result = Cache::tags(['moysklad', 'assortment'])->remember($this->moysklad->id . $offset, now()->addHours(8), function () use ($offset, $limit) {
-                return $this->moyskladClient->getAssortment($offset, $limit);
-            });
+        $meta = collect($result->get('meta'));
 
-            $meta = collect($result->get('meta'));
+        for ($i = 0; $i < intval($meta->get('size') / $meta->get('limit') + 1); $i++) {
+            ImportApiAssortmnet::dispatch($this->moysklad, $attributes, $i * $meta->get('limit'), $meta->get('limit'));
+        }
+    }
 
-            $rows = collect($result->get('rows'));
+    public function importItemsApi(Collection $attributes, int $offset, int $limit)
+    {
+        /** @var Collection $result */
+        $result = Cache::tags(['moysklad', 'assortment'])->remember($this->moysklad->id . $offset, now()->addHours(8), function () use ($offset, $limit) {
+            return $this->moyskladClient->getAssortment($offset, $limit);
+        });
 
-            $rows->each(function (array $row) use ($attributes, &$correct, &$error, &$updated) {
+        $rows = collect($result->get('rows'));
 
-                $row = collect($row);
+        $rows->each(function (array $row) use ($attributes) {
 
-                $extraFields = collect($row->get('attributes'));
+            $row = collect($row);
 
-                $uuid = $row->get('id');
-                $code = $row->get($attributes->get('code')) ?? collect($extraFields->firstWhere('id', $attributes->get('code')))?->get('value');
-                $name = $row->get($attributes->get('name')) ?? collect($extraFields->firstWhere('id', $attributes->get('name')))?->get('value');
-                $article = $row->get($attributes->get('article')) ?? collect($extraFields->firstWhere('id', $attributes->get('article')))?->get('value');
-                $multiplicity = $row->get($attributes->get('multiplicity')) ?? collect($extraFields->firstWhere('id', $attributes->get('multiplicity')))?->get('value');
-                $brand = $row->get($attributes->get('brand')) ?? collect($extraFields->firstWhere('id', $attributes->get('brand')))?->get('value');
-                $supplier_id = $row->get('supplier') ? str_replace('https://api.moysklad.ru/api/remap/1.2/entity/counterparty/', '', $row->get('supplier')['meta']['href']) : null;
+            $extraFields = collect($row->get('attributes'));
 
-                $response = ItemService::store([
-                    'ms_uuid' => $uuid,
-                    'code' => $code,
-                    'name' => $name,
-                    'article' => $article,
-                    'multiplicity' => $multiplicity,
-                    'brand' => $brand,
-                    'supplier_id' => $supplier_id
-                ], $this->moysklad->user_id);
+            $uuid = $row->get('id');
+            $code = $row->get($attributes->get('code')) ?? collect($extraFields->firstWhere('id', $attributes->get('code')))?->get('value');
+            $name = $row->get($attributes->get('name')) ?? collect($extraFields->firstWhere('id', $attributes->get('name')))?->get('value');
+            $article = $row->get($attributes->get('article')) ?? collect($extraFields->firstWhere('id', $attributes->get('article')))?->get('value');
+            $multiplicity = $row->get($attributes->get('multiplicity')) ?? collect($extraFields->firstWhere('id', $attributes->get('multiplicity')))?->get('value');
+            $brand = $row->get($attributes->get('brand')) ?? collect($extraFields->firstWhere('id', $attributes->get('brand')))?->get('value');
+            $supplier_id = $row->get('supplier') ? str_replace('https://api.moysklad.ru/api/remap/1.2/entity/counterparty/', '', $row->get('supplier')['meta']['href']) : null;
 
-                if ($response['status'] === 'success') $correct++;
-                else if ($response['status'] === 'updated') $updated++;
-                else {
+            $response = ItemService::store([
+                'ms_uuid' => $uuid,
+                'code' => $code,
+                'name' => $name,
+                'article' => $article,
+                'multiplicity' => $multiplicity,
+                'brand' => $brand,
+                'supplier_id' => $supplier_id
+            ], $this->moysklad->user_id);
 
-                    $error++;
-
-                    foreach ($response['errors'] as $attribute => $message) {
-                        ItemsMoyskladImportReportService::addBadItem(
-                            $this->moysklad,
-                            0,
-                            $attribute,
-                            $message,
-                            $row->all()
-                        );
-                    }
-                }
-            });
-
-            ItemsMoyskladImportReportService::flush($this->moysklad, $correct, $error, $updated);
-
-            $offset += $limit;
-        } while ($rows->isNotEmpty());
-
-        return collect(['correct' => $correct, 'error' => $error, 'updated' => $updated]);
+//            if ($response['status'] === 'success') $correct++;
+//            else if ($response['status'] === 'updated') $updated++;
+//            else {
+//
+//                $error++;
+//
+//                foreach ($response['errors'] as $attribute => $message) {
+//                    ItemsMoyskladImportReportService::addBadItem(
+//                        $this->moysklad,
+//                        0,
+//                        $attribute,
+//                        $message,
+//                        $row->all()
+//                    );
+//                }
+//            }
+        });
     }
 
     public function importItemsExcel(string $uuid, string $ext, Collection $attributes)

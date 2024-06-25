@@ -33,14 +33,14 @@ class ApiAssortment implements ShouldQueue
     {
         $service = new MoyskladService($this->moysklad);
         $service->setClient();
-        $result = $service->importItemsApi($this->attributes);
+        $service->startImportItemsApi($this->attributes);
 
-        ItemsMoyskladImportReportService::success(
-            moysklad: $this->moysklad,
-            correct: $result->get('correct', 0),
-            error: $result->get('error', 0),
-            updated: $result->get('updated', 0),
-        );
+//        ItemsMoyskladImportReportService::success(
+//            moysklad: $this->moysklad,
+//            correct: $result->get('correct', 0),
+//            error: $result->get('error', 0),
+//            updated: $result->get('updated', 0),
+//        );
     }
 
     public function failed()

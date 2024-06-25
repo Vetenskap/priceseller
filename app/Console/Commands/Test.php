@@ -6,6 +6,7 @@ use App\Events\NotificationEvent;
 use App\Events\TestBroadcast;
 use App\Models\EmailSupplier;
 use App\Models\Item;
+use App\Models\Moysklad;
 use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
@@ -14,6 +15,7 @@ use App\Models\WbMarket;
 use App\Models\WbWarehouse;
 use App\Services\EmailPriceItemService;
 use App\Services\EmailSupplierService;
+use App\Services\MoyskladService;
 use App\Services\SupplierReportService;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -45,10 +47,8 @@ class Test extends Command
      */
     public function handle()
     {
-        $validator = Validator::make(['test' => []], ['test' => 'string'], ['test.string' => 'Поле должно быть строкой']);
-        foreach ($validator->errors()->messages() as $key => $error) {
-            dump($key);
-            dd($error);
-        }
+        $client = new MoyskladService(Moysklad::first());
+        $client->setClient();
+        $client->importItemsApi(collect());
     }
 }
