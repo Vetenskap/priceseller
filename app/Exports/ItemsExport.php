@@ -3,7 +3,10 @@
 namespace App\Exports;
 
 use App\Models\Item;
+use App\Models\User;
+use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -13,14 +16,17 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class ItemsExport implements FromCollection, WithHeadings, WithStyles
 {
+    public Collection $warehouses;
+
     public function __construct(public int $userId)
     {
+        $this->warehouses = User::findOrFail($this->userId)->warehouses;
     }
 
 
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
         $items = Item::where('user_id', $this->userId)->when(App::isLocal(), function (Builder $query) {
@@ -28,7 +34,7 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
         })->get()->sortByDesc('updated_at');
 
         return $items->map(function (Item $item) {
-            return [
+            $main = [
                 'ms_uuid' => $item->ms_uuid,
                 'code' => $item->code,
                 'name' => $item->name,
@@ -43,12 +49,18 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
                 'created_at' => $item->created_at,
                 'delete' => 'Нет'
             ];
+
+            $main = array_merge($main, $this->warehouses->map(fn(Warehouse $warehouse) => ['Склад ' . $warehouse->name => $item->warehousesStocks()->where('warehouse_id', $warehouse->id)->first()?->stock])
+                ->collapse()
+                ->all());
+
+            return $main;
         });
     }
 
     public function headings(): array
     {
-        return [
+        $main = [
             'МС UUID',
             'Код',
             'Наименование',
@@ -63,6 +75,8 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
             'Создан',
             'Удалить'
         ];
+
+        return array_merge($main, $this->warehouses->map(fn(Warehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
     }
 
     public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)

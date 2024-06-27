@@ -15,23 +15,8 @@
         <x-danger-button wire:click="destroy">Удалить</x-danger-button>
     </x-layouts.actions>
     <x-layouts.main-container>
-        <div class="bg-white dark:bg-gray-700">
-            <nav class="flex flex-col sm:flex-row">
-                <x-links.tab-link name="Основное" :active="$selectedTab === 'main'"
-                                  wire:click="$set('selectedTab', 'main')"/>
-                <x-links.tab-link name="Цены" :active="$selectedTab === 'prices'"
-                                  wire:click="$set('selectedTab', 'prices')"/>
-                <x-links.tab-link name="Остатки и склады" :active="$selectedTab === 'stocks_warehouses'"
-                                  wire:click="$set('selectedTab', 'stocks_warehouses')"/>
-                <x-links.tab-link name="Связи и комиссии" :active="$selectedTab === 'relationships_commissions'"
-                                  wire:click="$set('selectedTab', 'relationships_commissions')"/>
-                <x-links.tab-link name="Экспорт" :active="$selectedTab === 'export'"
-                                  wire:click="$set('selectedTab', 'export')"/>
-                <x-links.tab-link name="Действия" :active="$selectedTab === 'actions'"
-                                  wire:click="$set('selectedTab', 'actions')"/>
-            </nav>
-        </div>
-        @switch($selectedTab)
+        <x-marketPages.index route="ozon-market-edit" :market="$market" :page="$page" />
+        @switch($page)
             @case('main')
                 <x-blocks.flex-block-end>
                     <x-inputs.switcher :disabled="$market->close" :checked="$form->open" wire:model="form.open"/>
@@ -50,6 +35,13 @@
                                                field="form.api_key"
                     >АПИ ключ
                     </x-inputs.input-with-label>
+                </x-blocks.flex-block-end>
+                <x-blocks.flex-block-end>
+                    <x-dropdown-select name="supplier"
+                                       field="form.organization_id"
+                                       :options="auth()->user()->organizations">
+                        Организация
+                    </x-dropdown-select>
                 </x-blocks.flex-block-end>
                 @break
             @case('prices')
@@ -96,79 +88,14 @@
                 </x-blocks.flex-block>
                 @break
             @case('stocks_warehouses')
-                <x-blocks.main-block>
-                    <x-layouts.title name="Остатки"/>
-                </x-blocks.main-block>
-                @if(!$market->warehouses()->count())
-                    <x-blocks.center-block class="w-full bg-yellow-200 p-6 dark:bg-yellow-400">
-                        <x-layouts.simple-text class="dark:text-gray-900" name="Ни один склад не добавлен. Остатки не будут выгружаться"/>
-                    </x-blocks.center-block>
-                @endif
-                <x-blocks.flex-block>
-                    <x-inputs.input-with-label name="max_count"
-                                               type="number"
-                                               field="form.max_count"
-                    >Максимальный остаток
-                    </x-inputs.input-with-label>
-                </x-blocks.flex-block>
-                <x-blocks.main-block>
-                    <x-layouts.simple-text name="Ставить остаток 1 если"/>
-                </x-blocks.main-block>
-                <x-blocks.flex-block>
-                    <x-inputs.input-with-label name="min"
-                                               type="number"
-                                               field="form.min"
-                    >Остаток от
-                    </x-inputs.input-with-label>
-                    <x-inputs.input-with-label name="max"
-                                               type="number"
-                                               field="form.max"
-                    >Остаток до
-                    </x-inputs.input-with-label>
-                </x-blocks.flex-block>
-                <livewire:ozon-warehouse.ozon-warehouse-index :market="$market" :api-warehouses="$apiWarehouses" />
+                <x-marketPages.stocks-warehouses :market="$market" :api-warehouses="$apiWarehouses" />
+                <livewire:ozon-warehouse.ozon-warehouse-index :market="$market" :api-warehouses="$apiWarehouses"/>
                 @break
             @case('export')
-                <x-blocks.main-block>
-                    <x-layouts.title name="Экспорт"/>
-                </x-blocks.main-block>
-                <x-blocks.center-block>
-                    <x-secondary-button wire:click="export">Экспортировать</x-secondary-button>
-                </x-blocks.center-block>
-                <livewire:items-export-report.items-export-report-index :model="$market"/>
+                <x-marketPages.export :market="$market" />
                 @break
             @case('relationships_commissions')
-                <x-blocks.main-block>
-                    <x-layouts.title name="Создание/Обновление связей и комиссий"/>
-                </x-blocks.main-block>
-                <form wire:submit="import">
-                    <div
-                        x-data="{ uploading: false, progress: 0 }"
-                        x-on:livewire-upload-start="uploading = true"
-                        x-on:livewire-upload-finish="uploading = false"
-                        x-on:livewire-upload-cancel="uploading = false"
-                        x-on:livewire-upload-error="uploading = false"
-                        x-on:livewire-upload-progress="progress = $event.detail.progress"
-                    >
-                        <x-blocks.main-block>
-                            <x-file-input wire:model="file" wire:loading.attr="disabled" wire:target="saveFile"/>
-                        </x-blocks.main-block>
-
-                        <x-blocks.main-block x-show="uploading">
-                            <x-file-progress x-bind:style="{ width: progress + '%' }"/>
-                        </x-blocks.main-block>
-
-                        @if($file)
-                            <x-blocks.main-block class="text-center" wire:loading.remove>
-                                <x-success-button>Загрузить</x-success-button>
-                            </x-blocks.main-block>
-                        @endif
-                    </div>
-
-                </form>
-                <x-layouts.title name="Комиссии"/>
-                <x-titles.sub-title name="Комиссии по умолчанию"/>
-                <x-blocks.flex-block>
+                <x-marketPages.relationships-commissions :market="$market" :items="$items" :status-filters="$statusFilters">
                     <x-inputs.input-with-label name="min_price_percent"
                                                type="number"
                                                field="min_price_percent"
@@ -186,83 +113,13 @@
                                                field="shipping_processing"
                     >Обработка отправления
                     </x-inputs.input-with-label>
-                </x-blocks.flex-block>
-                <x-blocks.main-block>
-                    <x-secondary-button wire:click="relationshipsAndCommissions">Загрузить связи и комиссии
-                    </x-secondary-button>
-                </x-blocks.main-block>
-                <x-blocks.main-block>
-                    <x-danger-button wire:click="clearRelationships">Очистить связи</x-danger-button>
-                </x-blocks.main-block>
-                <livewire:items-import-report.items-import-report-index :model="$market"/>
+                </x-marketPages.relationships-commissions>
                 @break
             @case('actions')
-                <x-blocks.flex-block>
-                    <x-secondary-button wire:click="testPrice">Пересчитать цены</x-secondary-button>
-                    <x-secondary-button wire:click="nullStocks">Занулить кабинет</x-secondary-button>
-                </x-blocks.flex-block>
+                <x-marketPages.actions />
                 @break
         @endswitch
     </x-layouts.main-container>
-    @if($selectedTab === 'relationships_commissions')
-        <x-layouts.main-container>
-            <x-blocks.main-block>
-                <x-layouts.title name="Все связи"/>
-            </x-blocks.main-block>
-            <x-titles.sub-title name="Фильтры"/>
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="external_code"
-                                           type="text"
-                                           field="filters.external_code"
-                >Внешний код
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="code"
-                                           type="text"
-                                           field="filters.code"
-                >Ваш код
-                </x-inputs.input-with-label>
-            </x-blocks.flex-block>
-            @if($items->count() > 0)
-                <x-table.table-layout>
-                    <x-table.table-header>
-                        <x-table.table-child>
-                            <x-layouts.simple-text name="Внешний код"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-layouts.simple-text name="Ваш код"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-layouts.simple-text name="Статус"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-layouts.simple-text name="Последнее изменение"/>
-                        </x-table.table-child>
-                    </x-table.table-header>
-                    @foreach($items as $item)
-                        <x-table.table-item wire:key="{{$item->getKey()}}">
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$item->external_code"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$item->code"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$item->message"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$item->updated_at->diffForHumans()"/>
-                            </x-table.table-child>
-                        </x-table.table-item>
-                    @endforeach
-                </x-table.table-layout>
-            @else
-                <x-titles.sub-title name="Нет связей"/>
-            @endif
-            <x-blocks.main-block>
-                {{ $items->links() }}
-            </x-blocks.main-block>
-        </x-layouts.main-container>
-    @endif
     <div wire:loading
          wire:target="import, relationshipsAndCommissions, clearRelationships, getWarehouses, testPrice, nullStocks">
         <x-loader/>

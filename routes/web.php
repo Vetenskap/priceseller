@@ -1,12 +1,20 @@
 <?php
 
 use App\Livewire\ItemsImportReport\ItemsImportReportShow;
+use App\Livewire\Warehouse\WarehouseEdit;
 use Illuminate\Support\Facades\Route;
 
 Route::middleware(['auth'])->group(function () {
 
+    Route::get('/organizations', \App\Livewire\Organization\OrganizationIndex::class)->name('organizations.index');
+
+    Route::get('/warehouses', \App\Livewire\Warehouse\WarehouseIndex::class)->name('warehouses.index');
+    Route::get('/warehouses/{warehouse}', WarehouseEdit::class)->name('warehouses.edit')->whereUuid('warehouse');
+
     Route::view('dashboard', 'dashboard')
         ->name('dashboard');
+
+    Route::get('/orders', \App\Livewire\Order::class)->name('orders.index');
 
     Route::get('/emails', \App\Livewire\Email\EmailIndex::class)->name('emails');
     Route::get('/emails/{email}', \App\Livewire\Email\EmailShow::class)->name('email-show')->whereUuid('email');

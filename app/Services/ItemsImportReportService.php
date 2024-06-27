@@ -7,6 +7,7 @@ use App\Events\NotificationEvent;
 use App\Models\ItemsImportReport;
 use App\Models\OzonMarket;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Models\WbMarket;
 use App\Services\Item\ItemService;
 use Illuminate\Support\Collection;
@@ -15,12 +16,12 @@ use Illuminate\Support\Facades\Storage;
 
 class ItemsImportReportService
 {
-    public static function get(OzonMarket|WbMarket|User $model): ?ItemsImportReport
+    public static function get(OzonMarket|WbMarket|User|Warehouse $model): ?ItemsImportReport
     {
         return $model->itemsImportReports()->where('status', 2)->first();
     }
 
-    public static function new(OzonMarket|WbMarket|User $model, string $uuid): ?ItemsImportReport
+    public static function new(OzonMarket|WbMarket|User|Warehouse $model, string $uuid): ?ItemsImportReport
     {
         if (static::get($model)) {
             return null;
@@ -33,7 +34,7 @@ class ItemsImportReportService
         }
     }
 
-    public static function flush(OzonMarket|WbMarket|User $model, int $correct, int $error, int $updated, int $deleted = 0): bool
+    public static function flush(OzonMarket|WbMarket|User|Warehouse $model, int $correct, int $error, int $updated, int $deleted = 0): bool
     {
         if ($report = static::get($model)) {
 
@@ -56,7 +57,7 @@ class ItemsImportReportService
         }
     }
 
-    public static function addBadItem(OzonMarket|WbMarket|User $model, int $row, string $attribute, array $errors, array $values): bool
+    public static function addBadItem(OzonMarket|WbMarket|User|Warehouse $model, int $row, string $attribute, array $errors, array $values): bool
     {
         if ($report = static::get($model)) {
 
@@ -73,7 +74,7 @@ class ItemsImportReportService
         }
     }
 
-    public static function success(OzonMarket|WbMarket|User $model, int $correct, int $error, int $updated, int $deleted = 0, ?string $uuid = null): bool
+    public static function success(OzonMarket|WbMarket|User|Warehouse $model, int $correct, int $error, int $updated, int $deleted = 0, ?string $uuid = null): bool
     {
         if ($report = static::get($model)) {
 
@@ -107,7 +108,7 @@ class ItemsImportReportService
         }
     }
 
-    public static function error(OzonMarket|WbMarket|User $model): bool
+    public static function error(OzonMarket|WbMarket|User|Warehouse $model): bool
     {
         if ($report = static::get($model)) {
             $report->update([
@@ -163,6 +164,8 @@ class ItemsImportReportService
                     Storage::delete(WbMarketService::PATH . "{$report->uuid}.xlsx");
                 } else if ($report->reportable instanceof User) {
                     Storage::delete(ItemService::PATH . "{$report->uuid}.xlsx");
+                } else if ($report->reportable instanceof Warehouse) {
+                    Storage::delete(WarehouseService::PATH . "{$report->uuid}.xlsx");
                 }
 
                 $report->delete();

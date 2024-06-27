@@ -169,4 +169,9 @@ class WbClient
 
         }
     }
+
+    public function getNewOrders()
+    {
+        return $this->request->get('/api/v3/orders/new')->throw()->collect('orders');
+    }
 }

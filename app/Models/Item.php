@@ -44,4 +44,9 @@ class Item extends Model
     {
         return $this->hasOne(EmailPriceItem::class);
     }
+
+    public function warehousesStocks()
+    {
+        return $this->hasMany(ItemWarehouseStock::class);
+    }
 }

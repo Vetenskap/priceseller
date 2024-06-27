@@ -37,4 +37,14 @@ class OzonItem extends Model
     {
         return $this->belongsTo(Item::class);
     }
+
+    public function orders()
+    {
+        return $this->morphMany(Order::class, 'orderable');
+    }
+
+    public function market()
+    {
+        return $this->belongsTo(OzonMarket::class);
+    }
 }

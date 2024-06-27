@@ -4,6 +4,7 @@ namespace App\Jobs;
 
 use App\Models\OzonMarket;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Models\WbMarket;
 use App\Services\ItemsImportReportService;
 use Illuminate\Bus\Queueable;
@@ -21,7 +22,7 @@ class Import implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public string $uuid, public string $ext, public OzonMarket|WbMarket|User $model, public string $service)
+    public function __construct(public string $uuid, public string $ext, public OzonMarket|WbMarket|User|Warehouse $model, public string $service)
     {
         if (!ItemsImportReportService::new($this->model, $this->uuid)) {
             throw new \Exception("Уже идёт импорт");

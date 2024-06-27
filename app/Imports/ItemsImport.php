@@ -4,7 +4,9 @@ namespace App\Imports;
 
 use App\Models\Item;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Services\ItemsImportReportService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
@@ -23,10 +25,12 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     public int $updated = 0;
     public int $deleted = 0;
     public User $user;
+    public Collection $warehouses;
 
     public function __construct(int $userId)
     {
         $this->user = User::find($userId);
+        $this->warehouses = $this->user->warehouses;
     }
 
     /**
@@ -76,6 +80,18 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
                 'brand' => $row->get('Бренд'),
                 'multiplicity' => $row->get('Кратность отгрузки'),
             ]);
+
+            $this->warehouses->each(function (Warehouse $warehouse) use ($row, $item) {
+                $stock = $row->get('Склад ' . $warehouse->name, 0);
+                $item->warehousesStocks()->updateOrCreate([
+                    'warehouse_id' => $warehouse->id,
+                    'item_id' => $item->id,
+                ], [
+                    'warehouse_id' => $warehouse->id,
+                    'stock' => $stock ?: 0,
+                ]);
+            });
+
             return null;
         }
 

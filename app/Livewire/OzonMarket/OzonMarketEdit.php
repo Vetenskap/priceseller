@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -36,8 +37,8 @@ class OzonMarketEdit extends Component
 
     public int $selectedWarehouse;
 
-    #[Session('OzonMarketEdit.{market.id}')]
-    public $selectedTab = 'main';
+    #[Url]
+    public $page = 'main';
 
     /** @var TemporaryUploadedFile $file */
     public $file;
@@ -50,6 +51,17 @@ class OzonMarketEdit extends Component
 
     #[Session('OzonMarketEdit.shipping_processing.{market.id}')]
     public $shipping_processing = null;
+
+    public array $statusFilters = [
+        [
+            'status' => 1,
+            'name' => 'Связь не создана'
+        ],
+        [
+            'status' => 0,
+            'name' => 'Связь создана'
+        ],
+    ];
 
     public function export(): void
     {
@@ -102,7 +114,7 @@ class OzonMarketEdit extends Component
     {
         $this->form->setMarket($this->market);
 
-        $this->getWarehouses();
+        if ($this->page === 'stocks_warehouses') $this->getWarehouses();
 
     }
 

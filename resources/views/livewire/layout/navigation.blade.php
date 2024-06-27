@@ -33,12 +33,12 @@ new class extends Component
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate.hover>
                         {{ __('Главная') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('moysklad')" :active="request()->routeIs('moysklad')" wire:navigate.hover>
-                        {{ __('Мой склад') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('avito')" :active="request()->routeIs('avito')" wire:navigate.hover>
-                        {{ __('Авито') }}
-                    </x-nav-link>
+{{--                    <x-nav-link :href="route('moysklad')" :active="request()->routeIs('moysklad')" wire:navigate.hover>--}}
+{{--                        {{ __('Мой склад') }}--}}
+{{--                    </x-nav-link>--}}
+{{--                    <x-nav-link :href="route('avito')" :active="request()->routeIs('avito')" wire:navigate.hover>--}}
+{{--                        {{ __('Авито') }}--}}
+{{--                    </x-nav-link>--}}
                     <x-nav-link :href="route('emails')" :active="request()->routeIs('emails', 'email-show')" wire:navigate.hover>
                         {{ __('Почта') }}
                     </x-nav-link>
@@ -53,6 +53,15 @@ new class extends Component
                     </x-nav-link>
                     <x-nav-link :href="route('wb')" :active="request()->routeIs('wb', 'wb-market-edit')" wire:navigate.hover>
                         {{ __('ВБ') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('organizations.index')" :active="request()->routeIs('organizations.index')" wire:navigate.hover>
+                        {{ __('Организации') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('warehouses.index')" :active="request()->routeIs('warehouses.index', 'warehouses.edit')" wire:navigate.hover>
+                        {{ __('Склады') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')" wire:navigate.hover>
+                        {{ __('Заказы') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -112,12 +121,12 @@ new class extends Component
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Главная') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('moysklad')" :active="request()->routeIs('moysklad')" wire:navigate.hover>
-                {{ __('Мой склад') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('avito')" :active="request()->routeIs('avito')" wire:navigate.hover>
-                {{ __('Авито') }}
-            </x-responsive-nav-link>
+{{--            <x-responsive-nav-link :href="route('moysklad')" :active="request()->routeIs('moysklad')" wire:navigate.hover>--}}
+{{--                {{ __('Мой склад') }}--}}
+{{--            </x-responsive-nav-link>--}}
+{{--            <x-responsive-nav-link :href="route('avito')" :active="request()->routeIs('avito')" wire:navigate.hover>--}}
+{{--                {{ __('Авито') }}--}}
+{{--            </x-responsive-nav-link>--}}
             <x-responsive-nav-link :href="route('emails')" :active="request()->routeIs('emails', 'email-show')" wire:navigate.hover>
                 {{ __('Почта') }}
             </x-responsive-nav-link>
@@ -132,6 +141,15 @@ new class extends Component
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('wb')" :active="request()->routeIs('wb', 'wb-market-edit')" wire:navigate.hover>
                 {{ __('ВБ') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('organizations.index')" :active="request()->routeIs('organizations.index')" wire:navigate.hover>
+                {{ __('Организации') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('warehouses.index')" :active="request()->routeIs('warehouses.index', 'warehouses.edit')" wire:navigate.hover>
+                {{ __('Склады') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('orders.index')" :active="request()->routeIs('orders.index')" wire:navigate.hover>
+                {{ __('Заказы') }}
             </x-responsive-nav-link>
         </div>
 

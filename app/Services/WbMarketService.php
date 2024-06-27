@@ -183,4 +183,43 @@ class WbMarketService
             });
         }
     }
+
+    public function getNewOrders()
+    {
+        $client = new WbClient($this->market->api_key);
+
+        $orders = $client->getNewOrders();
+
+        $orders = $orders
+            ->groupBy('id')
+            ->map(function (Collection $group) {
+                return $group->reduce(function ($carry, $item) {
+                    if (is_null($carry)) {
+                        $carry = $item;
+                        $carry['count'] = $item['count'] ?? 1;
+                    } else {
+                        $carry['count'] += $item['count'] ?? 1;
+                    }
+                    return $carry;
+                });
+            })
+            ->values();
+
+        $orders->each(function (array $order) {
+
+            $order = collect($order);
+
+            $wbItem = $this->market->items()->where('vendor_code', $order->get('article'))->first();
+
+            if ($wbItem && !$wbItem->orders()->where('number', $order->get('id'))->exists()) {
+                $wbItem->orders()->create([
+                    'number' => $order->get('id'),
+                    'count' => $order->get('count'),
+                    'price' => $order->get('price')/100,
+                    'user_id' => $this->market->user_id,
+                    'organization_id' => $this->market->organization_id
+                ]);
+            }
+        });
+    }
 }

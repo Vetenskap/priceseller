@@ -38,6 +38,8 @@ class OzonMarketPostForm extends Form
 
     public $max_mile = null;
 
+    public $organization_id = null;
+
     public function setMarket(OzonMarket $market)
     {
         $this->market = $market;
@@ -55,6 +57,7 @@ class OzonMarketPostForm extends Form
         $this->acquiring = $this->market->acquiring;
         $this->last_mile = $this->market->last_mile;
         $this->max_mile = $this->market->max_mile;
+        $this->organization_id = $market->organization_id;
     }
 
     public function store()
@@ -70,19 +73,6 @@ class OzonMarketPostForm extends Form
 
     public function update()
     {
-        $this->market->update($this->only([
-            'client_id',
-            'api_key',
-            'min_price_percent',
-            'max_price_percent',
-            'seller_price_percent',
-            'acquiring',
-            'last_mile',
-            'max_mile',
-            'open',
-            'max_count',
-            'min',
-            'max'
-        ]));
+        $this->market->update($this->except('market'));
     }
 }

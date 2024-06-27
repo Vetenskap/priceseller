@@ -6,6 +6,7 @@ use App\Events\NotificationEvent;
 use App\Models\ItemsExportReport;
 use App\Models\OzonMarket;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Models\WbMarket;
 use App\Services\Item\ItemService;
 use Illuminate\Support\Collection;
@@ -13,12 +14,12 @@ use Illuminate\Support\Facades\Storage;
 
 class ItemsExportReportService
 {
-    public static function get(OzonMarket|WbMarket|User $model)
+    public static function get(OzonMarket|WbMarket|User|Warehouse $model)
     {
         return $model->itemsExportReports()->where('status', 2)->first();
     }
 
-    public static function newOrFirst(OzonMarket|WbMarket|User $model)
+    public static function newOrFirst(OzonMarket|WbMarket|User|Warehouse $model)
     {
         if ($report = static::get($model)) {
             return $report;
@@ -30,7 +31,7 @@ class ItemsExportReportService
         }
     }
 
-    public static function success(OzonMarket|WbMarket|User $model, $uuid = null): bool
+    public static function success(OzonMarket|WbMarket|User|Warehouse $model, $uuid = null): bool
     {
         if ($report = static::get($model)) {
             $report->update([
@@ -51,7 +52,7 @@ class ItemsExportReportService
         }
     }
 
-    public static function error(OzonMarket|WbMarket|User $model): bool
+    public static function error(OzonMarket|WbMarket|User|Warehouse $model): bool
     {
         if ($report = static::get($model)) {
             $report->update([
@@ -106,6 +107,8 @@ class ItemsExportReportService
                     Storage::delete(WbMarketService::PATH . "{$report->uuid}.xlsx");
                 } else if ($report->reportable instanceof User) {
                     Storage::delete(ItemService::PATH . "{$report->uuid}.xlsx");
+                } else if ($report->reportable instanceof  Warehouse) {
+                    Storage::delete(WarehouseService::PATH . "{$report->uuid}.xlsx");
                 }
 
                 $report->delete();

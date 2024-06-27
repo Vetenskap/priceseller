@@ -28,6 +28,7 @@ class OzonMarket extends Model
         'last_mile',
         'max_mile',
         'user_id',
+        'organization_id'
     ];
 
     public function items()

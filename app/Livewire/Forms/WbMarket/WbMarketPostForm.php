@@ -31,6 +31,8 @@ class WbMarketPostForm extends Form
 
     public $price_one_liter = null;
 
+    public $organization_id = null;
+
     public function setMarket(WbMarket $market)
     {
         $this->market = $market;
@@ -44,6 +46,7 @@ class WbMarketPostForm extends Form
         $this->coefficient = $this->market->coefficient;
         $this->basic_logistics = $this->market->basic_logistics;
         $this->price_one_liter = $this->market->price_one_liter;
+        $this->organization_id = $market->organization_id;
     }
 
     public function store()

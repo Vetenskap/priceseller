@@ -20,6 +20,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -32,8 +33,8 @@ class WbMarketEdit extends Component
 
     public WbMarket $market;
 
-    #[Session('WbMarketEdit.{market.id}')]
-    public $selectedTab = 'main';
+    #[Url]
+    public $page = 'main';
 
     /** @var TemporaryUploadedFile $file */
     public $file;
@@ -68,7 +69,7 @@ class WbMarketEdit extends Component
     {
         $this->form->setMarket($this->market);
 
-        $this->getWarehouses();
+        if ($this->page === 'stocks_warehouses') $this->getWarehouses();
     }
 
     public function save()

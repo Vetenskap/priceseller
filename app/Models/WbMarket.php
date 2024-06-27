@@ -24,6 +24,7 @@ class WbMarket extends Model
         'max',
         'volume',
         'user_id',
+        'organization_id'
     ];
 
     public function items()

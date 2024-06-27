@@ -6,9 +6,11 @@ use App\Events\NotificationEvent;
 use App\Events\TestBroadcast;
 use App\Models\EmailSupplier;
 use App\Models\Item;
+use App\Models\Organization;
 use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Models\WbItem;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
@@ -16,6 +18,7 @@ use App\Services\EmailPriceItemService;
 use App\Services\EmailSupplierService;
 use App\Services\OzonMarketService;
 use App\Services\SupplierReportService;
+use App\Services\WbMarketService;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\App;
@@ -46,9 +49,8 @@ class Test extends Command
      */
     public function handle()
     {
-        $user = User::first();
-        $user->ozonMarkets()->orderBy('created_at')->get()->skip(5)->each(function (OzonMarket $market) {
-            dump($market->name);
-        });
+        $service = new OzonMarketService(OzonMarket::find('9c4e439b-4b61-410a-ab03-87f28c326122'));
+        $service->getNewOrders();
+
     }
 }
