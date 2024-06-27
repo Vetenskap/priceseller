@@ -98,7 +98,7 @@ class EmailSupplierService
         $itemService = new ItemPriceService($article, $this->supplier->supplier->id);
         $items = $this->supplier->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
 
-        if ($items) {
+        if (count($items) > 0) {
 
             foreach ($items as $item) {
 
