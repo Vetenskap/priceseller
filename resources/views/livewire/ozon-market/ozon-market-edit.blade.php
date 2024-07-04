@@ -37,7 +37,7 @@
                     </x-inputs.input-with-label>
                 </x-blocks.flex-block-end>
                 <x-blocks.flex-block-end>
-                    <x-dropdown-select name="supplier"
+                    <x-dropdown-select name="organization"
                                        field="form.organization_id"
                                        :options="auth()->user()->organizations">
                         Организация

@@ -50,6 +50,14 @@
                 Поставщики
             </x-dropdown-select>
         </x-blocks.flex-block>
+        <x-blocks.flex-block>
+            <x-inputs.switcher :checked="$form->unload_wb" wire:model="form.unload_wb" />
+            <x-layouts.simple-text name="Выгружать на ВБ" />
+        </x-blocks.flex-block>
+        <x-blocks.flex-block>
+            <x-inputs.switcher :checked="$form->unload_ozon" wire:model="form.unload_ozon" />
+            <x-layouts.simple-text name="Выгружать на ОЗОН" />
+        </x-blocks.flex-block>
         <x-blocks.main-block>
             <x-layouts.title name="Прочая информация"/>
         </x-blocks.main-block>

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Models;
+namespace Modules\Order\Models;
 
+use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -14,13 +15,23 @@ class Order extends Model
         'orderable_id',
         'orderable_type',
         'count',
+        'state',
         'price',
-        'user_id',
-        'organization_id'
+        'organization_id',
     ];
 
     public function orderable()
     {
         return $this->morphTo();
+    }
+
+    public function writeOffStocks()
+    {
+        return $this->hasMany(WriteOffItemWarehouseStock::class);
+    }
+
+    public function organization()
+    {
+        return $this->belongsTo(Organization::class);
     }
 }

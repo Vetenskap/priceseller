@@ -2,7 +2,10 @@
 
 namespace App\Exports;
 
+use App\Models\WbItem;
 use App\Models\WbMarket;
+use App\Models\WbWarehouse;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -11,8 +14,11 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class WbItemsExport implements FromCollection, WithHeadings, WithStyles
 {
+    public Collection $warehouses;
+
     public function __construct(public WbMarket $market)
     {
+        $this->warehouses = $this->market->warehouses;
     }
 
 
@@ -23,8 +29,8 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
     {
         $items = $this->market->items->sortByDesc('updated_at');
 
-        return $items->map(function ($item) {
-            return [
+        return $items->map(function (WbItem $item) {
+            $main = [
                 'nmID' => $item->nm_id,
                 'vendor_code' => $item->vendor_code,
                 'item_code' => $item->item->code,
@@ -43,13 +49,19 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
                 'created_at' => $item->created_at,
                 'delete' => 'Нет'
             ];
+
+            $main = array_merge($main, $this->warehouses->map(fn(WbWarehouse $warehouse) => ['Склад ' . $warehouse->name => $item->stocks()->where('wb_warehouse_id', $warehouse->id)->first()?->stock])
+                ->collapse()
+                ->all());
+
+            return $main;
         });
     }
 
     public function headings(): array
     {
         // Укажите свои собственные названия колонок
-        return [
+        $main = [
             'Артикул WB (nmID)',
             'Артикул продавца (vendorCode)',
             'Код',
@@ -68,6 +80,8 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
             'Создано',
             'Удалить'
         ];
+
+        return array_merge($main, $this->warehouses->map(fn(WbWarehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
     }
 
     public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)

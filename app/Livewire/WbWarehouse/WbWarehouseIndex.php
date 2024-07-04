@@ -2,6 +2,7 @@
 
 namespace App\Livewire\WbWarehouse;
 
+use App\Livewire\Components\Toast;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
 use Livewire\Component;
@@ -13,14 +14,13 @@ class WbWarehouseIndex extends Component
 
     public $selectedWarehouse;
 
-    public function mount()
-    {
-        $firstWarehouse = collect($this->apiWarehouses)->first();
-        $this->selectedWarehouse = $firstWarehouse ? $firstWarehouse['id'] : null;
-    }
-
     public function addWarehouse()
     {
+        if (!$this->selectedWarehouse) {
+            $this->js((new Toast('Ошибка', "Не выбран склад"))->danger());
+            return;
+        }
+
         $this->authorize('create', WbWarehouse::class);
 
         $name = collect($this->apiWarehouses)->firstWhere('id', $this->selectedWarehouse)['name'];

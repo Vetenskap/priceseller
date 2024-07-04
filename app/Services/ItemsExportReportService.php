@@ -19,10 +19,10 @@ class ItemsExportReportService
         return $model->itemsExportReports()->where('status', 2)->first();
     }
 
-    public static function newOrFirst(OzonMarket|WbMarket|User|Warehouse $model)
+    public static function newOrFail(OzonMarket|WbMarket|User|Warehouse $model)
     {
         if ($report = static::get($model)) {
-            return $report;
+            throw new \Exception("Уже идёт экспорт");
         } else {
             $model->itemsExportReports()->create([
                 'status' => 2,

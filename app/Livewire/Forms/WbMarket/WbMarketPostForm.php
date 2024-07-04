@@ -62,6 +62,8 @@ class WbMarketPostForm extends Form
 
     public function update()
     {
+        if (!$this->organization_id) $this->organization_id = null;
+
         $this->market->update($this->except('market'));
 
         Cache::tags(['wb', 'warehouses'])->forget($this->market->id);

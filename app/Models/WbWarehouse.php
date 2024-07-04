@@ -24,4 +24,14 @@ class WbWarehouse extends Model
     {
         return $this->hasMany(WbWarehouseSupplier::class);
     }
+
+    public function userWarehouses()
+    {
+        return $this->hasMany(WbWarehouseUserWarehouse::class);
+    }
+
+    public function stocks()
+    {
+        return $this->hasMany(WbWarehouseStock::class);
+    }
 }

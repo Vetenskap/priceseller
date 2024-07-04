@@ -21,10 +21,10 @@ class ItemsImportReportService
         return $model->itemsImportReports()->where('status', 2)->first();
     }
 
-    public static function new(OzonMarket|WbMarket|User|Warehouse $model, string $uuid): ?ItemsImportReport
+    public static function newOrFail(OzonMarket|WbMarket|User|Warehouse $model, string $uuid): ?ItemsImportReport
     {
         if (static::get($model)) {
-            return null;
+            throw new \Exception("Уже идёт импорт");
         } else {
             return $model->itemsImportReports()->create([
                 'status' => 2,

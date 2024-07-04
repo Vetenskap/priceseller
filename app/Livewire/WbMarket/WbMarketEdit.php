@@ -164,6 +164,8 @@ class WbMarketEdit extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->market);
+
         $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
 
         return view('livewire.wb-market.wb-market-edit', [

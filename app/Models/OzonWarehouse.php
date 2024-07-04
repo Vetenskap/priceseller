@@ -24,4 +24,14 @@ class OzonWarehouse extends Model
     {
         return $this->hasMany(OzonWarehouseSupplier::class);
     }
+
+    public function userWarehouses()
+    {
+        return $this->hasMany(OzonWarehouseUserWarehouse::class);
+    }
+
+    public function stocks()
+    {
+        return $this->hasMany(OzonWarehouseStock::class);
+    }
 }

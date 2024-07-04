@@ -2,7 +2,10 @@
 
 namespace App\Exports;
 
+use App\Models\OzonItem;
 use App\Models\OzonMarket;
+use App\Models\OzonWarehouse;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -11,8 +14,11 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
 {
+    public Collection $warehouses;
+
     public function __construct(public OzonMarket $market)
     {
+        $this->warehouses = $this->market->warehouses;
     }
 
 
@@ -23,8 +29,8 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
     {
         $items = $this->market->items->sortByDesc('updated_at');
 
-        return $items->map(function ($item) {
-            return [
+        return $items->map(function (OzonItem $item) {
+            $main = [
                 'product_id' => $item->product_id,
                 'offer_id' => $item->offer_id,
                 'item_code' => $item->item->code,
@@ -46,12 +52,18 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
                 'created_at' => $item->created_at,
                 'delete' => 'Нет'
             ];
+
+            $main = array_merge($main, $this->warehouses->map(fn(OzonWarehouse $warehouse) => ['Склад ' . $warehouse->name => $item->stocks()->where('ozon_warehouse_id', $warehouse->id)->first()?->stock])
+                ->collapse()
+                ->all());
+
+            return $main;
         });
     }
 
     public function headings(): array
     {
-        return [
+        $main = [
             'product_id',
             'Артикул ozon (offer_id)',
             'Код',
@@ -73,6 +85,8 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
             'Загружено',
             'Удалить'
         ];
+
+        return array_merge($main, $this->warehouses->map(fn(OzonWarehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
     }
 
     public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)

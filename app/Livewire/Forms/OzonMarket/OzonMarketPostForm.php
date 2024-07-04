@@ -4,6 +4,7 @@ namespace App\Livewire\Forms\OzonMarket;
 
 use App\Models\OzonMarket;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Cache;
 use Livewire\Form;
 
 class OzonMarketPostForm extends Form
@@ -73,6 +74,10 @@ class OzonMarketPostForm extends Form
 
     public function update()
     {
+        if (!$this->organization_id) $this->organization_id = null;
+
         $this->market->update($this->except('market'));
+
+        Cache::tags(['ozon', 'warehouses'])->forget($this->market->id);
     }
 }

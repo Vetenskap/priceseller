@@ -21,6 +21,8 @@ class SupplierReportEdit extends Component
 
     public function destroy()
     {
+        $this->authorize('delete', $this->report);
+
         $this->report->delete();
 
         return redirect()->route('supplier-edit', ['supplier' => $this->report->supplier_id]);
@@ -28,6 +30,8 @@ class SupplierReportEdit extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->report);
+
         return view('livewire.supplier-report.supplier-report-edit');
     }
 }

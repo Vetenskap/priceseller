@@ -30,6 +30,8 @@ class EmailSupplierStockValue extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->stockValue);
+
         return view('livewire.email-supplier-stock-value');
     }
 }

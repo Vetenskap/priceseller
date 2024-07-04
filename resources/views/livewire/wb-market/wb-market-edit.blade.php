@@ -95,7 +95,7 @@
                 </x-marketPages.relationships-commissions>
                 @break
             @case('actions')
-                <livewire:market-pages.actions />
+                <x-marketPages.actions />
                 @break
         @endswitch
     </x-layouts.main-container>

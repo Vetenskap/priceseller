@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Item;
 
+use App\Livewire\Components\Toast;
 use App\Livewire\Forms\Item\ItemPostForm;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Livewire\Traits\WithSubscribeNotification;
@@ -20,9 +21,13 @@ class ItemEdit extends Component
     {
         $this->authorize('update', $this->item);
 
-        $this->form->update();
+        $result = $this->form->update();
 
-        $this->addSuccessSaveNotification();
+        if (!$result->get('status')) {
+            $this->js((new Toast('Ошибка', $result->get('message')))->danger());
+        } else {
+            $this->addSuccessSaveNotification();
+        }
     }
 
     public function destroy()
@@ -41,6 +46,8 @@ class ItemEdit extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->item);
+
         return view('livewire.item.item-edit');
     }
 }

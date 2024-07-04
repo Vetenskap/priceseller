@@ -45,6 +45,8 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
                 'count' => $item->count,
                 'multiplicity' => $item->multiplicity,
                 'updated' => $item->updated ? 'Да' : 'Нет',
+                'unload_wb' => $item->unload_wb ? 'Да' : 'Нет',
+                'unload_ozon' => $item->unload_ozon ? 'Да' : 'Нет',
                 'updated_at' => $item->updated_at,
                 'created_at' => $item->created_at,
                 'delete' => 'Нет'
@@ -71,6 +73,8 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
             'Количество',
             'Кратность отгрузки',
             'Был обновлён',
+            'Выгружать на ВБ',
+            'Выгружать на ОЗОН',
             'Обновлён',
             'Создан',
             'Удалить'
@@ -85,5 +89,7 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
         $sheet->getStyle('D1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
         $sheet->getStyle('E1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
         $sheet->getStyle('I1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
+        $sheet->getStyle('K1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
+        $sheet->getStyle('L1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
     }
 }

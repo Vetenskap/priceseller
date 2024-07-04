@@ -22,7 +22,9 @@ class Item extends Model
         'ms_uuid',
         'name',
         'multiplicity',
-        'id'
+        'id',
+        'unload_ozon',
+        'unload_wb'
     ];
 
     public function supplier()

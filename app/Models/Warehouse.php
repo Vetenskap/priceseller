@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Order\Models\WriteOffWarehouseStock;
 
 class Warehouse extends Model
 {
@@ -15,4 +16,9 @@ class Warehouse extends Model
         'name',
         'user_id',
     ];
+
+    public function stocks()
+    {
+        return $this->hasMany(ItemWarehouseStock::class);
+    }
 }

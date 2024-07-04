@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Modules\Order\Models\WriteOffItemWarehouseStock;
 
 class ItemWarehouseStock extends Model
 {
@@ -14,4 +15,14 @@ class ItemWarehouseStock extends Model
         'item_id',
         'warehouse_id',
     ];
+
+    public function writeOffStock()
+    {
+        return $this->hasOne(WriteOffItemWarehouseStock::class);
+    }
+
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
 }

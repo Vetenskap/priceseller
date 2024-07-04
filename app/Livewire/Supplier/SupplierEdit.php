@@ -46,6 +46,8 @@ class SupplierEdit extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->supplier);
+
         return view('livewire.supplier.supplier-edit', [
             'priceItems' => $this->supplier->priceItems()->filters()->paginate(100)
         ]);

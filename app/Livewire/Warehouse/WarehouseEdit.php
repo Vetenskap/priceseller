@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Warehouse;
 
+use App\Exports\WarehousesStocksExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Livewire\Forms\Warehouse\WarehousePostForm;
@@ -63,6 +64,8 @@ class WarehouseEdit extends Component
 
     public function save()
     {
+        $this->authorize('update', $this->warehouse);
+
         $this->form->update();
 
         $this->addSuccessSaveNotification();
@@ -70,6 +73,8 @@ class WarehouseEdit extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->warehouse);
+
         return view('livewire.warehouse.warehouse-edit');
     }
 }

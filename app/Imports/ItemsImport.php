@@ -25,12 +25,10 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
     public int $updated = 0;
     public int $deleted = 0;
     public User $user;
-    public Collection $warehouses;
 
     public function __construct(int $userId)
     {
         $this->user = User::find($userId);
-        $this->warehouses = $this->user->warehouses;
     }
 
     /**
@@ -61,7 +59,7 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
 
         if ($item = $this->user->items()->where('code', $row->get('Код'))->first()) {
 
-            if ($row->get('Удалить') === 'Да') {
+            if ($row->get('Удалить')) {
 
                 $this->deleted++;
 
@@ -79,23 +77,14 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
                 'article' => $row->get('Артикул'),
                 'brand' => $row->get('Бренд'),
                 'multiplicity' => $row->get('Кратность отгрузки'),
+                'unload_wb' => $row->get('Выгружать на ВБ'),
+                'unload_ozon' => $row->get('Выгружать на ОЗОН'),
             ]);
-
-            $this->warehouses->each(function (Warehouse $warehouse) use ($row, $item) {
-                $stock = $row->get('Склад ' . $warehouse->name, 0);
-                $item->warehousesStocks()->updateOrCreate([
-                    'warehouse_id' => $warehouse->id,
-                    'item_id' => $item->id,
-                ], [
-                    'warehouse_id' => $warehouse->id,
-                    'stock' => $stock ?: 0,
-                ]);
-            });
 
             return null;
         }
 
-        if ($row->get('Удалить') === 'Да') {
+        if ($row->get('Удалить')) {
 
             $this->error++;
 
@@ -121,7 +110,9 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'brand' => $row->get('Бренд'),
             'multiplicity' => $row->get('Кратность отгрузки'),
             'user_id' => $this->user->id,
-            'id' => Str::uuid()
+            'id' => Str::uuid(),
+            'unload_wb' => $row->get('Выгружать на ВБ'),
+            'unload_ozon' => $row->get('Выгружать на ОЗОН'),
         ]);
     }
 
@@ -130,6 +121,9 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         if ($index % 1000 === 0) ItemsImportReportService::flush($this->user, $this->correct, $this->error, $this->updated, $this->deleted);
 
         $data['Кратность отгрузки'] = preg_replace("/[^0-9]/", "", $data['Кратность отгрузки']);
+        $data['Выгружать на ВБ'] = $data['Выгружать на ВБ'] === 'Да';
+        $data['Выгружать на ОЗОН'] = $data['Выгружать на ОЗОН'] === 'Да';
+        $data['Удалить'] = $data['Удалить'] === 'Да';
 
         return $data;
     }

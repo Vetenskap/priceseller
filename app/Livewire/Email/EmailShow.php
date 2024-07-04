@@ -48,6 +48,8 @@ class EmailShow extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->email);
+
         return view('livewire.email.email-show');
     }
 

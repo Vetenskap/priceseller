@@ -26,6 +26,8 @@ class EmailSupplierEdit extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->emailSupplier);
+
         return view('livewire.email-supplier.email-supplier-edit');
     }
 

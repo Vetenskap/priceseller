@@ -12,21 +12,18 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Log;
 
 class Import implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public $timeout = 60;
+
     /**
      * Create a new job instance.
      */
     public function __construct(public string $uuid, public string $ext, public OzonMarket|WbMarket|User|Warehouse $model, public string $service)
     {
-        if (!ItemsImportReportService::new($this->model, $this->uuid)) {
-            throw new \Exception("Уже идёт импорт");
-        }
     }
 
     /**
@@ -34,6 +31,7 @@ class Import implements ShouldQueue
      */
     public function handle(): void
     {
+        ItemsImportReportService::newOrFail($this->model, $this->uuid);
 
         if (class_exists($this->service)) {
 

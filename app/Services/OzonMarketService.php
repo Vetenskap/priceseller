@@ -173,45 +173,4 @@ class OzonMarketService
             });
         }
     }
-
-    public function getNewOrders()
-    {
-        $allPostings = collect();
-        $limit = 1000;
-        $offset = 0;
-
-        do {
-            $client = new OzonClient($this->market->api_key, $this->market->client_id);
-            $result = $client->getNewOrders($limit, $offset);
-            $postings = collect($result->get('postings'));
-            $hasNext = $result->get('has_next');
-
-            $offset += $limit;
-
-            $allPostings = $allPostings->merge($postings);
-        } while ($hasNext);
-
-        $allPostings->each(function (array $posting) {
-
-            $posting = collect($posting);
-
-            collect($posting->get('products'))->each(function (array $product) use ($posting) {
-
-                $product = collect($product);
-
-                $ozonItem = $this->market->items()->where('offer_id', $product->get('offer_id'))->first();
-
-                if ($ozonItem && !$ozonItem->orders()->where('number', $posting->get('posting_number'))->exists()) {
-                    $ozonItem->orders()->create([
-                        'number' => $posting->get('posting_number'),
-                        'count' => $product->get('quantity'),
-                        'price' => $product->get('price'),
-                        'user_id' => $this->market->user_id,
-                        'organization_id' => $this->market->organization_id
-                    ]);
-                }
-            });
-
-        });
-    }
 }

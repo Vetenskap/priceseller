@@ -9,10 +9,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\App;
+use Laravel\Sanctum\HasApiTokens;
+use Modules\Order\Models\Order;
 
 class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -160,5 +162,15 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
     public function orders()
     {
         return $this->hasMany(Order::class);
+    }
+
+    public function warehousesItemsExportReports()
+    {
+        return $this->hasMany(WarehousesItemsExportReport::class);
+    }
+
+    public function warehousesItemsImportReports()
+    {
+        return $this->hasMany(WarehousesItemsImportReport::class);
     }
 }

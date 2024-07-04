@@ -160,6 +160,8 @@ class OzonMarketEdit extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->market);
+
         $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
 
         return view('livewire.ozon-market.ozon-market-edit', [

@@ -92,21 +92,4 @@ class OzonClient
         );
 
     }
-
-    public function getNewOrders(int $limit, int $offset = 0): Collection
-    {
-        $data = array(
-            "dir" => "ASC",
-            "filter" => array(
-                "cutoff_from" => '2024-06-27' . 'T00:00:00Z',
-                "cutoff_to" => '3000-01-01' . 'T23:59:59Z',
-                "status" => "awaiting_deliver",
-                "warehouse_id" => array()
-            ),
-            "limit" => $limit,
-            "offset" => $offset,
-        );
-
-        return $this->request->post('/v3/posting/fbs/unfulfilled/list', $data)->throw()->collect('result');
-    }
 }
