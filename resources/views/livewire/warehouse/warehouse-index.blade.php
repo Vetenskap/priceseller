@@ -71,6 +71,9 @@
             <x-blocks.main-block>
                 <x-layouts.title name="Загрузить новые остатки"/>
             </x-blocks.main-block>
+            <x-blocks.flex-block class="justify-center">
+                <x-success-button wire:click="downloadTemplate">Скачать шаблон</x-success-button>
+            </x-blocks.flex-block>
             <form wire:submit="import">
                 <div
                     x-data="{ uploading: false, progress: 0 }"

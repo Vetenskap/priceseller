@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Item;
 
+use App\Exports\ItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Livewire\Traits\WithFilters;
@@ -11,6 +12,8 @@ use App\Models\User;
 use App\Services\Item\ItemService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Session;
+use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
@@ -23,9 +26,17 @@ class ItemIndex extends Component
     public $file;
     public User $user;
 
+    #[Url]
+    public $tab = 'list';
+
     public function mount()
     {
         $this->user = auth()->user();
+    }
+
+    public function downloadTemplate()
+    {
+        return \Excel::download(new ItemsExport($this->user->id, true), "priceseller_шаблон.xlsx");
     }
 
     public function export()
@@ -59,10 +70,10 @@ class ItemIndex extends Component
             ->orderByDesc('updated_at')
             ->with('supplier')
             ->filters()
-            ->paginate(50);
+            ->paginate(10);
 
         return view('livewire.item.item-index', [
-            'items' => $items
+            'items' => $this->tab === 'list' ? $items : []
         ]);
     }
 }

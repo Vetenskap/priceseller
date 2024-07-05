@@ -10,7 +10,7 @@
     @if($page === 'main')
         <x-layouts.module-container class="flex p-6">
             <div class="p-6 dark:bg-gray-700 w-1/4 overflow-hidden shadow-sm sm:rounded-lg mr-6">
-                <a href="{{route('modules.index')}}">
+                <a href="{{url()->previous()}}">
                     <x-primary-button class="mb-6">Назад</x-primary-button>
                 </a>
                 <div class="mb-6">
@@ -70,8 +70,7 @@
                                 @foreach($organization->supplierOrderReports as $report)
                                     <x-success-button
                                         wire:click="downloadPurchaseOrder({{$report}})">{{$report->supplier->name}}
-                                        ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->count()}}
-                                        )
+                                        ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->count()}})
                                     </x-success-button>
                                 @endforeach
                             </x-blocks.flex-block-end>

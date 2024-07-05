@@ -20,6 +20,24 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure
 {
+    CONST HEADERS = [
+        'МС UUID',
+        'Код',
+        'Наименование',
+        'Поставщик',
+        'Артикул',
+        'Бренд',
+        'Цена',
+        'Количество',
+        'Кратность отгрузки',
+        'Был обновлён',
+        'Выгружать на ВБ',
+        'Выгружать на ОЗОН',
+        'Обновлён',
+        'Создан',
+        'Удалить'
+    ];
+
     public int $correct = 0;
     public int $error = 0;
     public int $updated = 0;

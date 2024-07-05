@@ -1,9 +1,9 @@
 <div>
     <x-layouts.header :name="$item->name . ' (' . $item->code . ')'"/>
     <x-layouts.actions>
-        <a href="{{route('items')}}" wire:navigate.hover>
-            <x-primary-button>Назад</x-primary-button>
-        </a>
+{{--        <a href="{{url()->previous()}}" wire:navigate.hover>--}}
+            <x-primary-button wire:click="redirectBack">Закрыть</x-primary-button>
+{{--        </a>--}}
         <x-success-button wire:click="save">Сохранить</x-success-button>
         <x-danger-button wire:click="destroy">Удалить</x-danger-button>
     </x-layouts.actions>

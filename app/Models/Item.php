@@ -39,6 +39,18 @@ class Item extends Model
         })
             ->when(request('filters.article'), function (Builder $query) {
                 $query->where('article', 'like', '%' . request('filters.article') . '%');
+            })
+            ->when(request('filters.supplier_id'), function (Builder $query) {
+                $query->where('supplier_id',  request('filters.supplier_id'));
+            })
+            ->when(request('filters.name'), function (Builder $query) {
+                $query->where('name', 'like', '%' . request('filters.name') . '%');
+            })
+            ->when(!is_null(request('filters.unload_wb')), function (Builder $query) {
+                $query->where('unload_wb',  request('filters.unload_wb'));
+            })
+            ->when(!is_null(request('filters.unload_ozon')), function (Builder $query) {
+                $query->where('unload_ozon',  request('filters.unload_ozon'));
             });
     }
 

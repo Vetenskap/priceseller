@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Warehouse;
 
+use App\Exports\WarehousesStocksExport;
 use App\Jobs\Warehouse\Export;
 use App\Jobs\Warehouse\Import;
 use App\Livewire\Forms\Warehouse\WarehousePostForm;
@@ -38,6 +39,11 @@ class WarehouseIndex extends Component
         $this->form->store();
 
         $this->reset('showCreateForm');
+    }
+
+    public function downloadTemplate()
+    {
+        return \Excel::download(new WarehousesStocksExport(auth()->user(), true), 'Склады_шаблон.xlsx');
     }
 
     public function destroy($warehouse)

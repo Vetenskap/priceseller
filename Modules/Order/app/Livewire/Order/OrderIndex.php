@@ -136,7 +136,7 @@ class OrderIndex extends Component
 
         $this->authorize('view', $order);
 
-        return response()->download(Storage::disk('public')->path("users/orders/{$order->uuid}.xlsx"), $order->supplier->name . '.xlsx');
+        return response()->download(Storage::disk('public')->path("users/orders/{$order->uuid}.xlsx"), 'Заказ поставщику ' . $this->organization->name . ' ' . $order->supplier->name . '.xlsx');
     }
 
     public function clear()

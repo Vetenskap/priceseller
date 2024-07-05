@@ -6,6 +6,7 @@ use App\Jobs\Email\CheckEmails;
 use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\App;
 
 class UserProcess extends Command
 {
@@ -30,7 +31,13 @@ class UserProcess extends Command
     {
         User::chunk(10, function (Collection $users) {
             $users->each(function (User $user) {
-                CheckEmails::dispatch($user->id);
+                if (App::isLocal()) {
+                    if ($user->isAdmin()) {
+                        CheckEmails::dispatch($user->id);
+                    }
+                } else {
+                    CheckEmails::dispatch($user->id);
+                }
             });
         });
     }

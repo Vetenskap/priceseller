@@ -8,8 +8,8 @@
     </x-notify-top>
     @enderror
     <x-layouts.actions>
-        <a href="{{route('wb')}}" wire:navigate.hover>
-            <x-primary-button>Назад</x-primary-button>
+        <a href="{{url()->previous()}}" wire:navigate.hover>
+            <x-primary-button>Закрыть</x-primary-button>
         </a>
         <x-success-button wire:click="save">Сохранить</x-success-button>
         <x-danger-button wire:click="destroy">Удалить</x-danger-button>

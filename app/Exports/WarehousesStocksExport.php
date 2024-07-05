@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Imports\WarehousesStocksImport;
 use App\Models\Item;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -15,7 +16,7 @@ class WarehousesStocksExport implements FromCollection, WithHeadings
 {
     public Collection $warehouses;
 
-    public function __construct(public User $user)
+    public function __construct(public User $user, public bool $template = false)
     {
         $this->warehouses = $user->warehouses;
     }
@@ -26,6 +27,8 @@ class WarehousesStocksExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
+        if ($this->template) return collect();
+
         $items = $this->user
             ->items()
             ->with(['warehousesStocks', 'supplier'])
@@ -55,15 +58,6 @@ class WarehousesStocksExport implements FromCollection, WithHeadings
 
     public function headings(): array
     {
-        $main = [
-            'Код',
-            'Поставщик',
-            'Артикул',
-            'Бренд',
-            'Наименование',
-            'Кратность отгрузки',
-        ];
-
-        return array_merge($main, $this->warehouses->map(fn(Warehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
+        return array_merge(WarehousesStocksImport::HEADERS, $this->warehouses->map(fn(Warehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
     }
 }

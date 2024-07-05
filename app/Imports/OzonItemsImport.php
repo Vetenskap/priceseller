@@ -22,6 +22,29 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError
 {
+    CONST HEADERS = [
+        'product_id',
+        'Артикул ozon (offer_id)',
+        'Код',
+        'Мин. Цена, процент',
+        'Мин. Цена',
+        'Обработка отправления',
+        'Магистраль',
+        'Последняя миля',
+        'Комиссия',
+        'Цена продажи',
+        'Цена конкурента',
+        'Минимальная цена',
+        'Цена до скидки, процент',
+        'Цена из маркета',
+        'Остаток',
+        'Закупочная цена',
+        'Кратность отгрузки',
+        'Обновлено',
+        'Загружено',
+        'Удалить'
+    ];
+
     public int $correct = 0;
     public int $error = 0;
     public int $updated = 0;

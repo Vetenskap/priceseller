@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Imports\ItemsImport;
 use App\Models\Item;
 use App\Models\User;
 use App\Models\Warehouse;
@@ -18,7 +19,7 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
 {
     public Collection $warehouses;
 
-    public function __construct(public int $userId)
+    public function __construct(public int $userId, public bool $template = false)
     {
         $this->warehouses = User::findOrFail($this->userId)->warehouses;
     }
@@ -29,6 +30,8 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
      */
     public function collection()
     {
+        if ($this->template) return collect();
+
         $items = Item::where('user_id', $this->userId)->when(App::isLocal(), function (Builder $query) {
             $query->limit(100);
         })->get()->sortByDesc('updated_at');
@@ -62,23 +65,7 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
 
     public function headings(): array
     {
-        $main = [
-            'МС UUID',
-            'Код',
-            'Наименование',
-            'Поставщик',
-            'Артикул',
-            'Бренд',
-            'Цена',
-            'Количество',
-            'Кратность отгрузки',
-            'Был обновлён',
-            'Выгружать на ВБ',
-            'Выгружать на ОЗОН',
-            'Обновлён',
-            'Создан',
-            'Удалить'
-        ];
+        $main = ItemsImport::HEADERS;
 
         return array_merge($main, $this->warehouses->map(fn(Warehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
     }

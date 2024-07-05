@@ -10,6 +10,15 @@ use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
 class WarehousesStocksImport implements ToCollection, WithHeadingRow
 {
+    CONST HEADERS = [
+        'Код',
+        'Поставщик',
+        'Артикул',
+        'Бренд',
+        'Наименование',
+        'Кратность отгрузки',
+    ];
+
     public function __construct(public User $user)
     {
     }

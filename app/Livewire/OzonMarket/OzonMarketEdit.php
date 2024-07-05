@@ -2,6 +2,7 @@
 
 namespace App\Livewire\OzonMarket;
 
+use App\Exports\OzonItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Jobs\MarketRelationshipsAndCommissions;
@@ -68,6 +69,11 @@ class OzonMarketEdit extends Component
         Export::dispatch($this->market, OzonMarketService::class);
 
         $this->dispatch('items-export-report-created');
+    }
+
+    public function downloadTemplate()
+    {
+        return \Excel::download(new OzonItemsExport($this->market, true), "ОЗОН_шаблон.xlsx");
     }
 
     public function import(): void

@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Imports\OzonItemsImport;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
@@ -16,7 +17,7 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
 {
     public Collection $warehouses;
 
-    public function __construct(public OzonMarket $market)
+    public function __construct(public OzonMarket $market, public bool $template = false)
     {
         $this->warehouses = $this->market->warehouses;
     }
@@ -27,6 +28,8 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
     */
     public function collection()
     {
+        if ($this->template) return collect();
+
         $items = $this->market->items->sortByDesc('updated_at');
 
         return $items->map(function (OzonItem $item) {
@@ -63,30 +66,7 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
 
     public function headings(): array
     {
-        $main = [
-            'product_id',
-            'Артикул ozon (offer_id)',
-            'Код',
-            'Мин. Цена, процент',
-            'Мин. Цена',
-            'Обработка отправления',
-            'Магистраль',
-            'Последняя миля',
-            'Комиссия',
-            'Цена продажи',
-            'Цена конкурента',
-            'Минимальная цена',
-            'Цена до скидки, процент',
-            'Цена из маркета',
-            'Остаток',
-            'Закупочная цена',
-            'Кратность отгрузки',
-            'Обновлено',
-            'Загружено',
-            'Удалить'
-        ];
-
-        return array_merge($main, $this->warehouses->map(fn(OzonWarehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
+        return array_merge(OzonItemsImport::HEADERS, $this->warehouses->map(fn(OzonWarehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
     }
 
     public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)

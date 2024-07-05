@@ -2,6 +2,8 @@
 
 namespace App\Livewire\WbMarket;
 
+use App\Exports\ItemsExport;
+use App\Exports\WbItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Jobs\MarketRelationshipsAndCommissions;
@@ -70,6 +72,11 @@ class WbMarketEdit extends Component
         $this->form->setMarket($this->market);
 
         if ($this->page === 'stocks_warehouses') $this->getWarehouses();
+    }
+
+    public function downloadTemplate()
+    {
+        return \Excel::download(new WbItemsExport($this->market, true), "ВБ_шаблон.xlsx");
     }
 
     public function save()

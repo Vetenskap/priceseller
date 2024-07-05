@@ -17,6 +17,15 @@ class ItemEdit extends Component
 
     public Item $item;
 
+    public $backRoute;
+
+    public function redirectBack()
+    {
+        session()->flash('selected-item', $this->item->getKey());
+
+        $this->redirect($this->backRoute);
+    }
+
     public function save()
     {
         $this->authorize('update', $this->item);
@@ -42,6 +51,7 @@ class ItemEdit extends Component
     public function mount()
     {
         $this->form->setItem($this->item);
+        $this->backRoute = \url()->previous();
     }
 
     public function render()

@@ -32,7 +32,7 @@ class MarketItemRelationship extends Model
             ->when(request('filters.code'), function (Builder $query) {
                 $query->where('code', 'like', '%' . request('filters.code') . '%');
             })
-            ->when(request('filters.status'), function (Builder $query) {
+            ->when(!is_null(request('filters.status')), function (Builder $query) {
                 $query->where('status', request('filters.status'));
             });
     }

@@ -4,6 +4,9 @@
     <x-blocks.main-block>
         <x-layouts.title name="Создание/Обновление связей и комиссий"/>
     </x-blocks.main-block>
+    <x-blocks.flex-block class="justify-center">
+        <x-success-button wire:click="downloadTemplate">Скачать шаблон</x-success-button>
+    </x-blocks.flex-block>
     <form wire:submit="import">
         <div
             x-data="{ uploading: false, progress: 0 }"
@@ -108,7 +111,4 @@
     @else
         <x-titles.sub-title name="Нет связей"/>
     @endif
-    <x-blocks.main-block>
-        {{ $items->links() }}
-    </x-blocks.main-block>
 </div>

@@ -24,6 +24,25 @@ use PHPUnit\Logging\Exception;
 
 class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure
 {
+    CONST HEADERS = [
+        'Артикул WB (nmID)',
+        'Артикул продавца (vendorCode)',
+        'Код',
+        'Баркод (sku)',
+        'Комиссия, процент',
+        'Мин. цена',
+        'Розничная наценка, процент',
+        'Упаковка',
+        'Объем',
+        'Новая цена',
+        'Цена из маркета',
+        'Остаток',
+        'Закупочная цена',
+        'Кратность отгрузки',
+        'Обновлено',
+        'Создано',
+        'Удалить'
+    ];
 
     public int $correct = 0;
     public int $error = 0;

@@ -1,21 +1,19 @@
 <div>
     <x-layouts.header :name="$supplier->name"/>
     <x-layouts.actions>
-        <a href="{{route('suppliers')}}" wire:navigate.hover>
-            <x-primary-button>Назад</x-primary-button>
+        <a href="{{url()->previous()}}" wire:navigate.hover>
+            <x-primary-button>Закрыть</x-primary-button>
         </a>
         <x-success-button wire:click="save">Сохранить</x-success-button>
         <x-danger-button wire:click="destroy">Удалить</x-danger-button>
     </x-layouts.actions>
     <x-layouts.main-container>
-        <div class="bg-white dark:bg-gray-700">
-            <nav class="flex flex-col sm:flex-row">
+        <x-navigate-pages>
                 <x-links.tab-link name="Основное" :active="$selectedTab === 'main'"
                                   wire:click="$set('selectedTab', 'main')"/>
                 <x-links.tab-link name="Прайс" :active="$selectedTab === 'price'"
                                   wire:click="$set('selectedTab', 'price')"/>
-            </nav>
-        </div>
+        </x-navigate-pages>
         @if($selectedTab === 'main')
             <x-blocks.flex-block-end>
                 <x-inputs.switcher :checked="$supplier->open" wire:model="form.open"/>
@@ -87,9 +85,6 @@
                     </x-table.table-item>
                 @endforeach
             </x-table.table-layout>
-            <x-blocks.main-block>
-                {{ $priceItems->links('livewire::tailwind') }}
-            </x-blocks.main-block>
         @endif
     </x-layouts.main-container>
 </div>

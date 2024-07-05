@@ -2,6 +2,7 @@
 
 namespace App\Livewire\ItemsImportReport;
 
+use App\Exports\ItemsExport;
 use App\Livewire\Traits\WithModelsPaths;
 use App\Models\ItemsImportReport;
 use App\Models\OzonMarket;

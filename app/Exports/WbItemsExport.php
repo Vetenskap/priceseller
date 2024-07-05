@@ -2,6 +2,7 @@
 
 namespace App\Exports;
 
+use App\Imports\WbItemsImport;
 use App\Models\WbItem;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
@@ -16,7 +17,7 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
 {
     public Collection $warehouses;
 
-    public function __construct(public WbMarket $market)
+    public function __construct(public WbMarket $market, public bool $template = false)
     {
         $this->warehouses = $this->market->warehouses;
     }
@@ -27,6 +28,8 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
     */
     public function collection()
     {
+        if ($this->template) return collect();
+
         $items = $this->market->items->sortByDesc('updated_at');
 
         return $items->map(function (WbItem $item) {
@@ -60,28 +63,7 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
 
     public function headings(): array
     {
-        // Укажите свои собственные названия колонок
-        $main = [
-            'Артикул WB (nmID)',
-            'Артикул продавца (vendorCode)',
-            'Код',
-            'Баркод (sku)',
-            'Комиссия, процент',
-            'Мин. цена',
-            'Розничная наценка, процент',
-            'Упаковка',
-            'Объем',
-            'Новая цена',
-            'Цена из маркета',
-            'Остаток',
-            'Закупочная цена',
-            'Кратность отгрузки',
-            'Обновлено',
-            'Создано',
-            'Удалить'
-        ];
-
-        return array_merge($main, $this->warehouses->map(fn(WbWarehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
+        return array_merge(WbItemsImport::HEADERS, $this->warehouses->map(fn(WbWarehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
     }
 
     public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
