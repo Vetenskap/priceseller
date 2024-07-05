@@ -42,8 +42,7 @@ class ItemIndex extends Component
     public function export()
     {
         Export::dispatch(auth()->user(), ItemService::class);
-
-        $this->dispatch('items-export-report-created');
+        $this->addJobNotification();
     }
 
     public function import()
@@ -58,8 +57,7 @@ class ItemIndex extends Component
         }
 
         Import::dispatch($uuid, $ext, auth()->user(), ItemService::class);
-
-        $this->dispatch('items-import-report-created');
+        $this->addJobNotification();
     }
 
     public function render()

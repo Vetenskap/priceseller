@@ -30,13 +30,14 @@ class Export implements ShouldQueue
      */
     public function handle(): void
     {
-        ItemsExportReportService::newOrFail($this->model);
-        if (class_exists($this->service)) {
-            $service = new $this->service($this->model);
-            if (method_exists($service, 'exportItems')) {
-                $uuid = $service->exportItems();
+        if (ItemsExportReportService::newOrFail($this->model)) {
+            if (class_exists($this->service)) {
+                $service = new $this->service($this->model);
+                if (method_exists($service, 'exportItems')) {
+                    $uuid = $service->exportItems();
 
-                ItemsExportReportService::success($this->model, $uuid);
+                    ItemsExportReportService::success($this->model, $uuid);
+                }
             }
         }
     }

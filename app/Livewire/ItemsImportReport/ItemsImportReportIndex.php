@@ -20,9 +20,8 @@ class ItemsImportReportIndex extends Component
     public function getListeners()
     {
         return [
-            'echo:notification.' . auth()->user()->id . ',.notify' => 'render',
-            "echo:items-import-report.{$this->model->id},.event" => 'render',
-            "items-import-report-created" => 'render',
+            'echo:notification.' . auth()->user()->id . ',.notify' => '$refresh',
+            "echo:items-import-report.{$this->model->id},.event" => '$refresh',
         ];
     }
 

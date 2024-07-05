@@ -100,9 +100,7 @@ class WbMarketEdit extends Component
     public function export(): void
     {
         Export::dispatch($this->market, WbMarketService::class);
-
-        $this->dispatch('items-export-report-created');
-
+        $this->addJobNotification();
     }
 
     public function import(): void
@@ -120,8 +118,7 @@ class WbMarketEdit extends Component
         }
 
         Import::dispatch($uuid, $ext, $this->market, WbMarketService::class);
-
-        $this->dispatch('items-import-report-created');
+        $this->addJobNotification();
     }
 
     public function relationshipsAndCommissions(): void
@@ -136,8 +133,6 @@ class WbMarketEdit extends Component
             model: $this->market,
             service: WbMarketService::class
         );
-
-        $this->dispatch('items-import-report-created');
     }
 
     public function getWarehouses()

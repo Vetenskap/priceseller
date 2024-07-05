@@ -21,16 +21,25 @@ class ItemsImportReportService
         return $model->itemsImportReports()->where('status', 2)->first();
     }
 
-    public static function newOrFail(OzonMarket|WbMarket|User|Warehouse $model, string $uuid): ?ItemsImportReport
+    public static function newOrFail(OzonMarket|WbMarket|User|Warehouse $model, string $uuid): bool
     {
         if (static::get($model)) {
-            throw new \Exception("Уже идёт импорт");
+            return false;
         } else {
-            return $model->itemsImportReports()->create([
+
+            $model->itemsImportReports()->create([
                 'status' => 2,
                 'message' => 'В процессе',
                 'uuid' => $uuid,
             ]);
+
+            try {
+                event(new ItemsImportReportEvent($model));
+            } catch (\Throwable) {
+
+            }
+
+            return true;
         }
     }
 

@@ -19,8 +19,8 @@ class ItemsExportReportIndex extends Component
     public function getListeners()
     {
         return [
-            'echo:notification.' . auth()->user()->id . ',.notify' => 'render',
-            "items-export-report-created" => 'render',
+            'echo:notification.' . auth()->user()->id . ',.notify' => '$refresh',
+            'echo:items-import-report.' . $this->model->id . ',.event' => '$refresh'
         ];
     }
 

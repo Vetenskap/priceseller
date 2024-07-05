@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\ItemsImportReportEvent;
 use App\Events\NotificationEvent;
 use App\Models\User;
 use App\Models\WarehousesItemsImportReport;
@@ -15,16 +16,24 @@ class WarehouseItemsImportReportService
         return $model->warehousesItemsImportReports()->where('status', 2)->first();
     }
 
-    public static function newOrFail(User $model, string $uuid)
+    public static function newOrFail(User $model, string $uuid): bool
     {
         if (static::get($model)) {
-            throw new \Exception('Уже идёт импорт');
+            return false;
         } else {
             $model->warehousesItemsImportReports()->create([
                 'status' => 2,
                 'message' => 'В процессе',
                 'uuid' => $uuid,
             ]);
+
+            try {
+                event(new ItemsImportReportEvent($model));
+            } catch (\Throwable) {
+
+            }
+
+            return true;
         }
     }
 

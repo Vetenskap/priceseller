@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\ItemsImportReportEvent;
 use App\Events\NotificationEvent;
 use App\Models\ItemsExportReport;
 use App\Models\OzonMarket;
@@ -19,15 +20,24 @@ class ItemsExportReportService
         return $model->itemsExportReports()->where('status', 2)->first();
     }
 
-    public static function newOrFail(OzonMarket|WbMarket|User|Warehouse $model)
+    public static function newOrFail(OzonMarket|WbMarket|User|Warehouse $model): bool
     {
         if ($report = static::get($model)) {
-            throw new \Exception("Уже идёт экспорт");
+            return false;
         } else {
+
             $model->itemsExportReports()->create([
                 'status' => 2,
                 'message' => 'В процессе'
             ]);
+
+            try {
+                event(new ItemsImportReportEvent($model));
+            } catch (\Throwable) {
+
+            }
+
+            return true;
         }
     }
 

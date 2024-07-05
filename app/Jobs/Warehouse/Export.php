@@ -15,8 +15,6 @@ use Illuminate\Support\Str;
 class Export implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    public $timeout = 60;
     /**
      * Create a new job instance.
      */
@@ -29,10 +27,11 @@ class Export implements ShouldQueue
      */
     public function handle(): void
     {
-        WarehouseItemsExportReportService::newOrFail($this->user);
-        $uuid = Str::uuid();
-        \Excel::store(new WarehousesStocksExport($this->user), 'users/warehouses/' . $uuid . '.xlsx', 'public');
-        WarehouseItemsExportReportService::success($this->user, $uuid);
+        if (WarehouseItemsExportReportService::newOrFail($this->user)) {
+            $uuid = Str::uuid();
+            \Excel::store(new WarehousesStocksExport($this->user), 'users/warehouses/' . $uuid . '.xlsx', 'public');
+            WarehouseItemsExportReportService::success($this->user, $uuid);
+        }
     }
 
     public function failed(\Throwable $e)

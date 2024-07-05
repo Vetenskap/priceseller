@@ -3,6 +3,7 @@
 namespace Modules\Order\Exports;
 
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Modules\Order\Models\Order;
@@ -33,16 +34,16 @@ class SupplierOrderExport implements FromCollection, WithHeadings
             })
             ->get();
 
-        return $orders->map(function (Order $order) {
-            if ($order->orderable->item->code == '4-063497') {
-                dd($order);
-            }
+        return $orders->groupBy('orderable.item.id')->map(function (Collection $group, string $id) {
+
+            $order = $group->first();
+
             return [
                 'name' => $order->orderable->item->name,
                 'code' => $order->orderable->item->code,
                 'article' => $order->orderable->item->article,
                 'brand' => $order->orderable->item->brand,
-                'count' => $order->count * $order->orderable->item->multiplicity,
+                'count' => $group->sum('count') * $order->orderable->item->multiplicity,
                 'price' => $order->price
             ];
         });

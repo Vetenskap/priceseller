@@ -67,8 +67,7 @@ class OzonMarketEdit extends Component
     public function export(): void
     {
         Export::dispatch($this->market, OzonMarketService::class);
-
-        $this->dispatch('items-export-report-created');
+        $this->addJobNotification();
     }
 
     public function downloadTemplate()
@@ -88,8 +87,7 @@ class OzonMarketEdit extends Component
         }
 
         Import::dispatch($uuid, $ext, $this->market, OzonMarketService::class);
-
-        $this->dispatch('items-import-report-created');
+        $this->addJobNotification();
     }
 
     public function relationshipsAndCommissions(): void
@@ -104,8 +102,6 @@ class OzonMarketEdit extends Component
             model: $this->market,
             service: OzonMarketService::class
         );
-
-        $this->dispatch('items-import-report-created');
     }
 
     public function clearRelationships()

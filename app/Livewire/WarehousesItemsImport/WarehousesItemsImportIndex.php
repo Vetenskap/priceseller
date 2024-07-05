@@ -14,9 +14,8 @@ class WarehousesItemsImportIndex extends Component
     public function getListeners()
     {
         return [
-            'echo:notification.' . auth()->user()->id . ',.notify' => 'render',
-            "echo:items-import-report.{$this->model->id},.event" => 'render',
-            "warehouses-items-import-created" => 'render',
+            'echo:notification.' . $this->model->id . ',.notify' => '$refresh',
+            'echo:items-import-report.' . $this->model->id . ',.event' => '$refresh'
         ];
     }
 

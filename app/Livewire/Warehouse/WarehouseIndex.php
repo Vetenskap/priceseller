@@ -5,7 +5,9 @@ namespace App\Livewire\Warehouse;
 use App\Exports\WarehousesStocksExport;
 use App\Jobs\Warehouse\Export;
 use App\Jobs\Warehouse\Import;
+use App\Livewire\Components\Toast;
 use App\Livewire\Forms\Warehouse\WarehousePostForm;
+use App\Livewire\Traits\WithJsNotifications;
 use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Warehouse;
 use Illuminate\Support\Facades\Storage;
@@ -17,7 +19,7 @@ use Livewire\WithFileUploads;
 
 class WarehouseIndex extends Component
 {
-    use WithSubscribeNotification, WithFileUploads;
+    use WithSubscribeNotification, WithFileUploads, WithJsNotifications;
 
     public WarehousePostForm $form;
 
@@ -63,7 +65,7 @@ class WarehouseIndex extends Component
     public function export()
     {
         Export::dispatch(auth()->user());
-        $this->dispatch('warehouses-items-export-created');
+        $this->addJobNotification();
     }
 
     public function import()
@@ -78,6 +80,6 @@ class WarehouseIndex extends Component
         }
 
         Import::dispatch(auth()->user(), $uuid);
-        $this->dispatch('warehouses-items-import-created');
+        $this->addJobNotification();
     }
 }

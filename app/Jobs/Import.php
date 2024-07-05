@@ -17,8 +17,6 @@ class Import implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 60;
-
     /**
      * Create a new job instance.
      */
@@ -31,27 +29,26 @@ class Import implements ShouldQueue
      */
     public function handle(): void
     {
-        ItemsImportReportService::newOrFail($this->model, $this->uuid);
+        if (ItemsImportReportService::newOrFail($this->model, $this->uuid)) {
+            if (class_exists($this->service)) {
 
-        if (class_exists($this->service)) {
+                $service = new $this->service($this->model);
 
-            $service = new $this->service($this->model);
+                if (method_exists($service, 'importItems')) {
 
-            if (method_exists($service, 'importItems')) {
+                    $result = $service->importItems($this->uuid, $this->ext);
 
-                $result = $service->importItems($this->uuid, $this->ext);
-
-                ItemsImportReportService::success(
-                    model: $this->model,
-                    correct: $result->get('correct', 0),
-                    error: $result->get('error', 0),
-                    updated: $result->get('updated', 0),
-                    deleted: $result->get('deleted', 0),
-                    uuid: $this->uuid
-                );
+                    ItemsImportReportService::success(
+                        model: $this->model,
+                        correct: $result->get('correct', 0),
+                        error: $result->get('error', 0),
+                        updated: $result->get('updated', 0),
+                        deleted: $result->get('deleted', 0),
+                        uuid: $this->uuid
+                    );
+                }
             }
         }
-
     }
 
     public function failed()

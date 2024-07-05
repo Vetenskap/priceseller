@@ -15,7 +15,6 @@ class Import implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $timeout = 60;
     /**
      * Create a new job instance.
      */
@@ -28,9 +27,10 @@ class Import implements ShouldQueue
      */
     public function handle(): void
     {
-        WarehouseItemsImportReportService::newOrFail($this->user, $this->uuid);
-        \Excel::import(new WarehousesStocksImport($this->user), 'users/warehouses/' . $this->uuid . '.xlsx');
-        WarehouseItemsImportReportService::success($this->user, 0, 0);
+        if (WarehouseItemsImportReportService::newOrFail($this->user, $this->uuid)) {
+            \Excel::import(new WarehousesStocksImport($this->user), 'users/warehouses/' . $this->uuid . '.xlsx');
+            WarehouseItemsImportReportService::success($this->user, 0, 0);
+        }
     }
 
     public function failed(\Throwable $e)

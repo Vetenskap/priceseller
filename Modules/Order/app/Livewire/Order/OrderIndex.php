@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Session;
 use Livewire\Attributes\Url;
 use Livewire\Component;
 use Livewire\WithFileUploads;
@@ -35,12 +36,21 @@ class OrderIndex extends Component
 
     public ?Organization $organization = null;
     public ?Collection $orders = null;
+
+    #[Session]
     public array $selectedWarehouses = [];
 
     #[Url]
     public $page = 'main';
 
     public $file;
+
+    public $openSelectedWarehouses = false;
+
+    public function changeActive()
+    {
+        $this->openSelectedWarehouses = !$this->openSelectedWarehouses;
+    }
 
     public function export()
     {
@@ -85,12 +95,12 @@ class OrderIndex extends Component
         $this->dispatch('refresh')->self();
     }
 
-    public function selectWarehouse(array $warehouse)
+    public function selectWarehouse(string $id)
     {
-        if (!in_array($warehouse['id'], $this->selectedWarehouses)) {
-            $this->selectedWarehouses[] = $warehouse['id'];
+        if (!in_array($id, $this->selectedWarehouses)) {
+            $this->selectedWarehouses[] = $id;
         } else {
-            Arr::forget($this->selectedWarehouses, array_search($warehouse['id'], $this->selectedWarehouses));
+            Arr::forget($this->selectedWarehouses, array_search($id, $this->selectedWarehouses));
         }
     }
 

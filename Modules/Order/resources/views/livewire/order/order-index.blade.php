@@ -9,9 +9,9 @@
     </x-navigate-pages>
     @if($page === 'main')
         <x-layouts.module-container class="flex p-6">
-            <div class="p-6 dark:bg-gray-700 w-1/4 overflow-hidden shadow-sm sm:rounded-lg mr-6">
+            <div class="p-6 dark:bg-gray-700 bg-gray-100 w-1/4 overflow-hidden shadow-sm sm:rounded-lg mr-6">
                 <a href="{{url()->previous()}}">
-                    <x-primary-button class="mb-6">Назад</x-primary-button>
+                    <x-secondary-button class="mb-6">Назад</x-secondary-button>
                 </a>
                 <div class="mb-6">
                     <x-layouts.title name="Организации"/>
@@ -19,7 +19,7 @@
                 @foreach($organizations as $org)
                     <a href="{{route('orders.index', ['page' => 'main', 'organizationId' => $org->id])}}">
                         <div
-                            class="mb-6 text-center shadow-sm sm:rounded-lg p-4 dark:text-white {{$organizationId === $org->id ? 'dark:bg-gray-600' : 'dark:bg-gray-500'}}">
+                            class="mb-6 text-center shadow-sm sm:rounded-lg p-4 dark:text-white {{$organizationId === $org->id ? 'dark:bg-gray-600 bg-gray-300' : 'dark:bg-gray-500 bg-gray-200'}}">
                             {{$org->name}}
                         </div>
                     </a>
@@ -27,7 +27,7 @@
             </div>
             @if($organization)
                 <div class="w-3/4">
-                    <div class="p-6 dark:bg-gray-700 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                    <div class="p-6 dark:bg-gray-700 bg-gray-100 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                         <x-layouts.title :name="$organization->name"/>
                         @if($orders->count())
                             <x-blocks.flex-block-end>
@@ -39,17 +39,14 @@
                         </x-blocks.flex-block-end>
                         @if($orders->count())
                             <x-titles.sub-title name="Списать остатки"/>
-                            <x-blocks.flex-block-end class="justify-between">
-                                @foreach($warehouses as $warehouse)
-                                    <div
-                                        class="cursor-pointer text-center shadow-sm sm:rounded-lg p-2 dark:text-white {{in_array($warehouse->id, $selectedWarehouses) ? 'dark:bg-gray-600' : 'dark:bg-gray-500'}}"
-                                        wire:click="selectWarehouse({{$warehouse}})"
-                                    >
-                                        {{$warehouse->name}}
-                                    </div>
-                                @endforeach
-                            </x-blocks.flex-block-end>
                             <x-blocks.flex-block-end>
+                                <x-dropdowns.dropdown-checkboxes :options="$warehouses"
+                                                                 :selected-options="$selectedWarehouses"
+                                                                 wire-func="selectWarehouse"
+                                                                 :active="$openSelectedWarehouses"
+                                >
+                                    Склады
+                                </x-dropdowns.dropdown-checkboxes>
                                 <x-primary-button wire:click="writeOffBalance">Списать остатки</x-primary-button>
                             </x-blocks.flex-block-end>
                             @if($writeOff)
@@ -70,7 +67,8 @@
                                 @foreach($organization->supplierOrderReports as $report)
                                     <x-success-button
                                         wire:click="downloadPurchaseOrder({{$report}})">{{$report->supplier->name}}
-                                        ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->count()}})
+                                        ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('orderable.item.id')->count()}}
+                                        )
                                     </x-success-button>
                                 @endforeach
                             </x-blocks.flex-block-end>

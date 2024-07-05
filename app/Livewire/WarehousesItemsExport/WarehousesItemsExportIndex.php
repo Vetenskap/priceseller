@@ -15,8 +15,8 @@ class WarehousesItemsExportIndex extends Component
     public function getListeners()
     {
         return [
-            'echo:notification.' . auth()->user()->id . ',.notify' => 'render',
-            "warehouses-items-export-created" => 'render',
+            'echo:notification.' . $this->model->id . ',.notify' => '$refresh',
+            'echo:items-import-report.' . $this->model->id . ',.event' => '$refresh'
         ];
     }
 
@@ -27,7 +27,7 @@ class WarehousesItemsExportIndex extends Component
 
         return response()->download(
             file: Storage::disk('public')->path('users/warehouses/' . "{$report->uuid}.xlsx"),
-            name: 'Склады ' . \auth()->user()->name . "_{$report->updated_at}.xlsx"
+            name: 'Склады ' . $this->model->name. "_{$report->updated_at}.xlsx"
         );
     }
 
