@@ -67,8 +67,7 @@
                                 @foreach($organization->supplierOrderReports as $report)
                                     <x-success-button
                                         wire:click="downloadPurchaseOrder({{$report}})">{{$report->supplier->name}}
-                                        ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('orderable.item.id')->count()}}
-                                        )
+                                        ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('orderable.item.id')->count()}})
                                     </x-success-button>
                                 @endforeach
                             </x-blocks.flex-block-end>

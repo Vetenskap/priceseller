@@ -26,8 +26,9 @@ class ItemIndex extends Component
     public $file;
     public User $user;
 
+    #[Session]
     #[Url]
-    public $tab = 'list';
+    public $tab = null;
 
     public function mount()
     {
