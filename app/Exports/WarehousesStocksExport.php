@@ -32,9 +32,6 @@ class WarehousesStocksExport implements FromCollection, WithHeadings
         $items = $this->user
             ->items()
             ->with(['warehousesStocks', 'supplier'])
-            ->when(App::isLocal(), function (Builder$query) {
-                $query->limit(1000);
-            })
             ->get();
 
         return $items->map(function (Item $item) {

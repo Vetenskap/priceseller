@@ -32,9 +32,7 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
     {
         if ($this->template) return collect();
 
-        $items = Item::where('user_id', $this->userId)->when(App::isLocal(), function (Builder $query) {
-            $query->limit(100);
-        })->get()->sortByDesc('updated_at');
+        $items = Item::where('user_id', $this->userId)->get()->sortByDesc('updated_at');
 
         return $items->map(function (Item $item) {
             $main = [

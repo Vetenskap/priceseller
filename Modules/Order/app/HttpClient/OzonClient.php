@@ -34,7 +34,7 @@ class OzonClient
             "filter" => array(
                 "cutoff_from" => '2024-06-27' . 'T00:00:00Z',
                 "cutoff_to" => '3000-01-01' . 'T23:59:59Z',
-                "status" => App::isLocal() ? "delivering" : "awaiting_packaging",
+                "status" => "awaiting_packaging",
                 "warehouse_id" => array()
             ),
             "limit" => $limit,
