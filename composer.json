@@ -8,6 +8,7 @@
         "php": "^8.2",
         "box/spout": "^3.3",
         "filament/filament": "^3.2",
+        "kerigard/laravel-lang-ru": "^2.0",
         "laravel/framework": "^11.0",
         "laravel/horizon": "^5.24",
         "laravel/pulse": "^1.1",

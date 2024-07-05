@@ -162,24 +162,6 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
         ];
     }
 
-    public function customValidationMessages()
-    {
-        return [
-            'Артикул WB (nmID).integer' => 'Поле должно быть целым числом',
-            'Артикул продавца (vendorCode).required' => 'Поле обязательно',
-            'Комиссия, процент.numeric' => 'Поле должно быть числом',
-            'Комиссия, процент.min' => 'Поле должно быть больше 0',
-            'Мин. цена.integer' => 'Поле должно быть целым числом',
-            'Мин. цена.min' => 'Поле должно быть больше 0',
-            'Розничная наценка, процент.numeric' => 'Поле должно быть числом',
-            'Розничная наценка, процент.min' => 'Поле должно быть больше 0',
-            'Упаковка.numeric' => 'Поле должно быть числом',
-            'Упаковка.min' => 'Поле должно быть больше 0',
-            'Объем.numeric' => 'Поле должно быть числом',
-            'Код.required' => 'Поле обязательно',
-        ];
-    }
-
     public function onFailure(Failure ...$failures)
     {
         foreach ($failures as $failure) {

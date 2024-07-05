@@ -158,17 +158,6 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         ];
     }
 
-    public function customValidationMessages()
-    {
-        return [
-            'Код.required' => 'Поле обязательно',
-            'Артикул.required' => 'Поле обязательно',
-            'Кратность отгрузки.required' => 'Поле обязательно',
-            'Кратность отгрузки.integer' => 'Поле должно быть целым числом',
-            'Кратность отгрузки.min' => 'Поле должно быть не меньше 1',
-        ];
-    }
-
     public function onFailure(Failure ...$failures)
     {
         foreach ($failures as $failure) {
