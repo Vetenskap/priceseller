@@ -112,7 +112,7 @@ class WbItemPriceService
     {
         $this->market->warehouses->each(function (WbWarehouse $warehouse) use ($wbItem) {
             $myWarehousesStocks = $warehouse->userWarehouses->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($wbItem) {
-                return $userWarehouse->warehouse->stocks()->where('item_id', $wbItem->item_id)?->first()->stock;
+                return $userWarehouse->warehouse->stocks()->where('item_id', $wbItem->item_id)->first()?->stock;
             })->sum();
 
             $new_count = $wbItem->item->count < $this->market->min ? 0 : $wbItem->item->count;
