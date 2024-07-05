@@ -210,7 +210,7 @@ class WbItemPriceService
                         $data = $items->map(function (WbItem $item) use ($warehouse) {
                             return [
                                 "sku" => (string)$item->sku,
-                                "amount" => (int) $item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0,
+                                "amount" => (int) ($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
                             ];
                         });
 

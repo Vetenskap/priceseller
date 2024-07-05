@@ -135,7 +135,7 @@ class OzonItemPriceService
     {
         $this->market->warehouses->each(function (OzonWarehouse $warehouse) use ($ozonItem) {
             $myWarehousesStocks = $warehouse->userWarehouses->map(function (OzonWarehouseUserWarehouse $userWarehouse) use ($ozonItem) {
-                return $userWarehouse->warehouse->stocks()->where('item_id', $ozonItem->item_id)?->first()->stock;
+                return $userWarehouse->warehouse->stocks()->where('item_id', $ozonItem->item_id)->first()?->stock;
             })->sum();
 
             $new_count = $ozonItem->item->count < $this->market->min ? 0 : $ozonItem->item->count;
@@ -237,7 +237,7 @@ class OzonItemPriceService
                             return [
                                 'offer_id' => (string)$item->offer_id,
                                 'product_id' => (int)$item->product_id,
-                                'stock' => (int)$item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0,
+                                'stock' => (int) ($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
                                 'warehouse_id' => (int)$warehouse->warehouse_id
                             ];
                         });
