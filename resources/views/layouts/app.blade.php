@@ -54,8 +54,8 @@
     </main>
 
     <footer>
-        <div class="bg-gray-300 dark:bg-gray-700">
-            <div class="max-w-2xl mx-auto py-4">
+        <div class="bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
+            <div class="w-1/2 mx-auto py-4">
 {{--                <div class="text-center">--}}
 {{--                    <h3 class="text-xl mb-3"> Download our fitness app </h3>--}}
 {{--                    <p> Stay fit. All day, every day. </p>--}}
@@ -63,11 +63,11 @@
 {{--                    </div>--}}
 {{--                </div>--}}
                 <div class="my-5 flex flex-col md:flex-row md:justify-between items-center text-sm dark:text-white">
-                    <p class="order-2 md:order-1 mt-8 md:mt-0"> &copy; ООО "СКАД", 2024. </p>
+                    <p class="order-2 md:order-1 mt-8 md:mt-0"> Copyright &copy; 2024 - {{ date('Y') }} ООО "ИВиКО". </p>
                     <div class="order-1 md:order-2">
-                        <a href="/" class="px-2 hover:text-indigo-400 dark:hover:text-indigo-600">О нас</a>
-                        <a href="/" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Связаться с нами</a>
+                        <a href="/" class="px-2 hover:text-indigo-400 dark:hover:text-indigo-600">Связаться с нами</a>
                         <a href="/" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Политика конфиденциальности</a>
+                        <a href="/" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Куки</a>
                     </div>
                 </div>
             </div>
