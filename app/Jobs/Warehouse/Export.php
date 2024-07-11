@@ -6,6 +6,7 @@ use App\Exports\WarehousesStocksExport;
 use App\Models\User;
 use App\Services\WarehouseItemsExportReportService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -15,6 +16,7 @@ use Illuminate\Support\Str;
 class Export implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
     /**
      * Create a new job instance.
      */
@@ -38,4 +40,9 @@ class Export implements ShouldQueue
     {
         WarehouseItemsExportReportService::error($this->user);
     }
+
+//    public function uniqueId(): string
+//    {
+//        return $this->user->id;
+//    }
 }

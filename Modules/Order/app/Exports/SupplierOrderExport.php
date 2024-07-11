@@ -25,6 +25,7 @@ class SupplierOrderExport implements FromCollection, WithHeadings
     public function collection()
     {
         $orders = Order::with('orderable.item')
+            ->whereHas('orderable')
             ->where('count', '>', 0)
             ->where('state', 'new')
             ->where('organization_id', $this->organizationId)->whereHas('orderable', function (Builder $builder) {

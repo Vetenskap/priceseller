@@ -9,14 +9,17 @@ use App\Models\WbMarket;
 use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class Export implements ShouldQueue
+class Export implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public $uniqueFor = 10700;
 
     /**
      * Create a new job instance.
@@ -45,5 +48,10 @@ class Export implements ShouldQueue
     public function failed()
     {
         ItemsExportReportService::error($this->model);
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->model->id;
     }
 }

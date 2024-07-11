@@ -25,6 +25,8 @@ class WarehousesItemsExportIndex extends Component
 
         $report = WarehousesItemsExportReport::find($report['id']);
 
+        if ($report->status === 2) abort(403);
+
         return response()->download(
             file: Storage::disk('public')->path('users/warehouses/' . "{$report->uuid}.xlsx"),
             name: 'Склады ' . $this->model->name. "_{$report->updated_at}.xlsx"
@@ -34,6 +36,8 @@ class WarehousesItemsExportIndex extends Component
     public function destroy($report)
     {
         $report = WarehousesItemsExportReport::find($report['id']);
+
+        if ($report->status === 2) abort(403);
 
         Storage::disk('public')->delete('users/warehouses/' . "{$report->uuid}.xlsx");
         $report->delete();

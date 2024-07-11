@@ -8,6 +8,7 @@ use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Supplier;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Livewire\Component;
@@ -41,7 +42,9 @@ class SupplierEdit extends Component
     {
         $this->authorize('delete', $this->supplier);
 
-        $this->supplier->delete();
+        DB::transaction(function () {
+            $this->supplier->delete();
+        });
     }
 
     public function render()

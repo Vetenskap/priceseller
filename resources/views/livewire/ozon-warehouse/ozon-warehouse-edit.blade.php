@@ -43,26 +43,28 @@
                 </x-dropdown-select>
                 <x-success-button wire:click="addSupplier">Добавить</x-success-button>
             </x-blocks.flex-block-end>
-            <x-table.table-layout>
-                <x-table.table-header>
-                    <x-table.table-child>
-                        <x-layouts.simple-text name="Наименование"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
+        @if($warehouse->suppliers()->count())
+                <x-table.table-layout>
+                    <x-table.table-header>
+                        <x-table.table-child>
+                            <x-layouts.simple-text name="Наименование"/>
+                        </x-table.table-child>
+                        <x-table.table-child>
 
-                    </x-table.table-child>
-                </x-table.table-header>
-                @foreach($warehouse->suppliers as $supplier)
-                    <x-table.table-item>
-                        <x-table.table-child>
-                            <x-layouts.simple-text :name="$supplier->supplier->name"/>
                         </x-table.table-child>
-                        <x-table.table-child>
-                            <x-danger-button wire:click="deleteSupplier({{$supplier}})">Удалить</x-danger-button>
-                        </x-table.table-child>
-                    </x-table.table-item>
-                @endforeach
-            </x-table.table-layout>
+                    </x-table.table-header>
+                    @foreach($warehouse->suppliers as $supplier)
+                        <x-table.table-item wire:key="{{$supplier->getKey()}}">
+                            <x-table.table-child>
+                                <x-layouts.simple-text :name="$supplier->supplier->name"/>
+                            </x-table.table-child>
+                            <x-table.table-child>
+                                <x-danger-button wire:click="deleteSupplier({{$supplier}})">Удалить</x-danger-button>
+                            </x-table.table-child>
+                        </x-table.table-item>
+                    @endforeach
+                </x-table.table-layout>
+        @endif
         @endif
         @if($selectedTab === 'warehouses')
             <x-blocks.flex-block-end>
@@ -71,26 +73,28 @@
                 </x-dropdown-select>
                 <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
             </x-blocks.flex-block-end>
-            <x-table.table-layout>
-                <x-table.table-header>
-                    <x-table.table-child>
-                        <x-layouts.simple-text name="Наименование"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
+        @if($warehouse->userWarehouses()->count())
+                <x-table.table-layout>
+                    <x-table.table-header>
+                        <x-table.table-child>
+                            <x-layouts.simple-text name="Наименование"/>
+                        </x-table.table-child>
+                        <x-table.table-child>
 
-                    </x-table.table-child>
-                </x-table.table-header>
-                @foreach($warehouse->userWarehouses as $userWarehouse)
-                    <x-table.table-item>
-                        <x-table.table-child>
-                            <x-layouts.simple-text :name="$userWarehouse->warehouse->name"/>
                         </x-table.table-child>
-                        <x-table.table-child>
-                            <x-danger-button wire:click="deleteWarehouse({{$userWarehouse}})">Удалить</x-danger-button>
-                        </x-table.table-child>
-                    </x-table.table-item>
-                @endforeach
-            </x-table.table-layout>
+                    </x-table.table-header>
+                    @foreach($warehouse->userWarehouses as $userWarehouse)
+                        <x-table.table-item wire:key="{{$userWarehouse->getKey()}}">
+                            <x-table.table-child>
+                                <x-layouts.simple-text :name="$userWarehouse->warehouse->name"/>
+                            </x-table.table-child>
+                            <x-table.table-child>
+                                <x-danger-button wire:click="deleteWarehouse({{$userWarehouse}})">Удалить</x-danger-button>
+                            </x-table.table-child>
+                        </x-table.table-item>
+                    @endforeach
+                </x-table.table-layout>
+        @endif
         @endif
     </x-layouts.main-container>
 </div>

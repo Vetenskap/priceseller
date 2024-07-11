@@ -27,30 +27,36 @@ class WarehousesStocksExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        if ($this->template) return collect();
+        if ($this->template) {
+            return collect();
+        }
 
-        $items = $this->user
+        $allData = collect();
+
+        $this->user
             ->items()
             ->with(['warehousesStocks', 'supplier'])
-            ->get();
+            ->chunk(1000, function ($items) use (&$allData) {
+                $chunkData = $items->map(function (Item $item) {
+                    $main = [
+                        'code' => $item->code,
+                        'supplier_name' => $item->supplier->name,
+                        'article' => $item->article,
+                        'brand' => $item->brand,
+                        'name' => $item->name,
+                        'multiplicity' => $item->multiplicity,
+                    ];
 
-        return $items->map(function (Item $item) {
-            $main = [
-                'code' => $item->code,
-                'supplier_name' => $item->supplier->name,
-                'article' => $item->article,
-                'brand' => $item->brand,
-                'name' => $item->name,
-                'multiplicity' => $item->multiplicity,
+                    $warehouseStocks = $item->warehousesStocks->pluck('stock', 'warehouse.name');
+                    $main = array_merge($main, $warehouseStocks->all());
 
-            ];
+                    return $main;
+                });
 
-            $main = array_merge($main, $this->warehouses->map(fn(Warehouse $warehouse) => ['Склад ' . $warehouse->name => $item->warehousesStocks->where('warehouse_id', $warehouse->id)->first()?->stock])
-                ->collapse()
-                ->all());
+                $allData = $allData->merge($chunkData);
+            });
 
-            return $main;
-        });
+        return $allData;
     }
 
     public function headings(): array

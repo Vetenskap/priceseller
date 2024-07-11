@@ -29,6 +29,8 @@ class ItemsExportReportIndex extends Component
 
         $report = ItemsExportReport::find($report['id']);
 
+        if ($report->status === 2) abort(403);
+
         return response()->download(
             file: Storage::disk('public')->path($this->getPath() . "{$report->uuid}.xlsx"),
             name: $this->getFilename() . "_{$report->updated_at}.xlsx"
@@ -38,6 +40,8 @@ class ItemsExportReportIndex extends Component
     public function destroy($report)
     {
         $report = ItemsExportReport::find($report['id']);
+
+        if ($report->status === 2) abort(403);
 
         $this->authorize('delete', $report);
 

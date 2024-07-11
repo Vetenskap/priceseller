@@ -10,7 +10,7 @@
     @if($page === 'main')
         <x-layouts.module-container class="flex p-6">
             <div class="p-6 dark:bg-gray-700 bg-gray-100 w-1/4 overflow-hidden shadow-sm sm:rounded-lg mr-6">
-                <a href="{{url()->previous()}}">
+                <a href="{{route('modules.index')}}">
                     <x-secondary-button class="mb-6">Назад</x-secondary-button>
                 </a>
                 <div class="mb-6">
@@ -107,19 +107,19 @@
                                     </x-table.table-child>
                                 </x-table.table-header>
                                 @foreach($orders as $order)
-                                    <x-table.table-item :status="$order->writeOffStocks()->count() ? 2 : -1">
+                                    <x-table.table-item :status="$order->writeOffStocks()->count() ? 2 : -1" wire:key="{{$order->getKey()}}">
                                         <x-table.table-child>
                                             <x-layouts.simple-text :name="$order->number"/>
                                         </x-table.table-child>
                                         <x-table.table-child>
-                                            <x-layouts.simple-text :name="$order->orderable->item->code"/>
+                                            <x-layouts.simple-text :name="$order->orderable?->item->code"/>
                                         </x-table.table-child>
                                         <x-table.table-child>
                                             <x-layouts.simple-text
-                                                :name="$order->orderable->offer_id ?? $order->orderable->vendor_code"/>
+                                                :name="$order->orderable?->offer_id ?? $order->orderable?->vendor_code"/>
                                         </x-table.table-child>
                                         <x-table.table-child>
-                                            <x-layouts.simple-text :name="$order->orderable->market->name"/>
+                                            <x-layouts.simple-text :name="$order->orderable?->market->name"/>
                                         </x-table.table-child>
                                         <x-table.table-child>
                                             <x-layouts.simple-text

@@ -12,11 +12,31 @@
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet"/>
     <link rel="stylesheet" href="/assets/css/toast.min.css">
 
+    <style>
+        html, body {
+            height: 100%;
+        }
+
+        .page-content {
+            min-height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .page-content main {
+            flex: 1;
+        }
+
+        .page-content footer {
+            flex-shrink: 0;
+        }
+    </style>
+
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
-<div class="min-h-screen bg-gray-100 dark:bg-gray-900">
+<div class="page-content min-h-screen bg-gray-100 dark:bg-gray-900">
     <livewire:layout.navigation/>
 
     <!-- Page Heading -->
@@ -32,6 +52,27 @@
     <main>
         {{ $slot }}
     </main>
+
+    <footer>
+        <div class="bg-gray-300">
+            <div class="max-w-2xl mx-auto text-black py-4">
+{{--                <div class="text-center">--}}
+{{--                    <h3 class="text-xl mb-3"> Download our fitness app </h3>--}}
+{{--                    <p> Stay fit. All day, every day. </p>--}}
+{{--                    <div class="flex justify-center my-10">--}}
+{{--                    </div>--}}
+{{--                </div>--}}
+                <div class="my-5 flex flex-col md:flex-row md:justify-between items-center text-sm text-black">
+                    <p class="order-2 md:order-1 mt-8 md:mt-0"> &copy; ООО "СКАД", 2024. </p>
+                    <div class="order-1 md:order-2">
+                        <span class="px-2"><a href="/">О нас</a></span>
+                        <span class="px-2 border-l border-gray-400"><a href="/">Связаться с нами</a></span>
+                        <span class="px-2 border-l border-gray-400"><a href="/">Политика конфиденциальности</a></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
 </div>
 <script src="/assets/js/toast.min.js"></script>
 <script src="https://kit.fontawesome.com/5850d038fd.js" crossorigin="anonymous"></script>

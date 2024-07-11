@@ -36,7 +36,9 @@
                         @endif
                     </x-table.table-child>
                     <x-table.table-child>
-                        <x-danger-button wire:click="destroy({{$report}})">Удалить</x-danger-button>
+                        @if($report->status !== 2)
+                            <x-danger-button wire:click="destroy({{$report}})">Удалить</x-danger-button>
+                        @endif
                     </x-table.table-child>
                 </x-table.table-item>
             @endforeach

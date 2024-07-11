@@ -28,6 +28,11 @@ class EmailSupplierIndex extends Component
 
         $this->authorize('create', EmailSupplier::class);
 
+        if ($this->email->suppliers()->wherePivot('supplier_id', $this->selectedSupplier)->exists()) {
+            $this->js((new Toast('Ошибка', "Указаный поставщик уже добавлен"))->danger());
+            return;
+        }
+
         $this->email->suppliers()->attach($this->selectedSupplier, [
             'created_at' => now(),
             'updated_at' => now(),

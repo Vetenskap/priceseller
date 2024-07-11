@@ -34,12 +34,13 @@ class SupplierReportService
         }
     }
 
-    public static function addLog(Supplier $supplier, string $message): bool
+    public static function addLog(Supplier $supplier, string $message, string $level = 'info'): bool
     {
         if ($report = static::get($supplier)) {
 
             $report->logs()->create([
-                'message' => $message
+                'message' => $message,
+                'level' => $level
             ]);
 
             return true;

@@ -20,7 +20,6 @@ use Modules\Order\Exports\NotChangeOzonStatesExport;
 use Modules\Order\Exports\SupplierOrderExport;
 use Modules\Order\Exports\WriteOffItemWarehouseStockExport;
 use Modules\Order\Imports\NotChangeOzonStatesImport;
-use Modules\Order\Models\Order;
 use Modules\Order\Models\SupplierOrderReport;
 use Modules\Order\Models\WriteOffItemWarehouseStock;
 use Modules\Order\Services\OrderService;
@@ -62,13 +61,12 @@ class OrderIndex extends Component
         \Excel::import(new NotChangeOzonStatesImport(\auth()->user()), $this->file);
     }
 
-
-    #[On(['refresh'])]
+    #[On('refresh')]
     public function mount()
     {
         if ($this->organizationId) {
             $this->organization = auth()->user()->organizations()->findOrFail($this->organizationId);
-            $this->orders = $this->organization->orders()->with('orderable.item')->where('state', 'new')->get();
+            $this->orders = $this->organization->orders()->whereHas('orderable')->with('orderable.item')->where('state', 'new')->get();
         }
     }
 
@@ -87,7 +85,7 @@ class OrderIndex extends Component
         ]);
     }
 
-    public function getOrders()
+    public function getOrders(): void
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $total = $service->getOrders();
@@ -149,42 +147,16 @@ class OrderIndex extends Component
         return response()->download(Storage::disk('public')->path("users/orders/{$order->uuid}.xlsx"), 'Заказ поставщику ' . $this->organization->name . ' ' . $order->supplier->name . '.xlsx');
     }
 
-    public function clear()
+    public function clear(): void
     {
-        $this->organization->orders()->chunk(100, function (Collection $orders) {
-            $orders->each(function (Order $order) {
-
-                $this->authorize('delete', $order);
-
-                $order->writeOffStocks()->delete();
-            });
-        });
-        $this->organization->orders()->update(['state' => 'old']);
-        $this->organization->supplierOrderReports()->delete();
+        $service = new OrderService($this->organizationId, auth()->user());
+        $service->clearAll();
         $this->dispatch('refresh')->self();
     }
 
     public function writeOffBalanceRollback()
     {
-        WriteOffItemWarehouseStock::whereHas('order', function (Builder $query) {
-            $query->where('organization_id', $this->organizationId);
-        })
-            ->chunk(100, function (Collection $writeOffStocks) {
-                $writeOffStocks->each(function (WriteOffItemWarehouseStock $writeOffStock) {
-
-                    $itemWarehouseStock = $writeOffStock->itemWarehouseStock;
-                    $itemWarehouseStock->stock = $itemWarehouseStock->stock + $writeOffStock->stock;
-                    $order = $writeOffStock->order;
-                    $order->count += $writeOffStock->stock;
-
-                    $this->authorize('update', $order);
-
-                    $itemWarehouseStock->save();
-                    $order->save();
-                    $writeOffStock->delete();
-
-                });
-            });
+        $this->service->writeOffBalanceRollback();
         $this->js((new Toast('Успех', 'Все остатки возвращены на склад'))->success());
         $this->dispatch('refresh')->self();
     }

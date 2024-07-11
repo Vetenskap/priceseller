@@ -55,14 +55,6 @@ class Test extends Command
      */
     public function handle()
     {
-//        $supplier = Supplier::find('9c5482cc-4a4a-4806-a5ca-c67ba8a41078');
-//        $market = WbMarket::find('9c4e4462-6a3a-40f7-b9a2-dae9d0a1554a');
-//        $service = new WbItemPriceService($supplier, $market);
-//        $service->recountStockWbItem(WbItem::find('9c62b22f-9e2f-45a2-b68a-91336a4cc01e'));
-
-        $item = WbItem::find('9c62b22f-9e2f-45a2-b68a-91336a4cc01e');
-        $warehouse = WbWarehouse::find(5);
-
-        dd($item->warehouseStock($warehouse)->stock);
+        dd(Str::uuid()->toString());
     }
 }

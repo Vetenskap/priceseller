@@ -10,6 +10,8 @@ use App\Livewire\Forms\Warehouse\WarehousePostForm;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Warehouse;
+use App\Services\WarehouseItemsExportReportService;
+use App\Services\WarehouseItemsImportReportService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
@@ -27,7 +29,6 @@ class WarehouseIndex extends Component
 
     public $file;
 
-    #[Session]
     #[Url]
     public $page = null;
 
@@ -52,6 +53,8 @@ class WarehouseIndex extends Component
     {
         $warehouse = Warehouse::find($warehouse['id']);
 
+        $this->authorize('delete', $warehouse);
+
         $warehouse->delete();
     }
 
@@ -64,12 +67,22 @@ class WarehouseIndex extends Component
 
     public function export()
     {
+        if (WarehouseItemsExportReportService::get(auth()->user())) {
+            $this->addJobAlready();
+            return;
+        }
+
         Export::dispatch(auth()->user());
         $this->addJobNotification();
     }
 
     public function import()
     {
+        if (WarehouseItemsImportReportService::get(auth()->user())) {
+            $this->addJobAlready();
+            return;
+        }
+
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
         $path = $this->file->storeAs('/users/warehouses/', $uuid . '.' . $ext);

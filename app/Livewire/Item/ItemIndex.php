@@ -10,6 +10,8 @@ use App\Livewire\Traits\WithJsNotifications;
 use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\User;
 use App\Services\Item\ItemService;
+use App\Services\ItemsExportReportService;
+use App\Services\ItemsImportReportService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
@@ -26,7 +28,6 @@ class ItemIndex extends Component
     public $file;
     public User $user;
 
-    #[Session]
     #[Url]
     public $tab = null;
 
@@ -42,12 +43,22 @@ class ItemIndex extends Component
 
     public function export()
     {
+        if (ItemsExportReportService::get($this->user)) {
+            $this->addJobAlready();
+            return;
+        }
+
         Export::dispatch(auth()->user(), ItemService::class);
         $this->addJobNotification();
     }
 
     public function import()
     {
+        if (ItemsImportReportService::get($this->user)) {
+            $this->addJobAlready();
+            return;
+        }
+
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
         $path = $this->file->storeAs(ItemService::PATH, $uuid . '.' . $ext);

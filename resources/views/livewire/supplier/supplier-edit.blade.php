@@ -1,11 +1,11 @@
 <div>
     <x-layouts.header :name="$supplier->name"/>
     <x-layouts.actions>
-        <a href="{{url()->previous()}}" wire:navigate.hover>
+        <a href="{{route('suppliers')}}" wire:navigate.hover>
             <x-primary-button>Закрыть</x-primary-button>
         </a>
         <x-success-button wire:click="save">Сохранить</x-success-button>
-        <x-danger-button wire:click="destroy">Удалить</x-danger-button>
+        <x-danger-button wire:click="destroy" wire:confirm="Вы действительно хотите удалить поставщика? Так же будут удалены все связанные с ним товары.">Удалить</x-danger-button>
     </x-layouts.actions>
     <x-layouts.main-container>
         <x-navigate-pages>
@@ -66,7 +66,7 @@
                     </x-table.table-child>
                 </x-table.table-header>
                 @foreach($priceItems as $priceItem)
-                    <x-table.table-item wire:key="{{$priceItem->id}}" :status="$priceItem->status">
+                    <x-table.table-item wire:key="{{$priceItem->getKey()}}" :status="$priceItem->status">
                         <x-table.table-child>
                             <x-layouts.simple-text :name="$priceItem->message"/>
                         </x-table.table-child>
@@ -87,4 +87,8 @@
             </x-table.table-layout>
         @endif
     </x-layouts.main-container>
+    <div wire:loading
+         wire:target="destroy">
+        <x-loader/>
+    </div>
 </div>

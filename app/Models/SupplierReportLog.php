@@ -12,5 +12,6 @@ class SupplierReportLog extends Model
     protected $fillable = [
         'message',
         'supplier_report_id',
+        'level'
     ];
 }

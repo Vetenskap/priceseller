@@ -29,7 +29,7 @@
                 </x-table.table-child>
             </x-table.table-header>
             @foreach($report->badItems as $badItem)
-                <x-table.table-item>
+                <x-table.table-item wire:key="{{$badItem->getKey()}}">
                     <x-table.table-child>
                         <x-layouts.simple-text :name="$badItem->row" />
                     </x-table.table-child>

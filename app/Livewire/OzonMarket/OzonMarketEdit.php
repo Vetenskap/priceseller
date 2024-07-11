@@ -13,6 +13,7 @@ use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
 use App\Models\Supplier;
+use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
 use App\Services\OzonItemPriceService;
 use App\Services\OzonMarketService;
@@ -39,7 +40,7 @@ class OzonMarketEdit extends Component
     public int $selectedWarehouse;
 
     #[Url]
-    public $page = 'main';
+    public $page = null;
 
     /** @var TemporaryUploadedFile $file */
     public $file;
@@ -66,6 +67,11 @@ class OzonMarketEdit extends Component
 
     public function export(): void
     {
+        if (ItemsExportReportService::get($this->market)) {
+            $this->addJobAlready();
+            return;
+        }
+
         Export::dispatch($this->market, OzonMarketService::class);
         $this->addJobNotification();
     }
@@ -77,6 +83,11 @@ class OzonMarketEdit extends Component
 
     public function import(): void
     {
+        if (ItemsImportReportService::get($this->market)) {
+            $this->addJobAlready();
+            return;
+        }
+
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
         $path = $this->file->storeAs(OzonMarketService::PATH, $uuid . '.' . $ext);

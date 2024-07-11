@@ -8,11 +8,11 @@
     </x-notify-top>
     @enderror
     <x-layouts.actions>
-        <a href="{{url()->previous()}}" wire:navigate.hover>
+        <a href="{{route('ozon')}}" wire:navigate.hover>
             <x-primary-button>Закрыть</x-primary-button>
         </a>
         <x-success-button wire:click="save">Сохранить</x-success-button>
-        <x-danger-button wire:click="destroy">Удалить</x-danger-button>
+        <x-danger-button wire:click="destroy" wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить</x-danger-button>
     </x-layouts.actions>
     <x-layouts.main-container>
         <x-marketPages.index route="ozon-market-edit" :market="$market" :page="$page" />

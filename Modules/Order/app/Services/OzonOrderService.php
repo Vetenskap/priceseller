@@ -24,7 +24,7 @@ class OzonOrderService
 
     public function writeOffStocks()
     {
-        $this->organization->orders()->with('orderable')->chunk(100, function (Collection $orders) {
+        $this->organization->orders()->whereHas('orderable')->with('orderable')->chunk(100, function (Collection $orders) {
             $orders->each(function (Order $order) {
 
                 $markets = $this

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SupplierReport;
 
+use App\Exports\SupplierReportLogsExport;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\SupplierReport;
 use Livewire\Component;
@@ -33,5 +34,10 @@ class SupplierReportEdit extends Component
         $this->authorize('view', $this->report);
 
         return view('livewire.supplier-report.supplier-report-edit');
+    }
+
+    public function unloadAllLogs()
+    {
+        return \Excel::download(new SupplierReportLogsExport($this->report), 'report.xlsx');
     }
 }

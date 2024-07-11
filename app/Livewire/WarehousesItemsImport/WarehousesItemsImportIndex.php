@@ -23,6 +23,8 @@ class WarehousesItemsImportIndex extends Component
     {
         $report = WarehousesItemsImportReport::find($report['id']);
 
+        if ($report->status === 2) abort(403);
+
         Storage::disk('public')->delete('users/warehouses/' . "{$report->uuid}.xlsx");
         $report->delete();
     }

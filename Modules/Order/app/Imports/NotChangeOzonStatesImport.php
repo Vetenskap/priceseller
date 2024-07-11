@@ -25,7 +25,7 @@ class NotChangeOzonStatesImport implements ToCollection, WithHeadingRow
 
             if ($item = $this->user->items()->where('code', $row->get('Код клиента'))->first()) {
                 if ($row->get('Удалить') === 'Да') {
-                    NotChangeOzonState::where('user_id', $this->user->id)->where('item_id', $item->id);
+                    NotChangeOzonState::where('user_id', $this->user->id)->where('item_id', $item->id)->delete();
                     return;
                 }
 

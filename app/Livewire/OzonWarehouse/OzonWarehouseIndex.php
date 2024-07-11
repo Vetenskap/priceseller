@@ -14,10 +14,6 @@ class OzonWarehouseIndex extends Component
 
     public $selectedWarehouse = null;
 
-    public function mount()
-    {
-    }
-
     public function addWarehouse()
     {
         if (!$this->selectedWarehouse) {

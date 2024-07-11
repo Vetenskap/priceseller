@@ -3,6 +3,7 @@
 namespace App\Livewire\OzonWarehouse;
 
 use App\Livewire\Components\Toast;
+use App\Livewire\Traits\WithJsNotifications;
 use App\Models\OzonWarehouse;
 use App\Models\OzonWarehouseSupplier;
 use App\Models\OzonWarehouseUserWarehouse;
@@ -10,6 +11,8 @@ use Livewire\Component;
 
 class OzonWarehouseEdit extends Component
 {
+    use WithJsNotifications;
+
     public OzonWarehouse $warehouse;
 
     public $name;
@@ -21,11 +24,19 @@ class OzonWarehouseEdit extends Component
     public $selectedSupplier;
     public $selectedWarehouse;
 
+    public function save()
+    {
+        $this->authorize('update', $this->warehouse);
+
+        $this->warehouse->update($this->only('name'));
+
+        $this->addSuccessSaveNotification();
+    }
+
     public function mount()
     {
         $this->name = $this->warehouse->name;
         $this->warehouse_id = $this->warehouse->warehouse_id;
-        $this->selectedSupplier = auth()->user()->suppliers->first()?->id;
     }
 
     public function addSupplier()

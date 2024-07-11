@@ -18,6 +18,11 @@ trait WithJsNotifications
         $this->js((new Toast('Уведомление', 'Задача добавлена, пожалуйста, ожидайте..'))->info());
     }
 
+    public function addJobAlready()
+    {
+        $this->js((new Toast('Ошибка', 'Задача уже находится в обработке, ожидайте..'))->danger());
+    }
+
     public function addDeleteNotification()
     {
         $this->js((new Toast('Уведомление', 'Успешно удалено'))->info());

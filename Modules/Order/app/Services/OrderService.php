@@ -2,10 +2,12 @@
 
 namespace Modules\Order\Services;
 
+use App\Models\Organization;
 use App\Models\OzonItem;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WbItem;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
@@ -13,6 +15,7 @@ use Illuminate\Support\Facades\Http;
 use Modules\Order\HttpClient\WbClient;
 use Modules\Order\HttpClient\OzonClient;
 use Modules\Order\Models\Order;
+use Modules\Order\Models\WriteOffItemWarehouseStock;
 use Modules\Order\Models\WriteOffWarehouseStock;
 
 class OrderService
@@ -131,7 +134,7 @@ class OrderService
         }));
 
         DB::transaction(function () use ($warehouses, &$total) {
-            Order::where('organization_id', $this->organizationId)->where('state', 'new')->chunk(100, function (Collection $orders) use ($warehouses, &$total) {
+            Order::where('organization_id', $this->organizationId)->whereHas('orderable')->where('state', 'new')->chunk(100, function (Collection $orders) use ($warehouses, &$total) {
                 $orders->each(function (Order $order) use ($warehouses, &$total) {
                     $warehouses->each(function (Warehouse $warehouse) use ($order, &$total) {
                         $stock = $warehouse->stocks()->where('item_id', $order->orderable->item_id)->first();
@@ -176,5 +179,39 @@ class OrderService
         });
 
         return $total;
+    }
+
+    public function writeOffBalanceRollback(): void
+    {
+        WriteOffItemWarehouseStock::whereHas('order', function (Builder $query) {
+            $query->where('organization_id', $this->organizationId);
+        })
+            ->chunk(100, function (Collection $writeOffStocks) {
+                $writeOffStocks->each(function (WriteOffItemWarehouseStock $writeOffStock) {
+
+                    $itemWarehouseStock = $writeOffStock->itemWarehouseStock;
+                    $itemWarehouseStock->stock = $itemWarehouseStock->stock + $writeOffStock->stock;
+                    $order = $writeOffStock->order;
+                    $order->count += $writeOffStock->stock;
+
+                    $itemWarehouseStock->save();
+                    $order->save();
+                    $writeOffStock->delete();
+
+                });
+            });
+    }
+
+    public function clearAll(): void
+    {
+        $organization = Organization::find($this->organizationId);
+        $organization->orders()->chunk(100, function (Collection $orders) {
+            $orders->each(function (Order $order) {
+
+                $order->writeOffStocks()->delete();
+                $order->update(['state' => 'old']);
+            });
+        });
+        $organization->supplierOrderReports()->delete();
     }
 }

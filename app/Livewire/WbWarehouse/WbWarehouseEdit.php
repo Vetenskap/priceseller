@@ -3,6 +3,7 @@
 namespace App\Livewire\WbWarehouse;
 
 use App\Livewire\Components\Toast;
+use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Supplier;
 use App\Models\WbWarehouse;
 use App\Models\WbWarehouseSupplier;
@@ -11,6 +12,8 @@ use Livewire\Component;
 
 class WbWarehouseEdit extends Component
 {
+    use WithJsNotifications;
+
     public WbWarehouse $warehouse;
 
     public $name;
@@ -26,7 +29,15 @@ class WbWarehouseEdit extends Component
     {
         $this->name = $this->warehouse->name;
         $this->warehouse_id = $this->warehouse->warehouse_id;
-        $this->selectedSupplier = auth()->user()->suppliers->first()?->id;
+    }
+
+    public function save()
+    {
+        $this->authorize('update', $this->warehouse);
+
+        $this->warehouse->update($this->only('name'));
+
+        $this->addSuccessSaveNotification();
     }
 
     public function render()

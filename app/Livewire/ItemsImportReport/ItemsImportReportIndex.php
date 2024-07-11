@@ -29,6 +29,8 @@ class ItemsImportReportIndex extends Component
     {
         $report = ItemsImportReport::find($report['id']);
 
+        if ($report->status === 2) abort(403);
+
         $this->authorize('delete', $report);
 
         Storage::disk('public')->delete($this->getPath() . "{$report->uuid}.xlsx");
