@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Order\Models\WriteOffWarehouseStock;
 
-class Warehouse extends Model
+class Warehouse extends MainModel
 {
     use HasFactory;
     use HasUuids;

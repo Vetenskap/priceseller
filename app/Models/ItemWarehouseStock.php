@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Order\Models\WriteOffItemWarehouseStock;
 
-class ItemWarehouseStock extends Model
+class ItemWarehouseStock extends MainModel
 {
     use HasFactory;
 

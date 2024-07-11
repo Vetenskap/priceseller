@@ -26,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
         'name',
         'email',
         'password',
+        'timezone'
     ];
 
     /**
@@ -49,6 +50,16 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getTimeZoneAttribute ($value): string
+    {
+        return $value == config('app.timezone') || empty($value) ? config('app.timezone') : $value;
+    }
+
+    public function setTimeZoneAttribute($value)
+    {
+        $this->attributes['timezone'] = $value == config('app.timezone') || is_null($value) ? null : $value;
     }
 
     public function permissions(): BelongsToMany

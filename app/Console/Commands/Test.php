@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Events\NotificationEvent;
 use App\Events\TestBroadcast;
+use App\Helpers\Helpers;
 use App\Models\EmailSupplier;
 use App\Models\Item;
 use App\Models\Organization;
@@ -55,6 +56,6 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(Str::uuid()->toString());
+        dd(Helpers::getTimeZoneList());
     }
 }

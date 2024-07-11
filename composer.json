@@ -85,5 +85,8 @@
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "files": [
+        "app/Helpers/Helpers.php"
+    ]
 }

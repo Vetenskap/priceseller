@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Order\Models\Order;
 
-class OzonItem extends Model
+class OzonItem extends MainModel
 {
     use HasFactory;
     use HasUuids;

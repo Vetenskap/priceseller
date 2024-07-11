@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Modules\Order\Models\Order;
 use Modules\Order\Models\SupplierOrderReport;
 
-class Organization extends Model
+class Organization extends MainModel
 {
     use HasFactory;
     use HasUuids;

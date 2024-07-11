@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OzonWarehouseSupplier extends Model
+class OzonWarehouseSupplier extends MainModel
 {
     use HasFactory;
 

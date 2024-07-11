@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Modules\Order\Models\Order;
 
-class WbItem extends Model
+class WbItem extends MainModel
 {
     use HasFactory;
     use HasUuids;
