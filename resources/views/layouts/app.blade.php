@@ -54,20 +54,20 @@
     </main>
 
     <footer>
-        <div class="bg-gray-300">
-            <div class="max-w-2xl mx-auto text-black py-4">
+        <div class="bg-gray-300 dark:bg-gray-700">
+            <div class="max-w-2xl mx-auto py-4">
 {{--                <div class="text-center">--}}
 {{--                    <h3 class="text-xl mb-3"> Download our fitness app </h3>--}}
 {{--                    <p> Stay fit. All day, every day. </p>--}}
 {{--                    <div class="flex justify-center my-10">--}}
 {{--                    </div>--}}
 {{--                </div>--}}
-                <div class="my-5 flex flex-col md:flex-row md:justify-between items-center text-sm text-black">
+                <div class="my-5 flex flex-col md:flex-row md:justify-between items-center text-sm dark:text-white">
                     <p class="order-2 md:order-1 mt-8 md:mt-0"> &copy; ООО "СКАД", 2024. </p>
                     <div class="order-1 md:order-2">
-                        <span class="px-2"><a href="/">О нас</a></span>
-                        <span class="px-2 border-l border-gray-400"><a href="/">Связаться с нами</a></span>
-                        <span class="px-2 border-l border-gray-400"><a href="/">Политика конфиденциальности</a></span>
+                        <a href="/" class="px-2 hover:text-indigo-400 dark:hover:text-indigo-600">О нас</a>
+                        <a href="/" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Связаться с нами</a>
+                        <a href="/" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Политика конфиденциальности</a>
                     </div>
                 </div>
             </div>
