@@ -155,8 +155,6 @@ class OzonMarketService
 
     public static function closeMarkets(User $user)
     {
-        if (App::isLocal() || $user->isAdmin()) return;
-
         $count = $user->ozonMarkets()->count();
 
         if ($count > 0 && !$user->isOzonFiveSub() && !$user->isOzonTenSub()) {

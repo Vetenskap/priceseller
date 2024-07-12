@@ -17,11 +17,9 @@ class BusinessLogicService
         })->chunk(5, function (Collection $users) {
             $users->each(function (User $user) {
                 if (App::isLocal()) {
-                    if ($user->isAdmin()) {
-                        CheckEmails::dispatch($user->id);
-                    }
+                    CheckEmails::dispatchIf($user->isAdmin(), $user->id);
                 } else {
-                    CheckEmails::dispatch($user->id);
+                    CheckEmails::dispatchIf($user->isSub(), $user->id);
                 }
             });
         });

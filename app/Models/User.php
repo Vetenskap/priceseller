@@ -119,6 +119,11 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
         return $this->permissions()->where('value', 'admin')->where('expires', '>', now())->exists();
     }
 
+    public function isSub()
+    {
+        return $this->isAdmin() || $this->isWbSub() || $this->isOzonSub();
+    }
+
     public function emails()
     {
         return $this->hasMany(Email::class);

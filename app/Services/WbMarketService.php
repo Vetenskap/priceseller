@@ -160,8 +160,6 @@ class WbMarketService
 
     public static function closeMarkets(User $user)
     {
-        if (App::isLocal() || $user->isAdmin()) return;
-
         $count = $user->wbMarkets()->count();
 
         if ($count > 0 && !$user->isWbFiveSub() && !$user->isWbTenSub()) {

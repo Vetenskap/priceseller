@@ -59,7 +59,7 @@ class OzonMarketIndex extends Component
     public function render()
     {
         return view('livewire.ozon-market.ozon-market-index', [
-            'markets' => OzonMarket::where('user_id', auth()->user()->id)->get()
+            'markets' => auth()->user()->ozonMarkets
         ]);
     }
 }

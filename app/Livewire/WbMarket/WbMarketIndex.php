@@ -59,7 +59,7 @@ class WbMarketIndex extends Component
     public function render()
     {
         return view('livewire.wb-market.wb-market-index', [
-            'markets' => WbMarket::where('user_id', auth()->user()->id)->get()
+            'markets' => auth()->user()->wbMarkets
         ]);
     }
 }

@@ -11,8 +11,10 @@ class UsersPermissionsService
     {
         User::chunk(5, function (Collection $users) {
             $users->each(function (User $user) {
-                OzonMarketService::closeMarkets($user);
-                WbMarketService::closeMarkets($user);
+                if (!$user->isAdmin()) {
+                    OzonMarketService::closeMarkets($user);
+                    WbMarketService::closeMarkets($user);
+                }
             });
         });
     }
@@ -21,8 +23,10 @@ class UsersPermissionsService
     {
         User::whereNotNull('email_verified_at')->chunk(5, function (Collection $users) {
             $users->each(function (User $user) {
-                $service = new UserEmailNotficationService($user);
-                $service->subscribesExpires();
+                if (!$user->isAdmin()) {
+                    $service = new UserEmailNotficationService($user);
+                    $service->subscribesExpires();
+                }
             });
         });
     }

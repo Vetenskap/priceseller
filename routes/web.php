@@ -48,18 +48,6 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
-Route::middleware(['auth'])->group(function () {
-
-    Route::get('/subscribe/main', \App\Livewire\Subscribe\MainSub::class)->name('subscribe.main');
-    Route::get('/subscribe/ms', \App\Livewire\Subscribe\MsSub::class)->name('subscribe.ms');
-    Route::get('/subscribe/avito', \App\Livewire\Subscribe\AvitoSub::class)->name('subscribe.avito');
-    Route::get('/subscribe/ozon', \App\Livewire\Subscribe\OzonSub::class)->name('subscribe.ozon');
-    Route::get('/subscribe/wb', \App\Livewire\Subscribe\WbSub::class)->name('subscribe.wb');
-
-    Route::view('profile', 'profile')
-        ->name('profile');
-});
-
 Route::permanentRedirect('/', 'dashboard');
 
 
