@@ -48,6 +48,12 @@ Route::middleware(['auth'])->group(function () {
 
 });
 
+Route::middleware(['auth'])->group(function () {
+
+    Route::view('profile', 'profile')
+        ->name('profile');
+});
+
 Route::permanentRedirect('/', 'dashboard');
 
 
