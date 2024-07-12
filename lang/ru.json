@@ -39,5 +39,9 @@
     "Unauthorized": "Не авторизован",
     "Verify Email Address": "Подтвердить адрес электронной почты",
     "Whoops!": "Упс!",
-    "You are receiving this email because we received a password reset request for your account.": "Вы получили это письмо, потому что мы получили запрос на сброс пароля для Вашей учётной записи."
+    "You are receiving this email because we received a password reset request for your account.": "Вы получили это письмо, потому что мы получили запрос на сброс пароля для Вашей учётной записи.",
+    "Your subscription is expiring": "Ваша подписка истекает",
+    "Your subscription": "Ваша подписка",
+    "is about to expire.": "скоро истекает.",
+    "End date:": "Дата окончания:"
 }

@@ -214,4 +214,9 @@ class OrderService
         });
         $organization->supplierOrderReports()->delete();
     }
+
+    public static function prune(): void
+    {
+        Order::where('updated_at', '<', now()->subMonth())->delete();
+    }
 }

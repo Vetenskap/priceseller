@@ -62,11 +62,6 @@ class EmailHandlerLaravelImap
      */
     public function getNewPrice(string $supplierEmail, string $supplierFilename, string $criteria = 'UNSEEN'): ?string
     {
-        Context::forget('unload');
-        Context::push('unload', [
-            'Поставщик' => $supplierEmail,
-        ]);
-
         /** @var Folder $folder */
         foreach ($this->connection->getFolders()->paginate()->getIterator() as $folder) {
 
@@ -84,25 +79,14 @@ class EmailHandlerLaravelImap
             foreach ($query->paginate()->getIterator() as $message) {
                 if ($message->hasAttachments()) {
 
-                    Context::push('unload', ['Информация' => 'Есть вложения']);
-
                     /** @var Attachment $file */
                     foreach ($message->getAttachments()->paginate()->getIterator() as $file) {
 
                         $name = $file->getName();
 
-                        Context::push('unload', [
-                            'Название файла' => $name,
-                            'Наше название' => $supplierFilename
-                        ]);
-
                         if (!Str::contains($name, $supplierFilename)) {
                             continue;
                         }
-
-                        Context::push('unload', [
-                            'Тип файла' => $file->getContentType(),
-                        ]);
 
                         if (
                             !in_array($file->getContentType(), self::TABLE_TYPES) &&
@@ -112,11 +96,6 @@ class EmailHandlerLaravelImap
                         $fullPath = SupplierService::PATH . uniqid() . '_';
 
                         $this->storage->put($fullPath . Str::ascii($name), $file->getContent());
-
-                        Context::push('unload', [
-                            'Информация' => 'Файл сохранен',
-                            'Путь' => $fullPath . Str::ascii($name)
-                        ]);
 
                         if (in_array($file->getContentType(), self::ZIP_TYPES)) {
 
@@ -135,11 +114,6 @@ class EmailHandlerLaravelImap
                                 $this->storage->delete($fullPath . Str::ascii($name));
 
                                 $fullPath = $fullPath . Str::ascii($nameZip);
-
-                                Context::push('unload', [
-                                    'Информация' => 'Архивный файл сохранен',
-                                    'Путь' => $fullPath
-                                ]);
 
                             } else {
                                 Context::push('unload', [
@@ -164,8 +138,6 @@ class EmailHandlerLaravelImap
 
             unset($folder);
         }
-
-        Log::debug('Прайс не найден');
 
         return null;
     }

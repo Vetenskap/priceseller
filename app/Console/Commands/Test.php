@@ -11,12 +11,14 @@ use App\Models\Organization;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
+use App\Models\Permission;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WbItem;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
+use App\Notifications\SubscriptionExpires;
 use App\Services\EmailPriceItemService;
 use App\Services\EmailSupplierService;
 use App\Services\OzonItemPriceService;
@@ -56,6 +58,7 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(Helpers::getTimeZoneList());
+        $user = User::first();
+        $user->notify(new SubscriptionExpires(Permission::first()));
     }
 }
