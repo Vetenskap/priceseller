@@ -7,14 +7,14 @@ Schedule::call(function () {
     \App\Services\BusinessLogicService::usersEmailsUnload();
     \App\Services\ReportService::checkTimeouts();
 
-})->everyMinute()->withoutOverlapping();
+})->everyMinute()->name('everyMinuteSchedule')->withoutOverlapping();
 
 Schedule::call(function () {
 
     \Illuminate\Support\Facades\Artisan::call('horizon:snapshot');
     \App\Services\UsersPermissionsService::closeMarkets();
 
-})->everyFiveMinutes()->withoutOverlapping();
+})->everyFiveMinutes()->name('everyFiveMinutesSchedule')->withoutOverlapping();
 
 Schedule::call(function () {
 
