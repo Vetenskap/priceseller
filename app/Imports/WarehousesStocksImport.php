@@ -3,13 +3,18 @@
 namespace App\Imports;
 
 use App\Models\User;
+use App\Services\WarehouseItemsImportReportService;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\ToModel;
+use Maatwebsite\Excel\Concerns\WithChunkReading;
 use Maatwebsite\Excel\Concerns\WithHeadingRow;
 
-class WarehousesStocksImport implements ToCollection, WithHeadingRow
+class WarehousesStocksImport implements ToCollection, WithHeadingRow, WithChunkReading
 {
+    public int $correct = 0;
+    public int $error = 0;
+
     CONST HEADERS = [
         'Код',
         'Поставщик',
@@ -42,6 +47,8 @@ class WarehousesStocksImport implements ToCollection, WithHeadingRow
                 if (str_starts_with($key, 'Склад')) {
                     if ($warehouse = $this->user->warehouses()->where('name', str_replace('Склад ', '', $key))->first()) {
 
+                        $this->correct++;
+
                         $warehouse->stocks()->updateOrCreate(
                             [
                                 'item_id' => $item->id
@@ -54,6 +61,13 @@ class WarehousesStocksImport implements ToCollection, WithHeadingRow
                     }
                 }
             });
+
+            WarehouseItemsImportReportService::flush($this->user, $this->correct, $this->error);
         });
+    }
+
+    public function chunkSize(): int
+    {
+        return 1000;
     }
 }

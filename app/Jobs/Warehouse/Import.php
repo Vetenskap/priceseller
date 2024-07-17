@@ -30,8 +30,9 @@ class Import implements ShouldQueue, ShouldBeUnique
     public function handle(): void
     {
         if (WarehouseItemsImportReportService::newOrFail($this->user, $this->uuid)) {
-            \Excel::import(new WarehousesStocksImport($this->user), 'users/warehouses/' . $this->uuid . '.xlsx');
-            WarehouseItemsImportReportService::success($this->user, 0, 0);
+            $import = new WarehousesStocksImport($this->user);
+            \Excel::import($import, 'users/warehouses/' . $this->uuid . '.xlsx');
+            WarehouseItemsImportReportService::success($this->user, $import->correct, $import->error);
         }
     }
 
@@ -39,6 +40,7 @@ class Import implements ShouldQueue, ShouldBeUnique
     {
         WarehouseItemsImportReportService::error($this->user);
     }
+
 
     public function uniqueId(): string
     {

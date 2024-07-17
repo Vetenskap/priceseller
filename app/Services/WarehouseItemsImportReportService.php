@@ -46,11 +46,11 @@ class WarehouseItemsImportReportService
                 'error' => $error,
             ]);
 
-//            try {
-//                event(new ReportEvent($model));
-//            } catch (\Throwable) {
-//
-//            }
+            try {
+                event(new ReportEvent($model->id));
+            } catch (\Throwable $e) {
+                report($e);
+            }
 
             return true;
         } else {
