@@ -55,7 +55,7 @@ class ItemsImportReportService
             ]);
 
             try {
-                event(new ReportEvent($model));
+                event(new ReportEvent($model->user_id ?? $model->id));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -127,8 +127,8 @@ class ItemsImportReportService
 
             try {
                 event(new NotificationEvent($model->user_id ?? $model->id, 'Объект: ' . $model->name, 'Ошибка при импорте', 1));
-            } catch (\Throwable) {
-
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return true;
@@ -150,8 +150,8 @@ class ItemsImportReportService
 
                     try {
                         event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, 'Объект: ' . $report->reportable->name, 'Вышло время импорта', 1));
-                    } catch (\Throwable) {
-
+                    } catch (\Throwable $e) {
+                        report($e);
                     }
 
                 });

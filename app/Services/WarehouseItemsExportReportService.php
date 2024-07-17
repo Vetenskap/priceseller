@@ -28,9 +28,9 @@ class WarehouseItemsExportReportService
             ]);
 
             try {
-                event(new ReportEvent($model));
-            } catch (\Throwable) {
-
+                event(new ReportEvent($model->id));
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return true;
@@ -48,8 +48,8 @@ class WarehouseItemsExportReportService
 
             try {
                 event(new NotificationEvent($model->id, 'Объект: склады', 'Экспорт завершен', 0));
-            } catch (\Throwable) {
-
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return true;
@@ -68,8 +68,8 @@ class WarehouseItemsExportReportService
 
             try {
                 event(new NotificationEvent($model->id, 'Объект: склады', 'Ошибка при экспорте', 1));
-            } catch (\Throwable) {
-
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return true;
@@ -91,8 +91,8 @@ class WarehouseItemsExportReportService
 
                     try {
                         event(new NotificationEvent($report->user_id, 'Объект: склады', 'Вышло время экспорта', 1));
-                    } catch (\Throwable) {
-
+                    } catch (\Throwable $e) {
+                        report($e);
                     }
                 });
             });

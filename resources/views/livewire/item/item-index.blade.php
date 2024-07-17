@@ -9,7 +9,7 @@
         </x-navigate-pages>
         @if($tab === 'list')
             <x-blocks.main-block>
-                <x-layouts.title name="Все товары ({{$items->total()}})"/>
+                <x-layouts.title name="Все товары"/>
             </x-blocks.main-block>
             <x-blocks.main-block>
                 <x-titles.sub-title name="Фильтры"/>
@@ -33,15 +33,18 @@
                 <x-dropdown-select name="supplier"
                                    field="filters.supplier_id"
                                    :options="$user->suppliers"
-                >Поставщик</x-dropdown-select>
+                >Поставщик
+                </x-dropdown-select>
                 <x-dropdown-select name="unloadWb"
                                    field="filters.unload_wb"
                                    :options="[['id' => 1, 'name' => 'Да'],['id' => 0, 'name' => 'Нет']]"
-                >Выгружать на ВБ</x-dropdown-select>
+                >Выгружать на ВБ
+                </x-dropdown-select>
                 <x-dropdown-select name="unloadOzon"
                                    field="filters.unload_ozon"
                                    :options="[['id' => 1, 'name' => 'Да'],['id' => 0, 'name' => 'Нет']]"
-                >Выгружать на ОЗОН</x-dropdown-select>
+                >Выгружать на ОЗОН
+                </x-dropdown-select>
             </x-blocks.flex-block-end>
             @if($items->count() > 0)
                 <x-table.table-layout>
@@ -63,7 +66,8 @@
                         </x-table.table-child>
                     </x-table.table-header>
                     @foreach($items->sortByDesc('updated_at') as $item)
-                        <x-table.table-item wire:key="{{$item->getKey()}}" :status="session('selected-item') === $item->getKey() ? 0 : -1">
+                        <x-table.table-item wire:key="{{$item->getKey()}}"
+                                            :status="session('selected-item') === $item->getKey() ? 0 : -1">
                             <x-table.table-child>
                                 <a href="{{route('item-edit', ['item' => $item->getKey()])}}">
                                     <x-layouts.simple-text :name="$item->code"/>
@@ -84,6 +88,9 @@
                         </x-table.table-item>
                     @endforeach
                 </x-table.table-layout>
+                <x-blocks.main-block>
+                    {{ $items->withQueryString()->links() }}
+                </x-blocks.main-block>
             @else
                 <x-blocks.main-block>
                     <x-layouts.simple-text name="Сейчас у вас нет товаров"/>
@@ -110,12 +117,12 @@
             </x-blocks.flex-block>
             <form wire:submit="import">
                 <div
-                        x-data="{ uploading: false, progress: 0 }"
-                        x-on:livewire-upload-start="uploading = true"
-                        x-on:livewire-upload-finish="uploading = false"
-                        x-on:livewire-upload-cancel="uploading = false"
-                        x-on:livewire-upload-error="uploading = false"
-                        x-on:livewire-upload-progress="progress = $event.detail.progress"
+                    x-data="{ uploading: false, progress: 0 }"
+                    x-on:livewire-upload-start="uploading = true"
+                    x-on:livewire-upload-finish="uploading = false"
+                    x-on:livewire-upload-cancel="uploading = false"
+                    x-on:livewire-upload-error="uploading = false"
+                    x-on:livewire-upload-progress="progress = $event.detail.progress"
                 >
                     <x-blocks.main-block>
                         <x-file-input wire:model="file"/>

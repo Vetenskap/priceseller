@@ -161,9 +161,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
 
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
-        if (App::isProduction()) return $this->isAdmin();
-
-        return true;
+        return $this->isAdmin() || App::isLocal();
     }
 
     public function organizations()

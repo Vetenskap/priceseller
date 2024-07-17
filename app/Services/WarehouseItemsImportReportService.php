@@ -28,9 +28,9 @@ class WarehouseItemsImportReportService
             ]);
 
             try {
-                event(new ReportEvent($model));
-            } catch (\Throwable) {
-
+                event(new ReportEvent($model->id));
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return true;
@@ -93,8 +93,8 @@ class WarehouseItemsImportReportService
 
             try {
                 event(new NotificationEvent($model->id, 'Объект: склады', 'Импорт завершен', 0));
-            } catch (\Throwable) {
-
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return true;
@@ -113,8 +113,8 @@ class WarehouseItemsImportReportService
 
             try {
                 event(new NotificationEvent($model->id, 'Объект: склады', 'Ошибка при импорте', 1));
-            } catch (\Throwable) {
-
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return true;
@@ -136,8 +136,8 @@ class WarehouseItemsImportReportService
 
                     try {
                         event(new NotificationEvent($report->user_id, 'Объект: склады', 'Вышло время импорта', 1));
-                    } catch (\Throwable) {
-
+                    } catch (\Throwable $e) {
+                        report($e);
                     }
 
                 });
