@@ -2,14 +2,14 @@
 
 namespace App\Livewire\OzonWarehouse;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Components\Toast;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\OzonWarehouse;
 use App\Models\OzonWarehouseSupplier;
 use App\Models\OzonWarehouseUserWarehouse;
-use Livewire\Component;
 
-class OzonWarehouseEdit extends Component
+class OzonWarehouseEdit extends BaseComponent
 {
     use WithJsNotifications;
 

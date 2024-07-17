@@ -2,12 +2,12 @@
 
 namespace App\Livewire\WbWarehouse;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Components\Toast;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
-use Livewire\Component;
 
-class WbWarehouseIndex extends Component
+class WbWarehouseIndex extends BaseComponent
 {
     public WbMarket $market;
     public $apiWarehouses;

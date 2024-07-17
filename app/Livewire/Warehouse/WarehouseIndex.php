@@ -5,23 +5,20 @@ namespace App\Livewire\Warehouse;
 use App\Exports\WarehousesStocksExport;
 use App\Jobs\Warehouse\Export;
 use App\Jobs\Warehouse\Import;
-use App\Livewire\Components\Toast;
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Warehouse\WarehousePostForm;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Warehouse;
 use App\Services\WarehouseItemsExportReportService;
 use App\Services\WarehouseItemsImportReportService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Session;
 use Livewire\Attributes\Url;
-use Livewire\Component;
 use Livewire\WithFileUploads;
 
-class WarehouseIndex extends Component
+class WarehouseIndex extends BaseComponent
 {
-    use WithSubscribeNotification, WithFileUploads, WithJsNotifications;
+    use WithFileUploads, WithJsNotifications;
 
     public WarehousePostForm $form;
 

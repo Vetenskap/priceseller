@@ -1,20 +1,19 @@
 <?php
 
-namespace App\Livewire\Traits;
+namespace App\Livewire;
 
 use App\Livewire\Components\Toast;
-use Illuminate\Support\Arr;
-use Livewire\Attributes\On;
+use Livewire\Component;
 
-trait WithSubscribeNotification
+class BaseComponent extends Component
 {
     public function getListeners()
     {
         return [
-            'echo:notification.' . auth()->user()->id . ',.notify' => 'notification'
+            'echo:notification.' . auth()->user()->id . ',.notify' => 'notification',
+            'echo:report.' . auth()->user()->id . ',.event' => '$refresh'
         ];
     }
-
 
     public function notification($event)
     {

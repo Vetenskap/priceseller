@@ -2,27 +2,19 @@
 
 namespace App\Livewire\ItemsExportReport;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithModelsPaths;
 use App\Models\ItemsExportReport;
 use App\Models\OzonMarket;
 use App\Models\User;
 use App\Models\WbMarket;
 use Illuminate\Support\Facades\Storage;
-use Livewire\Component;
 
-class ItemsExportReportIndex extends Component
+class ItemsExportReportIndex extends BaseComponent
 {
     use WithModelsPaths;
 
     public User|WbMarket|OzonMarket $model;
-
-    public function getListeners()
-    {
-        return [
-            'echo:notification.' . auth()->user()->id . ',.notify' => '$refresh',
-            'echo:items-import-report.' . $this->model->id . ',.event' => '$refresh'
-        ];
-    }
 
     public function download($report)
     {

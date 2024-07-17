@@ -6,10 +6,10 @@ use App\Exports\OzonItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Jobs\MarketRelationshipsAndCommissions;
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
 use App\Models\Supplier;
@@ -23,13 +23,12 @@ use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
 use Livewire\Attributes\Url;
-use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
-class OzonMarketEdit extends Component
+class OzonMarketEdit extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters, WithSubscribeNotification;
+    use WithFileUploads, WithJsNotifications, WithFilters;
 
     public OzonMarketPostForm $form;
 

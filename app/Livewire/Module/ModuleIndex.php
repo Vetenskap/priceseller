@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Module;
 
-use Livewire\Component;
+use App\Livewire\BaseComponent;
 
-class ModuleIndex extends Component
+class ModuleIndex extends BaseComponent
 {
     public function render()
     {

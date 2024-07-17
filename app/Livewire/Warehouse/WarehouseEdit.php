@@ -2,24 +2,17 @@
 
 namespace App\Livewire\Warehouse;
 
-use App\Exports\WarehousesStocksExport;
-use App\Jobs\Export;
-use App\Jobs\Import;
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Warehouse\WarehousePostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Warehouse;
-use App\Services\WarehouseService;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
-class WarehouseEdit extends Component
+class WarehouseEdit extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters, WithSubscribeNotification;
+    use WithFileUploads, WithJsNotifications, WithFilters;
 
     public WarehousePostForm $form;
 

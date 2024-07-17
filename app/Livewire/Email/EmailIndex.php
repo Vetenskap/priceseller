@@ -2,15 +2,12 @@
 
 namespace App\Livewire\Email;
 
-use App\Livewire\Components\Toast;
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Email\EmailPostForm;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Email;
-use Livewire\Component;
 
-class EmailIndex extends Component
+class EmailIndex extends BaseComponent
 {
-    use WithSubscribeNotification;
 
     public EmailPostForm $form;
 

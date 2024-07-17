@@ -2,13 +2,12 @@
 
 namespace App\Livewire\EmailSupplier;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Components\Toast;
 use App\Models\Email;
 use App\Models\EmailSupplier;
-use Livewire\Attributes\On;
-use Livewire\Component;
 
-class EmailSupplierIndex extends Component
+class EmailSupplierIndex extends BaseComponent
 {
     public Email $email;
 

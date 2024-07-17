@@ -2,18 +2,16 @@
 
 namespace App\Livewire\WbMarket;
 
-use App\Exports\ItemsExport;
 use App\Exports\WbItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Jobs\MarketRelationshipsAndCommissions;
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Supplier;
 use App\Models\WbMarket;
-use App\Models\WbWarehouse;
 use App\Services\ItemsImportReportService;
 use App\Services\WbItemPriceService;
 use App\Services\WbMarketService;
@@ -23,13 +21,12 @@ use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
 use Livewire\Attributes\Url;
-use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
-class WbMarketEdit extends Component
+class WbMarketEdit extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters, WithSubscribeNotification;
+    use WithFileUploads, WithJsNotifications, WithFilters;
 
     public WbMarketPostForm $form;
 

@@ -2,22 +2,15 @@
 
 namespace App\Livewire\WarehousesItemsImport;
 
+use App\Livewire\BaseComponent;
 use App\Models\User;
 use App\Models\WarehousesItemsImportReport;
 use Illuminate\Support\Facades\Storage;
-use Livewire\Component;
 
-class WarehousesItemsImportIndex extends Component
+class WarehousesItemsImportIndex extends BaseComponent
 {
     public User $model;
 
-    public function getListeners()
-    {
-        return [
-            'echo:notification.' . $this->model->id . ',.notify' => '$refresh',
-            'echo:items-import-report.' . $this->model->id . ',.event' => '$refresh'
-        ];
-    }
 
     public function deleteImport($report)
     {

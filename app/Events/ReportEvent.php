@@ -1,25 +1,24 @@
 <?php
 
-namespace App\Events\Supplier;
+namespace App\Events;
 
-use App\Models\Supplier;
+use App\Models\OzonMarket;
+use App\Models\User;
+use App\Models\WbMarket;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class SupplierReportChangeMessage implements ShouldBroadcastNow
+class ReportEvent implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(public Supplier $supplier)
+    public function __construct(public int $userId)
     {
         //
     }
@@ -32,12 +31,12 @@ class SupplierReportChangeMessage implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         return [
-            new Channel('supplier.report.' . $this->supplier->id),
+            new Channel('report.' . $this->userId),
         ];
     }
 
     public function broadcastAs()
     {
-        return 'change-message';
+        return 'event';
     }
 }

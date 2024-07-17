@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Events\ItemsImportReportEvent;
+use App\Events\ReportEvent;
 use App\Events\NotificationEvent;
 use App\Models\ItemsImportReport;
 use App\Models\OzonMarket;
@@ -34,9 +34,9 @@ class ItemsImportReportService
             ]);
 
             try {
-                event(new ItemsImportReportEvent($model));
-            } catch (\Throwable) {
-
+                event(new ReportEvent($model));
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return true;
@@ -55,9 +55,9 @@ class ItemsImportReportService
             ]);
 
             try {
-                event(new ItemsImportReportEvent($model));
-            } catch (\Throwable) {
-
+                event(new ReportEvent($model));
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return true;
@@ -107,8 +107,8 @@ class ItemsImportReportService
 
             try {
                 event(new NotificationEvent($model->user_id ?? $model->id, 'Объект: ' . $model->name, 'Импорт завершен', 0));
-            } catch (\Throwable) {
-
+            } catch (\Throwable $e) {
+                report($e);
             }
 
             return true;

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Events\NotificationEvent;
+use App\Events\ReportEvent;
 use App\Events\Supplier\SupplierReportChangeMessage;
 use App\Models\Supplier;
 use App\Models\SupplierReport;
@@ -55,7 +56,7 @@ class SupplierReportService
             $report->save();
 
             try {
-                event(new SupplierReportChangeMessage($supplier));
+                event(new ReportEvent($supplier->user_id));
             } catch (\Throwable) {
 
             }

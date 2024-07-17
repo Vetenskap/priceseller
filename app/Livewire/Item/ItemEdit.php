@@ -2,16 +2,15 @@
 
 namespace App\Livewire\Item;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Components\Toast;
 use App\Livewire\Forms\Item\ItemPostForm;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Item;
-use Livewire\Component;
 
-class ItemEdit extends Component
+class ItemEdit extends BaseComponent
 {
-    use WithJsNotifications, WithSubscribeNotification;
+    use WithJsNotifications;
 
     public ItemPostForm $form;
 

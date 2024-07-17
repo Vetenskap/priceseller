@@ -2,19 +2,14 @@
 
 namespace App\Livewire\Email;
 
-use App\Exceptions\ItemNotFoundException;
-use App\Livewire\Components\Toast;
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Email\EmailPostForm;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Email;
-use App\Models\Supplier;
-use Livewire\Attributes\On;
-use Livewire\Component;
 
-class EmailShow extends Component
+class EmailShow extends BaseComponent
 {
-    use WithJsNotifications, WithSubscribeNotification;
+    use WithJsNotifications;
 
     public EmailPostForm $form;
 

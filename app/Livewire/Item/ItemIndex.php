@@ -5,24 +5,22 @@ namespace App\Livewire\Item;
 use App\Exports\ItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
+use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\User;
 use App\Services\Item\ItemService;
 use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Session;
 use Livewire\Attributes\Url;
-use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
-class ItemIndex extends Component
+class ItemIndex extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters, WithSubscribeNotification;
+    use WithFileUploads, WithJsNotifications, WithFilters;
 
     /** @var TemporaryUploadedFile $file */
     public $file;

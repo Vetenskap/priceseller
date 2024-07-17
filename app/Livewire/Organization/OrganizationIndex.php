@@ -2,14 +2,12 @@
 
 namespace App\Livewire\Organization;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Organization\OrganizationPostForm;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Organization;
-use Livewire\Component;
 
-class OrganizationIndex extends Component
+class OrganizationIndex extends BaseComponent
 {
-    use WithSubscribeNotification;
 
     public OrganizationPostForm $form;
 

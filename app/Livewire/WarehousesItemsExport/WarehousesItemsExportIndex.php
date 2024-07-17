@@ -2,23 +2,14 @@
 
 namespace App\Livewire\WarehousesItemsExport;
 
+use App\Livewire\BaseComponent;
 use App\Models\User;
 use App\Models\WarehousesItemsExportReport;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Livewire\Component;
 
-class WarehousesItemsExportIndex extends Component
+class WarehousesItemsExportIndex extends BaseComponent
 {
     public User $model;
-
-    public function getListeners()
-    {
-        return [
-            'echo:notification.' . $this->model->id . ',.notify' => '$refresh',
-            'echo:items-import-report.' . $this->model->id . ',.event' => '$refresh'
-        ];
-    }
 
     public function download($report)
     {

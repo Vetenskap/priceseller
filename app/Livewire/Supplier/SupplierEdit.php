@@ -2,20 +2,16 @@
 
 namespace App\Livewire\Supplier;
 
-use App\Livewire\Components\Toast;
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Supplier\SupplierPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
-use Livewire\Component;
-
-class SupplierEdit extends Component
+class SupplierEdit extends BaseComponent
 {
-    use WithJsNotifications, WithFilters, WithSubscribeNotification;
+    use WithJsNotifications, WithFilters;
 
     public SupplierPostForm $form;
 

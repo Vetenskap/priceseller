@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\Events\ItemsImportReportEvent;
+use App\Events\ReportEvent;
 use App\Events\NotificationEvent;
 use App\Models\User;
 use App\Models\WarehousesItemsImportReport;
@@ -28,7 +28,7 @@ class WarehouseItemsImportReportService
             ]);
 
             try {
-                event(new ItemsImportReportEvent($model));
+                event(new ReportEvent($model));
             } catch (\Throwable) {
 
             }
@@ -47,7 +47,7 @@ class WarehouseItemsImportReportService
             ]);
 
 //            try {
-//                event(new ItemsImportReportEvent($model));
+//                event(new ReportEvent($model));
 //            } catch (\Throwable) {
 //
 //            }

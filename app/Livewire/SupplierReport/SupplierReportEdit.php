@@ -3,22 +3,15 @@
 namespace App\Livewire\SupplierReport;
 
 use App\Exports\SupplierReportLogsExport;
+use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\SupplierReport;
-use Livewire\Component;
 
-class SupplierReportEdit extends Component
+class SupplierReportEdit extends BaseComponent
 {
     use WithJsNotifications;
 
     public SupplierReport $report;
-
-    public function getListeners()
-    {
-        return [
-            "echo:supplier.report.{$this->report->supplier->id},.change-message" => 'render'
-        ];
-    }
 
     public function destroy()
     {

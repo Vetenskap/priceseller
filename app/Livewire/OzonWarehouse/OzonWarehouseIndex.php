@@ -2,12 +2,12 @@
 
 namespace App\Livewire\OzonWarehouse;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Components\Toast;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
-use Livewire\Component;
 
-class OzonWarehouseIndex extends Component
+class OzonWarehouseIndex extends BaseComponent
 {
     public OzonMarket $market;
     public $apiWarehouses;

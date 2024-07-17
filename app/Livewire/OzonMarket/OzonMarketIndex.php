@@ -2,17 +2,14 @@
 
 namespace App\Livewire\OzonMarket;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Components\Toast;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\OzonMarket;
 use Illuminate\Auth\Access\AuthorizationException;
-use Livewire\Component;
 
-class OzonMarketIndex extends Component
+class OzonMarketIndex extends BaseComponent
 {
-    use WithSubscribeNotification;
-
     public OzonMarketPostForm $form;
 
     public $showCreateForm = false;

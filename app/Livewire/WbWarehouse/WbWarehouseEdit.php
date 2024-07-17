@@ -2,15 +2,13 @@
 
 namespace App\Livewire\WbWarehouse;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Components\Toast;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Models\Supplier;
 use App\Models\WbWarehouse;
 use App\Models\WbWarehouseSupplier;
 use App\Models\WbWarehouseUserWarehouse;
-use Livewire\Component;
-
-class WbWarehouseEdit extends Component
+class WbWarehouseEdit extends BaseComponent
 {
     use WithJsNotifications;
 
