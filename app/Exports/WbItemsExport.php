@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use Modules\Order\Models\Order;
 use PhpOffice\PhpSpreadsheet\Style\Color;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 
@@ -60,6 +61,10 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
                         ->collapse()
                         ->all());
 
+                    if (class_exists(Order::class)) {
+                        $main['count_orders'] = $item->orders()->sum('count');
+                    }
+
                     return $main;
                 });
 
@@ -71,7 +76,13 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
 
     public function headings(): array
     {
-        return array_merge(WbItemsImport::HEADERS, $this->warehouses->map(fn(WbWarehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
+        $main = array_merge(WbItemsImport::HEADERS, $this->warehouses->map(fn(WbWarehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
+
+        if (class_exists(Order::class)) {
+            $main[] = 'Всего заказов';
+        }
+
+        return $main;
     }
 
     public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)

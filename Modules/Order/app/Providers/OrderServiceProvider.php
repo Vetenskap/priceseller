@@ -28,9 +28,9 @@ class OrderServiceProvider extends ServiceProvider
 
             $schedule = $this->app->make(Schedule::class);
 
-            $schedule->call(function () {
-                \Modules\Order\Services\OrderService::prune();
-            })->name('dailyOrderSchedule')->daily();
+//            $schedule->call(function () {
+//                \Modules\Order\Services\OrderService::prune();
+//            })->name('dailyOrderSchedule')->daily();
 
             $schedule->call(function () {
                 \App\Models\User::chunk(10, function (\Illuminate\Support\Collection $users) {
