@@ -132,25 +132,9 @@ class OrderIndex extends Component
 
     public function purchaseOrder()
     {
-        $this->organization->supplierOrderReports()->delete();
-
-        $this->organization
-            ->orders()
-            ->with('orderable.item')
-            ->where('state', 'new')
-            ->get()
-            ->groupBy('orderable.item.supplier_id')->each(function (Collection $hh, string $supplierId) {
-
-                $uuid = Str::uuid();
-
-                \Excel::store(new SupplierOrderExport($this->organizationId, $supplierId), "users/orders/{$uuid}.xlsx", 'public');
-
-                SupplierOrderReport::create([
-                    'supplier_id' => $supplierId,
-                    'organization_id' => $this->organizationId,
-                    'uuid' => $uuid,
-                ]);
-            });
+        $service = new OrderService($this->organizationId, auth()->user());
+        $service->purchaseOrder();
+        $this->dispatch('refresh')->self();
     }
 
     public function downloadPurchaseOrder(array $order)
@@ -171,7 +155,8 @@ class OrderIndex extends Component
 
     public function writeOffBalanceRollback()
     {
-        $this->service->writeOffBalanceRollback();
+        $service = new OrderService($this->organizationId, auth()->user());
+        $service->writeOffBalanceRollback();
         $this->js((new Toast('Успех', 'Все остатки возвращены на склад'))->success());
         $this->dispatch('refresh')->self();
     }
@@ -194,5 +179,11 @@ class OrderIndex extends Component
 
         $this->js((new Toast('Успех', "Изменён статус у {$total} заказов на Озоне"))->success());
         $this->dispatch('refresh')->self();
+    }
+
+    public function startAllActions()
+    {
+        $service = new OrderService($this->organizationId, auth()->user());
+        $service->processOrders();
     }
 }

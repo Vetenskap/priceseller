@@ -12,9 +12,12 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Str;
+use Modules\Order\Exports\SupplierOrderExport;
 use Modules\Order\HttpClient\WbClient;
 use Modules\Order\HttpClient\OzonClient;
 use Modules\Order\Models\Order;
+use Modules\Order\Models\SupplierOrderReport;
 use Modules\Order\Models\WriteOffItemWarehouseStock;
 use Modules\Order\Models\WriteOffWarehouseStock;
 
@@ -218,5 +221,47 @@ class OrderService
     public static function prune(): void
     {
         Order::where('updated_at', '<', now()->subMonth())->delete();
+    }
+
+    public function purchaseOrder()
+    {
+        $organization = Organization::find($this->organizationId);
+
+        $organization->supplierOrderReports()->delete();
+
+        $organization
+            ->orders()
+            ->with('orderable.item')
+            ->where('state', 'new')
+            ->get()
+            ->groupBy('orderable.item.supplier_id')->each(function (Collection $hh, string $supplierId) {
+
+                $uuid = Str::uuid();
+
+                \Excel::store(new SupplierOrderExport($this->organizationId, $supplierId), "users/orders/{$uuid}.xlsx", 'public');
+
+                SupplierOrderReport::create([
+                    'supplier_id' => $supplierId,
+                    'organization_id' => $this->organizationId,
+                    'uuid' => $uuid,
+                ]);
+            });
+    }
+
+    public function processOrders(): void
+    {
+        $organization = Organization::find($this->organizationId);
+
+        $this->getOrders();
+        $this->writeOffBalance($organization->selectedOrdersWarehouses->map(fn (Warehouse $warehouse) => $warehouse->id)->toArray());
+        $this->purchaseOrder();
+
+        $ozonService = new OzonOrderService($organization, $this->user);
+        $ozonService->writeOffStocks();
+
+        $wbService = new WbOrderService($organization, $this->user);
+        $wbService->writeOffStocks();
+
+        $ozonService->setStates();
     }
 }

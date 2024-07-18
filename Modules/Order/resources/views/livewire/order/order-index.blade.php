@@ -39,6 +39,10 @@
                             </x-blocks.flex-block-end>
                         @endif
                         <x-blocks.flex-block-end>
+                            <x-primary-button wire:click="startAllActions">Выполнить все действия</x-primary-button>
+                        </x-blocks.flex-block-end>
+                        <x-layouts.title name="Ручная выгрузка"/>
+                        <x-blocks.flex-block-end>
                             <x-primary-button wire:click="getOrders">Получить заказы</x-primary-button>
                         </x-blocks.flex-block-end>
                         <x-blocks.flex-block-end>
@@ -182,7 +186,7 @@
         </x-layouts.module-container>
     @endif
     <div wire:loading
-         wire:target="setOrdersState, export, import, getOrders, writeOffBalance, purchaseOrder, clear, writeOffBalanceRollback, writeOffMarketsStocks">
+         wire:target="startAllActions, setOrdersState, export, import, getOrders, writeOffBalance, purchaseOrder, clear, writeOffBalanceRollback, writeOffMarketsStocks">
         <x-loader/>
     </div>
 </div>

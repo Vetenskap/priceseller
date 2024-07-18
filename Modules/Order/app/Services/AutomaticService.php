@@ -19,6 +19,7 @@ class AutomaticService
             $service = new OrderService($organization->id, $this->user);
             $service->getOrders();
             $service->writeOffBalance($organization->selectedOrdersWarehouses->map(fn (Warehouse $warehouse) => $warehouse->id)->toArray());
+            $service->purchaseOrder();
 
             $ozonService = new OzonOrderService($organization, $this->user);
             $ozonService->writeOffStocks();
