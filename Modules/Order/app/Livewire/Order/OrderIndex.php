@@ -185,5 +185,6 @@ class OrderIndex extends Component
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $service->processOrders();
+        $this->dispatch('refresh')->self();
     }
 }
