@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Modules\Order\Models\Order;
 
 class OzonItemPriceService
 {
@@ -141,6 +142,9 @@ class OzonItemPriceService
             $new_count = $ozonItem->item->count < $this->market->min ? 0 : $ozonItem->item->count;
             $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $ozonItem->item->multiplicity === 1) ? 1 : $new_count;
             $new_count = ($new_count + $myWarehousesStocks) / $ozonItem->item->multiplicity;
+            if (class_exists(Order::class)) {
+                $new_count = $new_count - ($ozonItem->orders()->where('state', 'new')->sum('count') * $ozonItem->item->multiplicity);
+            }
             $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
             $new_count = (int)max($new_count, 0);
 

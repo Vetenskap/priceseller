@@ -29,6 +29,10 @@
                 <div class="w-3/4">
                     <div class="p-6 dark:bg-gray-700 bg-gray-100 overflow-hidden shadow-sm sm:rounded-lg mb-6">
                         <x-layouts.title :name="$organization->name"/>
+                        <x-blocks.flex-block-end>
+                            <x-inputs.switcher :checked="$automatic" wire:model="automatic"/>
+                            <x-layouts.simple-text name="Автоматическая выгрузка" />
+                        </x-blocks.flex-block-end>
                         @if($orders->count())
                             <x-blocks.flex-block-end>
                                 <x-danger-button wire:click="clear">Очистить</x-danger-button>
@@ -37,18 +41,19 @@
                         <x-blocks.flex-block-end>
                             <x-primary-button wire:click="getOrders">Получить заказы</x-primary-button>
                         </x-blocks.flex-block-end>
+                        <x-blocks.flex-block-end>
+                            <x-dropdowns.dropdown-checkboxes :options="$warehouses"
+                                                             :selected-options="$selectedWarehouses"
+                                                             wire-func="selectWarehouse"
+                                                             :active="$openSelectedWarehouses"
+                            >
+                                Склады
+                            </x-dropdowns.dropdown-checkboxes>
+                        </x-blocks.flex-block-end>
                         @if($orders->count())
-                            <x-titles.sub-title name="Списать остатки"/>
-                            <x-blocks.flex-block-end>
-                                <x-dropdowns.dropdown-checkboxes :options="$warehouses"
-                                                                 :selected-options="$selectedWarehouses"
-                                                                 wire-func="selectWarehouse"
-                                                                 :active="$openSelectedWarehouses"
-                                >
-                                    Склады
-                                </x-dropdowns.dropdown-checkboxes>
-                                <x-primary-button wire:click="writeOffBalance">Списать остатки</x-primary-button>
-                            </x-blocks.flex-block-end>
+                            <x-blocks.flex-block>
+                                <x-primary-button wire:click="writeOffBalance">Списать остатки со складов</x-primary-button>
+                            </x-blocks.flex-block>
                             @if($writeOff)
                                 <x-blocks.flex-block-end>
                                     <x-success-button wire:click="downloadWriteOffBalance">Скачать списанные
@@ -59,9 +64,8 @@
                                     </x-danger-button>
                                 </x-blocks.flex-block-end>
                             @endif
-                            <x-titles.sub-title name="Сформировать заказы поставщикам"/>
                             <x-blocks.flex-block>
-                                <x-primary-button wire:click="purchaseOrder">Сформировать</x-primary-button>
+                                <x-primary-button wire:click="purchaseOrder">Сформировать заказы поставщикам</x-primary-button>
                             </x-blocks.flex-block>
                             <x-blocks.flex-block-end>
                                 @foreach($organization->supplierOrderReports as $report)
@@ -107,7 +111,8 @@
                                     </x-table.table-child>
                                 </x-table.table-header>
                                 @foreach($orders as $order)
-                                    <x-table.table-item :status="$order->writeOffStocks()->count() ? 2 : -1" wire:key="{{$order->getKey()}}">
+                                    <x-table.table-item :status="$order->writeOffStocks()->count() ? 2 : -1"
+                                                        wire:key="{{$order->getKey()}}">
                                         <x-table.table-child>
                                             <x-layouts.simple-text :name="$order->number"/>
                                         </x-table.table-child>

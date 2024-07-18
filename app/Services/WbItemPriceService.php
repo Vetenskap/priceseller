@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Modules\Order\Models\Order;
 
 class WbItemPriceService
 {
@@ -118,6 +119,9 @@ class WbItemPriceService
             $new_count = $wbItem->item->count < $this->market->min ? 0 : $wbItem->item->count;
             $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $wbItem->item->multiplicity === 1) ? 1 : $new_count;
             $new_count = ($new_count + $myWarehousesStocks) / $wbItem->item->multiplicity;
+            if (class_exists(Order::class)) {
+                $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $wbItem->item->multiplicity);
+            }
             $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
             $new_count = (int)max($new_count, 0);
 

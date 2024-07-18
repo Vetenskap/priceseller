@@ -46,6 +46,17 @@ class OrderIndex extends Component
 
     public $openSelectedWarehouses = false;
 
+    public $automatic;
+
+    public function updatedAutomatic()
+    {
+        $this->organization->automaticUnloadOrder()->updateOrCreate([
+            'organization_id' => $this->organizationId
+        ], [
+            'automatic' => $this->automatic
+        ]);
+    }
+
     public function changeActive()
     {
         $this->openSelectedWarehouses = !$this->openSelectedWarehouses;
@@ -67,6 +78,8 @@ class OrderIndex extends Component
         if ($this->organizationId) {
             $this->organization = auth()->user()->organizations()->findOrFail($this->organizationId);
             $this->orders = $this->organization->orders()->whereHas('orderable')->with('orderable.item')->where('state', 'new')->get();
+            $this->selectedWarehouses = $this->organization->selectedOrdersWarehouses->pluck('id')->toArray();
+            $this->automatic = $this->organization->automaticUnloadOrder ? $this->organization->automaticUnloadOrder->automatic : false;
         }
     }
 
@@ -97,8 +110,10 @@ class OrderIndex extends Component
     {
         if (!in_array($id, $this->selectedWarehouses)) {
             $this->selectedWarehouses[] = $id;
+            $this->organization->selectedOrdersWarehouses()->attach($id);
         } else {
             Arr::forget($this->selectedWarehouses, array_search($id, $this->selectedWarehouses));
+            $this->organization->selectedOrdersWarehouses()->detach($id);
         }
     }
 

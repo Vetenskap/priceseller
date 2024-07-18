@@ -2,6 +2,8 @@
 
 namespace Modules\Order\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +24,27 @@ class OrderServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
+        $this->app->booted(function () {
+
+            $schedule = $this->app->make(Schedule::class);
+
+            $schedule->call(function () {
+                \Modules\Order\Services\OrderService::prune();
+            })->name('dailyOrderSchedule')->daily();
+
+            $schedule->call(function () {
+                \App\Models\User::chunk(10, function (\Illuminate\Support\Collection $users) {
+                    $users->each(function (\App\Models\User $user) {
+                        if (App::isLocal()) {
+                            \Modules\Order\Jobs\UserProcessOrders::dispatchIf($user->isAdmin(), $user);
+                        } else {
+                            \Modules\Order\Jobs\UserProcessOrders::dispatchIf($user->isSub() || $user->isAdmin(), $user);
+                        }
+                    });
+                });
+            })->name('everyThirtyMinutesOrderSchedule')->everyThirtyMinutes()->withoutOverlapping();
+
+        });
     }
 
     /**
