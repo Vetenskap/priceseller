@@ -6,6 +6,7 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "alcohol/iso4217": "^4.2",
         "box/spout": "^3.3",
         "filament/filament": "^3.2",
         "kerigard/laravel-lang-ru": "^2.0",

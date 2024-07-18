@@ -58,7 +58,7 @@ class Test extends Command
      */
     public function handle()
     {
-        $user = User::first();
-        $user->notify(new SubscriptionExpires(Permission::first()));
+        $wbItem = WbItem::find('9c62b39e-61e2-499e-83f9-a75b750b8520');
+        dd($wbItem->orders()->where('state', 'new')->sum('count') * 2);
     }
 }

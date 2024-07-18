@@ -2,6 +2,7 @@
 
 namespace Modules\Order\Services;
 
+use Alcohol\ISO4217;
 use App\Models\Organization;
 use App\Models\OzonItem;
 use App\Models\User;
@@ -65,13 +66,15 @@ class OrderService
 
                 if ($wbItem && !Order::where('organization_id', $this->organizationId)->where('number', $order->get('id'))->exists()) {
 
+                    $iso4217 = new ISO4217();
+
                     $wbItem->orders()->create([
                         'number' => $order->get('id'),
                         'count' => $order->get('count'),
                         'price' => $order->get('price') / 100,
                         'organization_id' => $this->organizationId,
                         'state' => 'new',
-                        'currency_code' => $order->get('currencyCode')
+                        'currency_code' => collect($iso4217->getByNumeric($order->get('currencyCode')))->get('alpha3'),
                     ]);
 
                     $total++;
@@ -116,7 +119,8 @@ class OrderService
                             'count' => $product->get('quantity'),
                             'price' => $product->get('price'),
                             'organization_id' => $this->organizationId,
-                            'state' => 'new'
+                            'state' => 'new',
+                            'currency_code' => $product->get('currency_code')
                         ]);
 
                         $total++;
