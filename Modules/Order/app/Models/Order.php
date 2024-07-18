@@ -18,7 +18,8 @@ class Order extends Model
         'state',
         'price',
         'organization_id',
-        'currency_code'
+        'currency_code',
+        'write_off'
     ];
 
     public function orderable()
@@ -34,5 +35,11 @@ class Order extends Model
     public function organization()
     {
         return $this->belongsTo(Organization::class);
+    }
+
+    public function markWriteOff(): bool
+    {
+        $this->write_off = true;
+        return $this->save();
     }
 }

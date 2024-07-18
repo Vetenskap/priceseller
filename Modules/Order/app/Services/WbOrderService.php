@@ -22,7 +22,7 @@ class WbOrderService
 
     public function writeOffStocks()
     {
-        $this->organization->orders()->with('orderable')->chunk(100, function (Collection $orders) {
+        $this->organization->orders()->where('state', 'new')->where('write_off', false)->with('orderable')->chunk(100, function (Collection $orders) {
             $orders->each(function (Order $order) {
 
                 $markets = $this
@@ -51,6 +51,8 @@ class WbOrderService
                     $service = new WbItemPriceService(null, $market);
                     $service->unloadWbItemStocks($wbItem);
                 });
+
+                $order->markWriteOff();
             });
         });
     }

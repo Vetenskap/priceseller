@@ -24,7 +24,7 @@ class OzonOrderService
 
     public function writeOffStocks()
     {
-        $this->organization->orders()->whereHas('orderable')->with('orderable')->chunk(100, function (Collection $orders) {
+        $this->organization->orders()->where('state', 'new')->where('write_off', false)->whereHas('orderable')->with('orderable')->chunk(100, function (Collection $orders) {
             $orders->each(function (Order $order) {
 
                 $markets = $this
@@ -53,6 +53,8 @@ class OzonOrderService
                     $service = new OzonItemPriceService(null, $market);
                     $service->unloadOzonItemStocks($ozonItem);
                 });
+
+                $order->markWriteOff();
             });
         });
     }
@@ -63,6 +65,7 @@ class OzonOrderService
 
         $this->organization
             ->orders()
+            ->where('state', 'new')
             ->with('orderable')
             ->where('orderable_type', OzonItem::class)
             ->chunk(100, function (Collection $orders) use (&$total) {
