@@ -69,7 +69,6 @@ class OrderService
                         'count' => $order->get('count'),
                         'price' => $order->get('price') / 100,
                         'organization_id' => $this->organizationId,
-                        'state' => 'new',
                         'currency_code' => collect($iso4217->getByNumeric($order->get('currencyCode')))->get('alpha3'),
                     ]);
 
@@ -115,7 +114,6 @@ class OrderService
                             'count' => $product->get('quantity'),
                             'price' => $product->get('price'),
                             'organization_id' => $this->organizationId,
-                            'state' => 'new',
                             'currency_code' => $product->get('currency_code')
                         ]);
 
@@ -213,7 +211,7 @@ class OrderService
             $orders->each(function (Order $order) {
 
                 $order->writeOffStocks()->delete();
-                $order->update(['state' => 'old']);
+                $order->markAccepted();
             });
         });
         $organization->supplierOrderReports()->delete();

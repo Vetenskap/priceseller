@@ -17,9 +17,11 @@ return new class extends Migration
             $table->string('orderable_id');
             $table->string('orderable_type');
             $table->unsignedBigInteger('count');
-            $table->string('state');
+            $table->string('state')->default('new');
             $table->float('price');
+            $table->string('currency_code')->nullable();
             $table->uuid('organization_id');
+            $table->boolean('write_off')->nullable()->default(false);
             $table->timestamps();
         });
     }

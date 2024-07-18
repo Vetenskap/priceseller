@@ -39,7 +39,11 @@ class Order extends Model
 
     public function markWriteOff(): bool
     {
-        $this->write_off = true;
-        return $this->save();
+        return $this->update(['write_off' => true]);
+    }
+
+    public function markAccepted(): bool
+    {
+        return $this->update(['state' => 'old']);
     }
 }
