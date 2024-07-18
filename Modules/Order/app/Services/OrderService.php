@@ -70,7 +70,8 @@ class OrderService
                         'count' => $order->get('count'),
                         'price' => $order->get('price') / 100,
                         'organization_id' => $this->organizationId,
-                        'state' => 'new'
+                        'state' => 'new',
+                        'currency_code' => $order->get('currencyCode')
                     ]);
 
                     $total++;

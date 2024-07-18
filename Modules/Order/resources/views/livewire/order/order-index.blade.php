@@ -135,7 +135,7 @@
                                                 :name="$order->count"/>
                                         </x-table.table-child>
                                         <x-table.table-child>
-                                            <x-layouts.simple-text :name="$order->price"/>
+                                            <x-layouts.simple-text :name="$order->price . $order->currency_code === 643 ? '(руб)' : ''"/>
                                         </x-table.table-child>
                                     </x-table.table-item>
                                 @endforeach

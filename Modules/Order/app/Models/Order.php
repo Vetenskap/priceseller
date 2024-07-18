@@ -18,6 +18,7 @@ class Order extends Model
         'state',
         'price',
         'organization_id',
+        'currency_code'
     ];
 
     public function orderable()
