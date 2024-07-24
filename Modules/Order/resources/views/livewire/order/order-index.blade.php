@@ -27,25 +27,21 @@
             </div>
             @if($organization)
                 <div class="w-3/4">
-                    <div class="p-6 dark:bg-gray-700 bg-gray-100 overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                        <x-layouts.title :name="$organization->name"/>
-                        <x-blocks.flex-block-end>
-                            <x-inputs.switcher :checked="$automatic" wire:model="automatic"/>
-                            <x-layouts.simple-text name="Автоматическая выгрузка" />
-                        </x-blocks.flex-block-end>
+                    <div class="dark:bg-gray-700 bg-gray-100 overflow-hidden shadow-sm sm:rounded-lg mb-6">
+                        <x-blocks.main-block>
+                            <x-layouts.title :name="$organization->name"/>
+                        </x-blocks.main-block>
                         @if($orders->count())
-                            <x-blocks.flex-block-end>
+                            <x-blocks.main-block>
                                 <x-danger-button wire:click="clear">Очистить</x-danger-button>
-                            </x-blocks.flex-block-end>
+                                <x-information>При очистке текущие заказы больше не будут учитываться при выгрузке прайса</x-information>
+                            </x-blocks.main-block>
                         @endif
                         <x-blocks.flex-block-end>
-                            <x-primary-button wire:click="startAllActions">Выполнить все действия</x-primary-button>
+                            <x-inputs.switcher :checked="$automatic" wire:model="automatic"/>
+                            <x-layouts.simple-text name="Автоматическая выгрузка"/>
                         </x-blocks.flex-block-end>
-                        <x-layouts.title name="Ручная выгрузка"/>
-                        <x-blocks.flex-block-end>
-                            <x-primary-button wire:click="getOrders">Получить заказы</x-primary-button>
-                        </x-blocks.flex-block-end>
-                        <x-blocks.flex-block-end>
+                        <x-blocks.main-block>
                             <x-dropdowns.dropdown-checkboxes :options="$warehouses"
                                                              :selected-options="$selectedWarehouses"
                                                              wire-func="selectWarehouse"
@@ -53,11 +49,23 @@
                             >
                                 Склады
                             </x-dropdowns.dropdown-checkboxes>
+                            <x-information>С указанных складов будут списаны остатки при автоматической выгрузке и ручной</x-information>
+                        </x-blocks.main-block>
+                        <x-blocks.flex-block-end>
+                            <x-primary-button wire:click="startAllActions">Выполнить все действия</x-primary-button>
                         </x-blocks.flex-block-end>
+                        <x-blocks.main-block>
+                            <x-layouts.title name="Ручная выгрузка"/>
+                        </x-blocks.main-block>
+                        <x-blocks.main-block>
+                            <x-primary-button wire:click="getOrders">Получить заказы</x-primary-button>
+                            <x-information>Получить заказы с ОЗОН и ВБ в которых указана данная организация</x-information>
+                        </x-blocks.main-block>
                         @if($orders->count())
-                            <x-blocks.flex-block>
+                            <x-blocks.main-block>
                                 <x-primary-button wire:click="writeOffBalance">Списать остатки со складов</x-primary-button>
-                            </x-blocks.flex-block>
+                                <x-information>Списать остатки в счёт заказов с указанных выше складов</x-information>
+                            </x-blocks.main-block>
                             @if($writeOff)
                                 <x-blocks.flex-block-end>
                                     <x-success-button wire:click="downloadWriteOffBalance">Скачать списанные
@@ -68,26 +76,31 @@
                                     </x-danger-button>
                                 </x-blocks.flex-block-end>
                             @endif
-                            <x-blocks.flex-block>
+                            <x-blocks.main-block>
                                 <x-primary-button wire:click="purchaseOrder">Сформировать заказы поставщикам</x-primary-button>
-                            </x-blocks.flex-block>
+                                <x-information>Сформировать заказы поставщикам в формате EXCEL</x-information>
+                            </x-blocks.main-block>
                             <x-blocks.flex-block-end>
                                 @foreach($organization->supplierOrderReports as $report)
                                     <x-success-button
                                         wire:click="downloadPurchaseOrder({{$report}})">{{$report->supplier->name}}
-                                        ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('orderable.item.id')->count()}})
+                                        ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('orderable.item.id')->count()}}
+                                        )
                                     </x-success-button>
                                 @endforeach
                             </x-blocks.flex-block-end>
-                            <x-layouts.title name="Управление кабинетами"/>
+                            <x-blocks.main-block>
+                                <x-layouts.title name="Управление кабинетами"/>
+                            </x-blocks.main-block>
                             <x-blocks.flex-block-end>
                                 <x-primary-button wire:click="writeOffMarketsStocks">Списать остатки с остальных
                                     кабинетов
                                 </x-primary-button>
                             </x-blocks.flex-block-end>
-                            <x-blocks.flex-block-end>
+                            <x-blocks.main-block>
                                 <x-primary-button wire:click="setOrdersState">Поменять статус заказов</x-primary-button>
-                            </x-blocks.flex-block-end>
+                                <x-information>Установить статусы в ОЗОН на "Готово к отгрузке"</x-information>
+                            </x-blocks.main-block>
                         @endif
                     </div>
                     @if($orders->count())
@@ -135,7 +148,8 @@
                                                 :name="$order->count"/>
                                         </x-table.table-child>
                                         <x-table.table-child>
-                                            <x-layouts.simple-text :name="$order->price . (' ' . $order->currency_code ?: '')"/>
+                                            <x-layouts.simple-text
+                                                :name="$order->price . (' ' . $order->currency_code ?: '')"/>
                                         </x-table.table-child>
                                     </x-table.table-item>
                                 @endforeach

@@ -54,15 +54,15 @@
                 @endif
                 @break
             @case('stocks')
-                <x-layouts.main-container>
-                    <x-blocks.main-block>
-                        <x-layouts.title name="Экспорт"/>
-                    </x-blocks.main-block>
-                    <x-blocks.center-block>
-                        <x-secondary-button wire:click="export">Экспортировать</x-secondary-button>
-                    </x-blocks.center-block>
+                <x-blocks.main-block>
+                    <x-layouts.title name="Экспорт"/>
+                </x-blocks.main-block>
+                <x-blocks.main-block>
+                    <x-secondary-button wire:click="export">Экспортировать</x-secondary-button>
+                </x-blocks.main-block>
+                <x-blocks.main-block>
                     <livewire:warehouses-items-export.warehouses-items-export-index :model="auth()->user()"/>
-                </x-layouts.main-container>
+                </x-blocks.main-block>
                 @break
         @endswitch
     </x-layouts.main-container>
@@ -98,7 +98,7 @@
                     @endif
                 </div>
             </form>
-            <livewire:warehouses-items-import.warehouses-items-import-index :model="auth()->user()" />
+            <livewire:warehouses-items-import.warehouses-items-import-index :model="auth()->user()"/>
         </x-layouts.main-container>
     @endif
     <div wire:loading wire:target="export, import">

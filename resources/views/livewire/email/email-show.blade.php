@@ -10,7 +10,9 @@
     </x-layouts.actions>
 
     <x-layouts.main-container wire:poll>
-        <x-layouts.title name="Основная информация"/>
+        <x-blocks.main-block>
+            <x-layouts.title name="Основная информация"/>
+        </x-blocks.main-block>
         <x-blocks.flex-block-end>
             <x-inputs.switcher :checked="$form->open" wire:model="form.open"/>
             <x-inputs.input-with-label name="name"

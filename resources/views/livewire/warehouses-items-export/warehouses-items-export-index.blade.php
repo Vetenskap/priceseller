@@ -44,8 +44,6 @@
             @endforeach
         </x-table.table-layout>
     @else
-        <x-blocks.main-block>
-            <x-titles.sub-title name="История пуста" />
-        </x-blocks.main-block>
+        <x-titles.sub-title name="История пуста"/>
     @endif
 </div>

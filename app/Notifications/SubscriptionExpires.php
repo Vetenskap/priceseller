@@ -16,9 +16,9 @@ class SubscriptionExpires extends Notification implements ShouldQueue
     /**
      * Create a new notification instance.
      */
-    public function __construct(public Permission $permission)
+    public function __construct(public Permission $permission, public string $expires)
     {
-        //
+
     }
 
     /**
@@ -39,7 +39,7 @@ class SubscriptionExpires extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject(Lang::get('Your subscription is expiring'))
             ->line(Lang::get('Your subscription') . ' "' . $this->permission->name . '" ' . Lang::get('is about to expire.'))
-            ->line(Lang::get('End date:') . ' ' . $this->permission->pivot->expires);
+            ->line(Lang::get('End date:') . ' ' . $this->expires);
     }
 
     /**

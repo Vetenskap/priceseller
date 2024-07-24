@@ -86,12 +86,6 @@ class OzonOrderService
                         } else {
                             $result = collect($order->number);
                         }
-
-                        if ($result->first() == $order->number) {
-                            $total++;
-                            $order->state = 'old';
-                            $order->save();
-                        }
                     }
 
                 });

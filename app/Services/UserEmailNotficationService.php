@@ -15,9 +15,9 @@ class UserEmailNotficationService
 
     public function subscribesExpires(): void
     {
-        $permissions = $this->user->permissions()->withPivot('expires')->wherePivot('expires', '>', now())->wherePivot('expires', '<', now()->addDays(3))->get();
+        $permissions = $this->user->permissions()->wherePivot('expires', '>', now())->wherePivot('expires', '<', now()->addDays(3))->get();
         $permissions->each(function (Permission $permission) {
-            $this->user->notify(new SubscriptionExpires($permission));
+            $this->user->notify(new SubscriptionExpires($permission, $permission->pivot->expires));
         });
     }
 }

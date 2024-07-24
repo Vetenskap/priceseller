@@ -37,8 +37,12 @@
     </form>
 
     @isset($slot)
-        <x-layouts.title name="Комиссии"/>
-        <x-titles.sub-title name="Комиссии по умолчанию"/>
+        <x-blocks.main-block>
+            <x-layouts.title name="Комиссии"/>
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            <x-titles.sub-title name="Комиссии по умолчанию"/>
+        </x-blocks.main-block>
         <x-blocks.flex-block>
             {{$slot}}
         </x-blocks.flex-block>
@@ -109,6 +113,8 @@
             @endforeach
         </x-table.table-layout>
     @else
-        <x-titles.sub-title name="Нет связей"/>
+        <x-blocks.main-block>
+            <x-titles.sub-title name="Нет связей"/>
+        </x-blocks.main-block>
     @endif
 </div>

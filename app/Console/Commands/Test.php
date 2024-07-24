@@ -24,6 +24,7 @@ use App\Services\EmailSupplierService;
 use App\Services\OzonItemPriceService;
 use App\Services\OzonMarketService;
 use App\Services\SupplierReportService;
+use App\Services\UserEmailNotficationService;
 use App\Services\WbItemPriceService;
 use App\Services\WbMarketService;
 use Illuminate\Console\Command;
@@ -58,7 +59,6 @@ class Test extends Command
      */
     public function handle()
     {
-        $wbItem = WbItem::find('9c62b39e-61e2-499e-83f9-a75b750b8520');
-        dd($wbItem->orders()->where('state', 'new')->sum('count') * 2);
+
     }
 }

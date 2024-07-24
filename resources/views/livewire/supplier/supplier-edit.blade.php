@@ -5,14 +5,17 @@
             <x-primary-button>Закрыть</x-primary-button>
         </a>
         <x-success-button wire:click="save">Сохранить</x-success-button>
-        <x-danger-button wire:click="destroy" wire:confirm="Вы действительно хотите удалить поставщика? Так же будут удалены все связанные с ним товары.">Удалить</x-danger-button>
+        <x-danger-button wire:click="destroy"
+                         wire:confirm="Вы действительно хотите удалить поставщика? Так же будут удалены все связанные с ним товары.">
+            Удалить
+        </x-danger-button>
     </x-layouts.actions>
     <x-layouts.main-container>
         <x-navigate-pages>
-                <x-links.tab-link name="Основное" :active="$selectedTab === 'main'"
-                                  wire:click="$set('selectedTab', 'main')"/>
-                <x-links.tab-link name="Прайс" :active="$selectedTab === 'price'"
-                                  wire:click="$set('selectedTab', 'price')"/>
+            <x-links.tab-link name="Основное" :active="$selectedTab === 'main'"
+                              wire:click="$set('selectedTab', 'main')"/>
+            <x-links.tab-link name="Прайс" :active="$selectedTab === 'price'"
+                              wire:click="$set('selectedTab', 'price')"/>
         </x-navigate-pages>
         @if($selectedTab === 'main')
             <x-blocks.flex-block-end>
@@ -39,7 +42,9 @@
             <x-blocks.main-block>
                 <x-layouts.title name="Прайс"/>
             </x-blocks.main-block>
-            <x-titles.sub-title name="Фильтры"/>
+            <x-blocks.main-block>
+                <x-titles.sub-title name="Фильтры"/>
+            </x-blocks.main-block>
             <x-blocks.flex-block>
                 <x-inputs.input-with-label name="article"
                                            type="text"
