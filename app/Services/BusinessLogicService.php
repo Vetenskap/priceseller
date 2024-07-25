@@ -19,7 +19,7 @@ class BusinessLogicService
                 if (App::isLocal()) {
                     CheckEmails::dispatchIf($user->isAdmin(), $user->id);
                 } else {
-                    CheckEmails::dispatchIf($user->isSub(), $user->id);
+                    CheckEmails::dispatchIf($user->isSub() || $user->isAdmin(), $user->id);
                 }
             });
         });
