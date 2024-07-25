@@ -47,6 +47,16 @@ class EmailHandlerLaravelImap
 
     }
 
+    public function getFoldersIterator(): \Iterator
+    {
+        return $this->connection->getFolders()->paginate()->getIterator();
+    }
+
+    public function getUnseenMessagesFromIterator(Folder $folder, string $email): \Iterator
+    {
+        return $folder->messages()->unseen()->from($email)->fetchOrderDesc()->paginate()->getIterator();
+    }
+
 
     /**
      * @param string $supplierEmail
@@ -60,7 +70,7 @@ class EmailHandlerLaravelImap
      * @throws \Webklex\PHPIMAP\Exceptions\MessageFlagException
      * @throws \Webklex\PHPIMAP\Exceptions\RuntimeException
      */
-    public function getNewPrice(string $supplierEmail, string $supplierFilename, string $criteria = 'UNSEEN'): ?string
+    public function getNewPrice(string $supplierEmail, string $supplierFilename): ?string
     {
         Context::forget('unload');
         Context::push('unload', [
@@ -68,20 +78,13 @@ class EmailHandlerLaravelImap
         ]);
 
         /** @var Folder $folder */
-        foreach ($this->connection->getFolders()->paginate()->getIterator() as $folder) {
+        foreach ($this->getFoldersIterator() as $folder) {
 
             // TODO if ($folder->name)
 
-            //Get all Messages of the current Mailbox $folder
-            /** @var MessageCollection $messages */
-            if ($criteria === 'UNSEEN') {
-                $query = $folder->messages()->unseen()->from($supplierEmail)->fetchOrderDesc();
-            } else if ($criteria === 'SEEN') {
-                $query = $folder->messages()->seen()->from($supplierEmail)->fetchOrderDesc();
-            }
 
             /** @var Message $message */
-            foreach ($query->paginate()->getIterator() as $message) {
+            foreach ($this->getUnseenMessagesFromIterator($folder, $supplierEmail) as $message) {
                 if ($message->hasAttachments()) {
 
                     Context::push('unload', ['Информация' => 'Есть вложения']);
