@@ -52,7 +52,7 @@ class OzonItem extends MainModel
         return $this->hasMany(OzonWarehouseStock::class);
     }
 
-    public function warehouseStock(OzonWarehouse $warehouse): OzonWarehouseStock
+    public function warehouseStock(OzonWarehouse $warehouse): ?OzonWarehouseStock
     {
         return $warehouse->stocks()->where('ozon_item_id', $this->id)->first();
     }
