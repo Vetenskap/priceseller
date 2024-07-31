@@ -49,10 +49,6 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
 
                 if (!SupplierReportService::get($supplier)) {
 
-                    Context::push('unload', [
-                        'Пользователь' => $user->name,
-                    ]);
-
                     $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
 
                     PriceUnload::dispatchIf((boolean) $pricePath, $supplier->pivot->id, $pricePath);

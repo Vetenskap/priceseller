@@ -2,16 +2,18 @@
 
 namespace App\Livewire\OzonMarket;
 
+use App\Exports\OzonItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Jobs\MarketRelationshipsAndCommissions;
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
 use App\Models\Supplier;
+use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
 use App\Services\OzonItemPriceService;
 use App\Services\OzonMarketService;
@@ -20,13 +22,13 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
-use Livewire\Component;
+use Livewire\Attributes\Url;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
-class OzonMarketEdit extends Component
+class OzonMarketEdit extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters, WithSubscribeNotification;
+    use WithFileUploads, WithJsNotifications, WithFilters;
 
     public OzonMarketPostForm $form;
 
@@ -36,8 +38,8 @@ class OzonMarketEdit extends Component
 
     public int $selectedWarehouse;
 
-    #[Session('OzonMarketEdit.{market.id}')]
-    public $selectedTab = 'main';
+    #[Url]
+    public $page = null;
 
     /** @var TemporaryUploadedFile $file */
     public $file;
@@ -51,15 +53,40 @@ class OzonMarketEdit extends Component
     #[Session('OzonMarketEdit.shipping_processing.{market.id}')]
     public $shipping_processing = null;
 
+    public array $statusFilters = [
+        [
+            'status' => 1,
+            'name' => 'Связь не создана'
+        ],
+        [
+            'status' => 0,
+            'name' => 'Связь создана'
+        ],
+    ];
+
     public function export(): void
     {
-        Export::dispatch($this->market, OzonMarketService::class);
+        if (ItemsExportReportService::get($this->market)) {
+            $this->addJobAlready();
+            return;
+        }
 
-        $this->dispatch('items-export-report-created');
+        Export::dispatch($this->market, OzonMarketService::class);
+        $this->addJobNotification();
+    }
+
+    public function downloadTemplate()
+    {
+        return \Excel::download(new OzonItemsExport($this->market, true), "ОЗОН_шаблон.xlsx");
     }
 
     public function import(): void
     {
+        if (ItemsImportReportService::get($this->market)) {
+            $this->addJobAlready();
+            return;
+        }
+
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
         $path = $this->file->storeAs(OzonMarketService::PATH, $uuid . '.' . $ext);
@@ -70,8 +97,7 @@ class OzonMarketEdit extends Component
         }
 
         Import::dispatch($uuid, $ext, $this->market, OzonMarketService::class);
-
-        $this->dispatch('items-import-report-created');
+        $this->addJobNotification();
     }
 
     public function relationshipsAndCommissions(): void
@@ -86,8 +112,6 @@ class OzonMarketEdit extends Component
             model: $this->market,
             service: OzonMarketService::class
         );
-
-        $this->dispatch('items-import-report-created');
     }
 
     public function clearRelationships()
@@ -102,7 +126,7 @@ class OzonMarketEdit extends Component
     {
         $this->form->setMarket($this->market);
 
-        $this->getWarehouses();
+        if ($this->page === 'stocks_warehouses') $this->getWarehouses();
 
     }
 
@@ -148,6 +172,8 @@ class OzonMarketEdit extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->market);
+
         $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
 
         return view('livewire.ozon-market.ozon-market-edit', [

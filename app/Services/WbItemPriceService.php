@@ -7,16 +7,19 @@ use App\Models\Supplier;
 use App\Models\WbItem;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
+use App\Models\WbWarehouseStock;
+use App\Models\WbWarehouseUserWarehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Modules\Order\Models\Order;
 
 class WbItemPriceService
 {
     protected WbClient $wbClient;
 
-    public function __construct(public Supplier $supplier, public WbMarket $market)
+    public function __construct(public ?Supplier $supplier = null, public WbMarket $market)
     {
         $this->wbClient = new WbClient($this->market->api_key);
     }
@@ -108,37 +111,78 @@ class WbItemPriceService
 
     public function recountStockWbItem(WbItem $wbItem): WbItem
     {
+        $this->market->warehouses->each(function (WbWarehouse $warehouse) use ($wbItem) {
+            $myWarehousesStocks = $warehouse->userWarehouses->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($wbItem) {
+                return $userWarehouse->warehouse->stocks()->where('item_id', $wbItem->item_id)->first()?->stock;
+            })->sum();
 
-        $newCount = $wbItem->item->count < $this->market->min ? 0 : $wbItem->item->count;
-        $newCount = ($newCount >= $this->market->min && $newCount <= $this->market->max && $wbItem->item->multiplicity === 1) ? 1 : $newCount;
-        $newCount = $newCount / $wbItem->item->multiplicity;
-        $newCount = $newCount > $this->market->max_count ? $this->market->max_count : $newCount;
-        $newCount = (int)max($newCount, 0);
+            $new_count = $wbItem->item->count < $this->market->min ? 0 : $wbItem->item->count;
+            $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $wbItem->item->multiplicity === 1) ? 1 : $new_count;
+            $new_count = ($new_count + $myWarehousesStocks) / $wbItem->item->multiplicity;
+            if (class_exists(Order::class)) {
+                $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $wbItem->item->multiplicity);
+            }
+            $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
+            $new_count = (int)max($new_count, 0);
 
-        $wbItem->count = $newCount;
+            $warehouse->stocks()->updateOrCreate([
+                'wb_item_id' => $wbItem->id
+            ], [
+                'wb_item_id' => $wbItem->id,
+                'stock' => $new_count
+            ]);
+        });
 
         return $wbItem;
     }
 
     public function nullNotUpdatedStocks(): void
     {
-        WbItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('updated', false)
-                    ->where('supplier_id', $this->supplier->id);
+        WbWarehouseStock::query()
+            ->whereHas('wbItem', function (Builder $query) {
+                $query->whereHas('item', function (Builder $query) {
+                    $query
+                        ->where('updated', false)
+                        ->where('supplier_id', $this->supplier->id);
+                });
             })
-            ->update(['count' => 0]);
+            ->update(['stock' => 0]);
     }
 
     public function nullAllStocks(): void
     {
-        WbItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('supplier_id', $this->supplier->id);
+        WbWarehouseStock::query()
+            ->whereHas('wbItem', function (Builder $query) {
+                $query->whereHas('item', function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id);
+                });
             })
-            ->update(['count' => 0]);
+            ->update(['stock' => 0]);
+    }
+
+    public function unloadWbItemStocks(WbItem $wbItem): void
+    {
+        $this->market->warehouses()
+            ->whereHas('market', function (Builder $query) use ($wbItem) {
+                $query->whereHas('items', function (Builder $query) use ($wbItem) {
+                    $query->where('id', $wbItem->item_id);
+                });
+            })
+            ->get()
+            ->map(function (WbWarehouse $warehouse) use ($wbItem) {
+
+                $data = collect([
+                    [
+                        "sku" => (string)$wbItem->sku,
+                        "amount" => (int) $wbItem->warehouseStock($warehouse) ? $wbItem->warehouseStock($warehouse)->stock : 0,
+                    ]
+                ]);
+
+                if (App::isProduction()) {
+                    $this->wbClient->putStocks($data, $warehouse->warehouse_id, $this->supplier);
+                }
+            });
     }
 
     public function unloadAllStocks(): void
@@ -162,14 +206,15 @@ class WbItemPriceService
                 WbItem::query()
                     ->whereHas('item', function (Builder $query) {
                         $query
+                            ->where('unload_wb', true)
                             ->where('supplier_id', $this->supplier->id);
                     })
                     ->chunk(1000, function (Collection $items) use ($warehouse) {
 
-                        $data = $items->map(function (WbItem $item) {
+                        $data = $items->map(function (WbItem $item) use ($warehouse) {
                             return [
                                 "sku" => (string)$item->sku,
-                                "amount" => (int)$item->count,
+                                "amount" => (int) ($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
                             ];
                         });
 

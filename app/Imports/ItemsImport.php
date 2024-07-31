@@ -4,7 +4,9 @@ namespace App\Imports;
 
 use App\Models\Item;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Services\ItemsImportReportService;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Maatwebsite\Excel\Concerns\SkipsEmptyRows;
@@ -18,6 +20,24 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure
 {
+    CONST HEADERS = [
+        'МС UUID',
+        'Код',
+        'Наименование',
+        'Поставщик',
+        'Артикул',
+        'Бренд',
+        'Цена',
+        'Количество',
+        'Кратность отгрузки',
+        'Был обновлён',
+        'Выгружать на ВБ',
+        'Выгружать на ОЗОН',
+        'Обновлён',
+        'Создан',
+        'Удалить'
+    ];
+
     public int $correct = 0;
     public int $error = 0;
     public int $updated = 0;
@@ -57,7 +77,7 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
 
         if ($item = $this->user->items()->where('code', $row->get('Код'))->first()) {
 
-            if ($row->get('Удалить') === 'Да') {
+            if ($row->get('Удалить')) {
 
                 $this->deleted++;
 
@@ -75,11 +95,14 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
                 'article' => $row->get('Артикул'),
                 'brand' => $row->get('Бренд'),
                 'multiplicity' => $row->get('Кратность отгрузки'),
+                'unload_wb' => $row->get('Выгружать на ВБ'),
+                'unload_ozon' => $row->get('Выгружать на ОЗОН'),
             ]);
+
             return null;
         }
 
-        if ($row->get('Удалить') === 'Да') {
+        if ($row->get('Удалить')) {
 
             $this->error++;
 
@@ -105,7 +128,9 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'brand' => $row->get('Бренд'),
             'multiplicity' => $row->get('Кратность отгрузки'),
             'user_id' => $this->user->id,
-            'id' => Str::uuid()
+            'id' => Str::uuid(),
+            'unload_wb' => $row->get('Выгружать на ВБ'),
+            'unload_ozon' => $row->get('Выгружать на ОЗОН'),
         ]);
     }
 
@@ -114,6 +139,9 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         if ($index % 1000 === 0) ItemsImportReportService::flush($this->user, $this->correct, $this->error, $this->updated, $this->deleted);
 
         $data['Кратность отгрузки'] = preg_replace("/[^0-9]/", "", $data['Кратность отгрузки']);
+        $data['Выгружать на ВБ'] = $data['Выгружать на ВБ'] === 'Да';
+        $data['Выгружать на ОЗОН'] = $data['Выгружать на ОЗОН'] === 'Да';
+        $data['Удалить'] = $data['Удалить'] === 'Да';
 
         return $data;
     }
@@ -127,17 +155,6 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'Артикул' => ['required'],
             'Бренд' => ['nullable'],
             'Кратность отгрузки' => ['required', 'integer', 'min:1'],
-        ];
-    }
-
-    public function customValidationMessages()
-    {
-        return [
-            'Код.required' => 'Поле обязательно',
-            'Артикул.required' => 'Поле обязательно',
-            'Кратность отгрузки.required' => 'Поле обязательно',
-            'Кратность отгрузки.integer' => 'Поле должно быть целым числом',
-            'Кратность отгрузки.min' => 'Поле должно быть не меньше 1',
         ];
     }
 

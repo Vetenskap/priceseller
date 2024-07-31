@@ -6,16 +6,21 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "alcohol/iso4217": "^4.2",
         "box/spout": "^3.3",
         "filament/filament": "^3.2",
+        "kerigard/laravel-lang-ru": "^2.0",
         "laravel/framework": "^11.0",
         "laravel/horizon": "^5.24",
         "laravel/pulse": "^1.1",
+        "laravel/sanctum": "^4.0",
         "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.9",
         "livewire/livewire": "^3.4",
         "livewire/volt": "^1.0",
         "maatwebsite/excel": "^3.1",
+        "mhmiton/laravel-modules-livewire": "^3.0",
+        "nwidart/laravel-modules": "^11.0",
         "opcodesio/log-viewer": "^3.8",
         "pusher/pusher-php-server": "^7.2",
         "webklex/laravel-imap": "^4.1"
@@ -63,6 +68,11 @@
     "extra": {
         "laravel": {
             "dont-discover": []
+        },
+        "merge-plugin": {
+            "include": [
+                "Modules/*/composer.json"
+            ]
         }
     },
     "config": {
@@ -71,9 +81,13 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "wikimedia/composer-merge-plugin": true
         }
     },
     "minimum-stability": "stable",
-    "prefer-stable": true
+    "prefer-stable": true,
+    "files": [
+        "app/Helpers/Helpers.php"
+    ]
 }

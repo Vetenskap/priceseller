@@ -2,16 +2,12 @@
 
 namespace App\Livewire\Supplier;
 
-use App\Livewire\Components\Toast;
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Supplier\SupplierPostForm;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Supplier;
-use Livewire\Component;
 
-class SupplierIndex extends Component
+class SupplierIndex extends BaseComponent
 {
-    use WithSubscribeNotification;
-
     public SupplierPostForm $form;
 
     public $showCreateBlock = false;

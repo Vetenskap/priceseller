@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class SupplierReport extends Model
+class SupplierReport extends MainModel
 {
     use HasFactory;
     use HasUuids;

@@ -24,6 +24,25 @@ use PHPUnit\Logging\Exception;
 
 class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure
 {
+    CONST HEADERS = [
+        'Артикул WB (nmID)',
+        'Артикул продавца (vendorCode)',
+        'Код',
+        'Баркод (sku)',
+        'Комиссия, процент',
+        'Мин. цена',
+        'Розничная наценка, процент',
+        'Упаковка',
+        'Объем',
+        'Новая цена',
+        'Цена из маркета',
+        'Остаток',
+        'Закупочная цена',
+        'Кратность отгрузки',
+        'Обновлено',
+        'Создано',
+        'Удалить'
+    ];
 
     public int $correct = 0;
     public int $error = 0;
@@ -140,24 +159,6 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
             'Упаковка' => ['nullable', 'numeric', 'min:0'],
             'Объем' => ['nullable', 'numeric'],
             'Код' => ['required'],
-        ];
-    }
-
-    public function customValidationMessages()
-    {
-        return [
-            'Артикул WB (nmID).integer' => 'Поле должно быть целым числом',
-            'Артикул продавца (vendorCode).required' => 'Поле обязательно',
-            'Комиссия, процент.numeric' => 'Поле должно быть числом',
-            'Комиссия, процент.min' => 'Поле должно быть больше 0',
-            'Мин. цена.integer' => 'Поле должно быть целым числом',
-            'Мин. цена.min' => 'Поле должно быть больше 0',
-            'Розничная наценка, процент.numeric' => 'Поле должно быть числом',
-            'Розничная наценка, процент.min' => 'Поле должно быть больше 0',
-            'Упаковка.numeric' => 'Поле должно быть числом',
-            'Упаковка.min' => 'Поле должно быть больше 0',
-            'Объем.numeric' => 'Поле должно быть числом',
-            'Код.required' => 'Поле обязательно',
         ];
     }
 

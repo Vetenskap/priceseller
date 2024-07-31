@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class WbMarket extends Model
+class WbMarket extends MainModel
 {
     use HasFactory;
     use HasUuids;
@@ -24,6 +24,7 @@ class WbMarket extends Model
         'max',
         'volume',
         'user_id',
+        'organization_id'
     ];
 
     public function items()

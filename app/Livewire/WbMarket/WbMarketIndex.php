@@ -2,17 +2,14 @@
 
 namespace App\Livewire\WbMarket;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Components\Toast;
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\WbMarket;
 use Illuminate\Auth\Access\AuthorizationException;
-use Livewire\Component;
 
-class WbMarketIndex extends Component
+class WbMarketIndex extends BaseComponent
 {
-    use WithSubscribeNotification;
-
     public WbMarketPostForm $form;
 
     public $showCreateForm = false;
@@ -59,7 +56,7 @@ class WbMarketIndex extends Component
     public function render()
     {
         return view('livewire.wb-market.wb-market-index', [
-            'markets' => WbMarket::where('user_id', auth()->user()->id)->get()
+            'markets' => auth()->user()->wbMarkets
         ]);
     }
 }

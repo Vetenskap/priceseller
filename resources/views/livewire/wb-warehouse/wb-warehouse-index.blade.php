@@ -11,6 +11,6 @@
         <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
     </x-blocks.flex-block-end>
     @foreach($market->warehouses as $warehouse)
-        <livewire:wb-warehouse.wb-warehouse-edit :warehouse="$warehouse" />
+        <livewire:wb-warehouse.wb-warehouse-edit :warehouse="$warehouse" wire:key="{{$warehouse->getKey()}}"/>
     @endforeach
 </div>

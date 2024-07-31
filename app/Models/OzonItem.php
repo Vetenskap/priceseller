@@ -2,13 +2,12 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Order\Models\Order;
 
-class OzonItem extends Model
+class OzonItem extends MainModel
 {
     use HasFactory;
     use HasUuids;
@@ -36,5 +35,25 @@ class OzonItem extends Model
     public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function orders()
+    {
+        return $this->morphMany(Order::class, 'orderable');
+    }
+
+    public function market()
+    {
+        return $this->belongsTo(OzonMarket::class, 'ozon_market_id', 'id');
+    }
+
+    public function stocks()
+    {
+        return $this->hasMany(OzonWarehouseStock::class);
+    }
+
+    public function warehouseStock(OzonWarehouse $warehouse): OzonWarehouseStock
+    {
+        return $warehouse->stocks()->where('ozon_item_id', $this->id)->first();
     }
 }

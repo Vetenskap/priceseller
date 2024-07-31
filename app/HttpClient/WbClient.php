@@ -113,7 +113,7 @@ class WbClient
 
                             $data = $data->filter(fn (array $item) => $item['sku'] !== $badItem->get('sku'));
 
-                            SupplierReportService::addLog($supplier, "sku: " . $badItem->get('sku') . " - " . $error->get('message'));
+                            SupplierReportService::addLog($supplier, "sku: " . $badItem->get('sku') . " - " . $error->get('message'), 'warning');
                         });
                     });
 
@@ -121,7 +121,7 @@ class WbClient
                 }
 
                 $data->each(function (array $item) use ($supplier, $response) {
-                    SupplierReportService::addLog($supplier, "sku: " . $item['sku'] . " - Статус: " . $response->status() . ", Тело: " . $response->body());
+                    SupplierReportService::addLog($supplier, "sku: " . $item['sku'] . " - Статус: " . $response->status() . ", Тело: " . $response->body(), 'warning');
                 });
 
                 return;
@@ -162,7 +162,7 @@ class WbClient
             }
 
             $data->each(function (array $item) use ($supplier, $body) {
-                SupplierReportService::addLog($supplier, "nmId: " . $item['nmId'] . " - " . $body->get('errorText'));
+                SupplierReportService::addLog($supplier, "nmId: " . $item['nmId'] . " - " . $body->get('errorText'), 'warning');
             });
 
             return;

@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Events\NotificationEvent;
+use App\Events\ReportEvent;
 use App\Events\Supplier\SupplierReportChangeMessage;
 use App\Models\Supplier;
 use App\Models\SupplierReport;
@@ -34,12 +35,13 @@ class SupplierReportService
         }
     }
 
-    public static function addLog(Supplier $supplier, string $message): bool
+    public static function addLog(Supplier $supplier, string $message, string $level = 'info'): bool
     {
         if ($report = static::get($supplier)) {
 
             $report->logs()->create([
-                'message' => $message
+                'message' => $message,
+                'level' => $level
             ]);
 
             return true;
@@ -54,7 +56,7 @@ class SupplierReportService
             $report->save();
 
             try {
-                event(new SupplierReportChangeMessage($supplier));
+                event(new ReportEvent($supplier->user_id));
             } catch (\Throwable) {
 
             }

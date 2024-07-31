@@ -2,9 +2,11 @@
 
 namespace App\Exports;
 
+use App\Imports\ItemsImport;
 use App\Models\Item;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\App;
+use App\Models\User;
+use App\Models\Warehouse;
+use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
@@ -13,56 +15,64 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 
 class ItemsExport implements FromCollection, WithHeadings, WithStyles
 {
-    public function __construct(public int $userId)
+    public Collection $warehouses;
+
+    public function __construct(public int $userId, public bool $template = false)
     {
+        $this->warehouses = User::findOrFail($this->userId)->warehouses;
     }
 
 
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
-        $items = Item::where('user_id', $this->userId)->when(App::isLocal(), function (Builder $query) {
-            $query->limit(100);
-        })->get()->sortByDesc('updated_at');
+        if ($this->template) return collect();
 
-        return $items->map(function (Item $item) {
-            return [
-                'ms_uuid' => $item->ms_uuid,
-                'code' => $item->code,
-                'name' => $item->name,
-                'supplier_name' => $item->supplier?->name,
-                'article' => $item->article,
-                'brand' => $item->brand,
-                'price' => $item->price,
-                'count' => $item->count,
-                'multiplicity' => $item->multiplicity,
-                'updated' => $item->updated ? 'Да' : 'Нет',
-                'updated_at' => $item->updated_at,
-                'created_at' => $item->created_at,
-                'delete' => 'Нет'
-            ];
-        });
+        $allData = collect();
+
+        Item::where('user_id', $this->userId)
+            ->orderByDesc('updated_at')
+            ->chunk(1000, function (Collection $items) use (&$allData) {
+                $chunkData = $items->map(function (Item $item) {
+                    $main = [
+                        'ms_uuid' => $item->ms_uuid,
+                        'code' => $item->code,
+                        'name' => $item->name,
+                        'supplier_name' => $item->supplier?->name,
+                        'article' => $item->article,
+                        'brand' => $item->brand,
+                        'price' => $item->price,
+                        'count' => $item->count,
+                        'multiplicity' => $item->multiplicity,
+                        'updated' => $item->updated ? 'Да' : 'Нет',
+                        'unload_wb' => $item->unload_wb ? 'Да' : 'Нет',
+                        'unload_ozon' => $item->unload_ozon ? 'Да' : 'Нет',
+                        'updated_at' => $item->updated_at,
+                        'created_at' => $item->created_at,
+                        'delete' => 'Нет'
+                    ];
+
+                    $main = array_merge($main, $this->warehouses->map(fn(Warehouse $warehouse) => ['Склад ' . $warehouse->name => $item->warehousesStocks()->where('warehouse_id', $warehouse->id)->first()?->stock])
+                        ->collapse()
+                        ->all());
+
+                    return $main;
+                });
+
+                $allData = $allData->merge($chunkData);
+            });
+
+
+        return $allData;
     }
 
     public function headings(): array
     {
-        return [
-            'МС UUID',
-            'Код',
-            'Наименование',
-            'Поставщик',
-            'Артикул',
-            'Бренд',
-            'Цена',
-            'Количество',
-            'Кратность отгрузки',
-            'Был обновлён',
-            'Обновлён',
-            'Создан',
-            'Удалить'
-        ];
+        $main = ItemsImport::HEADERS;
+
+        return array_merge($main, $this->warehouses->map(fn(Warehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
     }
 
     public function styles(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet)
@@ -71,5 +81,7 @@ class ItemsExport implements FromCollection, WithHeadings, WithStyles
         $sheet->getStyle('D1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
         $sheet->getStyle('E1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
         $sheet->getStyle('I1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
+        $sheet->getStyle('K1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
+        $sheet->getStyle('L1')->getFill()->setFillType(Fill::FILL_SOLID)->getStartColor()->setARGB(Color::COLOR_YELLOW);
     }
 }

@@ -22,6 +22,29 @@ use Maatwebsite\Excel\Validators\Failure;
 
 class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure, SkipsOnError
 {
+    CONST HEADERS = [
+        'product_id',
+        'Артикул ozon (offer_id)',
+        'Код',
+        'Мин. Цена, процент',
+        'Мин. Цена',
+        'Обработка отправления',
+        'Магистраль',
+        'Последняя миля',
+        'Комиссия',
+        'Цена продажи',
+        'Цена конкурента',
+        'Минимальная цена',
+        'Цена до скидки, процент',
+        'Цена из маркета',
+        'Остаток',
+        'Закупочная цена',
+        'Кратность отгрузки',
+        'Обновлено',
+        'Загружено',
+        'Удалить'
+    ];
+
     public int $correct = 0;
     public int $error = 0;
     public int $updated = 0;
@@ -136,26 +159,6 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
             'Последняя миля' => ['nullable', 'numeric', 'min:0'],
             'Комиссия' => ['nullable', 'integer', 'min:0'],
             'Код' => ['required'],
-        ];
-    }
-
-    public function customValidationMessages()
-    {
-        return [
-            'Артикул ozon (offer_id).required' => 'Поле обязательно',
-            'Мин. Цена, процент.integer' => 'Поле должно быть целым числом',
-            'Мин. Цена, процент.min' => 'Поле должно быть больше 0',
-            'Мин. Цена.integer' => 'Поле должно быть целым числом',
-            'Мин. Цена.min' => 'Поле должно быть больше 0',
-            'Обработка отправления.numeric' => 'Поле должно быть числом',
-            'Обработка отправления.min' => 'Поле должно быть больше 0',
-            'Магистраль.numeric' => 'Поле должно быть числом',
-            'Магистраль.min' => 'Поле должно быть больше 0',
-            'Последняя миля.numeric' => 'Поле должно быть числом',
-            'Последняя миля.min' => 'Поле должно быть больше 0',
-            'Комиссия.integer' => 'Поле должно быть целым числом',
-            'Комиссия.min' => 'Поле должно быть больше 0',
-            'Код.required' => 'Поле обязательно',
         ];
     }
 

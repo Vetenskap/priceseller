@@ -2,16 +2,16 @@
 
 namespace App\Livewire\WbMarket;
 
+use App\Exports\WbItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Jobs\MarketRelationshipsAndCommissions;
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\Supplier;
 use App\Models\WbMarket;
-use App\Models\WbWarehouse;
 use App\Services\ItemsImportReportService;
 use App\Services\WbItemPriceService;
 use App\Services\WbMarketService;
@@ -20,20 +20,20 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
-use Livewire\Component;
+use Livewire\Attributes\Url;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
-class WbMarketEdit extends Component
+class WbMarketEdit extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters, WithSubscribeNotification;
+    use WithFileUploads, WithJsNotifications, WithFilters;
 
     public WbMarketPostForm $form;
 
     public WbMarket $market;
 
-    #[Session('WbMarketEdit.{market.id}')]
-    public $selectedTab = 'main';
+    #[Url]
+    public $page = 'main';
 
     /** @var TemporaryUploadedFile $file */
     public $file;
@@ -68,7 +68,12 @@ class WbMarketEdit extends Component
     {
         $this->form->setMarket($this->market);
 
-        $this->getWarehouses();
+        if ($this->page === 'stocks_warehouses') $this->getWarehouses();
+    }
+
+    public function downloadTemplate()
+    {
+        return \Excel::download(new WbItemsExport($this->market, true), "ВБ_шаблон.xlsx");
     }
 
     public function save()
@@ -92,9 +97,7 @@ class WbMarketEdit extends Component
     public function export(): void
     {
         Export::dispatch($this->market, WbMarketService::class);
-
-        $this->dispatch('items-export-report-created');
-
+        $this->addJobNotification();
     }
 
     public function import(): void
@@ -112,8 +115,7 @@ class WbMarketEdit extends Component
         }
 
         Import::dispatch($uuid, $ext, $this->market, WbMarketService::class);
-
-        $this->dispatch('items-import-report-created');
+        $this->addJobNotification();
     }
 
     public function relationshipsAndCommissions(): void
@@ -128,8 +130,6 @@ class WbMarketEdit extends Component
             model: $this->market,
             service: WbMarketService::class
         );
-
-        $this->dispatch('items-import-report-created');
     }
 
     public function getWarehouses()
@@ -163,6 +163,8 @@ class WbMarketEdit extends Component
 
     public function render()
     {
+        $this->authorize('view', $this->market);
+
         $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
 
         return view('livewire.wb-market.wb-market-edit', [

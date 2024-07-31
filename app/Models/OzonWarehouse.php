@@ -5,7 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class OzonWarehouse extends Model
+class OzonWarehouse extends MainModel
 {
     use HasFactory;
 
@@ -23,5 +23,15 @@ class OzonWarehouse extends Model
     public function suppliers()
     {
         return $this->hasMany(OzonWarehouseSupplier::class);
+    }
+
+    public function userWarehouses()
+    {
+        return $this->hasMany(OzonWarehouseUserWarehouse::class);
+    }
+
+    public function stocks()
+    {
+        return $this->hasMany(OzonWarehouseStock::class);
     }
 }

@@ -2,20 +2,21 @@
     <x-layouts.header :name="$supplier->name"/>
     <x-layouts.actions>
         <a href="{{route('suppliers')}}" wire:navigate.hover>
-            <x-primary-button>Назад</x-primary-button>
+            <x-primary-button>Закрыть</x-primary-button>
         </a>
         <x-success-button wire:click="save">Сохранить</x-success-button>
-        <x-danger-button wire:click="destroy">Удалить</x-danger-button>
+        <x-danger-button wire:click="destroy"
+                         wire:confirm="Вы действительно хотите удалить поставщика? Так же будут удалены все связанные с ним товары.">
+            Удалить
+        </x-danger-button>
     </x-layouts.actions>
     <x-layouts.main-container>
-        <div class="bg-white dark:bg-gray-700">
-            <nav class="flex flex-col sm:flex-row">
-                <x-links.tab-link name="Основное" :active="$selectedTab === 'main'"
-                                  wire:click="$set('selectedTab', 'main')"/>
-                <x-links.tab-link name="Прайс" :active="$selectedTab === 'price'"
-                                  wire:click="$set('selectedTab', 'price')"/>
-            </nav>
-        </div>
+        <x-navigate-pages>
+            <x-links.tab-link name="Основное" :active="$selectedTab === 'main'"
+                              wire:click="$set('selectedTab', 'main')"/>
+            <x-links.tab-link name="Прайс" :active="$selectedTab === 'price'"
+                              wire:click="$set('selectedTab', 'price')"/>
+        </x-navigate-pages>
         @if($selectedTab === 'main')
             <x-blocks.flex-block-end>
                 <x-inputs.switcher :checked="$supplier->open" wire:model="form.open"/>
@@ -41,7 +42,9 @@
             <x-blocks.main-block>
                 <x-layouts.title name="Прайс"/>
             </x-blocks.main-block>
-            <x-titles.sub-title name="Фильтры"/>
+            <x-blocks.main-block>
+                <x-titles.sub-title name="Фильтры"/>
+            </x-blocks.main-block>
             <x-blocks.flex-block>
                 <x-inputs.input-with-label name="article"
                                            type="text"
@@ -68,7 +71,7 @@
                     </x-table.table-child>
                 </x-table.table-header>
                 @foreach($priceItems as $priceItem)
-                    <x-table.table-item wire:key="{{$priceItem->id}}" :status="$priceItem->status">
+                    <x-table.table-item wire:key="{{$priceItem->getKey()}}" :status="$priceItem->status">
                         <x-table.table-child>
                             <x-layouts.simple-text :name="$priceItem->message"/>
                         </x-table.table-child>
@@ -87,9 +90,10 @@
                     </x-table.table-item>
                 @endforeach
             </x-table.table-layout>
-            <x-blocks.main-block>
-                {{ $priceItems->links('livewire::tailwind') }}
-            </x-blocks.main-block>
         @endif
     </x-layouts.main-container>
+    <div wire:loading
+         wire:target="destroy">
+        <x-loader/>
+    </div>
 </div>

@@ -2,13 +2,15 @@
 
 namespace App\Models;
 
+use App\Helpers\Helpers;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
-class Item extends Model
+class Item extends MainModel
 {
     use HasFactory;
     use HasUuids;
@@ -22,7 +24,9 @@ class Item extends Model
         'ms_uuid',
         'name',
         'multiplicity',
-        'id'
+        'id',
+        'unload_ozon',
+        'unload_wb'
     ];
 
     public function supplier()
@@ -37,11 +41,28 @@ class Item extends Model
         })
             ->when(request('filters.article'), function (Builder $query) {
                 $query->where('article', 'like', '%' . request('filters.article') . '%');
+            })
+            ->when(request('filters.supplier_id'), function (Builder $query) {
+                $query->where('supplier_id',  request('filters.supplier_id'));
+            })
+            ->when(request('filters.name'), function (Builder $query) {
+                $query->where('name', 'like', '%' . request('filters.name') . '%');
+            })
+            ->when(!is_null(request('filters.unload_wb')), function (Builder $query) {
+                $query->where('unload_wb',  request('filters.unload_wb'));
+            })
+            ->when(!is_null(request('filters.unload_ozon')), function (Builder $query) {
+                $query->where('unload_ozon',  request('filters.unload_ozon'));
             });
     }
 
     public function fromPrice()
     {
         return $this->hasOne(EmailPriceItem::class);
+    }
+
+    public function warehousesStocks()
+    {
+        return $this->hasMany(ItemWarehouseStock::class);
     }
 }

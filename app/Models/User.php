@@ -3,16 +3,19 @@
 namespace App\Models;
 
 use Filament\Models\Contracts\FilamentUser;
+use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\App;
+use Laravel\Sanctum\HasApiTokens;
+use Modules\Order\Models\Order;
 
-class User extends Authenticatable implements MustVerifyEmail, FilamentUser
+class User extends Authenticatable implements MustVerifyEmail, FilamentUser, CanResetPassword
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, HasApiTokens;
 
     /**
      * The attributes that are mass assignable.
@@ -23,6 +26,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         'name',
         'email',
         'password',
+        'timezone'
     ];
 
     /**
@@ -46,6 +50,16 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
         ];
+    }
+
+    public function getTimeZoneAttribute ($value): string
+    {
+        return $value == config('app.timezone') || empty($value) ? config('app.timezone') : $value;
+    }
+
+    public function setTimeZoneAttribute($value)
+    {
+        $this->attributes['timezone'] = $value == config('app.timezone') || is_null($value) ? null : $value;
     }
 
     public function permissions(): BelongsToMany
@@ -105,6 +119,11 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
         return $this->permissions()->where('value', 'admin')->where('expires', '>', now())->exists();
     }
 
+    public function isSub()
+    {
+        return $this->isAdmin() || $this->isWbSub() || $this->isOzonSub();
+    }
+
     public function emails()
     {
         return $this->hasMany(Email::class);
@@ -142,8 +161,31 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser
 
     public function canAccessPanel(\Filament\Panel $panel): bool
     {
-        if (App::isProduction()) return $this->isAdmin();
+        return $this->isAdmin() || App::isLocal();
+    }
 
-        return true;
+    public function organizations()
+    {
+        return $this->hasMany(Organization::class);
+    }
+
+    public function warehouses()
+    {
+        return $this->hasMany(Warehouse::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
+    public function warehousesItemsExportReports()
+    {
+        return $this->hasMany(WarehousesItemsExportReport::class);
+    }
+
+    public function warehousesItemsImportReports()
+    {
+        return $this->hasMany(WarehousesItemsImportReport::class);
     }
 }

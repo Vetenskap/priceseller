@@ -2,41 +2,61 @@
 
 namespace App\Livewire\Item;
 
+use App\Exports\ItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
+use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
-use App\Livewire\Traits\WithSubscribeNotification;
 use App\Models\User;
 use App\Services\Item\ItemService;
+use App\Services\ItemsExportReportService;
+use App\Services\ItemsImportReportService;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Livewire\Component;
+use Livewire\Attributes\Url;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
-class ItemIndex extends Component
+class ItemIndex extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters, WithSubscribeNotification;
+    use WithFileUploads, WithJsNotifications, WithFilters;
 
     /** @var TemporaryUploadedFile $file */
     public $file;
     public User $user;
+
+    #[Url]
+    public $tab = null;
 
     public function mount()
     {
         $this->user = auth()->user();
     }
 
+    public function downloadTemplate()
+    {
+        return \Excel::download(new ItemsExport($this->user->id, true), "priceseller_шаблон.xlsx");
+    }
+
     public function export()
     {
-        Export::dispatch(auth()->user(), ItemService::class);
+        if (ItemsExportReportService::get($this->user)) {
+            $this->addJobAlready();
+            return;
+        }
 
-        $this->dispatch('items-export-report-created');
+        Export::dispatch(auth()->user(), ItemService::class);
+        $this->addJobNotification();
     }
 
     public function import()
     {
+        if (ItemsImportReportService::get($this->user)) {
+            $this->addJobAlready();
+            return;
+        }
+
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
         $path = $this->file->storeAs(ItemService::PATH, $uuid . '.' . $ext);
@@ -47,8 +67,7 @@ class ItemIndex extends Component
         }
 
         Import::dispatch($uuid, $ext, auth()->user(), ItemService::class);
-
-        $this->dispatch('items-import-report-created');
+        $this->addJobNotification();
     }
 
     public function render()
@@ -59,10 +78,10 @@ class ItemIndex extends Component
             ->orderByDesc('updated_at')
             ->with('supplier')
             ->filters()
-            ->paginate(50);
+            ->paginate(10);
 
         return view('livewire.item.item-index', [
-            'items' => $items
+            'items' => $this->tab === 'list' ? $items : []
         ]);
     }
 }

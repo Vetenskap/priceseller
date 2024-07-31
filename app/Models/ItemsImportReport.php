@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Helpers\Helpers;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Carbon;
 
-class ItemsImportReport extends Model
+class ItemsImportReport extends MainModel
 {
     use HasFactory;
 

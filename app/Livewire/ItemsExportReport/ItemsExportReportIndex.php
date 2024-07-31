@@ -2,32 +2,26 @@
 
 namespace App\Livewire\ItemsExportReport;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithModelsPaths;
 use App\Models\ItemsExportReport;
 use App\Models\OzonMarket;
 use App\Models\User;
 use App\Models\WbMarket;
 use Illuminate\Support\Facades\Storage;
-use Livewire\Component;
 
-class ItemsExportReportIndex extends Component
+class ItemsExportReportIndex extends BaseComponent
 {
     use WithModelsPaths;
 
     public User|WbMarket|OzonMarket $model;
 
-    public function getListeners()
-    {
-        return [
-            'echo:notification.' . auth()->user()->id . ',.notify' => 'render',
-            "items-export-report-created" => 'render',
-        ];
-    }
-
     public function download($report)
     {
 
         $report = ItemsExportReport::find($report['id']);
+
+        if ($report->status === 2) abort(403);
 
         return response()->download(
             file: Storage::disk('public')->path($this->getPath() . "{$report->uuid}.xlsx"),
@@ -38,6 +32,8 @@ class ItemsExportReportIndex extends Component
     public function destroy($report)
     {
         $report = ItemsExportReport::find($report['id']);
+
+        if ($report->status === 2) abort(403);
 
         $this->authorize('delete', $report);
 

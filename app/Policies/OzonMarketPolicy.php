@@ -2,8 +2,6 @@
 
 namespace App\Policies;
 
-use App\Livewire\Components\Toast;
-use App\Livewire\Subscribe\OzonSub;
 use App\Models\OzonMarket;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;

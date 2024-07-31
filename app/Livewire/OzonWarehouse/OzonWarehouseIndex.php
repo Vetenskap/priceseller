@@ -2,25 +2,25 @@
 
 namespace App\Livewire\OzonWarehouse;
 
+use App\Livewire\BaseComponent;
+use App\Livewire\Components\Toast;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
-use Livewire\Component;
 
-class OzonWarehouseIndex extends Component
+class OzonWarehouseIndex extends BaseComponent
 {
     public OzonMarket $market;
     public $apiWarehouses;
 
-    public $selectedWarehouse;
-
-    public function mount()
-    {
-        $firstWarehouse = collect($this->apiWarehouses)->first();
-        $this->selectedWarehouse = $firstWarehouse ? $firstWarehouse['warehouse_id'] : null;
-    }
+    public $selectedWarehouse = null;
 
     public function addWarehouse()
     {
+        if (!$this->selectedWarehouse) {
+            $this->js((new Toast('Ошибка', "Не выбран склад"))->danger());
+            return;
+        }
+
         $this->authorize('create', OzonWarehouse::class);
 
         $name = collect($this->apiWarehouses)->firstWhere('warehouse_id', $this->selectedWarehouse)['name'];

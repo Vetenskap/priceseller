@@ -10,6 +10,7 @@
     "id" => $name,
 ]) }}
     wire:model.live.debounce.1s="{{$field}}">
+        <option wire:key="{{null}}" value="{{ null }}">Выберите опцию</option>
         @foreach($options as $option)
             <option wire:key="{{$option[$value]}}"
                     value="{{ $option[$value] }}">{{ $option[$optionName] }}</option>

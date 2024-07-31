@@ -3,14 +3,16 @@
 
     <x-layouts.actions>
         <a href="{{route('emails')}}" wire:navigate.hover>
-            <x-primary-button>Назад</x-primary-button>
+            <x-primary-button>Закрыть</x-primary-button>
         </a>
         <x-success-button wire:click="save">Сохранить</x-success-button>
         <x-danger-button wire:click="destroy">Удалить</x-danger-button>
     </x-layouts.actions>
 
     <x-layouts.main-container wire:poll>
-        <x-layouts.title name="Основная информация"/>
+        <x-blocks.main-block>
+            <x-layouts.title name="Основная информация"/>
+        </x-blocks.main-block>
         <x-blocks.flex-block-end>
             <x-inputs.switcher :checked="$form->open" wire:model="form.open"/>
             <x-inputs.input-with-label name="name"

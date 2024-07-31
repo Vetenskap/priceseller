@@ -155,22 +155,40 @@ class OzonMarketService
 
     public static function closeMarkets(User $user)
     {
-        if (App::isLocal() || $user->isAdmin()) return;
-
         $count = $user->ozonMarkets()->count();
 
         if ($count > 0 && !$user->isOzonFiveSub() && !$user->isOzonTenSub()) {
-            $user->ozonMarkets()->orderBy('created_at')->get()->each(function (OzonMarket $market) {
+
+            $user->ozonMarkets()->where('close', false)->orderBy('created_at')->get()->each(function (OzonMarket $market) {
                 $market->close = true;
                 $market->open = false;
                 $market->save();
             });
-        } else if ($count > 5 && !$user->isOzonTenSub()) {
-            $user->ozonMarkets()->orderBy('created_at')->get()->skip(5)->each(function (OzonMarket $market) {
+
+        } else {
+
+            $user->ozonMarkets()->orderBy('created_at')->get()->take(5)->where('close', true)->each(function (OzonMarket $market) {
+                $market->close = false;
+                $market->save();
+            });
+
+        }
+
+        if ($count > 5 && !$user->isOzonTenSub()) {
+
+            $user->ozonMarkets()->orderBy('created_at')->get()->skip(5)->where('close', false)->each(function (OzonMarket $market) {
                 $market->close = true;
                 $market->open = false;
                 $market->save();
             });
+
+        } else {
+
+            $user->ozonMarkets()->orderBy('created_at')->get()->skip(5)->where('close', true)->each(function (OzonMarket $market) {
+                $market->close = false;
+                $market->save();
+            });
+
         }
     }
 }

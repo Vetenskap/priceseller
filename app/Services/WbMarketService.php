@@ -10,16 +10,11 @@ use App\Models\Item;
 use App\Models\User;
 use App\Models\WbItem;
 use App\Models\WbMarket;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class WbMarketService
 {
@@ -165,22 +160,40 @@ class WbMarketService
 
     public static function closeMarkets(User $user)
     {
-        if (App::isLocal() || $user->isAdmin()) return;
-
         $count = $user->wbMarkets()->count();
 
         if ($count > 0 && !$user->isWbFiveSub() && !$user->isWbTenSub()) {
-            $user->wbMarkets()->orderBy('created_at')->get()->each(function (WbMarket $market) {
+
+            $user->wbMarkets()->where('close', false)->orderBy('created_at')->get()->each(function (WbMarket $market) {
                 $market->close = true;
                 $market->open = false;
                 $market->save();
             });
-        } else if ($count > 5 && !$user->isWbTenSub()) {
-            $user->wbMarkets()->orderBy('created_at')->get()->skip(5)->each(function (WbMarket $market) {
+
+        } else {
+
+            $user->wbMarkets()->orderBy('created_at')->get()->take(5)->where('close', true)->each(function (WbMarket $market) {
+                $market->close = false;
+                $market->save();
+            });
+
+        }
+
+        if ($count > 5 && !$user->isWbTenSub()) {
+
+            $user->wbMarkets()->orderBy('created_at')->get()->skip(5)->where('close', false)->each(function (WbMarket $market) {
                 $market->close = true;
                 $market->open = false;
                 $market->save();
             });
+
+        } else {
+
+            $user->wbMarkets()->orderBy('created_at')->get()->skip(5)->where('close', true)->each(function (WbMarket $market) {
+                $market->close = false;
+                $market->save();
+            });
+
         }
     }
 }

@@ -6,17 +6,21 @@ use App\HttpClient\OzonClient;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
+use App\Models\OzonWarehouseStock;
+use App\Models\OzonWarehouseUserWarehouse;
 use App\Models\Supplier;
+use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Modules\Order\Models\Order;
 
 class OzonItemPriceService
 {
     protected OzonClient $ozonClient;
 
-    public function __construct(public Supplier $supplier, public OzonMarket $market)
+    public function __construct(public ?Supplier $supplier = null, public OzonMarket $market)
     {
         $this->ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
     }
@@ -130,36 +134,80 @@ class OzonItemPriceService
 
     public function recountStockOzonItem(OzonItem $ozonItem): OzonItem
     {
-        $new_count = $ozonItem->item->count < $this->market->min ? 0 : $ozonItem->item->count;
-        $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $ozonItem->item->multiplicity === 1) ? 1 : $new_count;
-        $new_count = $new_count / $ozonItem->item->multiplicity;
-        $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
-        $new_count = (int)max($new_count, 0);
+        $this->market->warehouses->each(function (OzonWarehouse $warehouse) use ($ozonItem) {
+            $myWarehousesStocks = $warehouse->userWarehouses->map(function (OzonWarehouseUserWarehouse $userWarehouse) use ($ozonItem) {
+                return $userWarehouse->warehouse->stocks()->where('item_id', $ozonItem->item_id)->first()?->stock;
+            })->sum();
 
-        $ozonItem->count = $new_count;
+            $new_count = $ozonItem->item->count < $this->market->min ? 0 : $ozonItem->item->count;
+            $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $ozonItem->item->multiplicity === 1) ? 1 : $new_count;
+            $new_count = ($new_count + $myWarehousesStocks) / $ozonItem->item->multiplicity;
+            if (class_exists(Order::class)) {
+                $new_count = $new_count - ($ozonItem->orders()->where('state', 'new')->sum('count') * $ozonItem->item->multiplicity);
+            }
+            $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
+            $new_count = (int)max($new_count, 0);
+
+            $warehouse->stocks()->updateOrCreate([
+                'ozon_item_id' => $ozonItem->id
+            ], [
+                'ozon_item_id' => $ozonItem->id,
+                'stock' => $new_count
+            ]);
+        });
 
         return $ozonItem;
     }
 
     public function nullNotUpdatedStocks(): void
     {
-        OzonItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('updated', false)
-                    ->where('supplier_id', $this->supplier->id);
+        OzonWarehouseStock::query()
+            ->whereHas('ozonItem', function (Builder $query) {
+                $query->whereHas('item', function (Builder $query) {
+                    $query
+                        ->where('updated', false)
+                        ->where('supplier_id', $this->supplier->id);
+                });
             })
-            ->update(['count' => 0]);
+            ->update(['stock' => 0]);
     }
 
     public function nullAllStocks(): void
     {
-        OzonItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('supplier_id', $this->supplier->id);
+        OzonWarehouseStock::query()
+            ->whereHas('ozonItem', function (Builder $query) {
+                $query->whereHas('item', function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id);
+                });
             })
-            ->update(['count' => 0]);
+            ->update(['stock' => 0]);
+    }
+
+    public function unloadOzonItemStocks(OzonItem $ozonItem): void
+    {
+        $this->market->warehouses()
+            ->whereHas('market', function (Builder $query) use ($ozonItem) {
+                $query->whereHas('items', function (Builder $query) use ($ozonItem) {
+                    $query->where('id', $ozonItem->item_id);
+                });
+            })
+            ->get()
+            ->map(function (OzonWarehouse $warehouse) use ($ozonItem) {
+
+                $data = [
+                    [
+                        'offer_id' => (string)$ozonItem->offer_id,
+                        'product_id' => (int)$ozonItem->product_id,
+                        'stock' => (int)$ozonItem->warehouseStock($warehouse) ? $ozonItem->warehouseStock($warehouse)->stock : 0,
+                        'warehouse_id' => (int)$warehouse->warehouse_id
+                    ]
+                ];
+
+                if (App::isProduction()) {
+                    $this->ozonClient->putStocks($data, $this->supplier);
+                }
+            });
     }
 
     public function unloadAllStocks(): void
@@ -173,7 +221,8 @@ class OzonItemPriceService
 
         $this->market->warehouses()
             ->whereHas('suppliers', function (Builder $query) {
-                $query->where('supplier_id', $this->supplier->id);
+                $query
+                    ->where('supplier_id', $this->supplier->id);
             })
             ->get()
             ->map(function (OzonWarehouse $warehouse) {
@@ -183,6 +232,7 @@ class OzonItemPriceService
                 OzonItem::query()
                     ->whereHas('item', function (Builder $query) {
                         $query
+                            ->where('unload_ozon', true)
                             ->where('supplier_id', $this->supplier->id);
                     })
                     ->chunk(100, function (Collection $items) use ($warehouse) {
@@ -191,7 +241,7 @@ class OzonItemPriceService
                             return [
                                 'offer_id' => (string)$item->offer_id,
                                 'product_id' => (int)$item->product_id,
-                                'stock' => (int)$item->count,
+                                'stock' => (int) ($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
                                 'warehouse_id' => (int)$warehouse->warehouse_id
                             ];
                         });

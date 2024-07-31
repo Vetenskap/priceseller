@@ -5,9 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\SoftDeletes;
+use Modules\Order\Models\Order;
 
-class WbItem extends Model
+class WbItem extends MainModel
 {
     use HasFactory;
     use HasUuids;
@@ -30,5 +30,25 @@ class WbItem extends Model
     public function item()
     {
         return $this->belongsTo(Item::class);
+    }
+
+    public function orders()
+    {
+        return $this->morphMany(Order::class, 'orderable');
+    }
+
+    public function market()
+    {
+        return $this->belongsTo(WbMarket::class, 'wb_market_id', 'id');
+    }
+
+    public function warehouseStock(WbWarehouse $warehouse)
+    {
+        return $warehouse->stocks()->where('wb_item_id', $this->id)->first();
+    }
+
+    public function stocks()
+    {
+        return $this->hasMany(WbWarehouseStock::class);
     }
 }

@@ -2,21 +2,16 @@
 
 namespace App\Livewire\EmailSupplier;
 
+use App\Livewire\BaseComponent;
+use App\Livewire\Components\Toast;
 use App\Models\Email;
 use App\Models\EmailSupplier;
-use Livewire\Attributes\On;
-use Livewire\Component;
 
-class EmailSupplierIndex extends Component
+class EmailSupplierIndex extends BaseComponent
 {
     public Email $email;
 
     public $selectedSupplier;
-
-    public function mount()
-    {
-        $this->selectedSupplier = auth()->user()->suppliers->first()->id;
-    }
 
     public function render()
     {
@@ -25,8 +20,17 @@ class EmailSupplierIndex extends Component
 
     public function store()
     {
+        if (!$this->selectedSupplier) {
+            $this->js((new Toast('Ошибка', "Не выбран поставщик"))->danger());
+            return;
+        }
 
         $this->authorize('create', EmailSupplier::class);
+
+        if ($this->email->suppliers()->wherePivot('supplier_id', $this->selectedSupplier)->exists()) {
+            $this->js((new Toast('Ошибка', "Указаный поставщик уже добавлен"))->danger());
+            return;
+        }
 
         $this->email->suppliers()->attach($this->selectedSupplier, [
             'created_at' => now(),

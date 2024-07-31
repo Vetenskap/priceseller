@@ -2,22 +2,15 @@
 
 namespace App\Livewire\SupplierReport;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Supplier;
-use Livewire\Component;
 
-class SupplierReportIndex extends Component
+class SupplierReportIndex extends BaseComponent
 {
     use WithJsNotifications;
 
     public Supplier $supplier;
-
-    public function getListeners()
-    {
-        return [
-            "echo:supplier.report.{$this->supplier->id},.change-message" => 'render'
-        ];
-    }
 
     public function render()
     {
