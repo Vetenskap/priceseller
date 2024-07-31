@@ -7,11 +7,10 @@ Schedule::call(function () {
     \App\Services\BusinessLogicService::usersEmailsUnload();
     \App\Services\ReportService::checkTimeouts();
 
-})->everyMinute()->name('everyMinuteSchedule')->withoutOverlapping();
+})->everyMinute()->name('everyMinuteSchedule');
 
 Schedule::call(function () {
 
-    throw new Exception('Тест');
     \Illuminate\Support\Facades\Artisan::call('horizon:snapshot');
     \App\Services\UsersPermissionsService::closeMarkets();
 
