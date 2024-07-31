@@ -30,7 +30,7 @@
                 @enderror
             </x-blocks.center-block>
 
-            <x-blocks.main-block class="text-center" wire:loading.remove x-show="$wire.file">
+            <x-blocks.main-block class="text-center" x-show="$wire.file">
                 <x-success-button>Загрузить</x-success-button>
             </x-blocks.main-block>
         </div>
