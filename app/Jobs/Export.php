@@ -9,13 +9,12 @@ use App\Models\WbMarket;
 use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class Export implements ShouldQueue, ShouldBeUnique
+class Export implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
