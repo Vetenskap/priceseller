@@ -37,13 +37,7 @@
 </head>
 <body class="font-sans antialiased">
 <div class="page-content min-h-screen bg-gray-100 dark:bg-gray-900">
-    @if(\App\Services\UsersPermissionsService::getExpiringSubscribes(auth()->user())->isNotEmpty())
-        <div class="bg-red-300 text-center">
-            @foreach(\App\Services\UsersPermissionsService::getExpiringSubscribes(auth()->user()) as $permission)
-                <x-titles.sub-title :name="'Ваша подписка '  . $permission->name . ' истекает ' . $permission->pivot->expires"/>
-            @endforeach
-        </div>
-    @endif
+    <livewire:notification-div />
     <livewire:layout.navigation/>
 
     <!-- Page Heading -->
