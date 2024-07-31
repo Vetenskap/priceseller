@@ -82,7 +82,11 @@ class OzonOrderService
 
                         if (App::isProduction()) {
                             $client = new OzonClient($market->api_key, $market->client_id);
-                            $result = $client->setState($product, $order->number);
+                            try {
+                                $result = $client->setState($product, $order->number);
+                            } catch (\Throwable) {
+
+                            }
                         } else {
                             $result = collect($order->number);
                         }
