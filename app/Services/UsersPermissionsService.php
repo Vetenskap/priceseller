@@ -30,4 +30,9 @@ class UsersPermissionsService
             });
         });
     }
+
+    public static function getExpiringSubscribes(User $user): Collection
+    {
+        return $user->permissions()->wherePivot('expires', '>', now())->wherePivot('expires', '<', now()->addDays(3))->get();
+    }
 }
