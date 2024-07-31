@@ -88,6 +88,7 @@ class EmailHandlerLaravelImap
      */
     public function getNewPrice(string $supplierEmail, string $supplierFilename): ?string
     {
+
         /** @var Folder $folder */
         foreach ($this->getFoldersIterator() as $folder) {
 
