@@ -66,6 +66,7 @@ class OzonOrderService
         $this->organization
             ->orders()
             ->where('state', 'new')
+            ->where('write_off', false)
             ->with('orderable')
             ->where('orderable_type', OzonItem::class)
             ->chunk(100, function (Collection $orders) use (&$total) {
