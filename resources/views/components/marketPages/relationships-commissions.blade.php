@@ -1,4 +1,4 @@
-@props(['market' => null, 'items' => null, 'statusFilters' => null])
+@props(['market' => null, 'items' => null, 'statusFilters' => null, 'file' => null])
 
 <div>
     <x-blocks.main-block>
