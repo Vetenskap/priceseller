@@ -13,10 +13,8 @@ return new class extends Migration
     {
         Schema::create('moysklads', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('api_key', 400)->unique();
+            $table->longText('api_key');
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
-            $table->softDeletes();
             $table->timestamps();
         });
     }

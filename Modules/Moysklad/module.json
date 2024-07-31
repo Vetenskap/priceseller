@@ -1,0 +1,11 @@
+{
+    "name": "Moysklad",
+    "alias": "moysklad",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Moysklad\\Providers\\MoyskladServiceProvider"
+    ],
+    "files": []
+}

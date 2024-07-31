@@ -11,6 +11,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\App;
 use Laravel\Sanctum\HasApiTokens;
+use Modules\Moysklad\Models\Moysklad;
 use Modules\Order\Models\Order;
 
 class User extends Authenticatable implements MustVerifyEmail, FilamentUser, CanResetPassword
@@ -187,5 +188,10 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
     public function warehousesItemsImportReports()
     {
         return $this->hasMany(WarehousesItemsImportReport::class);
+    }
+
+    public function moysklad()
+    {
+        return $this->hasOne(Moysklad::class);
     }
 }
