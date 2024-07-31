@@ -10,6 +10,10 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Webklex\IMAP\Facades\Client;
 use Webklex\PHPIMAP\Attachment;
+use Webklex\PHPIMAP\Exceptions\ConnectionFailedException;
+use Webklex\PHPIMAP\Exceptions\FolderFetchingException;
+use Webklex\PHPIMAP\Exceptions\GetMessagesFailedException;
+use Webklex\PHPIMAP\Exceptions\RuntimeException;
 use Webklex\PHPIMAP\Folder;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Support\MessageCollection;
@@ -27,6 +31,9 @@ class EmailHandlerLaravelImap
         'text/csv'
     ];
 
+    /**
+     * @throws ConnectionFailedException
+     */
     public function __construct(string $address, string $password, ?Filesystem $storage = null)
     {
         $this->storage = $storage ?? Storage::disk('public');
@@ -47,11 +54,21 @@ class EmailHandlerLaravelImap
 
     }
 
+    /**
+     * @throws RuntimeException
+     * @throws FolderFetchingException
+     * @throws ConnectionFailedException
+     */
     public function getFoldersIterator(): \Iterator
     {
         return $this->connection->getFolders()->paginate()->getIterator();
     }
 
+    /**
+     * @throws RuntimeException
+     * @throws GetMessagesFailedException
+     * @throws ConnectionFailedException
+     */
     public function getUnseenMessagesFromIterator(Folder $folder, string $email): \Iterator
     {
         return $folder->messages()->unseen()->from($email)->fetchOrderDesc()->paginate()->getIterator();
@@ -61,7 +78,6 @@ class EmailHandlerLaravelImap
     /**
      * @param string $supplierEmail
      * @param string $supplierFilename
-     * @param string $criteria
      * @return string|null
      * @throws \Webklex\PHPIMAP\Exceptions\ConnectionFailedException
      * @throws \Webklex\PHPIMAP\Exceptions\EventNotFoundException
