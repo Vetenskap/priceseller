@@ -8,17 +8,14 @@ use App\Models\Warehouse;
 use App\Models\WbMarket;
 use App\Services\ItemsImportReportService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class Import implements ShouldQueue, ShouldBeUnique
+class Import implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-
-    public $uniqueFor = 10700;
 
     /**
      * Create a new job instance.
@@ -57,10 +54,5 @@ class Import implements ShouldQueue, ShouldBeUnique
     public function failed()
     {
         ItemsImportReportService::error($this->model);
-    }
-
-    public function uniqueId(): string
-    {
-        return $this->model->id;
     }
 }

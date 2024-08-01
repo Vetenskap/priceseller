@@ -66,6 +66,7 @@ class OzonOrderService
         $this->organization
             ->orders()
             ->where('state', 'new')
+            ->where('write_off', false)
             ->with('orderable')
             ->where('orderable_type', OzonItem::class)
             ->chunk(100, function (Collection $orders) use (&$total) {
@@ -82,7 +83,11 @@ class OzonOrderService
 
                         if (App::isProduction()) {
                             $client = new OzonClient($market->api_key, $market->client_id);
-                            $result = $client->setState($product, $order->number);
+                            try {
+                                $result = $client->setState($product, $order->number);
+                            } catch (\Throwable) {
+
+                            }
                         } else {
                             $result = collect($order->number);
                         }

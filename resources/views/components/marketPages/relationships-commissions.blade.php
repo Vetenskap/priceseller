@@ -1,4 +1,4 @@
-@props(['market' => null, 'items' => null, 'statusFilters' => null])
+@props(['market' => null, 'items' => null, 'statusFilters' => null, 'file' => null])
 
 <div>
     <x-blocks.main-block>
@@ -30,9 +30,11 @@
                 @enderror
             </x-blocks.center-block>
 
-            <x-blocks.main-block class="text-center" wire:loading.remove x-show="$wire.file">
-                <x-success-button>Загрузить</x-success-button>
-            </x-blocks.main-block>
+            @if($file)
+                <x-blocks.main-block class="text-center">
+                    <x-success-button>Загрузить</x-success-button>
+                </x-blocks.main-block>
+            @endif
         </div>
     </form>
 

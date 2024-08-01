@@ -23,6 +23,7 @@ class AutomaticService
 
             $ozonService = new OzonOrderService($organization, $this->user);
             $ozonService->writeOffStocks();
+            $ozonService->setStates();
 
             $wbService = new WbOrderService($organization, $this->user);
             $wbService->writeOffStocks();

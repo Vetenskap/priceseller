@@ -42,7 +42,7 @@ class WbItem extends MainModel
         return $this->belongsTo(WbMarket::class, 'wb_market_id', 'id');
     }
 
-    public function warehouseStock(WbWarehouse $warehouse)
+    public function warehouseStock(WbWarehouse $warehouse): ?WbWarehouseStock
     {
         return $warehouse->stocks()->where('wb_item_id', $this->id)->first();
     }
