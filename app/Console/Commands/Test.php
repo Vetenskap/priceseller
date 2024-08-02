@@ -2,41 +2,9 @@
 
 namespace App\Console\Commands;
 
-use App\Events\NotificationEvent;
-use App\Events\TestBroadcast;
-use App\Helpers\Helpers;
-use App\Models\EmailSupplier;
-use App\Models\Item;
-use App\Models\Organization;
-use App\Models\OzonItem;
-use App\Models\OzonMarket;
-use App\Models\OzonWarehouse;
-use App\Models\Permission;
-use App\Models\Supplier;
-use App\Models\User;
-use App\Models\Warehouse;
-use App\Models\WbItem;
-use App\Models\WbMarket;
-use App\Models\WbWarehouse;
-use App\Notifications\SubscriptionExpires;
-use App\Services\EmailPriceItemService;
-use App\Services\EmailSupplierService;
-use App\Services\OzonItemPriceService;
-use App\Services\OzonMarketService;
-use App\Services\SupplierReportService;
-use App\Services\UserEmailNotficationService;
-use App\Services\WbItemPriceService;
-use App\Services\WbMarketService;
+use App\Models\WbWarehouseStock;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Redis;
-use Illuminate\Support\Str;
-use Maatwebsite\Excel\ChunkReader;
-use Maatwebsite\Excel\Facades\Excel;
-use Modules\Order\Services\OrderService;
 
 class Test extends Command
 {
@@ -59,6 +27,15 @@ class Test extends Command
      */
     public function handle()
     {
-
+        dd(WbWarehouseStock::query()
+            ->whereHas('wbItem', function (Builder $query) {
+                $query->whereHas('item', function (Builder $query) {
+                    $query
+                        ->where('updated', false)
+                        ->orWhere('unload_wb', false)
+                        ->where('supplier_id', '9c548271-42d2-4c86-bff0-bdb106154757');
+                });
+            })
+            ->get());
     }
 }

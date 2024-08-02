@@ -120,6 +120,7 @@ class OzonItemPriceService
             ->whereHas('item', function (Builder $query) {
                 $query
                     ->where('updated', true)
+                    ->where('unload_ozon', true)
                     ->where('supplier_id', $this->supplier->id);
             })
             ->chunk(1000, function ($items) {
@@ -166,6 +167,7 @@ class OzonItemPriceService
                 $query->whereHas('item', function (Builder $query) {
                     $query
                         ->where('updated', false)
+                        ->orWhere('unload_ozon', false)
                         ->where('supplier_id', $this->supplier->id);
                 });
             })
@@ -232,7 +234,6 @@ class OzonItemPriceService
                 OzonItem::query()
                     ->whereHas('item', function (Builder $query) {
                         $query
-                            ->where('unload_ozon', true)
                             ->where('supplier_id', $this->supplier->id);
                     })
                     ->chunk(100, function (Collection $items) use ($warehouse) {
