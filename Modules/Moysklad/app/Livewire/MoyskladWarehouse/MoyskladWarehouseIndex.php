@@ -36,6 +36,16 @@ class MoyskladWarehouseIndex extends Component
         ]);
     }
 
+    public function addWebhook()
+    {
+
+    }
+
+    public function deleteWebhook()
+    {
+
+    }
+
     public function render()
     {
         return view('moysklad::livewire.moysklad-warehouse.moysklad-warehouse-index');

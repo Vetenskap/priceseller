@@ -19,4 +19,5 @@
     <x-blocks.main-block>
         <x-layouts.title name="Вебхук" />
     </x-blocks.main-block>
+    <x-success-button wire:click="addWebhook">Добавить</x-success-button>
 </x-layouts.module-container>

@@ -31,8 +31,30 @@ class MoyskladClient
         return $this->request->get('/entity/store')->throw()->collect('rows');
     }
 
+    public function getAllSuppliers(): Collection
+    {
+        return $this->request->get('/entity/counterparty')->throw()->collect('rows');
+    }
+
     public function getAllStocksFromWarehouse(string $warehouseId): Collection
     {
         return $this->request->withQueryParameters(['filter' => "storeId=$warehouseId"])->get('/report/stock/all/current')->throw()->collect();
+    }
+
+    public function getAllAssortmentAttributes(): Collection
+    {
+        return $this->request->get('/entity/product/metadata/attributes')->throw()->collect('rows');
+    }
+
+    public function addWarehouseWebhook()
+    {
+        $data = [
+            "url" => "http://www.example.com",
+            "enabled" => true,
+            "reportType" => "all",
+            "stockType" => "stock"
+        ];
+
+        $this->request->post('/entity/webhookstock')->throw();
     }
 }

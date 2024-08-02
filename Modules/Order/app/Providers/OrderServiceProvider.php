@@ -24,27 +24,6 @@ class OrderServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
-        $this->app->booted(function () {
-
-            $schedule = $this->app->make(Schedule::class);
-
-//            $schedule->call(function () {
-//                \Modules\Order\Services\OrderService::prune();
-//            })->name('dailyOrderSchedule')->daily();
-
-            $schedule->call(function () {
-                \App\Models\User::chunk(10, function (\Illuminate\Support\Collection $users) {
-                    $users->each(function (\App\Models\User $user) {
-                        if (App::isLocal()) {
-                            \Modules\Order\Jobs\UserProcessOrders::dispatchIf($user->isAdmin(), $user);
-                        } else {
-                            \Modules\Order\Jobs\UserProcessOrders::dispatchIf($user->isSub() || $user->isAdmin(), $user);
-                        }
-                    });
-                });
-            })->name('everyThirtyMinutesOrderSchedule')->everyThirtyMinutes()->withoutOverlapping();
-
-        });
     }
 
     /**
@@ -69,10 +48,24 @@ class OrderServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+//             $schedule->call(function () {
+//                \Modules\Order\Services\OrderService::prune();
+//            })->name('dailyOrderSchedule')->daily();
+
+            $schedule->call(function () {
+                \App\Models\User::chunk(10, function (\Illuminate\Support\Collection $users) {
+                    $users->each(function (\App\Models\User $user) {
+                        if (App::isLocal()) {
+                            \Modules\Order\Jobs\UserProcessOrders::dispatchIf($user->isAdmin(), $user);
+                        } else {
+                            \Modules\Order\Jobs\UserProcessOrders::dispatchIf($user->isSub() || $user->isAdmin(), $user);
+                        }
+                    });
+                });
+            })->name('everyThirtyMinutesOrderSchedule')->everyThirtyMinutes()->withoutOverlapping();
+        });
     }
 
     /**
@@ -80,7 +73,7 @@ class OrderServiceProvider extends ServiceProvider
      */
     public function registerTranslations(): void
     {
-        $langPath = resource_path('lang/modules/'.$this->moduleNameLower);
+        $langPath = resource_path('lang/modules/' . $this->moduleNameLower);
 
         if (is_dir($langPath)) {
             $this->loadTranslationsFrom($langPath, $this->moduleNameLower);
@@ -96,7 +89,7 @@ class OrderServiceProvider extends ServiceProvider
      */
     protected function registerConfig(): void
     {
-        $this->publishes([module_path($this->moduleName, 'config/config.php') => config_path($this->moduleNameLower.'.php')], 'config');
+        $this->publishes([module_path($this->moduleName, 'config/config.php') => config_path($this->moduleNameLower . '.php')], 'config');
         $this->mergeConfigFrom(module_path($this->moduleName, 'config/config.php'), $this->moduleNameLower);
     }
 
@@ -105,14 +98,14 @@ class OrderServiceProvider extends ServiceProvider
      */
     public function registerViews(): void
     {
-        $viewPath = resource_path('views/modules/'.$this->moduleNameLower);
+        $viewPath = resource_path('views/modules/' . $this->moduleNameLower);
         $sourcePath = module_path($this->moduleName, 'resources/views');
 
-        $this->publishes([$sourcePath => $viewPath], ['views', $this->moduleNameLower.'-module-views']);
+        $this->publishes([$sourcePath => $viewPath], ['views', $this->moduleNameLower . '-module-views']);
 
         $this->loadViewsFrom(array_merge($this->getPublishableViewPaths(), [$sourcePath]), $this->moduleNameLower);
 
-        $componentNamespace = str_replace('/', '\\', config('modules.namespace').'\\'.$this->moduleName.'\\'.ltrim(config('modules.paths.generator.component-class.path'), config('modules.paths.app_folder', '')));
+        $componentNamespace = str_replace('/', '\\', config('modules.namespace') . '\\' . $this->moduleName . '\\' . ltrim(config('modules.paths.generator.component-class.path'), config('modules.paths.app_folder', '')));
         Blade::componentNamespace($componentNamespace, $this->moduleNameLower);
     }
 
@@ -133,8 +126,8 @@ class OrderServiceProvider extends ServiceProvider
     {
         $paths = [];
         foreach (config('view.paths') as $path) {
-            if (is_dir($path.'/modules/'.$this->moduleNameLower)) {
-                $paths[] = $path.'/modules/'.$this->moduleNameLower;
+            if (is_dir($path . '/modules/' . $this->moduleNameLower)) {
+                $paths[] = $path . '/modules/' . $this->moduleNameLower;
             }
         }
 

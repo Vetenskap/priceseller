@@ -2,6 +2,7 @@
 
 namespace Modules\Moysklad\Livewire\MoyskladWarehouse;
 
+use App\Livewire\Components\Toast;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
@@ -31,7 +32,8 @@ class MoyskladWarehouseEdit extends Component
     public function updateStocks()
     {
         $service = new MoyskladService($this->warehouse->moysklad);
-        dd($service->getAllStocks($this->warehouse->moysklad_warehouse_uuid));
+        $total = $service->getAllStocks($this->warehouse);
+        $this->js((new Toast('Остатки загружены', 'Всего: ' . $total))->success());
     }
 
     public function render()

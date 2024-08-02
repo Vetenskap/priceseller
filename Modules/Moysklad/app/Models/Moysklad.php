@@ -23,4 +23,9 @@ class Moysklad extends Model
         return $this->hasMany(MoyskladWarehouseWarehouse::class);
     }
 
+    public function suppliers()
+    {
+        return $this->hasMany(MoyskladSupplierSupplier::class);
+    }
+
 }

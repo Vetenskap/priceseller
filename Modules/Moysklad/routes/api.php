@@ -1,7 +1,6 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use Modules\Moysklad\Http\Controllers\MoyskladController;
 
 /*
  *--------------------------------------------------------------------------
@@ -14,6 +13,6 @@ use Modules\Moysklad\Http\Controllers\MoyskladController;
  *
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('moysklad', MoyskladController::class)->names('moysklad');
+Route::prefix('modules')->group(function () {
+    Route::get('moysklad/webhooks/{webhook}', [\Modules\Moysklad\Http\Controllers\MoyskladApiController::class, 'index'])->name('moysklad.webhook.index');
 });

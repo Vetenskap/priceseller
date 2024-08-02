@@ -26,7 +26,9 @@ class Item extends MainModel
         'multiplicity',
         'id',
         'unload_ozon',
-        'unload_wb'
+        'unload_wb',
+        'created_at',
+        'updated_at'
     ];
 
     public function supplier()
