@@ -123,7 +123,7 @@ class WarehouseItemsImportReportService
         }
     }
 
-    public static function timeout()
+    public static function timeout(): void
     {
         WarehousesItemsImportReport::where('updated_at', '<', now()->subminutes(30))
             ->where('status', 2)

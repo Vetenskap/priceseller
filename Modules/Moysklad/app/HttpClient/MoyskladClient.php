@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\Http;
 
 class MoyskladClient
 {
+    const BASEURL = 'https://api.moysklad.ru/api/remap/1.2';
     public PendingRequest $request;
 
     public function __construct(string $apiKey)
@@ -23,38 +24,27 @@ class MoyskladClient
             ->withHeaders([
                 'Content-Type' => 'application/json',
                 'Accept-Encoding' => 'application/gzip'
-            ])->baseUrl('https://api.moysklad.ru/api/remap/1.2');
+            ])->baseUrl(static::BASEURL);
     }
 
-    public function getAllWarehouses(): Collection
+    public function get(string $endpoint, array $queryParameters = []): Collection
     {
-        return $this->request->get('/entity/store')->throw()->collect('rows');
+        return $this->request->withQueryParameters($queryParameters)->get($endpoint)->throw()->collect();
     }
 
-    public function getAllSuppliers(): Collection
+    public function delete(string $endpoint): bool
     {
-        return $this->request->get('/entity/counterparty')->throw()->collect('rows');
+        return $this->request->delete($endpoint)->throw()->successful();
     }
 
-    public function getAllStocksFromWarehouse(string $warehouseId): Collection
+    public function post(string $endpoint, array $data): Collection
     {
-        return $this->request->withQueryParameters(['filter' => "storeId=$warehouseId"])->get('/report/stock/all/current')->throw()->collect();
+        return $this->request->post($endpoint, $data)->throw()->collect();
     }
 
-    public function getAllAssortmentAttributes(): Collection
+    public function put(string $endpoint, array $data): bool
     {
-        return $this->request->get('/entity/product/metadata/attributes')->throw()->collect('rows');
+        return $this->request->put($endpoint, $data)->throw()->successful();
     }
 
-    public function addWarehouseWebhook()
-    {
-        $data = [
-            "url" => "http://www.example.com",
-            "enabled" => true,
-            "reportType" => "all",
-            "stockType" => "stock"
-        ];
-
-        $this->request->post('/entity/webhookstock')->throw();
-    }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\Order\Providers;
 
+use App\Services\ModuleService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
@@ -58,8 +59,8 @@ class OrderServiceProvider extends ServiceProvider
                 \App\Models\User::chunk(10, function (\Illuminate\Support\Collection $users) {
                     $users->each(function (\App\Models\User $user) {
                         if (App::isLocal()) {
-                            \Modules\Order\Jobs\UserProcessOrders::dispatchIf($user->isAdmin(), $user);
-                        } else {
+                            \Modules\Order\Jobs\UserProcessOrders::dispatch($user);
+                        } else if (ModuleService::moduleIsEnabled('Order', $user)) {
                             \Modules\Order\Jobs\UserProcessOrders::dispatchIf($user->isSub() || $user->isAdmin(), $user);
                         }
                     });

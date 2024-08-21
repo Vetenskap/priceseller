@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Helpers;
+use App\Models\User;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 
@@ -17,8 +18,8 @@ class Helpers {
         });
     }
 
-    static public function getUserTimeZone()
+    static public function getUserTimeZone(?User $user = null)
     {
-        return optional(auth()->user())->timezone ?? config('app.timezone');
+        return optional(auth()->user())->timezone ?? ($user ? $user->timezone : config('app.timezone'));
     }
 }

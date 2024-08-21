@@ -11,10 +11,14 @@ use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Warehouse;
 use App\Services\WarehouseItemsExportReportService;
 use App\Services\WarehouseItemsImportReportService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Url;
 use Livewire\WithFileUploads;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class WarehouseIndex extends BaseComponent
 {
@@ -22,61 +26,39 @@ class WarehouseIndex extends BaseComponent
 
     public WarehousePostForm $form;
 
-    public $showCreateForm = false;
+    public $file = null;
 
-    public $file;
+    public $page;
 
-    #[Url]
-    public $page = null;
-
-    public function add()
+    public function mount($page = 'list'): void
     {
-        $this->showCreateForm = !$this->showCreateForm;
+        $this->page = $page;
     }
 
-    public function create()
+    public function store(): void
     {
+        $this->authorize('create', Warehouse::class);
+
         $this->form->store();
 
-        $this->reset('showCreateForm');
     }
 
-    public function downloadTemplate()
+    public function downloadTemplate(): BinaryFileResponse
     {
         return \Excel::download(new WarehousesStocksExport(auth()->user(), true), 'Склады_шаблон.xlsx');
     }
 
-    public function destroy($warehouse)
+    public function export(): void
     {
-        $warehouse = Warehouse::find($warehouse['id']);
-
-        $this->authorize('delete', $warehouse);
-
-        $warehouse->delete();
-    }
-
-    public function render()
-    {
-        return view('livewire.warehouse.warehouse-index', [
-            'warehouses' => auth()->user()->warehouses
-        ]);
-    }
-
-    public function export()
-    {
-        if (WarehouseItemsExportReportService::get(auth()->user())) {
-            $this->addJobAlready();
-            return;
-        }
 
         Export::dispatch(auth()->user());
         $this->addJobNotification();
     }
 
-    public function import()
+    public function import(): void
     {
-        if (WarehouseItemsImportReportService::get(auth()->user())) {
-            $this->addJobAlready();
+        if (!$this->file) {
+            $this->dispatch('livewire-upload-error');
             return;
         }
 
@@ -91,5 +73,19 @@ class WarehouseIndex extends BaseComponent
 
         Import::dispatch(auth()->user(), $uuid);
         $this->addJobNotification();
+    }
+
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
+    {
+        if ($this->page === 'list') {
+            return view('livewire.warehouse.pages.warehouse-index-list-page', [
+                'warehouses' => auth()->user()->warehouses
+            ]);
+        } else if ($this->page === 'stocks') {
+            return view('livewire.warehouse.pages.warehouse-index-stocks-page');
+        }
+
+        abort(404);
+
     }
 }

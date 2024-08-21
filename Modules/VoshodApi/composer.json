@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/voshodapi",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\VoshodApi\\": "app/",
+            "Modules\\VoshodApi\\Database\\Factories\\": "database/factories/",
+            "Modules\\VoshodApi\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\VoshodApi\\Tests\\": "tests/"
+        }
+    }
+}

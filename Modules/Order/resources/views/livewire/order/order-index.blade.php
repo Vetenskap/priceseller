@@ -1,30 +1,28 @@
-<div>
-    <x-layouts.header name="Заказы"/>
-    <x-navigate-pages>
-        <x-links.tab-link href="{{route('orders.index', ['page' => 'main'])}}" :active="$page === 'main'">Основное
-        </x-links.tab-link>
-        <x-links.tab-link href="{{route('orders.index', ['page' => 'states'])}}" :active="$page === 'states'">Не менять
-            статус
-        </x-links.tab-link>
-    </x-navigate-pages>
+<x-layouts.module-index-layout :modules="$modules">
     @if($page === 'main')
-        <x-layouts.module-container class="flex p-6">
-            <div class="p-6 dark:bg-gray-700 bg-gray-100 w-1/4 overflow-hidden shadow-sm sm:rounded-lg mr-6">
-                <a href="{{route('modules.index')}}">
-                    <x-secondary-button class="mb-6">Назад</x-secondary-button>
-                </a>
-                <div class="mb-6">
-                    <x-layouts.title name="Организации"/>
-                </div>
+        <x-layouts.main-container>
+            <x-navigate-pages>
+                <x-links.tab-link href="{{route('orders.index', ['page' => 'main'])}}" :active="$page === 'main'">Основное
+                </x-links.tab-link>
+                <x-links.tab-link href="{{route('orders.index', ['page' => 'states'])}}" :active="$page === 'states'">Не менять
+                    статус
+                </x-links.tab-link>
+            </x-navigate-pages>
+            <x-blocks.center-block>
+                <x-layouts.title name="Организации"/>
+            </x-blocks.center-block>
+            <x-blocks.flex-block>
                 @foreach($organizations as $org)
                     <a href="{{route('orders.index', ['page' => 'main', 'organizationId' => $org->id])}}">
                         <div
-                            class="mb-6 text-center shadow-sm sm:rounded-lg p-4 dark:text-white {{$organizationId === $org->id ? 'dark:bg-gray-600 bg-gray-300' : 'dark:bg-gray-500 bg-gray-200'}}">
+                            class="w-[250px] mb-6 text-center shadow-sm sm:rounded-lg p-4 dark:text-white {{$organizationId === $org->id ? 'dark:bg-gray-600 bg-gray-300' : 'dark:bg-gray-500 bg-gray-200'}}">
                             {{$org->name}}
                         </div>
                     </a>
                 @endforeach
-            </div>
+            </x-blocks.flex-block>
+        </x-layouts.main-container>
+        <x-layouts.main-container>
             @if($organization)
                 <div class="w-3/4">
                     <div class="dark:bg-gray-700 bg-gray-100 overflow-hidden shadow-sm sm:rounded-lg mb-6">
@@ -34,7 +32,9 @@
                         @if($orders->count())
                             <x-blocks.main-block>
                                 <x-danger-button wire:click="clear">Очистить</x-danger-button>
-                                <x-information>При очистке текущие заказы больше не будут учитываться при выгрузке прайса</x-information>
+                                <x-information>При очистке текущие заказы больше не будут учитываться при выгрузке
+                                    прайса
+                                </x-information>
                             </x-blocks.main-block>
                         @endif
                         <x-blocks.flex-block-end>
@@ -49,7 +49,9 @@
                             >
                                 Склады
                             </x-dropdowns.dropdown-checkboxes>
-                            <x-information>С указанных складов будут списаны остатки при автоматической выгрузке и ручной</x-information>
+                            <x-information>С указанных складов будут списаны остатки при автоматической выгрузке и
+                                ручной
+                            </x-information>
                         </x-blocks.main-block>
                         <x-blocks.flex-block-end>
                             <x-primary-button wire:click="startAllActions">Выполнить все действия</x-primary-button>
@@ -59,11 +61,13 @@
                         </x-blocks.main-block>
                         <x-blocks.main-block>
                             <x-primary-button wire:click="getOrders">Получить заказы</x-primary-button>
-                            <x-information>Получить заказы с ОЗОН и ВБ в которых указана данная организация</x-information>
+                            <x-information>Получить заказы с ОЗОН и ВБ в которых указана данная организация
+                            </x-information>
                         </x-blocks.main-block>
                         @if($orders->count())
                             <x-blocks.main-block>
-                                <x-primary-button wire:click="writeOffBalance">Списать остатки со складов</x-primary-button>
+                                <x-primary-button wire:click="writeOffBalance">Списать остатки со складов
+                                </x-primary-button>
                                 <x-information>Списать остатки в счёт заказов с указанных выше складов</x-information>
                             </x-blocks.main-block>
                             @if($writeOff)
@@ -77,7 +81,8 @@
                                 </x-blocks.flex-block-end>
                             @endif
                             <x-blocks.main-block>
-                                <x-primary-button wire:click="purchaseOrder">Сформировать заказы поставщикам</x-primary-button>
+                                <x-primary-button wire:click="purchaseOrder">Сформировать заказы поставщикам
+                                </x-primary-button>
                                 <x-information>Сформировать заказы поставщикам в формате EXCEL</x-information>
                             </x-blocks.main-block>
                             <x-blocks.flex-block-end>
@@ -158,7 +163,7 @@
                     @endif
                 </div>
             @endif
-        </x-layouts.module-container>
+        </x-layouts.main-container>
     @endif
     @if($page === 'states')
         <x-layouts.module-container>
@@ -203,4 +208,4 @@
          wire:target="startAllActions, setOrdersState, export, import, getOrders, writeOffBalance, purchaseOrder, clear, writeOffBalanceRollback, writeOffMarketsStocks">
         <x-loader/>
     </div>
-</div>
+</x-layouts.module-index-layout>

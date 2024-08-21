@@ -13,33 +13,34 @@ use App\Livewire\Traits\WithJsNotifications;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
 use App\Models\Supplier;
-use App\Services\ItemsExportReportService;
-use App\Services\ItemsImportReportService;
 use App\Services\OzonItemPriceService;
 use App\Services\OzonMarketService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
-use Livewire\Attributes\Url;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class OzonMarketEdit extends BaseComponent
 {
     use WithFileUploads, WithJsNotifications, WithFilters;
 
+    public $backRoute = 'ozon';
+
     public OzonMarketPostForm $form;
 
     public OzonMarket $market;
 
-    public array $apiWarehouses = [];
-
     public int $selectedWarehouse;
 
-    #[Url]
-    public $page = null;
+    public $page;
 
     /** @var TemporaryUploadedFile $file */
     public $file;
@@ -66,26 +67,18 @@ class OzonMarketEdit extends BaseComponent
 
     public function export(): void
     {
-        if (ItemsExportReportService::get($this->market)) {
-            $this->addJobAlready();
-            return;
-        }
-
         Export::dispatch($this->market, OzonMarketService::class);
         $this->addJobNotification();
     }
 
-    public function downloadTemplate()
+    public function downloadTemplate(): BinaryFileResponse
     {
         return \Excel::download(new OzonItemsExport($this->market, true), "ОЗОН_шаблон.xlsx");
     }
 
     public function import(): void
     {
-        if (ItemsImportReportService::get($this->market)) {
-            $this->addJobAlready();
-            return;
-        }
+        if (!$this->file) $this->dispatch('livewire-upload-error');
 
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
@@ -102,19 +95,16 @@ class OzonMarketEdit extends BaseComponent
 
     public function relationshipsAndCommissions(): void
     {
-        if (ItemsImportReportService::get($this->market)) {
-            $this->addWarningImportNotification();
-            return;
-        }
-
         MarketRelationshipsAndCommissions::dispatch(
             defaultFields: collect($this->only(['shipping_processing', 'min_price', 'min_price_percent'])),
             model: $this->market,
             service: OzonMarketService::class
         );
+
+        $this->addJobNotification();
     }
 
-    public function clearRelationships()
+    public function clearRelationships(): void
     {
         $service = new OzonMarketService($this->market);
         $deleted = $service->clearRelationships();
@@ -122,21 +112,20 @@ class OzonMarketEdit extends BaseComponent
         $this->addSuccessClearRelationshipsNotification($deleted);
     }
 
-    public function mount(): void
+    public function mount($page = 'main'): void
     {
+        $this->page = $page;
         $this->form->setMarket($this->market);
 
         if ($this->page === 'stocks_warehouses') $this->getWarehouses();
 
     }
 
-    public function getWarehouses()
+    public function getWarehouses(): Collection
     {
         try {
             $service = new OzonMarketService($this->market);
-            $warehouses = $service->getWarehouses();
-            $this->apiWarehouses = $warehouses->all();
-            $this->selectedWarehouse = $warehouses->first()['warehouse_id'];
+            return $service->getWarehouses();
         } catch (RequestException $e) {
             if ($e->response->unauthorized()) {
                 $this->setErrorBag(new MessageBag([
@@ -149,10 +138,11 @@ class OzonMarketEdit extends BaseComponent
                     'error' => 'Неизвестная ошибка от сервера ОЗОН',
                 ]));
             }
+            return collect();
         }
     }
 
-    public function save(): void
+    public function update(): void
     {
         $this->authorize('update', $this->market);
 
@@ -165,20 +155,36 @@ class OzonMarketEdit extends BaseComponent
     {
         $this->authorize('delete', $this->market);
 
-        $this->market->delete();
+        $this->form->destroy();
 
-        $this->redirectRoute('ozon', navigate: true);
+        $this->redirectRoute($this->backRoute);
     }
 
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('view', $this->market);
 
-        $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
-
-        return view('livewire.ozon-market.ozon-market-edit', [
-            'items' => $items
-        ]);
+        switch ($this->page) {
+            case 'main':
+                return view('livewire.ozon-market.pages.ozon-market-main-page');
+            case 'prices':
+                return view('livewire.ozon-market.pages.ozon-market-prices-page');
+            case 'stocks_warehouses':
+                return view('livewire.ozon-market.pages.ozon-market-stocks_warehouses-page', [
+                    'apiWarehouses' => $this->getWarehouses()
+                ]);
+            case 'relationships_commissions':
+                $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
+                return view('livewire.ozon-market.pages.ozon-market-relationships_commissions-page', [
+                    'items' => $items
+                ]);
+            case 'export':
+                return view('livewire.ozon-market.pages.ozon-market-export-page');
+            case 'actions':
+                return view('livewire.ozon-market.pages.ozon-market-actions-page');
+            default:
+                return view('livewire.ozon-market.ozon-market-edit');
+        }
     }
 
     public function addWarehouse()

@@ -12,7 +12,7 @@ class MoyskladPostForm extends Form
     #[Validate]
     public $api_key = null;
 
-    public function setMoysklad(?Moysklad $moysklad)
+    public function setMoysklad(?Moysklad $moysklad): void
     {
         $this->moysklad = $moysklad;
         if ($moysklad) {
@@ -20,7 +20,7 @@ class MoyskladPostForm extends Form
         }
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
             'api_key' => ['required', 'min:5', 'string'],
@@ -28,22 +28,15 @@ class MoyskladPostForm extends Form
     }
 
 
-    public function store()
+    public function store(): void
     {
         $this->validate();
 
-        $moysklad = Moysklad::create(Arr::add($this->except('moysklad'), 'user_id', \auth()->user()->id));
-        $moysklad->refresh();
-
-        return $moysklad;
-
-    }
-
-    public function update()
-    {
-        $this->validate();
-
-        $this->moysklad->update($this->except('moysklad'));
+        if ($this->moysklad) {
+            auth()->user()->moysklad()->update($this->except('moysklad'));
+        } else {
+            $this->moysklad = auth()->user()->moysklad()->create($this->except('moysklad'));
+        }
 
     }
 }

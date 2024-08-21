@@ -12,6 +12,23 @@ class MoyskladWebhook extends Model
     /**
      * The attributes that are mass assignable.
      */
-    protected $fillable = [];
+    protected $fillable = [
+        'type',
+        'action',
+        'moysklad_webhook_uuid',
+        'moysklad_id',
+        'name',
+        'enabled'
+    ];
+
+    public function moysklad()
+    {
+        return $this->belongsTo(Moysklad::class);
+    }
+
+    public function reports()
+    {
+        return $this->hasMany(MoyskladWebhookReport::class);
+    }
 
 }

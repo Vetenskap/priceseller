@@ -7,25 +7,29 @@ use App\Livewire\Forms\Supplier\SupplierPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Supplier;
-use Illuminate\Support\Facades\DB;
-use Livewire\Attributes\Session;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
+
 class SupplierEdit extends BaseComponent
 {
     use WithJsNotifications, WithFilters;
+
+    public $backRoute = 'suppliers.index';
 
     public SupplierPostForm $form;
 
     public Supplier $supplier;
 
-    #[Session('supplierEdit.{supplier.id}')]
-    public $selectedTab = 'main';
+    public $page;
 
-    public function mount()
+    public function mount($page = 'main'): void
     {
+        $this->page = $page;
         $this->form->setSupplier($this->supplier);
     }
 
-    public function save()
+    public function update(): void
     {
         $this->authorize('update', $this->supplier);
 
@@ -34,21 +38,27 @@ class SupplierEdit extends BaseComponent
         $this->addSuccessSaveNotification();
     }
 
-    public function destroy()
+    public function destroy(): void
     {
         $this->authorize('delete', $this->supplier);
 
-        DB::transaction(function () {
-            $this->supplier->delete();
-        });
+        $this->form->destroy();
+
+        $this->redirectRoute($this->backRoute);
     }
 
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('view', $this->supplier);
 
-        return view('livewire.supplier.supplier-edit', [
-            'priceItems' => $this->supplier->priceItems()->filters()->paginate(100)
-        ]);
+        if ($this->page === 'main') {
+            return view('livewire.supplier.pages.supplier-edit-main-page');
+        } else if ($this->page === 'price') {
+            return view('livewire.supplier.pages.supplier-edit-price-page', [
+                'priceItems' => $this->supplier->priceItems
+            ]);
+        }
+
+        abort(404);
     }
 }

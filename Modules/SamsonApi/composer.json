@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/samsonapi",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\SamsonApi\\": "app/",
+            "Modules\\SamsonApi\\Database\\Factories\\": "database/factories/",
+            "Modules\\SamsonApi\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\SamsonApi\\Tests\\": "tests/"
+        }
+    }
+}

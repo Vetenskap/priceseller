@@ -5,6 +5,7 @@ namespace App\Imports;
 use App\Models\Item;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Services\Item\ItemService;
 use App\Services\ItemsImportReportService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -28,6 +29,7 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         'Артикул',
         'Бренд',
         'Цена',
+        'Закупочная цена резерв',
         'Количество',
         'Кратность отгрузки',
         'Был обновлён',
@@ -46,7 +48,7 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
 
     public function __construct(int $userId)
     {
-        $this->user = User::find($userId);
+        $this->user = User::with('itemAttributes')->find($userId);
     }
 
     /**
@@ -88,6 +90,23 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
 
             $this->updated++;
 
+            $row->where(function ($value, $key) {
+                return str_contains($key, 'Доп. поле:');
+            })->mapWithKeys(function ($value, $key) {
+                return [str_replace('Доп. поле: ', '', $key) => $value];
+            })->each(function ($value, $key) use ($item) {
+
+                if ($userAttribute = $this->user->itemAttributes->where('name', $key)->first()) {
+
+                    $item->attributesValues()->updateOrCreate([
+                        'item_attribute_id' => $userAttribute->id,
+                    ], [
+                        'item_attribute_id' => $userAttribute->id,
+                        'value' => $value
+                    ]);
+                }
+            });
+
             $item->update([
                 'ms_uuid' => $row->get('МС UUID'),
                 'name' => $row->get('Наименование'),
@@ -97,6 +116,7 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
                 'multiplicity' => $row->get('Кратность отгрузки'),
                 'unload_wb' => $row->get('Выгружать на ВБ'),
                 'unload_ozon' => $row->get('Выгружать на ОЗОН'),
+                'buy_price_reserve' => $row->get('Закупочная цена резерв')
             ]);
 
             return null;
@@ -131,6 +151,9 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
             'id' => Str::uuid(),
             'unload_wb' => $row->get('Выгружать на ВБ'),
             'unload_ozon' => $row->get('Выгружать на ОЗОН'),
+            'buy_price_reserve' => $row->get('Закупочная цена резерв'),
+            'created_at' => now(),
+            'updated_at' => now()
         ]);
     }
 
@@ -142,20 +165,14 @@ class ItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatc
         $data['Выгружать на ВБ'] = $data['Выгружать на ВБ'] === 'Да';
         $data['Выгружать на ОЗОН'] = $data['Выгружать на ОЗОН'] === 'Да';
         $data['Удалить'] = $data['Удалить'] === 'Да';
+        $data['Закупочная цена резерв'] = (float) str_replace(',', '.', $data['Закупочная цена резерв']);
 
         return $data;
     }
 
     public function rules(): array
     {
-        return [
-            'МС UUID' => ['nullable'],
-            'Код' => ['required'],
-            'Наименование' => ['nullable'],
-            'Артикул' => ['required'],
-            'Бренд' => ['nullable'],
-            'Кратность отгрузки' => ['required', 'integer', 'min:1'],
-        ];
+        return ItemService::excelImportRules();
     }
 
     public function onFailure(Failure ...$failures)

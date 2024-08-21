@@ -15,5 +15,5 @@ use Modules\Moysklad\Http\Controllers\MoyskladController;
 */
 
 Route::prefix('modules')->group( function () {
-    Route::get('/moysklad', \Modules\Moysklad\Livewire\Moysklad\MoyskladIndex::class)->name('moysklad.index');
+    Route::get('/moysklad/{page?}', \Modules\Moysklad\Livewire\Moysklad\MoyskladIndex::class)->name('moysklad.index');
 });

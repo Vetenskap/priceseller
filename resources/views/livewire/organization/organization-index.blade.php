@@ -1,21 +1,29 @@
 <div>
     <x-layouts.header name="Организации"/>
-    <x-layouts.actions>
-        <x-success-button wire:click="add">Добавить</x-success-button>
-    </x-layouts.actions>
-    @if($showCreateForm)
-        <x-layouts.main-container>
-            <x-blocks.flex-block-end>
+    <div x-data="{ open: false }">
+        <x-layouts.actions>
+            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
+        </x-layouts.actions>
+        <x-layouts.main-container x-show="open">
+            <x-blocks.main-block>
+                <x-layouts.title name="Добавление новой организации" />
+            </x-blocks.main-block>
+            <x-blocks.flex-block>
                 <x-inputs.input-with-label name="name"
                                            type="text"
                                            field="form.name"
                 >Наименование
                 </x-inputs.input-with-label>
-                <x-success-button wire:click="create">Добавить</x-success-button>
-            </x-blocks.flex-block-end>
+                <div class="self-center">
+                    <x-success-button wire:click="store">Добавить</x-success-button>
+                </div>
+            </x-blocks.flex-block>
         </x-layouts.main-container>
-    @endif
+    </div>
     <x-layouts.main-container>
+        <x-blocks.main-block>
+            <x-layouts.title name="Список" />
+        </x-blocks.main-block>
         @if($organizations->count() > 0)
             <x-table.table-layout>
                 <x-table.table-header>
@@ -23,23 +31,25 @@
                         <x-layouts.simple-text name="Наименование"/>
                     </x-table.table-child>
                     <x-table.table-child>
-
+                        <x-layouts.simple-text name="Последнее обновление"/>
                     </x-table.table-child>
                 </x-table.table-header>
                 @foreach($organizations as $organization)
-                    <x-table.table-item wire:key="{{$organization->getKey()}}">
-                        <x-table.table-child>
-                            <x-layouts.simple-text :name="$organization->name"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-danger-button wire:click="destroy({{$organization}})">Удалить</x-danger-button>
-                        </x-table.table-child>
-                    </x-table.table-item>
+                    <a href="{{route('organizations.edit', ['organization' => $organization->getKey()])}}" wire:key="{{$organization->getKey()}}">
+                        <x-table.table-item>
+                            <x-table.table-child>
+                                <x-layouts.simple-text :name="$organization->name"/>
+                            </x-table.table-child>
+                            <x-table.table-child>
+                                <x-information>{{$organization->updated_at}}</x-information>
+                            </x-table.table-child>
+                        </x-table.table-item>
+                    </a>
                 @endforeach
             </x-table.table-layout>
         @else
             <x-blocks.main-block>
-                <x-layouts.simple-text name="Сейчас у вас нет организаций"/>
+                <x-information>Сейчас у вас нет организаций</x-information>
             </x-blocks.main-block>
         @endif
     </x-layouts.main-container>

@@ -13,4 +13,5 @@
     <input {{ $attributes->merge(['class' => 'hidden', 'id'=>'dropzone-file', 'type'=>'file']) }}/>
 
     <p class="mt-2 text-red-200 dark:text-gray-200 tracking-wide">Размер файла не должен превышать 20 мб. </p>
+    <p class="mt-2 text-red-200 dark:text-gray-200 tracking-wide">В файле не должно быть больше 1 листа. </p>
 </label>

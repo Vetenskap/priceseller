@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/bergapi",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\BergApi\\": "app/",
+            "Modules\\BergApi\\Database\\Factories\\": "database/factories/",
+            "Modules\\BergApi\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\BergApi\\Tests\\": "tests/"
+        }
+    }
+}

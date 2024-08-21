@@ -1,25 +1,23 @@
-@props(['options', 'selectedOptions', 'optionName' => 'name', 'optionValue' => 'id', 'wireFunc', 'active' => false])
+@props(['options', 'selectedOptions', 'optionName' => 'name', 'optionValue' => 'id', 'wireFunc'])
 
-<div>
-    <!--- more free and premium Tailwind CSS components at https://tailwinduikit.com/ --->
-
-    <button class="focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500 focus:bg-gray-100 w-64 p-4 shadow rounded bg-white text-sm font-medium leading-none text-gray-800 flex items-center justify-between cursor-pointer"
-            wire:click="changeActive">
+<div x-data="{active: false}" class="w-[250px]">
+    <button class="text-nowrap overflow-hidden dropdown-button w-[250px] inline-flex h-[42px] items-center px-4 justify-between font-medium text-gray-700 rounded-md shadow-sm focus:outline-none border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 dark:focus:border-indigo-600 focus:ring-indigo-500 dark:focus:ring-indigo-600"
+            @click="active = ! active">
         {{$slot}}
         <div>
-            <div class="{{$active ? "" : "hidden"}}" id="close">
+            <div x-show="active" id="close">
                 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5.00016 0.666664L9.66683 5.33333L0.333496 5.33333L5.00016 0.666664Z" fill="#1F2937"/>
                 </svg>
             </div>
-            <div id="open" class="{{$active ? "hidden" : ""}}">
+            <div id="open" x-show="!active">
                 <svg width="10" height="6" viewBox="0 0 10 6" fill="none" xmlns="http://www.w3.org/2000/svg">
                     <path d="M5.00016 5.33333L0.333496 0.666664H9.66683L5.00016 5.33333Z" fill="#1F2937"/>
                 </svg>
             </div>
         </div>
     </button>
-    <div class="w-64 mt-2 p-4 bg-white shadow rounded absolute {{$active ? "" : "hidden"}}" id="dropdown">
+    <div class="max-h-52 absolute mt-2 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 p-1 space-y-1 dark:bg-gray-900 w-[250px]" id="dropdown" x-show="active">
         @foreach($options as $option)
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center">

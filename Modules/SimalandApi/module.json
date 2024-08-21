@@ -1,0 +1,11 @@
+{
+    "name": "SimalandApi",
+    "alias": "simalandapi",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SimalandApi\\Providers\\SimalandApiServiceProvider"
+    ],
+    "files": []
+}

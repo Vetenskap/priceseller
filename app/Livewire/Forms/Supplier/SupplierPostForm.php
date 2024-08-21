@@ -3,52 +3,67 @@
 namespace App\Livewire\Forms\Supplier;
 
 use App\Models\Supplier;
-use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class SupplierPostForm extends Form
 {
-    public ?Supplier $supplier;
+    public ?Supplier $supplier = null;
 
     #[Validate]
     public $name;
 
-    #[Validate]
-    public $ms_uuid = null;
-
-    public $open = true;
+    public $open = false;
 
     public $use_brand = false;
 
-    public function setSupplier(Supplier $supplier)
+    public function setSupplier(Supplier $supplier): void
     {
         $this->supplier = $supplier;
         $this->name = $supplier->name;
-        $this->ms_uuid = $supplier->ms_uuid;
         $this->open = $supplier->open;
         $this->use_brand = $supplier->use_brand;
     }
 
-    public function rules()
+    public function rules(): array
     {
         return [
-            'name' => ['required', 'min:3', 'string'],
-            'ms_uuid' => ['nullable', 'uuid'],
+            'name' => [
+                'required',
+                'min:3',
+                'string',
+                Rule::unique('suppliers', 'name')
+                    ->where('user_id', auth()->user()->id)
+                ->when($this->supplier, fn (Unique $unique) => $unique->ignore($this->supplier->id, 'id'))
+            ],
+            'open' => ['nullable', 'boolean'],
+            'use_brand' => ['nullable', 'boolean'],
         ];
     }
 
-    public function store()
+    public function store(): void
     {
-        $supplier = Supplier::create(Arr::add($this->except('supplier'), 'user_id', auth()->user()->id));
+        $this->validate();
 
-        $supplier->refresh();
+        auth()->user()->suppliers()->create($this->except('supplier'));
 
-        return $supplier;
+        $this->reset();
     }
 
-    public function update()
+    public function update(): void
     {
+        $this->validate();
+
         $this->supplier->update($this->except('supplier'));
+    }
+
+    public function destroy(): void
+    {
+        DB::transaction(function () {
+            $this->supplier->delete();
+        });
     }
 }

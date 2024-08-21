@@ -3,9 +3,11 @@
 namespace App\Exports;
 
 use App\Imports\WbItemsImport;
+use App\Models\User;
 use App\Models\WbItem;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
+use App\Services\ModuleService;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -17,10 +19,12 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 class WbItemsExport implements FromCollection, WithHeadings, WithStyles
 {
     public Collection $warehouses;
+    public User $user;
 
     public function __construct(public WbMarket $market, public bool $template = false)
     {
         $this->warehouses = $this->market->warehouses;
+        $this->user = $this->market->user;
     }
 
 
@@ -61,7 +65,7 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
                         ->collapse()
                         ->all());
 
-                    if (class_exists(Order::class)) {
+                    if (ModuleService::moduleIsEnabled('Order', $this->user)) {
                         $main['count_orders'] = $item->orders()->sum('count');
                     }
 
@@ -78,7 +82,7 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
     {
         $main = array_merge(WbItemsImport::HEADERS, $this->warehouses->map(fn(WbWarehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
 
-        if (class_exists(Order::class)) {
+        if (ModuleService::moduleIsEnabled('Order', $this->user)) {
             $main[] = 'Всего заказов';
         }
 

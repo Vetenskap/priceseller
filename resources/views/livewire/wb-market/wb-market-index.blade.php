@@ -1,11 +1,14 @@
 <div>
     <x-layouts.header name="ВБ"/>
-    <x-layouts.actions>
-        <x-success-button wire:click="add">Добавить</x-success-button>
-    </x-layouts.actions>
-    @if($showCreateForm)
-        <x-layouts.main-container>
-            <x-blocks.flex-block-end>
+    <div x-data="{ open: false }">
+        <x-layouts.actions>
+            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
+        </x-layouts.actions>
+        <x-layouts.main-container x-show="open">
+            <x-blocks.main-block>
+                <x-layouts.title name="Добавление нового кабинета"/>
+            </x-blocks.main-block>
+            <x-blocks.flex-block>
                 <x-inputs.input-with-label name="name"
                                            type="text"
                                            field="form.name"
@@ -16,11 +19,16 @@
                                            field="form.api_key"
                 >АПИ ключ
                 </x-inputs.input-with-label>
-                <x-success-button wire:click="create">Добавить</x-success-button>
-            </x-blocks.flex-block-end>
+                <div class="self-center">
+                    <x-success-button wire:click="store">Добавить</x-success-button>
+                </div>
+            </x-blocks.flex-block>
         </x-layouts.main-container>
-    @endif
+    </div>
     <x-layouts.main-container>
+        <x-blocks.main-block>
+            <x-layouts.title name="Список"/>
+        </x-blocks.main-block>
         @if($markets->count() > 0)
             <x-table.table-layout>
                 <x-table.table-header>
@@ -28,31 +36,33 @@
                         <x-layouts.simple-text name="Наименование"/>
                     </x-table.table-child>
                     <x-table.table-child>
-                        <x-layouts.simple-text name="Включен"/>
+                        <x-layouts.simple-text name="Последнее обновление"/>
                     </x-table.table-child>
                     <x-table.table-child>
-
+                        <x-layouts.simple-text name="Включен"/>
                     </x-table.table-child>
                 </x-table.table-header>
                 @foreach($markets as $market)
-                    <x-table.table-item wire:key="{{$market->getKey()}}">
-                        <x-table.table-child>
-                            <a href="{{route('wb-market-edit', ['market' => $market->getKey()])}}">
+                    <a href="{{route('wb-market-edit', ['market' => $market->getKey()])}}"
+                       wire:key="{{$market->getKey()}}">
+                        <x-table.table-item>
+                            <x-table.table-child>
                                 <x-layouts.simple-text :name="$market->name"/>
-                            </a>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-inputs.switcher :disabled="$market->close" :checked="$market->open" wire:click="changeOpen({{$market}})"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-danger-button wire:click="destroy({{$market}})">Удалить</x-danger-button>
-                        </x-table.table-child>
-                    </x-table.table-item>
+                            </x-table.table-child>
+                            <x-table.table-child>
+                                <x-information>{{$market->updated_at}}</x-information>
+                            </x-table.table-child>
+                            <x-table.table-child>
+                                <x-inputs.switcher :disabled="$market->close" :checked="$market->open"
+                                                   wire:click="changeOpen({{json_encode($market->id)}})"/>
+                            </x-table.table-child>
+                        </x-table.table-item>
+                    </a>
                 @endforeach
             </x-table.table-layout>
         @else
             <x-blocks.main-block>
-                <x-layouts.simple-text name="Сейчас у вас нет кабинетов ВБ"/>
+                <x-information>Сейчас у вас нет кабинетов ВБ</x-information>
             </x-blocks.main-block>
         @endif
     </x-layouts.main-container>

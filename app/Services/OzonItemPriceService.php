@@ -9,20 +9,24 @@ use App\Models\OzonWarehouse;
 use App\Models\OzonWarehouseStock;
 use App\Models\OzonWarehouseUserWarehouse;
 use App\Models\Supplier;
+use App\Models\User;
 use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
+use Modules\Moysklad\Models\Moysklad;
 use Modules\Order\Models\Order;
 
 class OzonItemPriceService
 {
     protected OzonClient $ozonClient;
+    protected User $user;
 
     public function __construct(public ?Supplier $supplier = null, public OzonMarket $market)
     {
         $this->ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
+        $this->user = $this->market->user;
     }
 
     public function updatePrice(): void
@@ -32,7 +36,9 @@ class OzonItemPriceService
         OzonItem::query()
             ->whereHas('item', function (Builder $query) {
                 $query
-                    ->where('updated', true)
+                    ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                        $query->where('updated', true);
+                    })
                     ->where('supplier_id', $this->supplier->id);
             })
             ->chunk(1000, function ($items) {
@@ -60,6 +66,12 @@ class OzonItemPriceService
 
     public function recountPriceOzonItem(OzonItem $ozonItem): OzonItem
     {
+        if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$ozonItem->item->price) {
+            $price = $ozonItem->item->buy_price_reserve;
+        } else {
+            $price = $ozonItem->item->price;
+        }
+
         $min_price_percent = (float)$this->market->min_price_percent;
         $seller_price_percent = (float)$this->market->seller_price_percent;
         $max_price_percent = (float)$this->market->max_price_percent / 100 + 1;
@@ -67,7 +79,6 @@ class OzonItemPriceService
         $lastMile = (float)$this->market->last_mile;
         $maxMile = (float)$this->market->max_mile;
 
-        $price = $ozonItem->item->price;
         $multiplicity = $ozonItem->item->multiplicity;
         $shipping_processing = $ozonItem->shipping_processing;
         $direct_flow_trans = $ozonItem->direct_flow_trans;
@@ -142,9 +153,15 @@ class OzonItemPriceService
             $new_count = $ozonItem->item->count < $this->market->min ? 0 : $ozonItem->item->count;
             $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $ozonItem->item->multiplicity === 1) ? 1 : $new_count;
             $new_count = ($new_count + $myWarehousesStocks) / $ozonItem->item->multiplicity;
-            if (class_exists(Order::class)) {
+
+            if (ModuleService::moduleIsEnabled('Order', $this->user)) {
                 $new_count = $new_count - ($ozonItem->orders()->where('state', 'new')->sum('count') * $ozonItem->item->multiplicity);
             }
+
+            if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+                $new_count = $new_count - (($ozonItem->item->moyskladOrders()->where('new', true)->exists() ? $ozonItem->item->moyskladOrders()->where('new')->sum('orders') : 0) * $ozonItem->item->multiplicity);
+            }
+
             $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
             $new_count = (int)max($new_count, 0);
 
@@ -267,13 +284,16 @@ class OzonItemPriceService
         OzonItem::query()
             ->whereHas('item', function (Builder $query) {
                 $query
-                    ->where('updated', true)
+                    ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                        $query->where('updated', true);
+                    })
                     ->where('supplier_id', $this->supplier->id);
             })
             ->whereNotNull('price_min')
             ->whereNotNull('offer_id')
             ->whereNotNull('price_max')
             ->whereNotNull('price')
+            ->where('price', '>', 0)
             ->whereNotNull('product_id')
             ->whereNotNull('shipping_processing')
             ->whereNotNull('direct_flow_trans')

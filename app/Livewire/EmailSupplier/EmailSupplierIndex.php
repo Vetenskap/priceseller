@@ -3,45 +3,40 @@
 namespace App\Livewire\EmailSupplier;
 
 use App\Livewire\BaseComponent;
-use App\Livewire\Components\Toast;
+use App\Livewire\Forms\EmailSupplier\EmailSupplierPostForm;
 use App\Models\Email;
 use App\Models\EmailSupplier;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 
 class EmailSupplierIndex extends BaseComponent
 {
+    public EmailSupplierPostForm $form;
+
     public Email $email;
 
-    public $selectedSupplier;
+    public function mount(): void
+    {
+        $this->form->setMainEmal($this->email);
+    }
 
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('livewire.email-supplier.email-supplier-index');
     }
 
-    public function store()
+    public function store(): void
     {
-        if (!$this->selectedSupplier) {
-            $this->js((new Toast('Ошибка', "Не выбран поставщик"))->danger());
-            return;
-        }
-
         $this->authorize('create', EmailSupplier::class);
 
-        if ($this->email->suppliers()->wherePivot('supplier_id', $this->selectedSupplier)->exists()) {
-            $this->js((new Toast('Ошибка', "Указаный поставщик уже добавлен"))->danger());
-            return;
-        }
-
-        $this->email->suppliers()->attach($this->selectedSupplier, [
-            'created_at' => now(),
-            'updated_at' => now(),
-        ]);
+        $this->form->store();
     }
 
-    public function delete($supplier)
+    public function delete(string $id): void
     {
-        $this->authorize('delete', EmailSupplier::where('supplier_id', $supplier['id'])->where('email_id', $this->email->id)->first());
+        $this->authorize('delete', EmailSupplier::where('supplier_id', $id)->where('email_id', $this->email->id)->first());
 
-        $this->email->suppliers()->detach($supplier['id']);
+        $this->form->destroy($id);
     }
 }

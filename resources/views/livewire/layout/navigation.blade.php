@@ -39,11 +39,11 @@ new class extends Component {
                     {{--                    <x-nav-link :href="route('avito')" :active="request()->routeIs('avito')" wire:navigate.hover>--}}
                     {{--                        {{ __('Авито') }}--}}
                     {{--                    </x-nav-link>--}}
-                    <x-nav-link :href="route('emails')" :active="request()->routeIs('emails', 'email-show')"
+                    <x-nav-link :href="route('emails.index')" :active="request()->routeIs('emails.index', 'email.edit')"
                                 wire:navigate.hover>
                         {{ __('Почта') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('suppliers')" :active="request()->routeIs('suppliers', 'supplier-edit')"
+                    <x-nav-link :href="route('suppliers.index')" :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
                                 wire:navigate.hover>
                         {{ __('Поставщики') }}
                     </x-nav-link>
@@ -70,6 +70,10 @@ new class extends Component {
                     <x-nav-link :href="route('modules.index')" :active="str_contains(request()->getUri(), 'modules')"
                                 wire:navigate.hover>
                         {{ __('Модули') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('base-settings.index')" :active="request()->routeIs('base-settings.index')"
+                                wire:navigate.hover>
+                        {{ __('Общие настройки') }}
                     </x-nav-link>
                 </div>
             </div>
@@ -132,23 +136,17 @@ new class extends Component {
         </div>
     </div>
 
-    <!-- Responsive Navigation Menu -->
+
     <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
         <div class="pt-2 pb-3 space-y-1">
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Главная') }}
             </x-responsive-nav-link>
-            {{--            <x-responsive-nav-link :href="route('moysklad')" :active="request()->routeIs('moysklad')" wire:navigate.hover>--}}
-            {{--                {{ __('Мой склад') }}--}}
-            {{--            </x-responsive-nav-link>--}}
-            {{--            <x-responsive-nav-link :href="route('avito')" :active="request()->routeIs('avito')" wire:navigate.hover>--}}
-            {{--                {{ __('Авито') }}--}}
-            {{--            </x-responsive-nav-link>--}}
-            <x-responsive-nav-link :href="route('emails')" :active="request()->routeIs('emails', 'email-show')"
+            <x-responsive-nav-link :href="route('emails.index')" :active="request()->routeIs('emails.index', 'email.edit')"
                                    wire:navigate.hover>
                 {{ __('Почта') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('suppliers')" :active="request()->routeIs('suppliers', 'supplier-edit')"
+            <x-responsive-nav-link :href="route('suppliers.index')" :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
                                    wire:navigate.hover>
                 {{ __('Поставщики') }}
             </x-responsive-nav-link>
@@ -176,6 +174,10 @@ new class extends Component {
             <x-responsive-nav-link :href="route('modules.index')" :active="str_contains(request()->getUri(), 'modules')"
                                    wire:navigate.hover>
                 {{ __('Модули') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('base-settings.index')" :active="request()->routeIs('base-settings.index')"
+                                   wire:navigate.hover>
+                {{ __('Общие настройки') }}
             </x-responsive-nav-link>
         </div>
 

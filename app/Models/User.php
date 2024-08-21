@@ -11,8 +11,11 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\App;
 use Laravel\Sanctum\HasApiTokens;
+use Modules\BergApi\Models\BergApi;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Order\Models\Order;
+use Modules\SamsonApi\Models\SamsonApi;
+use Modules\VoshodApi\Models\VoshodApi;
 
 class User extends Authenticatable implements MustVerifyEmail, FilamentUser, CanResetPassword
 {
@@ -193,5 +196,35 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
     public function moysklad()
     {
         return $this->hasOne(Moysklad::class);
+    }
+
+    public function itemAttributes()
+    {
+        return $this->hasMany(ItemAttribute::class);
+    }
+
+    public function baseSettings()
+    {
+        return $this->hasOne(UserBaseSetting::class);
+    }
+
+    public function voshodApi()
+    {
+        return $this->hasOne(VoshodApi::class);
+    }
+
+    public function samsonApi()
+    {
+        return $this->hasOne(SamsonApi::class);
+    }
+
+    public function bergApi()
+    {
+        return $this->hasOne(BergApi::class);
+    }
+
+    public function modules()
+    {
+        return $this->hasMany(UserModule::class);
     }
 }

@@ -5,52 +5,34 @@ namespace App\Livewire\Supplier;
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Supplier\SupplierPostForm;
 use App\Models\Supplier;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 
 class SupplierIndex extends BaseComponent
 {
     public SupplierPostForm $form;
 
-    public $showCreateBlock = false;
-
-    public function add()
+    public function store(): void
     {
-        $this->showCreateBlock = ! $this->showCreateBlock;
-    }
-
-    public function store()
-    {
-        if (! auth()->user()->permission_ms) {
-            $this->form->ms_uuid = null;
-        }
-
         $this->authorize('create', Supplier::class);
 
         $this->form->store();
     }
 
-    public function changeOpen($supplier)
+    public function changeOpen(string $id): void
     {
-        $supplier = Supplier::find($supplier['id']);
+        $supplier = Supplier::find($id);
 
         $this->authorize('update', $supplier);
 
-        $supplier->open = !$supplier->open;
-        $supplier->save();
+        $supplier->update(['open' => ! $supplier->open]);
     }
 
-    public function destroy($supplier)
-    {
-        $supplier = Supplier::find($supplier['id']);
-
-        $this->authorize('delete', $supplier);
-
-        $supplier->delete();
-    }
-
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('livewire.supplier.supplier-index', [
-            'suppliers' => Supplier::where('user_id', auth()->user()->id)->get()
+            'suppliers' => auth()->user()->suppliers
         ]);
     }
 }

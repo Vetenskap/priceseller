@@ -29,4 +29,9 @@ class BaseComponent extends Component
                 break;
         }
     }
+
+    public function back(): void
+    {
+        $this->redirectRoute($this->backRoute);
+    }
 }

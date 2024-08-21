@@ -37,12 +37,14 @@
             </x-blocks.flex-block>
         @endif
         @if($selectedTab === 'suppliers')
-            <x-blocks.flex-block-end>
+            <x-blocks.flex-block>
                 <x-dropdown-select name="supplier" field="selectedSupplier" :options="auth()->user()->suppliers">
                     Выберите поставщика
                 </x-dropdown-select>
-                <x-success-button wire:click="addSupplier">Добавить</x-success-button>
-            </x-blocks.flex-block-end>
+                <div class="self-center">
+                    <x-success-button wire:click="addSupplier">Добавить</x-success-button>
+                </div>
+            </x-blocks.flex-block>
         @if($warehouse->suppliers()->count())
                 <x-table.table-layout>
                     <x-table.table-header>
@@ -67,12 +69,14 @@
         @endif
         @endif
         @if($selectedTab === 'warehouses')
-            <x-blocks.flex-block-end>
+            <x-blocks.flex-block>
                 <x-dropdown-select name="warehouse" field="selectedWarehouse" :options="auth()->user()->warehouses">
                     Выберите склад
                 </x-dropdown-select>
-                <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
-            </x-blocks.flex-block-end>
+                <div class="self-center">
+                    <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
+                </div>
+            </x-blocks.flex-block>
         @if($warehouse->userWarehouses()->count())
                 <x-table.table-layout>
                     <x-table.table-header>

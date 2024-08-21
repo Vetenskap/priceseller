@@ -12,28 +12,32 @@ use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Supplier;
 use App\Models\WbMarket;
-use App\Services\ItemsImportReportService;
 use App\Services\WbItemPriceService;
 use App\Services\WbMarketService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
-use Livewire\Attributes\Url;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class WbMarketEdit extends BaseComponent
 {
     use WithFileUploads, WithJsNotifications, WithFilters;
 
+    public $backRoute = 'wb';
+
     public WbMarketPostForm $form;
 
     public WbMarket $market;
 
-    #[Url]
-    public $page = 'main';
+    public $page;
 
     /** @var TemporaryUploadedFile $file */
     public $file;
@@ -50,8 +54,6 @@ class WbMarketEdit extends BaseComponent
     #[Session('WbMarketEdit.package.{market.id}')]
     public $package = null;
 
-    public $apiWarehouses = [];
-
     public array $statusFilters = [
         [
             'status' => 1,
@@ -64,19 +66,18 @@ class WbMarketEdit extends BaseComponent
     ];
 
 
-    public function mount()
+    public function mount($page = 'main'): void
     {
+        $this->page = $page;
         $this->form->setMarket($this->market);
-
-        if ($this->page === 'stocks_warehouses') $this->getWarehouses();
     }
 
-    public function downloadTemplate()
+    public function downloadTemplate(): BinaryFileResponse
     {
         return \Excel::download(new WbItemsExport($this->market, true), "ВБ_шаблон.xlsx");
     }
 
-    public function save()
+    public function update(): void
     {
         $this->authorize('update', $this->market);
 
@@ -85,13 +86,13 @@ class WbMarketEdit extends BaseComponent
         $this->addSuccessSaveNotification();
     }
 
-    public function destroy()
+    public function destroy(): void
     {
         $this->authorize('delete', $this->market);
 
-        $this->market->delete();
+        $this->form->destroy();
 
-        $this->redirectRoute('ozon', navigate: true);
+        $this->redirectRoute($this->backRoute);
     }
 
     public function export(): void
@@ -102,6 +103,7 @@ class WbMarketEdit extends BaseComponent
 
     public function import(): void
     {
+
         if (!$this->file) $this->dispatch('livewire-upload-error');
 
         $uuid = Str::uuid();
@@ -120,25 +122,21 @@ class WbMarketEdit extends BaseComponent
 
     public function relationshipsAndCommissions(): void
     {
-        if (ItemsImportReportService::get($this->market)) {
-            $this->addWarningImportNotification();
-            return;
-        }
-
         MarketRelationshipsAndCommissions::dispatch(
             defaultFields: collect($this->only(['package', 'retail_markup_percent', 'min_price', 'sales_percent'])),
             model: $this->market,
             service: WbMarketService::class
         );
+
+        $this->addJobNotification();
     }
 
-    public function getWarehouses()
+    public function getWarehouses(): Collection
     {
         $service = new WbMarketService($this->market);
 
         try {
-            $warehouses = $service->getWarehouses();
-            $this->apiWarehouses = $warehouses->all();
+            return $service->getWarehouses();
         } catch (RequestException $e) {
             if ($e->response->unauthorized()) {
                 $this->setErrorBag(new MessageBag([
@@ -150,10 +148,11 @@ class WbMarketEdit extends BaseComponent
                     'error' => 'Неизвестная ошибка от сервера ВБ',
                 ]));
             }
+            return collect();
         }
     }
 
-    public function clearRelationships()
+    public function clearRelationships(): void
     {
         $service = new WbMarketService($this->market);
         $deleted = $service->clearRelationships();
@@ -161,15 +160,31 @@ class WbMarketEdit extends BaseComponent
         $this->addSuccessClearRelationshipsNotification($deleted);
     }
 
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('view', $this->market);
 
-        $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
-
-        return view('livewire.wb-market.wb-market-edit', [
-            'items' => $items
-        ]);
+        switch ($this->page) {
+            case 'main':
+                return view('livewire.wb-market.pages.wb-market-main-page');
+            case 'prices':
+                return view('livewire.wb-market.pages.wb-market-prices-page');
+            case 'stocks_warehouses':
+                return view('livewire.wb-market.pages.wb-market-stocks_warehouses-page', [
+                    'apiWarehouses' => $this->getWarehouses()
+                ]);
+            case 'relationships_commissions':
+                $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
+                return view('livewire.wb-market.pages.wb-market-relationships_commissions-page', [
+                    'items' => $items
+                ]);
+            case 'export':
+                return view('livewire.wb-market.pages.wb-market-export-page');
+            case 'actions':
+                return view('livewire.wb-market.pages.wb-market-actions-page');
+            default:
+                return view('livewire.wb-market.wb-market-edit');
+        }
     }
 
     public function testPrice()

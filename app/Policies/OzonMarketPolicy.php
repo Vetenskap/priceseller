@@ -23,14 +23,6 @@ class OzonMarketPolicy
 
     public function create(User $user): bool
     {
-        if (App::isLocal() || $user->isAdmin()) return true;
-
-        $count = $user->ozonMarkets()->count();
-
-        if ($count >= 5 && !$user->isOzonTenSub()) {
-            return false;
-        }
-
         return true;
     }
 

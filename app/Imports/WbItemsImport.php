@@ -58,7 +58,6 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
 
     public function model(array $row)
     {
-
         $row = collect($row);
 
         $item = $this->user->items()->where('code', $row->get('Код'))->first();

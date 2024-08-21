@@ -9,7 +9,9 @@
                            value="warehouse_id">
             Выберите склад
         </x-dropdown-select>
-        <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
+        <div class="self-center">
+            <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
+        </div>
     </x-blocks.flex-block-end>
     @foreach($market->warehouses as $warehouse)
         <livewire:ozon-warehouse.ozon-warehouse-edit :warehouse="$warehouse" wire:key="{{$warehouse->getKey()}}"/>

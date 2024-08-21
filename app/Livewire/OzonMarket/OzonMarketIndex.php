@@ -6,54 +6,39 @@ use App\Livewire\BaseComponent;
 use App\Livewire\Components\Toast;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
 use App\Models\OzonMarket;
-use Illuminate\Auth\Access\AuthorizationException;
+use App\Services\UsersPermissionsService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 
 class OzonMarketIndex extends BaseComponent
 {
     public OzonMarketPostForm $form;
 
-    public $showCreateForm = false;
-
-    public function add()
+    public function store(): void
     {
-        $this->showCreateForm = ! $this->showCreateForm;
-    }
+        $this->authorize('create', OzonMarket::class);
 
-    public function create()
-    {
-        try {
-            $this->authorize('create', OzonMarket::class);
-        } catch (AuthorizationException) {
+        if (!UsersPermissionsService::checkOzonPermission(auth()->user())) {
             $this->js((new Toast('Не разрешено', 'Ваша подписка не позволяет добавлять ещё кабинеты'))->warning());
-            $this->reset('showCreateForm');
             return;
         }
 
         $this->form->store();
 
-        $this->reset('showCreateForm');
     }
 
-    public function changeOpen($market)
+    public function changeOpen($id): void
     {
-        $market = OzonMarket::find($market['id']);
+        $market = OzonMarket::find($id);
 
         $this->authorize('update', $market);
 
-        $market->open = !$market->open;
+        $market->open = ! $market->open;
         $market->save();
     }
 
-    public function destroy($market)
-    {
-        $market = OzonMarket::find($market['id']);
-
-        $this->authorize('delete', $market);
-
-        $market->delete();
-    }
-
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('livewire.ozon-market.ozon-market-index', [
             'markets' => auth()->user()->ozonMarkets

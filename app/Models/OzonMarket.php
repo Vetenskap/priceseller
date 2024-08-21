@@ -55,4 +55,9 @@ class OzonMarket extends MainModel
     {
         return $this->morphMany(MarketItemRelationship::class, 'relationshipable');
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

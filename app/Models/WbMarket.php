@@ -51,4 +51,9 @@ class WbMarket extends MainModel
     {
         return $this->hasMany(WbWarehouse::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
 }

@@ -5,35 +5,25 @@ namespace App\Livewire\Organization;
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Organization\OrganizationPostForm;
 use App\Models\Organization;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 
 class OrganizationIndex extends BaseComponent
 {
 
     public OrganizationPostForm $form;
 
-    public $showCreateForm = false;
-
-    public function add()
+    public function store(): void
     {
-        $this->showCreateForm = ! $this->showCreateForm;
-    }
+        $this->authorize('create', Organization::class);
 
-    public function create()
-    {
         $this->form->store();
 
-        $this->reset('showCreateForm');
-    }
-
-    public function destroy($organization)
-    {
-        $market = Organization::find($organization['id']);
-
-        $market->delete();
     }
 
 
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('livewire.organization.organization-index', [
             'organizations' => auth()->user()->organizations

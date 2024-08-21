@@ -13,7 +13,6 @@ return new class extends Migration
     {
         Schema::create('moysklad_supplier_suppliers', function (Blueprint $table) {
             $table->id();
-            $table->string('moysklad_supplier_name')->nullable();
             $table->uuid('moysklad_supplier_uuid')->nullable();
             $table->foreignUuid('supplier_id')->constrained('suppliers')->cascadeOnDelete();
             $table->foreignId('moysklad_id')->constrained('moysklads')->cascadeOnDelete();

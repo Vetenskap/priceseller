@@ -1,0 +1,30 @@
+{
+    "name": "nwidart/trastapi",
+    "description": "",
+    "authors": [
+        {
+            "name": "Nicolas Widart",
+            "email": "n.widart@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\TrastApi\\": "app/",
+            "Modules\\TrastApi\\Database\\Factories\\": "database/factories/",
+            "Modules\\TrastApi\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Modules\\TrastApi\\Tests\\": "tests/"
+        }
+    }
+}

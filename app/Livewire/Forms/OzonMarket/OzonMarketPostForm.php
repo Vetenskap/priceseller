@@ -5,11 +5,13 @@ namespace App\Livewire\Forms\OzonMarket;
 use App\Models\OzonMarket;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Unique;
 use Livewire\Form;
 
 class OzonMarketPostForm extends Form
 {
-    public ?OzonMarket $market;
+    public ?OzonMarket $market = null;
 
     public $name;
 
@@ -41,7 +43,34 @@ class OzonMarketPostForm extends Form
 
     public $organization_id = null;
 
-    public function setMarket(OzonMarket $market)
+    public function rules(): array
+    {
+        return [
+            'name' => [
+                'required',
+                'string',
+                'min:3',
+                Rule::unique('ozon_markets', 'name')
+                    ->where('user_id', auth()->user()->id)
+                    ->when($this->market, fn(Unique $unique) => $unique->ignore($this->market->id, 'id'))
+            ],
+            'client_id' => ['required', 'integer'],
+            'api_key' => ['required', 'string'],
+            'min_price_percent' => ['nullable', 'integer'],
+            'max_price_percent' => ['nullable', 'integer'],
+            'seller_price_percent' => ['nullable', 'integer'],
+            'max_count' => ['nullable', 'integer'],
+            'min' => ['nullable', 'integer'],
+            'max' => ['nullable', 'integer'],
+            'seller_price' => ['nullable', 'boolean'],
+            'acquiring' => ['nullable', 'numeric'],
+            'last_mile' => ['nullable', 'integer'],
+            'max_mile' => ['nullable', 'integer'],
+            'organization_id' => ['nullable', 'uuid', 'exists:organizations,id'],
+        ];
+    }
+
+    public function setMarket(OzonMarket $market): void
     {
         $this->market = $market;
         $this->name = $this->market->name;
@@ -61,23 +90,25 @@ class OzonMarketPostForm extends Form
         $this->organization_id = $market->organization_id;
     }
 
-    public function store()
+    public function store(): void
     {
-        $market = OzonMarket::create(Arr::add($this->except('market'), 'user_id', auth()->user()->id));
+        $this->validate();
 
-        $market->refresh();
+        auth()->user()->ozonMarkets()->create($this->except('market'));
 
         $this->reset();
 
-        return $market;
     }
 
-    public function update()
+    public function update(): void
     {
-        if (!$this->organization_id) $this->organization_id = null;
+        $this->validate();
 
         $this->market->update($this->except('market'));
+    }
 
-        Cache::tags(['ozon', 'warehouses'])->forget($this->market->id);
+    public function destroy(): void
+    {
+        $this->market->delete();
     }
 }

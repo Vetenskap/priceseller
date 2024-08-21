@@ -1,0 +1,30 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('berg_api_warehouses', function (Blueprint $table) {
+            $table->id();
+            $table->string('name');
+            $table->integer('warehouse_id');
+            $table->foreignId('berg_api_id')->constrained('berg_apis')->cascadeOnDelete();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('berg_api_warehouses');
+    }
+};

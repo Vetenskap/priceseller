@@ -2,52 +2,55 @@
 
 namespace Modules\Moysklad\Livewire\MoyskladWarehouse;
 
+use App\Livewire\Traits\WithJsNotifications;
 use Illuminate\Support\Collection;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Models\MoyskladWarehouseWarehouse;
 use Modules\Moysklad\Services\MoyskladService;
+use Modules\Moysklad\Services\MoyskladWebhookService;
+use MoyskladWarehouse\MoyskladWarehousePostForm;
 
 class MoyskladWarehouseIndex extends Component
 {
+    use WithJsNotifications;
+
+    public MoyskladWarehousePostForm $form;
+
     public Moysklad $moysklad;
 
-    public Collection $moyskladWarehouses;
-
-    public $warehouseId;
-
-    public function save()
+    public function store(): void
     {
-        $this->dispatch('save.moysklad.warehouses');
+        $this->form->store();
     }
 
-    public function mount()
+    #[On('delete-warehouse')]
+    public function mount(): void
     {
-        $service = new MoyskladService($this->moysklad);
-        $this->moyskladWarehouses = $service->getAllWarehouses();
+        $this->form->setMoysklad($this->moysklad);
     }
 
-    public function add()
+    public function update(): void
     {
-        $this->moysklad->warehouses()->updateOrCreate([
-            'warehouse_id' => $this->warehouseId
-        ], [
-            'warehouse_id' => $this->warehouseId
-        ]);
+        $this->dispatch('update-warehouse')->component(MoyskladWarehouseEdit::class);
+        $this->addSuccessSaveNotification();
     }
 
-    public function addWebhook()
+    public function addWebhook(): void
     {
-
+        MoyskladWebhookService::addWarehouseWebhook($this->moysklad);
     }
 
-    public function deleteWebhook()
+    public function deleteWebhook(): void
     {
-
+        MoyskladWebhookService::deleteWarehouseWebhook($this->moysklad);
     }
 
     public function render()
     {
-        return view('moysklad::livewire.moysklad-warehouse.moysklad-warehouse-index');
+        return view('moysklad::livewire.moysklad-warehouse.moysklad-warehouse-index', [
+            'moyskladWarehouses' => (new MoyskladService($this->moysklad))->getAllWarehouses()
+        ]);
     }
 }

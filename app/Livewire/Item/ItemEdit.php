@@ -7,6 +7,10 @@ use App\Livewire\Components\Toast;
 use App\Livewire\Forms\Item\ItemPostForm;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Item;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
+use Livewire\Attributes\On;
 
 class ItemEdit extends BaseComponent
 {
@@ -18,14 +22,14 @@ class ItemEdit extends BaseComponent
 
     public $backRoute;
 
-    public function redirectBack()
+    public function redirectBack(): void
     {
         session()->flash('selected-item', $this->item->getKey());
 
         $this->redirect($this->backRoute);
     }
 
-    public function save()
+    public function save(): void
     {
         $this->authorize('update', $this->item);
 
@@ -38,7 +42,7 @@ class ItemEdit extends BaseComponent
         }
     }
 
-    public function destroy()
+    public function destroy(): void
     {
         $this->authorize('delete', $this->item);
 
@@ -47,13 +51,20 @@ class ItemEdit extends BaseComponent
         $this->redirectRoute('items');
     }
 
-    public function mount()
+    #[On('create_item_attribute')]
+    public function mount(): void
     {
         $this->form->setItem($this->item);
         $this->backRoute = \url()->previous();
     }
 
-    public function render()
+    public function deleteAttribute(array $mainAttribute): void
+    {
+        $attribute = auth()->user()->itemAttributes()->where('id', $mainAttribute['id'])->first();
+        $attribute->delete();
+    }
+
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('view', $this->item);
 

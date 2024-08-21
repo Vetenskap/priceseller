@@ -6,6 +6,7 @@ use App\Models\OzonMarket;
 use App\Models\WbMarket;
 use App\Services\ItemsImportReportService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -13,16 +14,18 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 
-class MarketRelationshipsAndCommissions implements ShouldQueue
+class MarketRelationshipsAndCommissions implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
+
+    public int $uniqueFor = 600;
 
     /**
      * Create a new job instance.
      */
     public function __construct(public Collection $defaultFields, public OzonMarket|WbMarket $model, public string $service)
     {
-        if (!ItemsImportReportService::newOrFail($this->model, '') ){
+        if (!ItemsImportReportService::new($this->model, '') ){
             throw new \Exception("Уже идёт импорт");
         }
     }
@@ -53,5 +56,10 @@ class MarketRelationshipsAndCommissions implements ShouldQueue
     public function failed()
     {
         ItemsImportReportService::error($this->model);
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->model->id . 'marketRelationshipsAndCommissions';
     }
 }

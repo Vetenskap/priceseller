@@ -6,17 +6,23 @@ use App\Models\OzonMarket;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WbMarket;
+use App\Services\Item\ItemService;
 use App\Services\ItemsImportReportService;
+use App\Services\OzonMarketService;
+use App\Services\WarehouseService;
+use App\Services\WbMarketService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class Import implements ShouldQueue
+class Import implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public $uniqueFor = 600;
     /**
      * Create a new job instance.
      */
@@ -29,9 +35,10 @@ class Import implements ShouldQueue
      */
     public function handle(): void
     {
-        if (ItemsImportReportService::newOrFail($this->model, $this->uuid)) {
+        if (ItemsImportReportService::new($this->model, $this->uuid)) {
             if (class_exists($this->service)) {
 
+                /** @var ItemService|OzonMarketService|WbMarketService|WarehouseService $service */
                 $service = new $this->service($this->model);
 
                 if (method_exists($service, 'importItems')) {
@@ -46,13 +53,24 @@ class Import implements ShouldQueue
                         deleted: $result->get('deleted', 0),
                         uuid: $this->uuid
                     );
+                } else {
+                    $this->fail('Method not found');
                 }
+            } else {
+                $this->fail('Service not found: ' . $this->service);
             }
+        } else {
+            $this->fail('Job is already in process');
         }
     }
 
-    public function failed()
+    public function failed(): void
     {
         ItemsImportReportService::error($this->model);
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->model->id . 'import';
     }
 }

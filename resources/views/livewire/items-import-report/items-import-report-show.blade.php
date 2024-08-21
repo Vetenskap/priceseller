@@ -12,7 +12,9 @@
             <x-layouts.simple-text name="Начало: {{$report->created_at}}" />
             <x-layouts.simple-text name="Конец: {{$report->updated_at}}" />
         </x-blocks.flex-block>
-        <x-layouts.title name="Не созданные товары" />
+        <x-blocks.main-block>
+            <x-layouts.title name="Не созданные товары" />
+        </x-blocks.main-block>
         <x-table.table-layout>
             <x-table.table-header>
                 <x-table.table-child>
@@ -28,7 +30,7 @@
                     <x-layouts.simple-text name="Значения" />
                 </x-table.table-child>
             </x-table.table-header>
-            @foreach($report->badItems as $badItem)
+            @foreach($badItems as $badItem)
                 <x-table.table-item wire:key="{{$badItem->getKey()}}">
                     <x-table.table-child>
                         <x-layouts.simple-text :name="$badItem->row" />
@@ -39,11 +41,14 @@
                     <x-table.table-child>
                         <x-json-text :json="$badItem->errors" />
                     </x-table.table-child>
-                    <x-table.table-child>
+                    <x-table.table-child class="overflow-y-auto">
                         <x-json-text :json="$badItem->values" />
                     </x-table.table-child>
                 </x-table.table-item>
             @endforeach
         </x-table.table-layout>
+        <x-blocks.main-block>
+            {{ $badItems->links() }}
+        </x-blocks.main-block>
     </x-layouts.main-container>
 </div>

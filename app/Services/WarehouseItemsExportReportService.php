@@ -78,9 +78,9 @@ class WarehouseItemsExportReportService
         }
     }
 
-    public static function timeout()
+    public static function timeout(): void
     {
-        WarehousesItemsExportReport::where('updated_at', '<', now()->subHours(2))
+        WarehousesItemsExportReport::where('updated_at', '<', now()->subHours(4))
             ->where('status', 2)
             ->chunk(100, function (Collection $reports) {
                 $reports->each(function (WarehousesItemsExportReport $report) {

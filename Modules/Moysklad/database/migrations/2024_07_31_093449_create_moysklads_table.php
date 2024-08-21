@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('moysklads', function (Blueprint $table) {
             $table->id();
             $table->longText('api_key');
+            $table->boolean('enabled_orders')->nullable()->default(false);
             $table->foreignId('user_id')->constrained('users')->cascadeOnDelete();
             $table->timestamps();
         });

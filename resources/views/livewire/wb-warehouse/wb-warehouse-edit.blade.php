@@ -41,7 +41,9 @@
                 <x-dropdown-select name="supplier" field="selectedSupplier" :options="auth()->user()->suppliers">
                     Выберите поставщика
                 </x-dropdown-select>
-                <x-success-button wire:click="addSupplier">Добавить</x-success-button>
+                <div class="self-center">
+                    <x-success-button wire:click="addSupplier">Добавить</x-success-button>
+                </div>
             </x-blocks.flex-block-end>
         @if($warehouse->suppliers()->count())
                 <x-table.table-layout>
@@ -71,7 +73,9 @@
                 <x-dropdown-select name="warehouse" field="selectedWarehouse" :options="auth()->user()->warehouses">
                     Выберите склад
                 </x-dropdown-select>
-                <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
+                <div class="self-center">
+                    <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
+                </div>
             </x-blocks.flex-block-end>
         @if($warehouse->userWarehouses()->count())
                 <x-table.table-layout>

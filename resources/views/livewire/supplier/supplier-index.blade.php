@@ -1,31 +1,29 @@
 <div>
     <x-layouts.header name="Поставщики"/>
-    <x-layouts.actions>
-        <x-success-button wire:click="add">Добавить</x-success-button>
-    </x-layouts.actions>
-    @if($showCreateBlock)
-        <x-layouts.main-container>
-            <x-blocks.flex-block-end>
+    <div x-data="{ open: false }">
+        <x-layouts.actions>
+            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
+        </x-layouts.actions>
+        <x-layouts.main-container x-show="open">
+            <x-blocks.main-block>
+                <x-layouts.title name="Добавление нового поставщика" />
+            </x-blocks.main-block>
+            <x-blocks.flex-block>
                 <x-inputs.input-with-label name="name"
                                            type="text"
                                            field="form.name"
                 >Наименование
                 </x-inputs.input-with-label>
-                @if(auth()->user()->isMsSub())
-
-                    <x-inputs.input-with-label name="ms_uuid"
-                                               type="text"
-                                               field="form.ms_uuid"
-                    >МС UUID
-                    </x-inputs.input-with-label>
-
-                @endif
-                <x-success-button wire:click="store">Добавить</x-success-button>
-
-            </x-blocks.flex-block-end>
+                <div class="self-center">
+                    <x-success-button wire:click="store">Добавить</x-success-button>
+                </div>
+            </x-blocks.flex-block>
         </x-layouts.main-container>
-    @endif
+    </div>
     <x-layouts.main-container>
+        <x-blocks.main-block>
+            <x-layouts.title name="Список" />
+        </x-blocks.main-block>
         @if($suppliers->count() > 0)
             <x-table.table-layout>
                 <x-table.table-header>
@@ -33,34 +31,32 @@
                         <x-layouts.simple-text name="Наименование"/>
                     </x-table.table-child>
                     <x-table.table-child>
-                        <x-layouts.simple-text name="Включен"/>
+                        <x-layouts.simple-text name="Последнее обновление"/>
                     </x-table.table-child>
                     <x-table.table-child>
 
                     </x-table.table-child>
                 </x-table.table-header>
                 @foreach($suppliers as $supplier)
-                    <x-table.table-item wire:key="{{$supplier->getKey()}}" wire:poll>
-                        <x-table.table-child>
-                            <a href="{{route('supplier-edit', ['supplier' => $supplier->getKey()])}}"
-                               wire:navigate.hover>
+                    <a href="{{route('supplier.edit', ['supplier' => $supplier->getKey()])}}" wire:key="{{$supplier->getKey()}}">
+                        <x-table.table-item>
+                            <x-table.table-child>
                                 <x-layouts.simple-text :name="$supplier->name"/>
-                            </a>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-inputs.switcher :checked="$supplier->open" wire:click="changeOpen({{$supplier}})"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-danger-button wire:click="destroy({{$supplier}})">Удалить</x-danger-button>
-                        </x-table.table-child>
-                    </x-table.table-item>
+                            </x-table.table-child>
+                            <x-table.table-child>
+                                <x-information>{{$supplier->updated_at}}</x-information>
+                            </x-table.table-child>
+                            <x-table.table-child>
+                                <x-inputs.switcher :checked="$supplier->open" wire:click="changeOpen({{json_encode($supplier->getKey())}})"/>
+                            </x-table.table-child>
+                        </x-table.table-item>
+                    </a>
                 @endforeach
             </x-table.table-layout>
         @else
             <x-blocks.main-block>
-                <x-layouts.simple-text name="Сейчас у вас нет поставщиков"/>
+                <x-information>Сейчас у вас нет поставщиков</x-information>
             </x-blocks.main-block>
         @endif
-
     </x-layouts.main-container>
 </div>

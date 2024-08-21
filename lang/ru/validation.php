@@ -228,6 +228,16 @@ return [
         'title' => 'Заголовок',
         'username' => 'Никнейм',
         'year' => 'Год',
+        'attribute_name' => 'Атрибут',
+        'link' => 'Атрибут',
+        'user_type' => 'Тип',
+        'warehouse_id' => 'Идентификатор склада',
+        'item_attribute_id' => 'Дополнительный атрибут',
+        'supplier_id' => 'Поставщик',
+        'api_key' => 'Апи ключ',
+        'moysklad_warehouse_uuid' => 'Идентификатор склада Мой Склад',
+        'moysklad_supplier_uuid' => 'Идентификатор поставщика Мой Склад',
+        'client_id' => 'Идентификатор клиента',
     ],
 
 ];

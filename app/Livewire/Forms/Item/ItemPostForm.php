@@ -4,6 +4,7 @@ namespace App\Livewire\Forms\Item;
 
 use App\Livewire\Components\Toast;
 use App\Models\Item;
+use App\Models\ItemAttributeValue;
 use Illuminate\Support\Collection;
 use Livewire\Form;
 
@@ -29,6 +30,8 @@ class ItemPostForm extends Form
 
     public $unload_ozon;
 
+    public $attributes;
+
     public function setItem(Item $item)
     {
         $this->item = $item;
@@ -41,6 +44,7 @@ class ItemPostForm extends Form
         $this->supplier_id = $item->supplier_id;
         $this->unload_ozon = $item->unload_ozon;
         $this->unload_wb = $item->unload_wb;
+        $this->attributes = $item->attributesValues->pluck('value', 'item_attribute_id')->toArray();
     }
 
     public function update(): Collection
@@ -49,7 +53,18 @@ class ItemPostForm extends Form
             return collect(['status' => false, 'message' => 'Не выбран поставщик']);
         }
 
-        $this->item->update($this->except('item'));
+        collect($this->attributes)->each(function ($value, $key) {
+            ItemAttributeValue::updateOrCreate([
+                'item_attribute_id' => $key,
+                'item_id' => $this->item->id
+            ], [
+                'item_attribute_id' => $key,
+                'value' => $value,
+                'item_id' => $this->item->id
+            ]);
+        });
+
+        $this->item->update($this->except(['item', 'attributes']));
 
         return collect(['status' => true, 'message' => '']);
     }

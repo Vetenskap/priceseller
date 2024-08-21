@@ -7,55 +7,28 @@ use App\Livewire\Forms\Warehouse\WarehousePostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Warehouse;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class WarehouseEdit extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters;
+    use WithJsNotifications;
+
+    public $backRoute = 'warehouses.index';
 
     public WarehousePostForm $form;
 
     public Warehouse $warehouse;
 
-    #[Session('WarehouseEdit.{warehouse.id}')]
-    public $selectedTab = 'main';
-
-    /** @var TemporaryUploadedFile $file */
-    public $file;
-
-//    public function import()
-//    {
-//        if (!$this->file) $this->dispatch('livewire-upload-error');
-//
-//        $uuid = Str::uuid();
-//        $ext = $this->file->getClientOriginalExtension();
-//
-//        $path = $this->file->storeAs(WarehouseService::PATH, $uuid . '.' . $ext);
-//
-//        if (!Storage::exists($path)) {
-//            $this->dispatch('livewire-upload-error');
-//            return;
-//        }
-//
-//        Import::dispatch($uuid, $ext, $this->warehouse, WarehouseService::class);
-//
-//        $this->dispatch('items-import-report-created');
-//    }
-//
-//    public function export()
-//    {
-//        Export::dispatch($this->warehouse, WarehouseService::class);
-//
-//        $this->dispatch('items-export-report-created');
-//    }
-
-    public function mount()
+    public function mount(): void
     {
         $this->form->setWarehouse($this->warehouse);
     }
 
-    public function save()
+    public function update(): void
     {
         $this->authorize('update', $this->warehouse);
 
@@ -64,7 +37,7 @@ class WarehouseEdit extends BaseComponent
         $this->addSuccessSaveNotification();
     }
 
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('view', $this->warehouse);
 

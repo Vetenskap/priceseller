@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
+use Modules\Moysklad\Models\MoyskladItemOrder;
 
 class Item extends MainModel
 {
@@ -28,7 +29,43 @@ class Item extends MainModel
         'unload_ozon',
         'unload_wb',
         'created_at',
-        'updated_at'
+        'updated_at',
+        'buy_price_reserve'
+    ];
+
+    const MAINATTRIBUTES = [
+        [
+            'name' => 'article',
+            'label' => 'Артикул'
+        ],
+        [
+            'name' => 'brand',
+            'label' => 'Бренд'
+        ],
+        [
+            'name' => 'name',
+            'label' => 'Наименование'
+        ],
+        [
+            'name' => 'multiplicity',
+            'label' => 'Кратность отгрузки'
+        ],
+        [
+            'name' => 'unload_ozon',
+            'label' => 'Выгружать Озон'
+        ],
+        [
+            'name' => 'unload_wb',
+            'label' => 'Выгружать ВБ'
+        ],
+        [
+            'name' => 'code',
+            'label' => 'Код клиента'
+        ],
+        [
+            'name' => 'buy_price_reserve',
+            'label' => 'Закупочная цена резерв'
+        ],
     ];
 
     public function supplier()
@@ -66,5 +103,15 @@ class Item extends MainModel
     public function warehousesStocks()
     {
         return $this->hasMany(ItemWarehouseStock::class);
+    }
+
+    public function attributesValues()
+    {
+        return $this->hasMany(ItemAttributeValue::class);
+    }
+
+    public function moyskladOrders()
+    {
+        return $this->hasMany(MoyskladItemOrder::class);
     }
 }

@@ -3,6 +3,7 @@
 namespace Modules\Order\Livewire\Order;
 
 use App\Livewire\Components\Toast;
+use App\Livewire\ModuleComponent;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Organization;
 use Illuminate\Database\Eloquent\Builder;
@@ -25,8 +26,9 @@ use Modules\Order\Models\WriteOffItemWarehouseStock;
 use Modules\Order\Services\OrderService;
 use Modules\Order\Services\OzonOrderService;
 use Modules\Order\Services\WbOrderService;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-class OrderIndex extends Component
+class OrderIndex extends ModuleComponent
 {
     use WithJsNotifications, WithFileUploads;
 
@@ -39,42 +41,42 @@ class OrderIndex extends Component
     #[Session]
     public array $selectedWarehouses = [];
 
-    #[Url]
-    public $page = 'main';
+    public $page;
 
     public $file;
 
-    public $openSelectedWarehouses = false;
-
     public $automatic;
 
-    public function updatedAutomatic()
+    public function store(): void
     {
         $this->organization->automaticUnloadOrder()->updateOrCreate([
             'organization_id' => $this->organizationId
         ], [
             'automatic' => $this->automatic
         ]);
+
+        $oldSelected = $this->organization->selectedOrdersWarehouses->pluck('id')->toArray();
+
+        $this->organization->selectedOrdersWarehouses()->detach($oldSelected);
+        $this->organization->selectedOrdersWarehouses()->attach($this->selectedWarehouses);
+
+        $this->addSuccessSaveNotification();
     }
 
-    public function changeActive()
-    {
-        $this->openSelectedWarehouses = !$this->openSelectedWarehouses;
-    }
-
-    public function export()
+    public function export(): BinaryFileResponse
     {
         return \Excel::download(new NotChangeOzonStatesExport(Auth::id()), 'Не менять статус.xlsx');
     }
 
-    public function import()
+    public function import(): void
     {
         \Excel::import(new NotChangeOzonStatesImport(\auth()->user()), $this->file);
     }
 
-    #[On('refresh')]
-    public function mount()
+    public function mount($page = 'main'): void
     {
+        $this->page = $page;
+
         if ($this->organizationId) {
             $this->organization = auth()->user()->organizations()->findOrFail($this->organizationId);
             $this->orders = $this->organization->orders()->whereHas('orderable')->with('orderable.item')->where('state', 'new')->get();
@@ -83,30 +85,14 @@ class OrderIndex extends Component
         }
     }
 
-    public function render()
-    {
-        if ($this->organization) {
-            $this->authorize('view', $this->organization);
-        }
-
-        return view('order::livewire.order.order-index', [
-            'organizations' => auth()->user()->organizations,
-            'warehouses' => auth()->user()->warehouses,
-            'writeOff' => WriteOffItemWarehouseStock::whereHas('order', function (Builder $query) {
-                $query->where('organization_id', $this->organizationId);
-            })->count()
-        ]);
-    }
-
     public function getOrders(): void
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $total = $service->getOrders();
         $this->js((new Toast('Успех', 'Успешно получено заказов: ' . $total))->success());
-        $this->dispatch('refresh')->self();
     }
 
-    public function selectWarehouse(string $id)
+    public function selectWarehouse(string $id): void
     {
         if (!in_array($id, $this->selectedWarehouses)) {
             $this->selectedWarehouses[] = $id;
@@ -117,27 +103,25 @@ class OrderIndex extends Component
         }
     }
 
-    public function writeOffBalance()
+    public function writeOffBalance(): void
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $total = $service->writeOffBalance($this->selectedWarehouses);
         $this->js((new Toast('Успех', 'Списано: ' . $total))->success());
-        $this->dispatch('refresh')->self();
     }
 
-    public function downloadWriteOffBalance()
+    public function downloadWriteOffBalance(): BinaryFileResponse
     {
         return \Excel::download(new WriteOffItemWarehouseStockExport($this->organizationId), 'Списание со складов ' . $this->organization->name . '.xlsx');
     }
 
-    public function purchaseOrder()
+    public function purchaseOrder(): void
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $service->purchaseOrder();
-        $this->dispatch('refresh')->self();
     }
 
-    public function downloadPurchaseOrder(array $order)
+    public function downloadPurchaseOrder(array $order): BinaryFileResponse
     {
         $order = SupplierOrderReport::findOrFail($order['id']);
 
@@ -150,18 +134,16 @@ class OrderIndex extends Component
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $service->clearAll();
-        $this->dispatch('refresh')->self();
     }
 
-    public function writeOffBalanceRollback()
+    public function writeOffBalanceRollback(): void
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $service->writeOffBalanceRollback();
         $this->js((new Toast('Успех', 'Все остатки возвращены на склад'))->success());
-        $this->dispatch('refresh')->self();
     }
 
-    public function writeOffMarketsStocks()
+    public function writeOffMarketsStocks(): void
     {
         $service = new OzonOrderService($this->organization, auth()->user());
         $service->writeOffStocks();
@@ -172,19 +154,42 @@ class OrderIndex extends Component
         $this->js((new Toast('Успех', 'Все остатки списаны с кабинетов'))->success());
     }
 
-    public function setOrdersState()
+    public function setOrdersState(): void
     {
         $service = new OzonOrderService($this->organization, auth()->user());
         $total = $service->setStates();
 
         $this->js((new Toast('Успех', "Изменён статус у {$total} заказов на Озоне"))->success());
-        $this->dispatch('refresh')->self();
     }
 
-    public function startAllActions()
+    public function startAllActions(): void
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $service->processOrders();
-        $this->dispatch('refresh')->self();
+    }
+
+    public function render()
+    {
+        if ($this->organization) {
+            $this->authorize('view', $this->organization);
+        }
+
+        if ($this->page === 'main') {
+            return view('order::livewire.order.pages.order-index-main-page', [
+                'organizations' => auth()->user()->organizations,
+                'warehouses' => auth()->user()->warehouses,
+                'writeOff' => WriteOffItemWarehouseStock::whereHas('order', function (Builder $query) {
+                    $query->where('organization_id', $this->organizationId);
+                })->count(),
+                'modules' => $this->getEnabledModules()
+            ]);
+        } else if ($this->page === 'states') {
+            return view('order::livewire.order.pages.order-index-states-page', [
+                'modules' => $this->getEnabledModules()
+            ]);
+        }
+
+        abort(404);
+
     }
 }

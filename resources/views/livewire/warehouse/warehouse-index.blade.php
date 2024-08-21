@@ -1,20 +1,22 @@
 <div>
     <x-layouts.header name="Склады"/>
-    <x-layouts.actions>
-        <x-success-button wire:click="add">Добавить</x-success-button>
-    </x-layouts.actions>
-    @if($showCreateForm)
-        <x-layouts.main-container>
+    <div x-data="{ open: false }">
+        <x-layouts.actions>
+            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
+        </x-layouts.actions>
+        <x-layouts.main-container x-show="open">
             <x-blocks.flex-block-end>
                 <x-inputs.input-with-label name="name"
                                            type="text"
                                            field="form.name"
                 >Наименование
                 </x-inputs.input-with-label>
-                <x-success-button wire:click="create">Добавить</x-success-button>
+                <div class="self-center">
+                    <x-success-button wire:click="store">Добавить</x-success-button>
+                </div>
             </x-blocks.flex-block-end>
         </x-layouts.main-container>
-    @endif
+    </div>
     <x-layouts.main-container>
         <x-navigate-pages>
             <x-links.tab-link :href="route('warehouses.index', ['page' => 'list'])" name="Список"

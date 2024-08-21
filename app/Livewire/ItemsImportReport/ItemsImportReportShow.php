@@ -12,6 +12,10 @@ class ItemsImportReportShow extends BaseComponent
 
     public function render()
     {
-        return view('livewire.items-import-report.items-import-report-show');
+        $badItems = $this->report->badItems()->paginate(10);
+
+        return view('livewire.items-import-report.items-import-report-show', [
+            'badItems' => $badItems
+        ]);
     }
 }

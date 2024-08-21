@@ -10,19 +10,23 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WbMarket;
 use App\Services\Item\ItemService;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use LaravelIdea\Helper\App\Models\_IH_ItemsExportReport_QB;
 
 class ItemsExportReportService
 {
-    public static function get(OzonMarket|WbMarket|User|Warehouse $model)
+    public static function get(OzonMarket|WbMarket|User|Warehouse $model): Model|MorphMany|MorphToMany|_IH_ItemsExportReport_QB|null
     {
         return $model->itemsExportReports()->where('status', 2)->first();
     }
 
-    public static function newOrFail(OzonMarket|WbMarket|User|Warehouse $model): bool
+    public static function new(OzonMarket|WbMarket|User|Warehouse $model): bool
     {
-        if ($report = static::get($model)) {
+        if (static::get($model)) {
             return false;
         } else {
 
@@ -82,9 +86,9 @@ class ItemsExportReportService
         }
     }
 
-    public static function timeout()
+    public static function timeout(): void
     {
-        ItemsExportReport::where('updated_at', '<', now()->subHours(2))
+        ItemsExportReport::where('updated_at', '<', now()->subHours(4))
             ->where('status', 2)
             ->chunk(100, function (Collection $reports) {
                 $reports->each(function (ItemsExportReport $report) {

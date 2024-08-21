@@ -1,0 +1,11 @@
+{
+    "name": "BergApi",
+    "alias": "bergapi",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\BergApi\\Providers\\BergApiServiceProvider"
+    ],
+    "files": []
+}

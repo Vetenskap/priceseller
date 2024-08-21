@@ -1,43 +1,53 @@
-<x-layouts.module-container>
-    <x-blocks.main-block>
-        <x-layouts.title name="Атрибуты"/>
-    </x-blocks.main-block>
-    <x-blocks.flex-block>
-        <x-dropdown-select name="code" field="code" :options="$assortmentAttributes">Код клиента</x-dropdown-select>
-        <x-dropdown-select name="article" field="article" :options="$assortmentAttributes">Артикул</x-dropdown-select>
-        <x-dropdown-select name="brand" field="brand" :options="$assortmentAttributes">Бренд</x-dropdown-select>
-        <x-dropdown-select name="name" field="name" :options="$assortmentAttributes">Наименование</x-dropdown-select>
-        <x-dropdown-select name="multiplicity" field="multiplicity" :options="$assortmentAttributes">Кратность отгрузки</x-dropdown-select>
-        <x-dropdown-select name="unload_ozon" field="unload_ozon" :options="$assortmentAttributes">Не выгружать на Озон</x-dropdown-select>
-        <x-dropdown-select name="unload_wb" field="unload_wb" :options="$assortmentAttributes">Не выгружать на ВБ</x-dropdown-select>
-    </x-blocks.flex-block>
-    <x-blocks.main-block>
-        <form wire:submit="import">
-            <div
-                x-data="{ uploading: false, progress: 0 }"
-                x-on:livewire-upload-start="uploading = true"
-                x-on:livewire-upload-finish="uploading = false"
-                x-on:livewire-upload-cancel="uploading = false"
-                x-on:livewire-upload-error="uploading = false"
-                x-on:livewire-upload-progress="progress = $event.detail.progress"
-            >
-                <x-blocks.main-block>
-                    <x-file-input wire:model="file"/>
-                </x-blocks.main-block>
-
-                <x-blocks.main-block x-show="uploading">
-                    <x-file-progress x-bind:style="{ width: progress + '%' }"/>
-                </x-blocks.main-block>
-
-                @if($file)
-                    <x-blocks.main-block class="text-center">
-                        <x-success-button wire:click="import">Загрузить</x-success-button>
-                    </x-blocks.main-block>
-                @endif
-            </div>
-        </form>
-    </x-blocks.main-block>
-    <div wire:loading wire:target="import">
-        <x-loader/>
-    </div>
-</x-layouts.module-container>
+<div>
+    <livewire:moysklad::moysklad-item-main-attribute-link.moysklad-item-main-attribute-link-index :moysklad="$moysklad"/>
+    <livewire:moysklad::moysklad-item-additional-attribute-link.moysklad-item-additional-attribute-link-index :moysklad="$moysklad"/>
+    <x-layouts.main-container>
+        <x-blocks.main-block>
+            <x-layouts.title name="Выгрузка товаров с Моего склада" />
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            <x-success-button wire:click="importApi">Выгрузить по АПИ</x-success-button>
+        </x-blocks.main-block>
+    </x-layouts.main-container>
+    <x-layouts.main-container>
+        <x-blocks.main-block>
+            <x-layouts.title name="Вебхуки" />
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            <x-titles.sub-title name="Вебхук на создание товара"/>
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            @if($webhook = $moysklad->webhooks()->where(['action' => 'CREATE', 'type' => 'product'])->first())
+                <x-information>Дата создания: {{$webhook->created_at}}</x-information>
+                <x-danger-button wire:click="deleteWebhook({{$webhook}})">Удалить</x-danger-button>
+            @else
+                <x-success-button wire:click="addCreateWebhook">Добавить</x-success-button>
+            @endif
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            <x-titles.sub-title name="Вебхук на изменение товара"/>
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            @if($webhook = $moysklad->webhooks()->where(['action' => 'UPDATE', 'type' => 'product'])->first())
+                <x-information>Дата создания: {{$webhook->created_at}}</x-information>
+                <x-danger-button wire:click="deleteWebhook({{$webhook}})">Удалить</x-danger-button>
+            @else
+                <x-success-button wire:click="addUpdateWebhook">Добавить</x-success-button>
+            @endif
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            <x-titles.sub-title name="Вебхук на удаление товара"/>
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            @if($webhook = $moysklad->webhooks()->where(['action' => 'DELETE', 'type' => 'product'])->first())
+                <x-information>Дата создания: {{$webhook->created_at}}</x-information>
+                <x-danger-button wire:click="deleteWebhook({{$webhook}})">Удалить</x-danger-button>
+            @else
+                <x-success-button wire:click="addDeleteWebhook">Добавить</x-success-button>
+            @endif
+        </x-blocks.main-block>
+        <div wire:loading wire:target="import, deleteWebhook, addUpdateWebhook, addCreateWebhook, importApi, addDeleteWebhook">
+            <x-loader/>
+        </div>
+    </x-layouts.main-container>
+</div>

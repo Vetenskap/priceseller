@@ -1,4 +1,9 @@
 {
     "Order": true,
-    "Moysklad": true
+    "Moysklad": true,
+    "VoshodApi": true,
+    "TrastApi": true,
+    "SamsonApi": true,
+    "BergApi": true,
+    "SimalandApi": true
 }

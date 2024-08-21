@@ -2,18 +2,26 @@
 
 namespace Modules\Moysklad\Livewire\MoyskladItem;
 
+use App\Livewire\Traits\WithJsNotifications;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Session;
 use Livewire\Component;
 use Livewire\WithFileUploads;
 use Modules\Moysklad\Imports\MoyskladItemsImport;
+use Modules\Moysklad\Jobs\MoyskladItemsApiImport;
 use Modules\Moysklad\Models\Moysklad;
+use Modules\Moysklad\Models\MoyskladItemAdditionalAttributeLink;
+use Modules\Moysklad\Models\MoyskladItemMainAttributeLink;
+use Modules\Moysklad\Models\MoyskladWebhook;
 use Modules\Moysklad\Services\MoyskladService;
+use Modules\Moysklad\Services\MoyskladWebhookService;
 
 class MoyskladItemIndex extends Component
 {
-    use WithFileUploads;
+    use WithFileUploads, WithJsNotifications;
 
     public Moysklad $moysklad;
 
@@ -21,41 +29,118 @@ class MoyskladItemIndex extends Component
 
     public $file;
 
-    #[Session]
-    public $code = null;
-    #[Session]
-    public $article = null;
-    #[Session]
-    public $brand = null;
-    #[Session]
-    public $name = null;
-    #[Session]
-    public $multiplicity = null;
-    #[Session]
-    public $unload_ozon = null;
-    #[Session]
-    public $unload_wb = null;
+    public $mainAttributesLinks = [];
+    public $additionalAttributesLinks = [];
 
-    public function import()
+    public function save(): void
+    {
+        foreach ($this->mainAttributesLinks as $attribute => $data) {
+
+            $assortmentAttribute = collect($this->assortmentAttributes->firstWhere('name', $data['name']));
+            $linkLabel = $assortmentAttribute->get('label');
+            $linkType = $assortmentAttribute->get('type');
+            $linkName = $linkType === 'metadata' ? $assortmentAttribute->get('label') : $data['name'];
+
+            $this->moysklad->itemMainAttributeLinks()->updateOrCreate([
+                'attribute_name' => $attribute
+            ], [
+                'attribute_name' => $attribute,
+                'link' => $data['name'],
+                'link_name' => $linkName,
+                'link_label' => $linkLabel,
+                'type' => $linkType,
+                'user_type' => $data['user_type']
+            ]);
+        }
+
+        foreach ($this->additionalAttributesLinks as $attribute => $data) {
+
+            $assortmentAttribute = collect($this->assortmentAttributes->firstWhere('name', $data['name']));
+            $linkLabel = $assortmentAttribute->get('label');
+            $linkType = $assortmentAttribute->get('type');
+            $linkName = $linkType === 'metadata' ? $assortmentAttribute->get('label') : $data['name'];
+
+            $this->moysklad->itemAdditionalAttributeLinks()->updateOrCreate([
+                'item_attribute_id' => $attribute
+            ], [
+                'item_attribute_id' => $attribute,
+                'link' => $data['name'],
+                'link_name' => $linkName,
+                'link_label' => $linkLabel,
+                'type' => $linkType,
+                'user_type' => $data['user_type']
+            ]);
+        }
+
+        $this->addSuccessSaveNotification();
+    }
+
+    public function import(): void
     {
         $attributes = collect($this->only(['code', 'article', 'brand', 'name', 'multiplicity', 'unload_ozon', 'unload_wb']));
         $attributes = $attributes->map(function ($value, $key) {
-            $name = collect($this->assortmentAttributes->where('id', $value)->first())->get('name');
+            $name = collect($this->assortmentAttributes->firstWhere('id', $value))->get('name');
             return Str::slug(Str::isUuid($value) ? 'Доп. поле: ' . $name : $name, '_');
         });
 
         $import = new MoyskladItemsImport(\auth()->user()->id, $attributes, $this->moysklad);
         \Excel::import($import, $this->file);
-        dd($import);
     }
 
-    public function mount()
+    public function importApi(): void
+    {
+        MoyskladItemsApiImport::dispatch($this->moysklad);
+        $this->addJobNotification();
+    }
+
+    public function mount(): void
     {
         $service = new MoyskladService($this->moysklad);
         $this->assortmentAttributes = $service->getAllAssortmentAttributes();
+        $this->mainAttributesLinks = $this->moysklad->itemMainAttributeLinks->mapWithKeys(function (MoyskladItemMainAttributeLink $itemMainAttributeLink) {
+            return [$itemMainAttributeLink->attribute_name => [
+                'name' => $itemMainAttributeLink->link,
+                'user_type' => $itemMainAttributeLink->user_type
+            ]];
+        })->toArray();
+        $this->additionalAttributesLinks = $this->moysklad->itemAdditionalAttributeLinks->mapWithKeys(function (MoyskladItemAdditionalAttributeLink $itemAdditionalAttributeLink) {
+            return [$itemAdditionalAttributeLink->item_attribute_id => [
+                'name' => $itemAdditionalAttributeLink->link,
+                'user_type' => $itemAdditionalAttributeLink->user_type
+            ]];
+        })->toArray();
     }
 
-    public function render()
+    public function deleteWebhook(array $webhook): void
+    {
+        $webhook = MoyskladWebhook::find($webhook['id']);
+
+        $service = new MoyskladWebhookService($this->moysklad, $webhook);
+        $service->deleteWebhook();
+    }
+
+    public function addUpdateWebhook(): void
+    {
+        $data = collect(config('moysklad.available_webhooks'))->where('type', 'product')->where('action', 'UPDATE')->first();
+
+        MoyskladWebhookService::createWebhook($this->moysklad, $data, true);
+    }
+
+    public function addCreateWebhook(): void
+    {
+        $data = collect(config('moysklad.available_webhooks'))->where('type', 'product')->where('action', 'CREATE')->first();
+
+        MoyskladWebhookService::createWebhook($this->moysklad, $data);
+    }
+
+    public function addDeleteWebhook(): void
+    {
+        $data = collect(config('moysklad.available_webhooks'))->where('type', 'product')->where('action', 'DELETE')->first();
+
+        MoyskladWebhookService::createWebhook($this->moysklad, $data);
+    }
+
+    public function render(): Factory|Application|View|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('moysklad::livewire.moysklad-item.moysklad-item-index');
     }

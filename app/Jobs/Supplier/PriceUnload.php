@@ -40,7 +40,7 @@ class PriceUnload implements ShouldQueue
         $emailSupplier = EmailSupplier::findOrFail($this->emailSupplierId);
 
         if (SupplierReportService::get($emailSupplier->supplier)) {
-            SupplierReportService::changeMessage($emailSupplier->supplier, 'Повторная попытка выгрузки');
+            return;
         } else {
             SupplierReportService::new($emailSupplier->supplier, $this->path);
         }

@@ -1,0 +1,11 @@
+{
+    "name": "SamsonApi",
+    "alias": "samsonapi",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\SamsonApi\\Providers\\SamsonApiServiceProvider"
+    ],
+    "files": []
+}

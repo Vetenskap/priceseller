@@ -21,7 +21,7 @@ class ItemsImportReportService
         return $model->itemsImportReports()->where('status', 2)->first();
     }
 
-    public static function newOrFail(OzonMarket|WbMarket|User|Warehouse $model, string $uuid): bool
+    public static function new(OzonMarket|WbMarket|User|Warehouse $model, string $uuid): bool
     {
         if (static::get($model)) {
             return false;
@@ -34,7 +34,7 @@ class ItemsImportReportService
             ]);
 
             try {
-                event(new ReportEvent($model));
+                event(new ReportEvent($model->user_id ?? $model->id));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -137,7 +137,7 @@ class ItemsImportReportService
         }
     }
 
-    public static function timeout()
+    public static function timeout(): void
     {
         ItemsImportReport::where('updated_at', '<', now()->subminutes(30))
             ->where('status', 2)

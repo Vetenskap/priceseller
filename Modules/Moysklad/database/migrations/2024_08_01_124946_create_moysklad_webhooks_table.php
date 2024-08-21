@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('moysklad_webhooks', function (Blueprint $table) {
             $table->uuid('id')->primary();
+            $table->string('name');
             $table->string('type');
             $table->string('action');
+            $table->boolean('enabled')->nullable()->default(true);
             $table->uuid('moysklad_webhook_uuid')->nullable();
+            $table->foreignId('moysklad_id')->constrained('moysklads')->cascadeOnDelete();
             $table->timestamps();
         });
     }

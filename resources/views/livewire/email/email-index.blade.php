@@ -1,13 +1,16 @@
 <div>
     <x-layouts.header name="Почта"/>
 
-    <x-layouts.actions>
-        <x-success-button wire:click="add">Добавить</x-success-button>
-    </x-layouts.actions>
+    <div x-data="{ open: false }">
+        <x-layouts.actions>
+            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
+        </x-layouts.actions>
 
-    @if($showCreateBlock)
-        <x-layouts.main-container>
-            <x-blocks.flex-block-end>
+        <x-layouts.main-container x-show="open">
+            <x-blocks.main-block>
+                <x-layouts.title name="Добавление новой почты"/>
+            </x-blocks.main-block>
+            <x-blocks.flex-block>
                 <x-inputs.input-with-label name="name"
                                            type="text"
                                            field="form.name"
@@ -27,13 +30,16 @@
                                            field="form.password"
                 >Пароль
                 </x-inputs.input-with-label>
-
-                <x-success-button wire:click="store">Добавить</x-success-button>
-
-            </x-blocks.flex-block-end>
+                <div class="self-center">
+                    <x-success-button wire:click="store">Добавить</x-success-button>
+                </div>
+            </x-blocks.flex-block>
         </x-layouts.main-container>
-    @endif
+    </div>
     <x-layouts.main-container>
+        <x-blocks.main-block>
+            <x-layouts.title name="Список"/>
+        </x-blocks.main-block>
         @if($emails->count() > 0)
             <x-table.table-layout>
                 <x-table.table-header>
@@ -44,40 +50,35 @@
                         <x-layouts.simple-text name="Адрес"/>
                     </x-table.table-child>
                     <x-table.table-child>
-
+                        <x-layouts.simple-text name="Последнее обновление"/>
                     </x-table.table-child>
                     <x-table.table-child>
 
                     </x-table.table-child>
                 </x-table.table-header>
                 @foreach($emails as $email)
-                    <x-table.table-item wire:key="{{$email->getKey()}}" wire:poll>
-                        <x-table.table-child>
-                            <a href="{{route('email-show', ['email' => $email->getKey()])}}" wire:navigate.hover>
-
+                    <a href="{{route('email.edit', ['email' => $email->getKey()])}}" wire:key="{{$email->getKey()}}">
+                        <x-table.table-item>
+                            <x-table.table-child>
                                 <x-layouts.simple-text :name="$email->name"/>
-
-                            </a>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <a href="{{route('email-show', ['email' => $email->getKey()])}}" wire:navigate.hover>
-
+                            </x-table.table-child>
+                            <x-table.table-child>
                                 <x-layouts.simple-text :name="$email->address"/>
-
-                            </a>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-inputs.switcher :checked="$email->open" wire:change="changeOpen({{$email}})"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-                            <x-danger-button wire:click="destroy({{$email}})">Удалить</x-danger-button>
-                        </x-table.table-child>
-                    </x-table.table-item>
+                            </x-table.table-child>
+                            <x-table.table-child>
+                                <x-information>{{$email->updated_at}}</x-information>
+                            </x-table.table-child>
+                            <x-table.table-child>
+                                <x-inputs.switcher :checked="$email->open"
+                                                   wire:change="changeOpen({{json_encode($email->getKey())}})"/>
+                            </x-table.table-child>
+                        </x-table.table-item>
+                    </a>
                 @endforeach
             </x-table.table-layout>
         @else
             <x-blocks.main-block>
-                <x-layouts.simple-text name="Сейчас у вас нет почты"/>
+                <x-information>Сейчас у вас нет почты</x-information>
             </x-blocks.main-block>
         @endif
     </x-layouts.main-container>

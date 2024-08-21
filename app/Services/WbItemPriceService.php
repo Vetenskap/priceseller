@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\HttpClient\WbClient;
 use App\Models\Supplier;
+use App\Models\User;
 use App\Models\WbItem;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
@@ -12,16 +13,16 @@ use App\Models\WbWarehouseUserWarehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Log;
-use Modules\Order\Models\Order;
 
 class WbItemPriceService
 {
     protected WbClient $wbClient;
+    protected User $user;
 
     public function __construct(public ?Supplier $supplier = null, public WbMarket $market)
     {
         $this->wbClient = new WbClient($this->market->api_key);
+        $this->user = $this->market->user;
     }
 
     public function updatePrice(): void
@@ -31,7 +32,9 @@ class WbItemPriceService
         WbItem::query()
             ->whereHas('item', function (Builder $query) {
                 $query
-                    ->where('updated', true)
+                    ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                        $query->where('updated', true);
+                    })
                     ->where('supplier_id', $this->supplier->id);
             })
             ->chunk(1000, function ($items) {
@@ -61,13 +64,18 @@ class WbItemPriceService
 
     public function recountPriceWbItem(WbItem $wbItem): WbItem
     {
+        if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$wbItem->item->price) {
+            $price = $wbItem->item->buy_price_reserve;
+        } else {
+            $price = $wbItem->item->price;
+        }
+
         $coefficient = (float)$this->market->coefficient;
         $basicLogistics = (int)$this->market->basic_logistics;
         $priceOneLiter = (int)$this->market->price_one_liter;
         $volume = (int)$this->market->volume;
 
         $volumeColumn = $wbItem->volume;
-        $price = $wbItem->item->price;
         $multiplicity = $wbItem->item->multiplicity;
         $retailMarkupPercent = $wbItem->retail_markup_percent / 100 + 1;
         $package = $wbItem->package;
@@ -119,9 +127,15 @@ class WbItemPriceService
             $new_count = $wbItem->item->count < $this->market->min ? 0 : $wbItem->item->count;
             $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $wbItem->item->multiplicity === 1) ? 1 : $new_count;
             $new_count = ($new_count + $myWarehousesStocks) / $wbItem->item->multiplicity;
-            if (class_exists(Order::class)) {
+
+            if (ModuleService::moduleIsEnabled('Order', $this->user)) {
                 $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $wbItem->item->multiplicity);
             }
+
+            if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+                $new_count = $new_count - (($wbItem->item->moyskladOrders()->where('new', true)->exists() ? $wbItem->item->moyskladOrders()->where('new')->sum('orders') : 0) * $wbItem->item->multiplicity);
+            }
+
             $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
             $new_count = (int)max($new_count, 0);
 
@@ -239,7 +253,9 @@ class WbItemPriceService
         WbItem::query()
             ->whereHas('item', function (Builder $query) {
                 $query
-                    ->where('updated', true)
+                    ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                        $query->where('updated', true);
+                    })
                     ->where('supplier_id', $this->supplier->id);
             })
             ->whereNotNull('volume')
@@ -248,6 +264,7 @@ class WbItemPriceService
             ->whereNotNull('sales_percent')
             ->whereNotNull('min_price')
             ->whereNotNull('price')
+            ->where('price', '>', 0)
             ->whereNotNull('nm_id')
             ->chunk(1000, function (Collection $items) {
 

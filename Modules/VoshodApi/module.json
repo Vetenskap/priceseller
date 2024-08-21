@@ -1,0 +1,11 @@
+{
+    "name": "VoshodApi",
+    "alias": "voshodapi",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\VoshodApi\\Providers\\VoshodApiServiceProvider"
+    ],
+    "files": []
+}

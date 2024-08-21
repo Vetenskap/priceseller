@@ -123,4 +123,42 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'item_attribute_types' => [
+        [
+            'name' => 'textarea',
+            'label' => 'Текст'
+        ],
+        [
+            'name' => 'number',
+            'label' => 'Число'
+        ],
+        [
+            'name' => 'text',
+            'label' => 'Строка'
+        ],
+        [
+            'name' => 'boolean',
+            'label' => 'Булевое значение'
+        ],
+    ],
+
+    'attributes_types' => [
+        [
+            'name' => 'string',
+            'label' => 'Строка'
+        ],
+        [
+            'name' => 'double',
+            'label' => 'Число с плавающей точкой'
+        ],
+        [
+            'name' => 'integer',
+            'label' => 'Целое число'
+        ],
+        [
+            'name' => 'boolean',
+            'label' => 'Булевое значение'
+        ]
+    ],
+
 ];

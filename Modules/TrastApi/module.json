@@ -1,0 +1,11 @@
+{
+    "name": "TrastApi",
+    "alias": "trastapi",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\TrastApi\\Providers\\TrastApiServiceProvider"
+    ],
+    "files": []
+}

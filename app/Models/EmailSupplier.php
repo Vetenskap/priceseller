@@ -30,4 +30,9 @@ class EmailSupplier extends MainModel
         return $this->hasMany(EmailSupplierStockValue::class);
     }
 
+    public function mainEmail()
+    {
+        return $this->belongsTo(Email::class, 'email_id', 'id');
+    }
+
 }

@@ -2,41 +2,44 @@
 
 namespace Modules\Moysklad\Livewire\MoyskladSupplier;
 
-use Illuminate\Support\Collection;
+use App\Livewire\Traits\WithJsNotifications;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
+use Livewire\Attributes\On;
 use Livewire\Component;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Services\MoyskladService;
+use MoyskladSupplier\MoyskladSupplierPostForm;
 
 class MoyskladSupplierIndex extends Component
 {
+    use WithJsNotifications;
+
+    public MoyskladSupplierPostForm $form;
     public Moysklad $moysklad;
 
-    public Collection $moyskladSuppliers;
-
-    public $supplierId;
-
-    public function save()
+    #[On('delete-supplier')]
+    public function mount(): void
     {
-        $this->dispatch('save.moysklad.suppliers');
+        $this->form->setMoysklad($this->moysklad);
     }
 
-    public function mount()
+    public function store(): void
     {
-        $service = new MoyskladService($this->moysklad);
-        $this->moyskladSuppliers = $service->getAllSuppliers();
+        $this->form->store();
     }
 
-    public function add()
+    public function update(): void
     {
-        $this->moysklad->suppliers()->updateOrCreate([
-            'supplier_id' => $this->supplierId
-        ], [
-            'supplier_id' => $this->supplierId
+        $this->dispatch('update-supplier')->component(MoyskladSupplierEdit::class);
+        $this->addSuccessSaveNotification();
+    }
+
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
+    {
+        return view('moysklad::livewire.moysklad-supplier.moysklad-supplier-index', [
+            'moyskladSuppliers' => (new MoyskladService($this->moysklad))->getAllSuppliers()
         ]);
-    }
-
-    public function render()
-    {
-        return view('moysklad::livewire.moysklad-supplier.moysklad-supplier-index');
     }
 }

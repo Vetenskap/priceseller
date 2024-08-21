@@ -2,35 +2,47 @@
 
 namespace Modules\Moysklad\Livewire\MoyskladSupplier;
 
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Models\MoyskladSupplierSupplier;
+use Modules\Moysklad\Services\MoyskladService;
+use MoyskladSupplier\MoyskladSupplierPostForm;
 
 class MoyskladSupplierEdit extends Component
 {
-    public MoyskladSupplierSupplier $supplier;
+    public MoyskladSupplierPostForm $form;
+    public MoyskladSupplierSupplier $moyskladSupplier;
 
-    public Collection $moyskladSuppliers;
+    public Moysklad $moysklad;
 
-    public $moyskladSupplierId;
-
-    public function mount()
+    public function mount(): void
     {
-        $this->moyskladSupplierId = $this->supplier->moysklad_supplier_uuid;
+        $this->form->setMoysklad($this->moysklad);
+        $this->form->setMoyskladSupplier($this->moyskladSupplier);
     }
 
-    #[On('save.moysklad.suppliers')]
-    public function save()
+    #[On('update-supplier')]
+    public function update(): void
     {
-        $name = collect($this->moyskladSuppliers->where('id', $this->moyskladSupplierId)->first())->get('name');
-        $this->supplier->moysklad_supplier_name = $name;
-        $this->supplier->moysklad_supplier_uuid = $this->moyskladSupplierId;
-        $this->supplier->save();
+        $this->form->update();
     }
 
-    public function render()
+    public function destroy(): void
     {
-        return view('moysklad::livewire.moysklad-supplier.moysklad-supplier-edit');
+        $this->form->destroy();
+        $this->dispatch('delete-supplier')->component(MoyskladSupplierIndex::class);
+    }
+
+
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
+    {
+        return view('moysklad::livewire.moysklad-supplier.moysklad-supplier-edit', [
+            'moyskladSuppliers' => (new MoyskladService($this->moysklad))->getAllSuppliers()
+        ]);
     }
 }

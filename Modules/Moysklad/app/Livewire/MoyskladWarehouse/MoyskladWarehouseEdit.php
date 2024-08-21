@@ -3,41 +3,56 @@
 namespace Modules\Moysklad\Livewire\MoyskladWarehouse;
 
 use App\Livewire\Components\Toast;
-use Illuminate\Support\Collection;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Models\MoyskladWarehouseWarehouse;
 use Modules\Moysklad\Services\MoyskladService;
+use Modules\Moysklad\Services\MoyskladWarehouseWarehouseService;
+use MoyskladWarehouse\MoyskladWarehousePostForm;
 
 class MoyskladWarehouseEdit extends Component
 {
+
+    public MoyskladWarehousePostForm $form;
+
     public MoyskladWarehouseWarehouse $warehouse;
 
-    public Collection $moyskladWarehouses;
+    public Moysklad $moysklad;
 
-    public $moyskladWarehouseId;
-
-    public function mount()
+    public function mount(): void
     {
-        $this->moyskladWarehouseId = $this->warehouse->moysklad_warehouse_uuid;
+        $this->form->setMoyskladWarehouse($this->warehouse);
+        $this->moysklad = $this->warehouse->moysklad;
     }
 
-    #[On('save.moysklad.warehouses')]
-    public function save()
+    #[On('update-warehouse')]
+    public function update(): void
     {
-        $this->warehouse->moysklad_warehouse_uuid = $this->moyskladWarehouseId;
-        $this->warehouse->save();
+        $this->form->update();
     }
 
-    public function updateStocks()
+    public function destroy(): void
     {
-        $service = new MoyskladService($this->warehouse->moysklad);
-        $total = $service->getAllStocks($this->warehouse);
-        $this->js((new Toast('Остатки загружены', 'Всего: ' . $total))->success());
+        $this->form->destroy();
+        $this->dispatch('delete-warehouse')->component(MoyskladWarehouseIndex::class);
     }
 
-    public function render()
+    public function updateStocks(): void
     {
-        return view('moysklad::livewire.moysklad-warehouse.moysklad-warehouse-edit');
+        $service = new MoyskladWarehouseWarehouseService($this->warehouse, $this->moysklad);
+        $count = $service->updateAllStocks();
+
+        $this->js((new Toast('Успех', 'Количество обновленных остатков: ' . $count))->success());
+    }
+
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
+    {
+        return view('moysklad::livewire.moysklad-warehouse.moysklad-warehouse-edit', [
+            'moyskladWarehouses' => (new MoyskladService($this->moysklad))->getAllWarehouses()
+        ]);
     }
 }

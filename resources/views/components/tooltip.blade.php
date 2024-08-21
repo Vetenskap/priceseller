@@ -1,5 +1,5 @@
 @props(['text'])
-<div>
+<div class="absolute">
     <span class="tooltip-toggle"
           aria-label="{{$text}}" tabIndex="0">
                                 <i class="fa-solid fa-circle-question"></i>

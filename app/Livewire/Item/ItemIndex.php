@@ -10,13 +10,14 @@ use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\User;
 use App\Services\Item\ItemService;
-use App\Services\ItemsExportReportService;
-use App\Services\ItemsImportReportService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
-use Livewire\Attributes\Url;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ItemIndex extends BaseComponent
 {
@@ -24,39 +25,30 @@ class ItemIndex extends BaseComponent
 
     /** @var TemporaryUploadedFile $file */
     public $file;
+
     public User $user;
 
-    #[Url]
-    public $tab = null;
+    public $page;
 
-    public function mount()
+    public function mount($page = 'list'): void
     {
         $this->user = auth()->user();
+        $this->page = $page;
     }
 
-    public function downloadTemplate()
+    public function downloadTemplate(): BinaryFileResponse
     {
         return \Excel::download(new ItemsExport($this->user->id, true), "priceseller_шаблон.xlsx");
     }
 
-    public function export()
+    public function export(): void
     {
-        if (ItemsExportReportService::get($this->user)) {
-            $this->addJobAlready();
-            return;
-        }
-
         Export::dispatch(auth()->user(), ItemService::class);
         $this->addJobNotification();
     }
 
-    public function import()
+    public function import(): void
     {
-        if (ItemsImportReportService::get($this->user)) {
-            $this->addJobAlready();
-            return;
-        }
-
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
         $path = $this->file->storeAs(ItemService::PATH, $uuid . '.' . $ext);
@@ -70,18 +62,26 @@ class ItemIndex extends BaseComponent
         $this->addJobNotification();
     }
 
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $items = auth()
-            ->user()
-            ->items()
-            ->orderByDesc('updated_at')
-            ->with('supplier')
-            ->filters()
-            ->paginate(10);
+        if ($this->page === 'list') {
 
-        return view('livewire.item.item-index', [
-            'items' => $this->tab === 'list' ? $items : []
-        ]);
+            $items = auth()
+                ->user()
+                ->items()
+                ->orderByDesc('updated_at')
+                ->with('supplier')
+                ->filters()
+                ->paginate(10);
+
+            return view('livewire.item.pages.item-list-page', [
+                'items' => $items
+            ]);
+
+        } else if ($this->page === 'manage') {
+            return view('livewire.item.pages.items-manage-page');
+        }
+
+        return view('livewire.item.item-index');
     }
 }

@@ -13,6 +13,7 @@ use App\Services\Item\ItemPriceWithCacheService;
 use App\Services\Item\ItemPriceServiceInterface;
 use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Client\Events\ResponseReceived;
@@ -44,6 +45,25 @@ class AppServiceProvider extends ServiceProvider
             return $this->each(function ($item) use ($arguments, $job) {
                 dispatch(new $job($item, ...$arguments));
             });
+        });
+
+        Collection::macro('toCollectionSpread', function () {
+            return $this->map(function ($item) {
+                if (!is_array($item)) return $item;
+                return collect($item)->toCollectionSpread();
+            });
+        });
+
+        Collection::macro('getFromDotWithValue', function (string $dot, $value) {
+            $parts = collect(explode('.', $dot));
+            $firstPart = $parts->first();
+            $parts->shift();
+
+            if ($this->has($firstPart)) {
+                return collect($this->get($firstPart))->getFromDotWithValue($parts->implode('.'), $value);
+            } else {
+                return collect($this->firstWhere($firstPart, $value));
+            }
         });
 
         Event::listen(ResponseReceived::class, ResponseReceivedLogging::class);

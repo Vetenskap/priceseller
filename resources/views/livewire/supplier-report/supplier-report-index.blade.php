@@ -18,7 +18,7 @@
             @foreach($reports->sortByDesc('updated_at') as $report)
                 <x-table.table-item :status="$report->status">
                     <x-table.table-child>
-                        <a href="{{route('supplier-report-edit', ['supplier' => $supplier->id, 'report' => $report->id])}}">
+                        <a href="{{route('supplier.report.edit', ['supplier' => $supplier->id, 'report' => $report->id])}}">
                             <x-layouts.simple-text :name="$report->message"/>
                         </a>
                     </x-table.table-child>

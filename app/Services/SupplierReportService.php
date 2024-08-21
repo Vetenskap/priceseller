@@ -18,7 +18,7 @@ class SupplierReportService
         return $supplier->reports()->where('status', 2)->first();
     }
 
-    public static function new(Supplier $supplier, string $path): bool
+    public static function new(Supplier $supplier, string $path = null): bool
     {
         if (static::get($supplier)) {
             return false;
@@ -100,7 +100,7 @@ class SupplierReportService
         return false;
     }
 
-    public static function timeout()
+    public static function timeout(): void
     {
         SupplierReport::where('updated_at', '<', now()->subHours(4))
             ->where('status', 2)

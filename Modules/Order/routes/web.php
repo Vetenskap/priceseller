@@ -15,5 +15,5 @@ use Modules\Order\Http\Controllers\OrderController;
 */
 
 Route::prefix('modules')->group( function () {
-    Route::get('/orders', \Modules\Order\Livewire\Order\OrderIndex::class)->name('orders.index');
+    Route::get('/orders/{page?}', \Modules\Order\Livewire\Order\OrderIndex::class)->name('orders.index');
 });

@@ -6,6 +6,8 @@ use App\Imports\OzonItemsImport;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
+use App\Models\User;
+use App\Services\ModuleService;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
@@ -17,10 +19,12 @@ use PhpOffice\PhpSpreadsheet\Style\Fill;
 class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
 {
     public Collection $warehouses;
+    public User $user;
 
     public function __construct(public OzonMarket $market, public bool $template = false)
     {
         $this->warehouses = $this->market->warehouses;
+        $this->user = $this->market->user;
     }
 
 
@@ -64,7 +68,7 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
                         ->collapse()
                         ->all());
 
-                    if (class_exists(Order::class)) {
+                    if (ModuleService::moduleIsEnabled('Order', $this->user)) {
                         $main['count_orders'] = $item->orders()->sum('count');
                     }
 
@@ -81,7 +85,7 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
     {
         $main = array_merge(OzonItemsImport::HEADERS, $this->warehouses->map(fn(OzonWarehouse $warehouse) => 'Склад ' . $warehouse->name)->all());
 
-        if (class_exists(Order::class)) {
+        if (ModuleService::moduleIsEnabled('Order', $this->user)) {
             $main[] = 'Всего заказов';
         }
 

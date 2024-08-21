@@ -14,5 +14,5 @@ use Illuminate\Support\Facades\Route;
 */
 
 Route::prefix('modules')->group(function () {
-    Route::get('moysklad/webhooks/{webhook}', [\Modules\Moysklad\Http\Controllers\MoyskladApiController::class, 'index'])->name('moysklad.webhook.index');
+    Route::post('moysklad/webhooks/{webhook}', [\Modules\Moysklad\Http\Controllers\MoyskladApiController::class, 'index'])->name('moysklad.webhook.index');
 });

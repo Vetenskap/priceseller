@@ -2,6 +2,7 @@
 
 namespace Modules\Moysklad\Models;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Moysklad\Database\Factories\MoyskladFactory;
@@ -26,6 +27,36 @@ class Moysklad extends Model
     public function suppliers()
     {
         return $this->hasMany(MoyskladSupplierSupplier::class);
+    }
+
+    public function webhooks()
+    {
+        return $this->hasMany(MoyskladWebhook::class);
+    }
+
+    public function itemMainAttributeLinks()
+    {
+        return $this->hasMany(MoyskladItemMainAttributeLink::class);
+    }
+
+    public function itemAdditionalAttributeLinks()
+    {
+        return $this->hasMany(MoyskladItemAdditionalAttributeLink::class);
+    }
+
+    public function itemsOrders()
+    {
+        return $this->hasMany(MoyskladItemOrder::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
+    }
+
+    public function orders()
+    {
+        return $this->hasMany(MoyskladItemOrder::class);
     }
 
 }
