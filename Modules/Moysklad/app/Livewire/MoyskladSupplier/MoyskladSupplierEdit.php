@@ -8,10 +8,10 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\Moysklad\Livewire\Forms\MoyskladSupplier\MoyskladSupplierPostForm;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Models\MoyskladSupplierSupplier;
 use Modules\Moysklad\Services\MoyskladService;
-use MoyskladSupplier\MoyskladSupplierPostForm;
 
 class MoyskladSupplierEdit extends Component
 {

@@ -1,5 +1,7 @@
 <?php
 
+namespace Modules\BergApi\Livewire\Forms\BergApi;
+
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 use Livewire\Attributes\Validate;

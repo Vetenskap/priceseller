@@ -8,8 +8,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\WithFileUploads;
+use Modules\Moysklad\Livewire\Forms\Moysklad\MoyskladPostForm;
 use Modules\Moysklad\Models\Moysklad;
-use MoyskladPostForm;
 
 class MoyskladIndex extends ModuleComponent
 {

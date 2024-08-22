@@ -1,6 +1,6 @@
 <?php
 
-namespace BergApiWarehouse;
+namespace Modules\BergApi\Livewire\Forms\BergApiWarehouse;
 
 use Livewire\Form;
 use Modules\BergApi\Models\BergApiWarehouse;

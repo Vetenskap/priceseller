@@ -1,5 +1,7 @@
 <?php
 
+namespace Modules\SamsonApi\Livewire\Forms\SamsonApi;
+
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 use Livewire\Attributes\Validate;

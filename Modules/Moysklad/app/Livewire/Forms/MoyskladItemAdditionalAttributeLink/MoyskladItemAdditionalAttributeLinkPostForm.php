@@ -1,6 +1,6 @@
 <?php
 
-namespace MoyskladItemAdditionalAttributeLink;
+namespace Modules\Moysklad\Livewire\Forms\MoyskladItemAdditionalAttributeLink;
 
 use App\Rules\Type;
 use Illuminate\Support\Collection;

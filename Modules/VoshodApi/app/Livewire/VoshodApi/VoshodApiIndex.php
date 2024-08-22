@@ -7,13 +7,14 @@ use App\Livewire\Traits\WithJsNotifications;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Modules\VoshodApi\Livewire\Forms\VoshodApi\VoshodApiPostForm;
 use Modules\VoshodApi\Models\VoshodApi;
 
 class VoshodApiIndex extends ModuleComponent
 {
     use WithJsNotifications;
 
-    public \VoshodApiPostForm $form;
+    public VoshodApiPostForm $form;
 
     public $page;
 

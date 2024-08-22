@@ -1,6 +1,6 @@
 <?php
 
-namespace MoyskladSupplier;
+namespace Modules\Moysklad\Livewire\Forms\MoyskladSupplier;
 
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;

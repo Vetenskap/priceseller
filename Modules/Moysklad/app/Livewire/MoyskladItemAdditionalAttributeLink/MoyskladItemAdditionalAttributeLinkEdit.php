@@ -7,10 +7,10 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\Moysklad\Livewire\Forms\MoyskladItemAdditionalAttributeLink\MoyskladItemAdditionalAttributeLinkPostForm;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Models\MoyskladItemAdditionalAttributeLink;
 use Modules\Moysklad\Services\MoyskladService;
-use MoyskladItemAdditionalAttributeLink\MoyskladItemAdditionalAttributeLinkPostForm;
 
 class MoyskladItemAdditionalAttributeLinkEdit extends Component
 {

@@ -3,15 +3,12 @@
 namespace Modules\Moysklad\Livewire\MoyskladWarehouse;
 
 use App\Livewire\Traits\WithJsNotifications;
-use Illuminate\Support\Collection;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\Moysklad\Livewire\Forms\MoyskladWarehouse\MoyskladWarehousePostForm;
 use Modules\Moysklad\Models\Moysklad;
-use Modules\Moysklad\Models\MoyskladWarehouseWarehouse;
 use Modules\Moysklad\Services\MoyskladService;
 use Modules\Moysklad\Services\MoyskladWebhookService;
-use MoyskladWarehouse\MoyskladWarehousePostForm;
-
 class MoyskladWarehouseIndex extends Component
 {
     use WithJsNotifications;

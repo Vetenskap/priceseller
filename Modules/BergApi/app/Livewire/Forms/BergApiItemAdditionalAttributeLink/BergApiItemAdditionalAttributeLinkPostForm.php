@@ -1,6 +1,6 @@
 <?php
 
-namespace BergApiItemAdditionalAttributeLink;
+namespace Modules\BergApi\Livewire\Forms\BergApiItemAdditionalAttributeLink;
 
 use Livewire\Attributes\Validate;
 use Livewire\Form;

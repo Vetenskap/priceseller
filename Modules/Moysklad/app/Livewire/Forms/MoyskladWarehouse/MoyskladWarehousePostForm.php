@@ -1,6 +1,6 @@
 <?php
 
-namespace MoyskladWarehouse;
+namespace Modules\Moysklad\Livewire\Forms\MoyskladWarehouse;
 
 use Livewire\Form;
 use Modules\Moysklad\Models\Moysklad;

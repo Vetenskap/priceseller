@@ -1,6 +1,6 @@
 <?php
 
-namespace MoyskladItemMainAttributeLink;
+namespace Modules\Moysklad\Livewire\Forms\MoyskladItemMainAttributeLink;
 
 use App\Rules\ItemMainAttribute;
 use App\Rules\Type;

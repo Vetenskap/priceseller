@@ -7,13 +7,14 @@ use App\Livewire\Traits\WithJsNotifications;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Modules\BergApi\Livewire\Forms\BergApi\BergApiPostForm;
 use Modules\BergApi\Models\BergApi;
 
 class BergApiIndex extends ModuleComponent
 {
     use WithJsNotifications;
 
-    public \BergApiPostForm $form;
+    public BergApiPostForm $form;
 
     public $page;
 

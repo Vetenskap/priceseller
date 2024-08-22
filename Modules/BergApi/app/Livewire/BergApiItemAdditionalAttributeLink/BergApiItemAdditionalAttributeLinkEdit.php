@@ -2,12 +2,12 @@
 
 namespace Modules\BergApi\Livewire\BergApiItemAdditionalAttributeLink;
 
-use BergApiItemAdditionalAttributeLink\BergApiItemAdditionalAttributeLinkPostForm;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\BergApi\Livewire\Forms\BergApiItemAdditionalAttributeLink\BergApiItemAdditionalAttributeLinkPostForm;
 use Modules\BergApi\Models\BergApiItemAdditionalAttributeLink;
 
 class BergApiItemAdditionalAttributeLinkEdit extends Component

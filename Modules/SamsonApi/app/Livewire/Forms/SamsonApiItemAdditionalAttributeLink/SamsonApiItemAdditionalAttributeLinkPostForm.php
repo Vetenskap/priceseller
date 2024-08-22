@@ -1,6 +1,6 @@
 <?php
 
-namespace SamsonApiItemAdditionalAttributeLink;
+namespace Modules\SamsonApi\Livewire\Forms\SamsonApiItemAdditionalAttributeLink;
 
 use Livewire\Attributes\Validate;
 use Livewire\Form;

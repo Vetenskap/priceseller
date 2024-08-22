@@ -7,8 +7,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\VoshodApi\Livewire\Forms\VoshodApiItemAdditionalAttributeLink\VoshodApiItemAdditionalAttributeLinkPostForm;
 use Modules\VoshodApi\Models\VoshodApiItemAdditionalAttributeLink;
-use VoshodApiItemAdditionalAttributeLink\VoshodApiItemAdditionalAttributeLinkPostForm;
 
 class VoshodApiItemAdditionalAttributeLinkEdit extends Component
 {

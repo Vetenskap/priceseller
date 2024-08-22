@@ -7,8 +7,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\SamsonApi\Livewire\Forms\SamsonApiItemAdditionalAttributeLink\SamsonApiItemAdditionalAttributeLinkPostForm;
 use Modules\SamsonApi\Models\SamsonApi;
-use SamsonApiItemAdditionalAttributeLink\SamsonApiItemAdditionalAttributeLinkPostForm;
 
 class SamsonApiItemAdditionalAttributeLinkIndex extends Component
 {

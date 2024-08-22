@@ -7,13 +7,14 @@ use App\Livewire\Traits\WithJsNotifications;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Modules\SamsonApi\Livewire\Forms\SamsonApi\SamsonApiPostForm;
 use Modules\SamsonApi\Models\SamsonApi;
 
 class SamsonApiIndex extends ModuleComponent
 {
     use WithJsNotifications;
 
-    public \SamsonApiPostForm $form;
+    public SamsonApiPostForm $form;
 
     public $page;
 

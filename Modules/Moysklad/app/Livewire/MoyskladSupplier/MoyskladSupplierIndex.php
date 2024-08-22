@@ -8,9 +8,9 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Modules\Moysklad\Livewire\Forms\MoyskladSupplier\MoyskladSupplierPostForm;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Services\MoyskladService;
-use MoyskladSupplier\MoyskladSupplierPostForm;
 
 class MoyskladSupplierIndex extends Component
 {

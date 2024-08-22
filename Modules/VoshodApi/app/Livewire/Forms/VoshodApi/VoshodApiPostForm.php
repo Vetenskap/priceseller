@@ -1,5 +1,7 @@
 <?php
 
+namespace Modules\VoshodApi\Livewire\Forms\VoshodApi;
+
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
 use Livewire\Attributes\Validate;

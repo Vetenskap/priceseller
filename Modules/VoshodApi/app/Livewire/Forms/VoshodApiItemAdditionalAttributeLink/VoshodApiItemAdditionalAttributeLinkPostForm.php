@@ -1,6 +1,6 @@
 <?php
 
-namespace VoshodApiItemAdditionalAttributeLink;
+namespace Modules\VoshodApi\Livewire\Forms\VoshodApiItemAdditionalAttributeLink;
 
 use Livewire\Attributes\Validate;
 use Livewire\Form;
