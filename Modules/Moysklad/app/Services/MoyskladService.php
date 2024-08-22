@@ -101,6 +101,9 @@ class MoyskladService
 
     public function importApiItems(): void
     {
+        logger('code attribute');
+        logger($this->moysklad->itemMainAttributeLinks->where('attribute_name', 'code')->first());
+
         $offset = Cache::tags(['moysklad', 'product', 'offset'])->get($this->moysklad->id, 0);
 
         $entityList = new EntityList(Product::class, $this->moysklad->api_key, offset: $offset);
@@ -115,8 +118,15 @@ class MoyskladService
 
             $products->each(function (Product $product) use (&$dirtyItems) {
 
+                $code = $this->getValueFromAttributesAndProduct($this->moysklad->itemMainAttributeLinks->where('attribute_name', 'code')->first(), $product);
+
+                logger('code');
+                logger($code);
+
                 if ($item = $this->moysklad->user->items()->where('ms_uuid', $product->id)
-                    ->orWhere('code', $this->getValueFromAttributesAndProduct($this->moysklad->itemMainAttributeLinks->where('attribute_name', 'code')->first(), $product))->first()) {
+                    ->orWhere('code', $code)
+                    ->first()
+                ) {
                     $this->updateItemFromProduct($product, $item);
                 } else {
                     $dirtyItem = $this->createItemFromProduct($product);
