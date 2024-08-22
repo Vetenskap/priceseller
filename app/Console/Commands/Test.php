@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Helpers\Helpers;
 use App\Models\User;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Str;
 use Modules\Moysklad\HttpClient\Resources\Entities\CustomerOrder\CustomerOrder;
@@ -37,6 +38,6 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(route('api.moysklad.webhook.index', ['webhook' => 1]));
+        dd(Cache::tags(['moysklad', 'product', 'offset'])->get(1));
     }
 }

@@ -33,6 +33,13 @@
             <x-inputs.switcher :checked="$supplier->use_brand" wire:model="form.use_brand"/>
             <x-layouts.simple-text name="Использовать бренд"/>
         </x-blocks.flex-block>
+        <x-blocks.flex-block class="p-0 px-6 pt-6">
+            <x-inputs.switcher :checked="$supplier->unload_without_price" wire:model="form.unload_without_price"/>
+            <x-layouts.simple-text name="Выгружать без прайса"/>
+        </x-blocks.flex-block>
+        <div class="px-6 pb-6">
+            <x-information>При установке этого параметра поставщик больше не будет выгружаться с почты, будут использоваться резервная цена и остатки с ваших складов для выгрузки в кабинеты каждый час</x-information>
+        </div>
         <livewire:supplier-report.supplier-report-index :supplier="$supplier"/>
     </x-layouts.main-container>
     <div wire:loading wire:target="destroy">

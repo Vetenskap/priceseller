@@ -2,11 +2,9 @@
 
 namespace Modules\VoshodApi\Jobs;
 
-use App\Services\OzonItemPriceService;
+use App\Jobs\Supplier\MarketsUnload;
 use App\Services\SupplierReportService;
-use App\Services\WbItemPriceService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -18,6 +16,7 @@ class VoshodUserProcess implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 2;
     /**
      * Create a new job instance.
      */
@@ -43,43 +42,7 @@ class VoshodUserProcess implements ShouldQueue
         $user = $this->voshodApi->user;
         $supplier = $this->voshodApi->supplier;
 
-        $ozonMarkets = $user->ozonMarkets()
-            ->whereHas('items', function (Builder $query) use ($supplier) {
-                $query->whereHas('item', function (Builder $query) use ($supplier) {
-                    $query->where('supplier_id', $supplier->id);
-                });
-            })
-            ->where('open', true)
-            ->where('close', false)
-            ->get();
-
-        $wbMarkets = $user->wbMarkets()
-            ->whereHas('items', function (Builder $query) use ($supplier) {
-                $query->whereHas('item', function (Builder $query) use ($supplier) {
-                    $query->where('supplier_id', $supplier->id);
-                });
-            })
-            ->where('open', true)
-            ->where('close', false)
-            ->get();
-
-        foreach ($ozonMarkets as $market) {
-            $service = new OzonItemPriceService($supplier, $market);
-            $service->updateStock();
-            $service->updatePrice();
-            $service->unloadAllStocks();
-            $service->unloadAllPrices();
-        }
-
-        foreach ($wbMarkets as $market) {
-            $service = new WbItemPriceService($supplier, $market);
-            $service->updateStock();
-            $service->updatePrice();
-            $service->unloadAllStocks();
-            $service->unloadAllPrices();
-        }
-
-        SupplierReportService::success($this->voshodApi->supplier);
+        MarketsUnload::dispatch($user, $supplier);
     }
 
     public function failed(\Throwable $th)

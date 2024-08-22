@@ -2,6 +2,7 @@
 
 namespace Modules\SamsonApi\Jobs;
 
+use App\Jobs\Supplier\MarketsUnload;
 use App\Services\OzonItemPriceService;
 use App\Services\SupplierReportService;
 use App\Services\WbItemPriceService;
@@ -18,6 +19,7 @@ class SamsonUserProcess implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $tries = 2;
     /**
      * Create a new job instance.
      */
@@ -43,43 +45,7 @@ class SamsonUserProcess implements ShouldQueue
         $user = $this->samsonApi->user;
         $supplier = $this->samsonApi->supplier;
 
-        $ozonMarkets = $user->ozonMarkets()
-            ->whereHas('items', function (Builder $query) use ($supplier) {
-                $query->whereHas('item', function (Builder $query) use ($supplier) {
-                    $query->where('supplier_id', $supplier->id);
-                });
-            })
-            ->where('open', true)
-            ->where('close', false)
-            ->get();
-
-        $wbMarkets = $user->wbMarkets()
-            ->whereHas('items', function (Builder $query) use ($supplier) {
-                $query->whereHas('item', function (Builder $query) use ($supplier) {
-                    $query->where('supplier_id', $supplier->id);
-                });
-            })
-            ->where('open', true)
-            ->where('close', false)
-            ->get();
-
-        foreach ($ozonMarkets as $market) {
-            $service = new OzonItemPriceService($supplier, $market);
-            $service->updateStock();
-            $service->updatePrice();
-            $service->unloadAllStocks();
-            $service->unloadAllPrices();
-        }
-
-        foreach ($wbMarkets as $market) {
-            $service = new WbItemPriceService($supplier, $market);
-            $service->updateStock();
-            $service->updatePrice();
-            $service->unloadAllStocks();
-            $service->unloadAllPrices();
-        }
-
-        SupplierReportService::success($this->samsonApi->supplier);
+        MarketsUnload::dispatch($user, $supplier);
     }
 
     public function failed(\Throwable $th)

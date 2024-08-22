@@ -20,12 +20,15 @@ class SupplierPostForm extends Form
 
     public $use_brand = false;
 
+    public $unload_without_price = false;
+
     public function setSupplier(Supplier $supplier): void
     {
         $this->supplier = $supplier;
         $this->name = $supplier->name;
         $this->open = $supplier->open;
         $this->use_brand = $supplier->use_brand;
+        $this->unload_without_price = $supplier->unload_without_price;
     }
 
     public function rules(): array
@@ -41,6 +44,7 @@ class SupplierPostForm extends Form
             ],
             'open' => ['nullable', 'boolean'],
             'use_brand' => ['nullable', 'boolean'],
+            'unload_without_price' => ['nullable', 'boolean'],
         ];
     }
 

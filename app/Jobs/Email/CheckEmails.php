@@ -44,7 +44,7 @@ class CheckEmails implements ShouldQueue
         foreach ($user->emails()->where('open', true)->get() as $email) {
 
             $handler = new EmailHandlerLaravelImap($email->address, $email->password);
-            foreach ($email->suppliers()->where('open', true)->get() as $supplier) {
+            foreach ($email->suppliers()->where('open', true)->where('unload_without_price', false)->get() as $supplier) {
 
                 if (!SupplierReportService::get($supplier)) {
 

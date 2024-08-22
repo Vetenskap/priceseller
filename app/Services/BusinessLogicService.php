@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Jobs\Email\CheckEmails;
+use App\Jobs\Supplier\MarketsUnload;
+use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -23,5 +25,17 @@ class BusinessLogicService
                 }
             });
         });
+
+        $time = now()->format('i');
+
+        if ($time === 0) {
+            Supplier::where('open', true)
+                ->where('unload_without_price', true)
+                ->chunk(5, function (Collection $suppliers) {
+                    $suppliers->each(function (Supplier $supplier) {
+                        MarketsUnload::dispatch($supplier->user, $supplier);
+                    });
+                });
+        }
     }
 }

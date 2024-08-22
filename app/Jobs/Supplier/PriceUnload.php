@@ -51,43 +51,7 @@ class PriceUnload implements ShouldQueue
         $supplier = $emailSupplier->supplier;
         $user = User::findOrFail($supplier->user_id);
 
-        $ozonMarkets = $user->ozonMarkets()
-            ->whereHas('items', function (Builder $query) use ($supplier) {
-                $query->whereHas('item', function (Builder $query) use ($supplier) {
-                    $query->where('supplier_id', $supplier->id);
-                });
-            })
-            ->where('open', true)
-            ->where('close', false)
-            ->get();
-
-        $wbMarkets = $user->wbMarkets()
-            ->whereHas('items', function (Builder $query) use ($supplier) {
-                $query->whereHas('item', function (Builder $query) use ($supplier) {
-                    $query->where('supplier_id', $supplier->id);
-                });
-            })
-            ->where('open', true)
-            ->where('close', false)
-            ->get();
-
-        foreach ($ozonMarkets as $market) {
-            $service = new OzonItemPriceService($supplier, $market);
-            $service->updateStock();
-            $service->updatePrice();
-            $service->unloadAllStocks();
-            $service->unloadAllPrices();
-        }
-
-        foreach ($wbMarkets as $market) {
-            $service = new WbItemPriceService($supplier, $market);
-            $service->updateStock();
-            $service->updatePrice();
-            $service->unloadAllStocks();
-            $service->unloadAllPrices();
-        }
-
-        SupplierReportService::success($emailSupplier->supplier);
+        MarketsUnload::dispatch($user, $supplier);
 
     }
 

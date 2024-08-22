@@ -18,6 +18,7 @@ class Supplier extends MainModel
         'open',
         'use_brand',
         'user_id',
+        'unload_without_price'
     ];
 
     public function emails()
@@ -47,5 +48,10 @@ class Supplier extends MainModel
     public function priceItems()
     {
         return $this->hasMany(EmailPriceItem::class);
+    }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class);
     }
 }
