@@ -99,8 +99,8 @@ class ItemService
             'unload_ozon' => ['nullable', 'boolean'],
             'buy_price_reserve' => ['nullable', 'numeric'],
             'attributes' => ['nullable', 'array'],
-            'attributes.*.attribute_id' => ['required', 'exists:item_attributes,id'],
-            'attributes.*.value' => ['required'],
+            'attributes.*.attribute_id' => ['nullable', 'exists:item_attributes,id'],
+            'attributes.*.value' => ['nullable'],
         ];
     }
 
