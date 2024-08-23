@@ -172,8 +172,8 @@ class MoyskladService
                 }
             }
         } else {
-            logger('Не найден поставщик - ' . $product->getSupplier()->getName());
-            logger($product->getSupplier()->id);
+            logger('Не найден поставщик - ' . $product->getSupplier()?->id);
+            logger('Product - ' . $product->getCode());
         }
 
         return $data;
