@@ -8,16 +8,18 @@ use App\Services\OzonItemPriceService;
 use App\Services\SupplierReportService;
 use App\Services\WbItemPriceService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class MarketsUnload implements ShouldQueue
+class MarketsUnload implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $uniqueFor = 600;
     /**
      * Create a new job instance.
      */
@@ -70,8 +72,13 @@ class MarketsUnload implements ShouldQueue
         SupplierReportService::success($this->supplier);
     }
 
-    public function failed(\Throwable $th)
+    public function failed(\Throwable $th): void
     {
         SupplierReportService::error($this->supplier);
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->supplier->id . 'markets_unload';
     }
 }

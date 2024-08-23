@@ -16,9 +16,51 @@ use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use LaravelIdea\Helper\App\Models\_IH_ItemsExportReport_QB;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ItemsExportReportService
 {
+    const MODEL_TO_PATH = [
+        'App\Models\User' => [
+            'path' => ItemService::PATH,
+            'filename' => ItemService::FILENAME,
+        ],
+        'App\Models\OzonMarket' => OzonMarketService::PATH,
+        'App\Models\WbMarket' => WbMarketService::PATH,
+    ];
+
+    public static function getPath(OzonMarket|WbMarket|User|Warehouse $model): string
+    {
+        return is_array(static::MODEL_TO_PATH[get_class($model)])
+            ? static::MODEL_TO_PATH[get_class($model)]['path']
+            : static::MODEL_TO_PATH[get_class($model)];
+    }
+
+    public static function getFilename(OzonMarket|WbMarket|User|Warehouse $model)
+    {
+        return is_array(static::MODEL_TO_PATH[get_class($model)])
+            ? static::MODEL_TO_PATH[get_class($model)]['filename']
+            : $model->name;
+    }
+
+    public static function download(ItemsExportReport $report, OzonMarket|WbMarket|User|Warehouse $model): BinaryFileResponse
+    {
+        if ($report->status === 2) abort(403);
+
+        return response()->download(
+            file: Storage::disk('public')->path(static::getPath($model) . "{$report->uuid}.xlsx"),
+            name: static::getFilename($model) . "_{$report->updated_at}.xlsx"
+        );
+    }
+
+    public static function destroy(ItemsExportReport $report, OzonMarket|WbMarket|User|Warehouse $model): void
+    {
+        if ($report->status === 2) abort(403);
+
+        $status = Storage::disk('public')->delete(static::getPath($model) . "{$report->uuid}.xlsx");
+        if ($status) $report->delete();
+    }
+
     public static function get(OzonMarket|WbMarket|User|Warehouse $model): Model|MorphMany|MorphToMany|_IH_ItemsExportReport_QB|null
     {
         return $model->itemsExportReports()->where('status', 2)->first();

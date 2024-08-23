@@ -21,7 +21,7 @@ class EmailSupplierService
         $this->stockValues = $this->supplier->stockValues->pluck('value', 'name');
     }
 
-    public function unload()
+    public function unload(): void
     {
         $this->nullUpdated();
 
@@ -127,15 +127,11 @@ class EmailSupplierService
     public function prepareStock(string $stock): int
     {
         $stock = $this->stockValues->get($stock, $stock);
-        $stock = (int) preg_replace("/[^0-9]/", "", $stock);
-
-        return $stock;
+        return (int) preg_replace("/[^0-9]/", "", $stock);
     }
 
     public function preparePrice(string $price): float
     {
-        $price = (float) preg_replace("/,/", '.', $price);
-
-        return $price;
+        return (float) preg_replace("/,/", '.', $price);
     }
 }

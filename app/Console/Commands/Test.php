@@ -38,6 +38,6 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(Cache::tags(['moysklad', 'product', 'offset'])->get(1));
+        dd(now()->subMinutes(9)->format('i'));
     }
 }

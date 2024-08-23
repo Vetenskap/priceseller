@@ -10,6 +10,7 @@ use App\Services\OzonItemPriceService;
 use App\Services\SupplierReportService;
 use App\Services\WbItemPriceService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -19,10 +20,11 @@ use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
-class PriceUnload implements ShouldQueue
+class PriceUnload implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public int $uniqueFor = 600;
     public int $tries = 2;
 
     /**
@@ -55,9 +57,14 @@ class PriceUnload implements ShouldQueue
 
     }
 
-    public function failed(\Throwable $th)
+    public function failed(\Throwable $th): void
     {
         $emailSupplier = EmailSupplier::findOrFail($this->emailSupplierId);
         SupplierReportService::error($emailSupplier->supplier);
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->emailSupplierId . "price_unload";
     }
 }

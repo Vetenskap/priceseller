@@ -12,7 +12,7 @@
                             {{config(\Illuminate\Support\Str::lower($module->name) . ".name")}}
                         </div>
                         <div>
-                            <x-inputs.switcher :checked="auth()->user()->modules()->where('module_id', $module->id)->first()?->enabled" wire:click="changeOpen({{$module}})"/>
+                            <x-inputs.switcher :checked="auth()->user()->modules()->where('module_id', $module->id)->first()?->enabled" wire:click="changeOpen({{$module}})" disabled="{{!\App\Services\ModuleService::moduleIsVisible($module->name, auth()->user())}}"/>
                         </div>
                     </div>
                 </a>

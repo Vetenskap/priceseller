@@ -19,20 +19,21 @@ class BusinessLogicService
         })->chunk(5, function (Collection $users) {
             $users->each(function (User $user) {
                 if (App::isLocal()) {
-                    CheckEmails::dispatchIf($user->isAdmin(), $user->id);
+                    CheckEmails::dispatchIf($user->isAdmin(), $user);
                 } else {
-                    CheckEmails::dispatchIf($user->isSub() || $user->isAdmin(), $user->id);
+                    CheckEmails::dispatchIf($user->isSub() || $user->isAdmin(), $user);
                 }
             });
         });
 
         $time = now()->format('i');
 
-        if ($time === 0) {
+        if ($time === "00") {
             Supplier::where('open', true)
                 ->where('unload_without_price', true)
                 ->chunk(5, function (Collection $suppliers) {
                     $suppliers->each(function (Supplier $supplier) {
+                        SupplierService::setAllItemsUpdated($supplier);
                         MarketsUnload::dispatch($supplier->user, $supplier);
                     });
                 });

@@ -3,45 +3,39 @@
 namespace App\Livewire\ItemsExportReport;
 
 use App\Livewire\BaseComponent;
-use App\Livewire\Traits\WithModelsPaths;
 use App\Models\ItemsExportReport;
 use App\Models\OzonMarket;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Models\WbMarket;
-use Illuminate\Support\Facades\Storage;
+use App\Services\ItemsExportReportService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ItemsExportReportIndex extends BaseComponent
 {
-    use WithModelsPaths;
 
-    public User|WbMarket|OzonMarket $model;
+    public User|WbMarket|OzonMarket|Warehouse $model;
 
-    public function download($report)
+    public function download($report): BinaryFileResponse
     {
-
         $report = ItemsExportReport::find($report['id']);
 
-        if ($report->status === 2) abort(403);
-
-        return response()->download(
-            file: Storage::disk('public')->path($this->getPath() . "{$report->uuid}.xlsx"),
-            name: $this->getFilename() . "_{$report->updated_at}.xlsx"
-        );
+        return ItemsExportReportService::download($report, $this->model);
     }
 
-    public function destroy($report)
+    public function destroy($report): void
     {
         $report = ItemsExportReport::find($report['id']);
-
-        if ($report->status === 2) abort(403);
 
         $this->authorize('delete', $report);
 
-        Storage::disk('public')->delete($this->getPath() . "{$report->uuid}.xlsx");
-        $report->delete();
+        ItemsExportReportService::destroy($report, $this->model);
     }
 
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('livewire.items-export-report.items-export-report-index', [
             'itemsExportReport' => $this->model->itemsExportReports

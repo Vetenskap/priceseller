@@ -8,7 +8,12 @@ use App\Livewire\Traits\WithModelsPaths;
 use App\Models\ItemsImportReport;
 use App\Models\OzonMarket;
 use App\Models\User;
+use App\Models\Warehouse;
 use App\Models\WbMarket;
+use App\Services\ItemsImportReportService;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Component;
 
@@ -16,21 +21,19 @@ class ItemsImportReportIndex extends BaseComponent
 {
     use WithModelsPaths;
 
-    public User|WbMarket|OzonMarket $model;
+    public User|WbMarket|OzonMarket|Warehouse $model;
 
-    public function deleteImport($report)
+    public function deleteImport($report): void
     {
         $report = ItemsImportReport::find($report['id']);
 
-        if ($report->status === 2) abort(403);
-
         $this->authorize('delete', $report);
 
-        Storage::disk('public')->delete($this->getPath() . "{$report->uuid}.xlsx");
-        $report->delete();
+        ItemsImportReportService::destroy($report, $this->model);
+
     }
 
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('livewire.items-import-report.items-import-report-index', [
             'itemsImportReports' => $this->model->itemsImportReports

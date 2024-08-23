@@ -23,7 +23,7 @@ class Export implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $uniqueFor = 600;
+    public int $uniqueFor = 600;
 
     public function __construct(public OzonMarket|WbMarket|User|Warehouse $model, public string $service)
     {

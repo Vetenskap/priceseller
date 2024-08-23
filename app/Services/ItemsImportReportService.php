@@ -16,6 +16,14 @@ use Illuminate\Support\Facades\Storage;
 
 class ItemsImportReportService
 {
+    public static function destroy(ItemsImportReport $report, OzonMarket|WbMarket|User|Warehouse $model): void
+    {
+        if ($report->status === 2) abort(403);
+
+        $status = Storage::disk('public')->delete(ItemsExportReportService::getPath($model) . "{$report->uuid}.xlsx");
+        if ($status) $report->delete();
+    }
+
     public static function get(OzonMarket|WbMarket|User|Warehouse $model): ?ItemsImportReport
     {
         return $model->itemsImportReports()->where('status', 2)->first();

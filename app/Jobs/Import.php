@@ -22,7 +22,7 @@ class Import implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public $uniqueFor = 600;
+    public int $uniqueFor = 600;
     /**
      * Create a new job instance.
      */

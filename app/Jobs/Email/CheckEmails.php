@@ -8,6 +8,7 @@ use App\Models\Email;
 use App\Models\User;
 use App\Services\SupplierReportService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -15,22 +16,19 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 
-class CheckEmails implements ShouldQueue
+class CheckEmails implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $userId;
+    public int $uniqueFor = 600;
 
-    public $uniqueFor = 600;
-
-    public $timeout = 550;
+    public int $timeout = 550;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(int $userId)
+    public function __construct(public User $user)
     {
-        $this->userId = $userId;
     }
 
     /**
@@ -38,10 +36,8 @@ class CheckEmails implements ShouldQueue
      */
     public function handle(): void
     {
-        $user = User::findOrFail($this->userId);
-
         /** @var Email $email */
-        foreach ($user->emails()->where('open', true)->get() as $email) {
+        foreach ($this->user->emails()->where('open', true)->get() as $email) {
 
             $handler = new EmailHandlerLaravelImap($email->address, $email->password);
             foreach ($email->suppliers()->where('open', true)->where('unload_without_price', false)->get() as $supplier) {
@@ -59,6 +55,6 @@ class CheckEmails implements ShouldQueue
 
     public function uniqueId(): string
     {
-        return 'check_emails_' . $this->userId;
+        return $this->user->id . 'check_emails';
     }
 }
