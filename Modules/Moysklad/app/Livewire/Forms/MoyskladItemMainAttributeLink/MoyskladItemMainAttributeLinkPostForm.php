@@ -30,6 +30,8 @@ class MoyskladItemMainAttributeLinkPostForm extends Form
     public $type;
     #[Validate]
     public $user_type;
+    #[Validate]
+    public $invert = false;
 
     public function setMoysklad(Moysklad $moysklad): void
     {
@@ -50,6 +52,7 @@ class MoyskladItemMainAttributeLinkPostForm extends Form
         $this->link_label = $moyskladItemLink->link_label;
         $this->type = $moyskladItemLink->type;
         $this->user_type = $moyskladItemLink->user_type;
+        $this->invert = $moyskladItemLink->invert;
     }
 
     public function rules(): array
@@ -72,6 +75,7 @@ class MoyskladItemMainAttributeLinkPostForm extends Form
                 'string',
                 new Type
             ],
+            'invert' => ['nullable', 'boolean'],
         ];
     }
 
@@ -93,7 +97,7 @@ class MoyskladItemMainAttributeLinkPostForm extends Form
 
         $this->moysklad->itemMainAttributeLinks()->create($this->except(['moysklad', 'moyskladItemLink']));
 
-        $this->reset(['attribute_name', 'link', 'link_name', 'link_label', 'type', 'user_type']);
+        $this->reset(['attribute_name', 'link', 'link_name', 'link_label', 'type', 'user_type', 'invert']);
     }
 
     public function update(): void

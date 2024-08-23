@@ -247,7 +247,8 @@ class MoyskladService
         /** @var Attribute $attribute */
         if ($attribute = $product->getAttributes()->firstWhere(fn(Attribute $attribute) => $attribute->getId() === $link->link)) {
             if ($link->user_type === 'boolean') {
-                return boolval($attribute->getValue());
+                $value = boolval($attribute->getValue());
+                return $link->invert ? !$value : $value;
             } elseif ($link->user_type === 'double') {
                 return floatval($attribute->getValue());
             } elseif ($link->user_type === 'integer') {
@@ -268,7 +269,9 @@ class MoyskladService
             return $product->{'get' . Str::apa($link->link)}()->getValue();
         } else if ($link->type === 'main') {
             if ($link->user_type === 'boolean') {
-                return boolval($product->{'is' . Str::apa($link->link)}());
+               $value = boolval($product->{'is' . Str::apa($link->link)}());
+
+               return $link->invert ? !$value : $value;
             }
             return $product->{'get' . Str::apa($link->link)}();
         }

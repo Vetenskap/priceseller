@@ -14,7 +14,8 @@ class MoyskladItemAdditionalAttributeLink extends Model
         'link_name',
         'link_label',
         'type',
-        'user_type'
+        'user_type',
+        'invert'
     ];
 
     public function itemAttribute()

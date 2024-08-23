@@ -19,6 +19,12 @@
         <x-dropdown-select name="user_type" field="form.user_type"
                            :options="config('app.attributes_types')" option-name="label" value="name">Тип
         </x-dropdown-select>
+        @if($form->user_type === 'boolean')
+            <x-blocks.flex-block>
+                <x-inputs.switcher :checked="$form->invert" wire:model="form.invert"/>
+                <x-layouts.simple-text name="Инвертировать" />
+            </x-blocks.flex-block>
+        @endif
         <div class="self-center">
             <x-danger-button wire:click="destroy">Удалить</x-danger-button>
         </div>
