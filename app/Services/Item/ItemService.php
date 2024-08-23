@@ -59,7 +59,6 @@ class ItemService
 
         if ($errors->isNotEmpty()) {
             logger(json_encode($errors, JSON_UNESCAPED_UNICODE));
-            return null;
         }
 
         $created = collect();
@@ -68,7 +67,16 @@ class ItemService
 
         foreach ($items as $item) {
 
+            logger('item');
+            logger($item);
+
+            logger('new Item');
+            logger($item);
+
             $newItem = $this->user->items()->create($item);
+
+            logger('new Item');
+            logger($newItem);
 
             foreach ($item['attributes'] as $attribute) {
                 $newItem->attributesValues()->updateOrCreate([
