@@ -7,41 +7,45 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
+use Livewire\Attributes\Validate;
 use Livewire\Form;
 
 class OzonMarketPostForm extends Form
 {
     public ?OzonMarket $market = null;
 
+    #[Validate]
     public $name;
-
+    #[Validate]
     public $client_id;
-
+    #[Validate]
     public $api_key;
-
+    #[Validate]
     public $min_price_percent = null;
-
+    #[Validate]
     public $max_price_percent = null;
-
+    #[Validate]
     public $seller_price_percent = null;
-
+    #[Validate]
     public $open = false;
-
+    #[Validate]
     public $max_count = 50;
-
+    #[Validate]
     public $min = 2;
-
+    #[Validate]
     public $max = 5;
-
+    #[Validate]
     public $seller_price = true;
-
+    #[Validate]
     public $acquiring = null;
-
+    #[Validate]
     public $last_mile = null;
-
+    #[Validate]
     public $max_mile = null;
-
+    #[Validate]
     public $organization_id = null;
+    #[Validate]
+    public $minus_stock = 0;
 
     public function rules(): array
     {
@@ -67,6 +71,7 @@ class OzonMarketPostForm extends Form
             'last_mile' => ['nullable', 'numeric'],
             'max_mile' => ['nullable', 'integer'],
             'organization_id' => ['nullable', 'uuid', 'exists:organizations,id'],
+            'minus_stock' => ['nullable', 'integer', 'min:0'],
         ];
     }
 
@@ -88,6 +93,7 @@ class OzonMarketPostForm extends Form
         $this->last_mile = $this->market->last_mile;
         $this->max_mile = $this->market->max_mile;
         $this->organization_id = $market->organization_id;
+        $this->minus_stock = $market->minus_stock;
     }
 
     public function store(): void

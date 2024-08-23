@@ -124,7 +124,8 @@ class WbItemPriceService
                 return $userWarehouse->warehouse->stocks()->where('item_id', $wbItem->item_id)->first()?->stock;
             })->sum();
 
-            $new_count = $wbItem->item->count < $this->market->min ? 0 : $wbItem->item->count;
+            $new_count = $wbItem->item->count - $this->market->minus_stock;
+            $new_count = $new_count < $this->market->min ? 0 : $new_count;
             $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $wbItem->item->multiplicity === 1) ? 1 : $new_count;
             $new_count = ($new_count + $myWarehousesStocks) / $wbItem->item->multiplicity;
 

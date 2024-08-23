@@ -47,6 +47,9 @@ class WbMarketPostForm extends Form
     #[Validate]
     public $organization_id = null;
 
+    #[Validate]
+    public $minus_stock = 0;
+
     public function rules(): array
     {
         return [
@@ -68,6 +71,7 @@ class WbMarketPostForm extends Form
             'basic_logistics' => ['nullable', 'integer'],
             'price_one_liter' => ['nullable', 'numeric'],
             'organization_id' => ['nullable', 'uuid', 'exists:organizations,id'],
+            'minus_stock' => ['nullable', 'integer', 'min:0']
         ];
     }
 
@@ -85,6 +89,7 @@ class WbMarketPostForm extends Form
         $this->basic_logistics = $this->market->basic_logistics;
         $this->price_one_liter = $this->market->price_one_liter;
         $this->organization_id = $market->organization_id;
+        $this->minus_stock = $market->minus_stock;
     }
 
     public function store(): void

@@ -10,6 +10,8 @@
                 </x-links.tab-link>
                 <x-links.tab-link href="{{route('moysklad.index', ['page' => 'suppliers'])}}" :active="$page === 'suppliers'">Поставщики
                 </x-links.tab-link>
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'organizations'])}}" :active="$page === 'organizations'">Организации
+                </x-links.tab-link>
                 <x-links.tab-link href="{{route('moysklad.index', ['page' => 'webhooks'])}}" :active="$page === 'webhooks'">Вебхуки
                 </x-links.tab-link>
                 <x-links.tab-link href="{{route('moysklad.index', ['page' => 'orders'])}}" :active="$page === 'orders'">Заказы
@@ -38,6 +40,9 @@
     @endif
     @if($page === 'suppliers')
         <livewire:moysklad::moysklad-supplier.moysklad-supplier-index :moysklad="$form->moysklad"/>
+    @endif
+    @if($page === 'organizations')
+        <livewire:moysklad::moysklad-organization.moysklad-organization-index :moysklad="$form->moysklad"/>
     @endif
     @if($page === 'orders')
         <livewire:moysklad::moysklad-item-order.moysklad-item-order-index :moysklad="$form->moysklad"/>

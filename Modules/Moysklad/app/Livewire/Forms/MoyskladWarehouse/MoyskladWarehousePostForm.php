@@ -2,6 +2,7 @@
 
 namespace Modules\Moysklad\Livewire\Forms\MoyskladWarehouse;
 
+use Livewire\Attributes\Validate;
 use Livewire\Form;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Models\MoyskladWarehouseWarehouse;
@@ -11,7 +12,9 @@ class MoyskladWarehousePostForm extends Form
     public Moysklad $moysklad;
     public ?MoyskladWarehouseWarehouse $moyskladWarehouse = null;
 
+    #[Validate]
     public $moysklad_warehouse_uuid;
+    #[Validate]
     public $warehouse_id;
 
     public function setMoysklad(Moysklad $moysklad): void

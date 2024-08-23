@@ -11,10 +11,10 @@
         </x-blocks.center-block>
     @endif
     <x-blocks.flex-block>
-        <x-inputs.input-with-label name="max_count"
+        <x-inputs.input-with-label name="minus_stock"
                                    type="number"
-                                   field="form.max_count"
-        >Максимальный остаток
+                                   field="form.minus_stock"
+        >Вычесть
         </x-inputs.input-with-label>
     </x-blocks.flex-block>
     <x-blocks.main-block>
@@ -30,6 +30,13 @@
                                    type="number"
                                    field="form.max"
         >Остаток до
+        </x-inputs.input-with-label>
+    </x-blocks.flex-block>
+    <x-blocks.flex-block>
+        <x-inputs.input-with-label name="max_count"
+                                   type="number"
+                                   field="form.max_count"
+        >Максимальный остаток
         </x-inputs.input-with-label>
     </x-blocks.flex-block>
 </div>

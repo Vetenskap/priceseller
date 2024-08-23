@@ -150,7 +150,8 @@ class OzonItemPriceService
                 return $userWarehouse->warehouse->stocks()->where('item_id', $ozonItem->item_id)->first()?->stock;
             })->sum();
 
-            $new_count = $ozonItem->item->count < $this->market->min ? 0 : $ozonItem->item->count;
+            $new_count = $ozonItem->item->count - $this->market->minus_stock;
+            $new_count = $new_count < $this->market->min ? 0 : $new_count;
             $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $ozonItem->item->multiplicity === 1) ? 1 : $new_count;
             $new_count = ($new_count + $myWarehousesStocks) / $ozonItem->item->multiplicity;
 

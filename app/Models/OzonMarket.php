@@ -29,6 +29,7 @@ class OzonMarket extends MainModel
         'max_mile',
         'user_id',
         'organization_id',
+        'minus_stock'
     ];
 
     public function items()

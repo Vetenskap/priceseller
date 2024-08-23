@@ -24,7 +24,8 @@ class WbMarket extends MainModel
         'max',
         'volume',
         'user_id',
-        'organization_id'
+        'organization_id',
+        'minus_stock'
     ];
 
     public function items()

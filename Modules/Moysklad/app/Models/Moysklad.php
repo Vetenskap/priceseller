@@ -29,6 +29,11 @@ class Moysklad extends Model
         return $this->hasMany(MoyskladSupplierSupplier::class);
     }
 
+    public function organizations()
+    {
+        return $this->hasMany(MoyskladOrganizationOrganization::class);
+    }
+
     public function webhooks()
     {
         return $this->hasMany(MoyskladWebhook::class);

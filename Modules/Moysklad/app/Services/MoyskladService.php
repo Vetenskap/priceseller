@@ -12,6 +12,7 @@ use Modules\Moysklad\HttpClient\MoyskladClientActions;
 use Modules\Moysklad\HttpClient\Resources\Entities\Counterparty;
 use Modules\Moysklad\HttpClient\Resources\Entities\EntityList;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Metadata\Attribute;
+use Modules\Moysklad\HttpClient\Resources\Entities\Product\Organization;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 use Modules\Moysklad\HttpClient\Resources\Entities\Store;
 use Modules\Moysklad\Models\Moysklad;
@@ -270,5 +271,28 @@ class MoyskladService
         }
 
         return null;
+    }
+
+    public function getAllOrganizations(): Collection
+    {
+        return Cache::tags(['moysklad', 'organizations'])->remember($this->moysklad->id, now()->addDay(), function () {
+
+            $entityList = new EntityList(Organization::class, $this->moysklad->api_key);
+
+            $allOrganizations = collect();
+
+            do {
+
+                $organizations = $entityList->getNext()->map(function (Organization $organization) {
+                    return ['id' => $organization->id, 'name' => $organization->getName()];
+                });
+
+                $allOrganizations = $allOrganizations->merge($organizations);
+
+            } while ($entityList->hasNext());
+
+            return $allOrganizations;
+
+        });
     }
 }
