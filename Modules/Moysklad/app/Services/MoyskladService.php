@@ -136,9 +136,6 @@ class MoyskladService
         $supplier = $this->moysklad->suppliers->where('moysklad_supplier_uuid', $product->getSupplier()?->id)->first()?->supplier;
 
         if ($supplier) {
-            $data = [
-                'attributes' => []
-            ];
 
             $data['supplier_id'] = $supplier->id;
             $data['ms_uuid'] = $product->id;
@@ -154,6 +151,10 @@ class MoyskladService
                 $value = $this->getValueFromAttributesAndProduct($itemAdditionalAttributeLink, $product);
 
                 if ($value) {
+
+                    if (!isset($data['attributes'])) {
+                        $data['attributes'] = [];
+                    }
 
                     $data['attributes'][] = [
                         'item_attribute_id' => $itemAdditionalAttributeLink->item_attribute_id,
