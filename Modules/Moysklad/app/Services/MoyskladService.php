@@ -105,13 +105,9 @@ class MoyskladService
 
         $entityList = new EntityList(Product::class, $this->moysklad->api_key, offset: $offset);
 
-        $itemService = new ItemService($this->moysklad->user);
-
         do {
 
             $products = $entityList->getNext();
-
-            $dirtyItems = ['items' => []];
 
             $products->each(function (Product $product) use (&$dirtyItems) {
 
@@ -123,25 +119,19 @@ class MoyskladService
                 ) {
                     $this->updateItemFromProduct($product, $item);
                 } else {
-                    $dirtyItem = $this->createItemFromProduct($product);
-
-                    if ($dirtyItem) {
-                        $dirtyItems['items'][] = $this->createItemFromProduct($product);
-                    }
+                    $this->createItemFromProduct($product);
                 }
 
             });
-
-            $itemService->createFromMs($dirtyItems);
 
             Cache::tags(['moysklad', 'product', 'offset'])->set($this->moysklad->id, $entityList->getOffset(), now()->addDay());
 
         } while ($entityList->hasNext());
     }
 
-    public function createItemFromProduct(Product $product): array
+    public function createItemFromProduct(Product $product): void
     {
-        $data = [];
+        $itemService = new ItemService($this->moysklad->user);
 
         $supplier = $this->moysklad->suppliers->where('moysklad_supplier_uuid', $product->getSupplier()?->id)->first()?->supplier;
 
@@ -171,12 +161,9 @@ class MoyskladService
                     ];
                 }
             }
-        } else {
-            logger('Не найден поставщик - ' . $product->getSupplier()?->id);
-            logger('Product - ' . $product->getCode());
-        }
 
-        return $data;
+            $itemService->createFromMs($data);
+        }
     }
 
     public function updateItemFromProductWithUpdatedFields(Product $product, Item $item, Collection $updatedFields): void

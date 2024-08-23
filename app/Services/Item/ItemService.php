@@ -51,7 +51,7 @@ class ItemService
 
     }
 
-    public function createFromMs(array $data): ?Collection
+    public function createFromMs(array $data): ?item
     {
         $data = Validator::make($data, static::moyskladImportRules($this->user->id));
 
@@ -59,61 +59,48 @@ class ItemService
 
         if ($errors->isNotEmpty()) {
             logger(json_encode($errors, JSON_UNESCAPED_UNICODE));
+            return null;
         }
 
-        $created = collect();
+        $item = $data->validate();
 
-        $items = $data->validate()['items'];
+        $newItem = $this->user->items()->create($item);
 
-        foreach ($items as $item) {
+        logger('new Item');
+        logger($newItem);
 
-            logger('item');
-            logger($item);
-
-            logger('new Item');
-            logger($item);
-
-            $newItem = $this->user->items()->create($item);
-
-            logger('new Item');
-            logger($newItem);
-
-            foreach ($item['attributes'] as $attribute) {
-                $newItem->attributesValues()->updateOrCreate([
-                    'item_attribute_id' => $attribute['attribute_id'],
-                ], [
-                    'item_attribute_id' => $attribute['attribute_id'],
-                    'value' => $attribute['value']
-                ]);
-            }
-
-            $created->push($newItem);
+        foreach ($item['attributes'] as $attribute) {
+            $newItem->attributesValues()->updateOrCreate([
+                'item_attribute_id' => $attribute['attribute_id'],
+            ], [
+                'item_attribute_id' => $attribute['attribute_id'],
+                'value' => $attribute['value']
+            ]);
         }
 
-        return $created;
+        return $newItem;
     }
 
     public static function moyskladImportRules(int $userId): array
     {
         return [
-            'items' => ['array', 'max:1000'],
-            'items.*.ms_uuid' => ['required', 'uuid', 'unique:items,ms_uuid'],
-            'items.*.code' => [
+            'ms_uuid' => ['required', 'uuid', 'unique:items,ms_uuid'],
+            'code' => [
                 'required',
                 Rule::unique('items', 'code')->where('user_id', $userId),
             ],
-            'items.*.name' => ['nullable'],
-            'items.*.supplier_id' => ['required', 'exists:suppliers,id'],
-            'items.*.article' => ['required'],
-            'items.*.brand' => ['nullable'],
-            'items.*.count' => ['nullable', 'integer'],
-            'items.*.multiplicity' => ['required', 'integer'],
-            'items.*.unload_wb' => ['nullable', 'boolean'],
-            'items.*.unload_ozon' => ['nullable', 'boolean'],
-            'items.*.buy_price_reserve' => ['nullable', 'numeric'],
-            'items.*.attributes' => ['nullable', 'array'],
-            'items.*.attributes.*.attribute_id' => ['required', 'exists:item_attributes,id'],
-            'items.*.attributes.*.value' => ['required'],
+            'name' => ['nullable'],
+            'supplier_id' => ['required', 'exists:suppliers,id'],
+            'article' => ['required'],
+            'brand' => ['nullable'],
+            'count' => ['nullable', 'integer'],
+            'multiplicity' => ['required', 'integer'],
+            'unload_wb' => ['nullable', 'boolean'],
+            'unload_ozon' => ['nullable', 'boolean'],
+            'buy_price_reserve' => ['nullable', 'numeric'],
+            'attributes' => ['nullable', 'array'],
+            'attributes.*.attribute_id' => ['required', 'exists:item_attributes,id'],
+            'attributes.*.value' => ['required'],
         ];
     }
 
