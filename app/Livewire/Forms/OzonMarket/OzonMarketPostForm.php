@@ -64,7 +64,7 @@ class OzonMarketPostForm extends Form
             'max' => ['nullable', 'integer'],
             'seller_price' => ['nullable', 'boolean'],
             'acquiring' => ['nullable', 'numeric'],
-            'last_mile' => ['nullable', 'integer'],
+            'last_mile' => ['nullable', 'numeric'],
             'max_mile' => ['nullable', 'integer'],
             'organization_id' => ['nullable', 'uuid', 'exists:organizations,id'],
         ];

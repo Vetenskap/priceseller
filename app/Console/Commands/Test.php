@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Validator;
 
 class Test extends Command
 {
@@ -26,6 +27,6 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(Cache::tags(['moysklad', 'product', 'offset'])->get(2, 0));
+
     }
 }

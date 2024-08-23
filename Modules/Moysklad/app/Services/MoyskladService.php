@@ -139,6 +139,8 @@ class MoyskladService
 
             $data['supplier_id'] = $supplier->id;
             $data['ms_uuid'] = $product->id;
+            $data['unload_ozon'] = true;
+            $data['unload_wb'] = true;
 
             foreach ($this->moysklad->itemMainAttributeLinks as $itemMainAttributeLink) {
                 $value = $this->getValueFromAttributesAndProduct($itemMainAttributeLink, $product);
