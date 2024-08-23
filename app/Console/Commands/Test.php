@@ -38,6 +38,6 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(now()->subMinutes(9)->format('i'));
+        dd(route('api.moysklad.webhook.index', ['webhook' => 1]));
     }
 }

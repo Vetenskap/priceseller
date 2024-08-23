@@ -39,8 +39,6 @@ class MoyskladWebhookService
 
             $url = route('api.moysklad.webhook.index', ['webhook' => $webhook->id]);
 
-            logger('webhook url -' . $url);
-
             $entityWebhook = new WebhookStock();
             $entityWebhook->setUrl($url);
             $entityWebhook->setStockType('stock');
@@ -114,8 +112,6 @@ class MoyskladWebhookService
             $webhook = $moysklad->webhooks()->create($data);
 
             $url = route('api.moysklad.webhook.index', ['webhook' => $webhook->id]);
-
-            logger('webhook url -' . $url);
 
             $entityWebhook = new Webhook();
             $entityWebhook->setUrl($url);
