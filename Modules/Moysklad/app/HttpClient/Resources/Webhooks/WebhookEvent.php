@@ -9,7 +9,7 @@ use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 
 class WebhookEvent
 {
-    protected Product|CustomerOrder $meta;
+    protected Product|CustomerOrder|Demand $meta;
     protected string $action;
     protected string $accountId;
     protected ?Collection $updatedFields = null;
