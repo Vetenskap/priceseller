@@ -98,8 +98,12 @@ class MoyskladWebhookProcessService
                 ]);
                 $stocksAll->fetchStocks($this->webhook->moysklad->api_key);
 
-                $stocksAll->getStocks()->get('rows')->each(function (Collection $stock) use ($order) {
+                $stocksAll->getStocks()->get('rows')->each(function (Collection $stock) use ($order, $stocksAll) {
                     if (intval($stock->get('quantity')) < 0) {
+                        logger('stocks');
+                        logger($stocksAll->getStocks());
+                        logger('stock');
+                        logger($stock);
                         $order->put($this->webhook->moysklad->api_key, [
                             'store' => [
                                 'meta' => [
