@@ -87,7 +87,7 @@ class MoyskladWebhookProcessService
             $order = $event->getMeta();
             $order->fetch($this->webhook->moysklad->api_key, ['expand' => 'positions']);
 
-            if ($order->getProject()->id === 'b4a96157-5f23-11ed-0a80-030b00027f77') {
+            if ($order->getProject()?->id === 'b4a96157-5f23-11ed-0a80-030b00027f77') {
 
                 /** @var Position $position */
                 $position = $order->getPositions()->first();
