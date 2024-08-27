@@ -93,8 +93,7 @@ class MoyskladWebhookProcessService
                 /** @var Position $position */
                 $position = $order->getPositions()->first();
                 $stocksAll = new StocksAll([
-                    'filter' => 'product=' . MoyskladClient::BASEURL . Product::ENDPOINT . $position->getAssortment()->id,
-                    'filter' => 'store=' . MoyskladClient::BASEURL . Store::ENDPOINT . '64232c0a-9a30-11ed-0a80-098900246f45'
+                    'filter' => 'product=' . MoyskladClient::BASEURL . Product::ENDPOINT . $position->getAssortment()->id . ';' . 'store=' . MoyskladClient::BASEURL . Store::ENDPOINT . '64232c0a-9a30-11ed-0a80-098900246f45',
                 ]);
                 $stocksAll->fetchStocks($this->webhook->moysklad->api_key);
 
