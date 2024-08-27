@@ -70,9 +70,11 @@ class AppServiceProvider extends ServiceProvider
 
         \LogViewer::auth(function ($request) {
 
-            if (App::isLocal()) return true;
+            return true;
 
-            return $request->user() && $request->user()->isAdmin();
+//            if (App::isLocal()) return true;
+//
+//            return $request->user() && $request->user()->isAdmin();
         });
 
         Gate::define('viewPulse', function (User $user) {
