@@ -29,6 +29,11 @@ return [
             'action' => 'DELETE',
             'type' => 'product',
             'name' => 'Товар (удаление)'
-        ]
+        ],
+        [
+            'action' => 'CREATE',
+            'type' => 'demand',
+            'name' => 'Отгрузка (создание)'
+        ],
     ]
 ];

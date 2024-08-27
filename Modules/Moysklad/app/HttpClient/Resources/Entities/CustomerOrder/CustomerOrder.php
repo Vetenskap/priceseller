@@ -6,12 +6,16 @@ use Illuminate\Support\Collection;
 use Modules\Moysklad\HttpClient\MoyskladClient;
 use Modules\Moysklad\HttpClient\Resources\Entities\CustomerOrder\MetaArrays\Position;
 use Modules\Moysklad\HttpClient\Resources\Entities\Entity;
+use Modules\Moysklad\HttpClient\Resources\Entities\Project;
+use Modules\Moysklad\HttpClient\Resources\Entities\Store;
 
 class CustomerOrder extends Entity
 {
     const ENDPOINT = '/entity/customerorder/';
 
-    public Collection $positions;
+    protected Collection $positions;
+    protected ?Project $project = null;
+    protected ?Store $store = null;
 
     public function __construct(?Collection $customerOrder = null)
     {
@@ -24,6 +28,29 @@ class CustomerOrder extends Entity
     {
         $this->data = $customerOrder;
         $this->id = $customerOrder->get('id');
+
+        if ($customerOrder->has('positions')) {
+            $positions = collect($customerOrder->get('positions'));
+            if ($positions->has('rows')) {
+                collect($positions->get('rows'))->each(function (array $row) {
+
+                    $this->positions->push(new Position(collect($row)));
+
+                });
+            }
+        }
+
+        if ($customerOrder->has('project')) {
+            $project = new Project();
+            $project->setId(collect($customerOrder->get('project'))->toCollectionSpread()->get('meta')->get('href'));
+            $this->project = $project;
+        }
+
+        if ($customerOrder->has('store')) {
+            $store = new Store();
+            $store->setId(collect($customerOrder->get('store'))->toCollectionSpread()->get('meta')->get('href'));
+            $this->store = $store;
+        }
     }
 
     public function fetchPositions(string $apiKey): void
@@ -45,5 +72,9 @@ class CustomerOrder extends Entity
         return $this->positions;
     }
 
+    public function getProject(): ?Project
+    {
+        return $this->project;
+    }
 
 }

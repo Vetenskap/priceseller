@@ -4,11 +4,16 @@ namespace Modules\Moysklad\Services;
 
 use App\Models\Item;
 use Illuminate\Support\Collection;
-use Mockery\Exception;
+use Modules\Moysklad\HttpClient\MoyskladClient;
 use Modules\Moysklad\HttpClient\Resources\Entities\CustomerOrder\MetaArrays\Position;
+use Modules\Moysklad\HttpClient\Resources\Entities\Demand;
+use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
+use Modules\Moysklad\HttpClient\Resources\Entities\Store;
+use Modules\Moysklad\HttpClient\Resources\Reports\StocksAll;
 use Modules\Moysklad\HttpClient\Resources\Webhooks\WebhookEvent;
 use Modules\Moysklad\HttpClient\Resources\Webhooks\WebhookPost;
 use Modules\Moysklad\HttpClient\Resources\Webhooks\WebhookStockPost;
+use Modules\Moysklad\Models\MoyskladOrderUuid;
 use Modules\Moysklad\Models\MoyskladWarehouseWarehouse;
 use Modules\Moysklad\Models\MoyskladWebhook;
 
@@ -28,6 +33,9 @@ class MoyskladWebhookProcessService
             case 'warehouses':
                 $this->updateWarehousesStocks();
                 break;
+            case 'demand':
+                $this->processChangeWarehouseDemand();
+                break;
             case 'product':
                 switch ($this->webhook->action) {
                     case 'UPDATE':
@@ -42,10 +50,77 @@ class MoyskladWebhookProcessService
                 }
                 break;
             case 'customerorder':
+                $this->processChangeWarehouseOrder();
                 $this->createOrder();
                 break;
 
         }
+    }
+
+    private function processChangeWarehouseDemand()
+    {
+        $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
+
+            /** @var Demand $demand */
+            $demand = $event->getMeta();
+            if ($orderUuid = MoyskladOrderUuid::where('moysklad_id', $this->webhook->moysklad_id)->where('uuid', $demand->getCustomerOrder()->id)->first()) {
+                $demand->put($this->webhook->moysklad->api_key, [
+                    'store' => [
+                        'meta' => [
+                            "href" => MoyskladClient::BASEURL . Store::ENDPOINT . 'c20b3e0e-599d-11ed-0a80-060900042d3e',
+                            "metadataHref" => "https://api.moysklad.ru/api/remap/1.2/entity/store/metadata",
+                            "type" => "store",
+                            "mediaType" => "application/json",
+                        ]
+                    ]
+                ]);
+                $orderUuid->delete();
+            }
+
+        });
+    }
+
+    private function processChangeWarehouseOrder()
+    {
+        $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
+
+            $order = $event->getMeta();
+            $order->fetch($this->webhook->moysklad->api_key, ['expand' => 'positions']);
+
+            if ($order->getProject()->id === 'b4a96157-5f23-11ed-0a80-030b00027f77') {
+
+                /** @var Position $position */
+                $position = $order->getPositions()->first();
+                $stocksAll = new StocksAll([
+                    'fliter' => 'product=' . MoyskladClient::BASEURL . Product::ENDPOINT . $position->getAssortment()->id,
+                    'filter' => 'store=' . MoyskladClient::BASEURL . Store::ENDPOINT . '64232c0a-9a30-11ed-0a80-098900246f45'
+                ]);
+                $stocksAll->fetchStocks($this->webhook->moysklad->api_key);
+
+                $stocksAll->getStocks()->get('rows')->each(function (Collection $stock) use ($order) {
+                    if (intval($stock->get('quantity')) < 0) {
+                        $order->put($this->webhook->moysklad->api_key, [
+                            'store' => [
+                                'meta' => [
+                                    "href" => MoyskladClient::BASEURL . Store::ENDPOINT . 'c20b3e0e-599d-11ed-0a80-060900042d3e',
+                                    "metadataHref" => "https://api.moysklad.ru/api/remap/1.2/entity/store/metadata",
+                                    "type" => "store",
+                                    "mediaType" => "application/json",
+                                ]
+                            ]
+                        ]);
+
+                        MoyskladOrderUuid::create([
+                            'moysklad_id' => $this->webhook->moysklad_id,
+                            'uuid' => $order->id,
+                        ]);
+
+                        return false;
+                    }
+                });
+
+            }
+        });
     }
 
     private function updateWarehousesStocks(): void

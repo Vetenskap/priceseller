@@ -16,6 +16,8 @@
                 </x-links.tab-link>
                 <x-links.tab-link href="{{route('moysklad.index', ['page' => 'orders'])}}" :active="$page === 'orders'">Заказы
                 </x-links.tab-link>
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'change_warehouse'])}}" :active="$page === 'change_warehouse'">Задача изменения склада
+                </x-links.tab-link>
             @endif
         </x-navigate-pages>
     </x-layouts.main-container>
@@ -49,5 +51,8 @@
     @endif
     @if($page === 'webhooks')
         <livewire:moysklad::moysklad-webhook.moysklad-webhook-index :moysklad="$form->moysklad"/>
+    @endif
+    @if($page === 'change_warehouse')
+        <livewire:moysklad::moysklad-change-warehouse.moysklad-change-warehouse-index :moysklad="$form->moysklad"/>
     @endif
 </x-layouts.module-index-layout>

@@ -29,10 +29,10 @@ abstract class Entity
         dd($this->data);
     }
 
-    public function fetch(string $apiKey): void
+    public function fetch(string $apiKey, array $queryParameters = []): void
     {
         $client = new MoyskladClient($apiKey);
-        $this->set($client->get(static::ENDPOINT . $this->id));
+        $this->set($client->get(static::ENDPOINT . $this->id, $queryParameters));
     }
 
     public function delete(string $apiKey): bool

@@ -4,6 +4,7 @@ namespace Modules\Moysklad\HttpClient\Resources\Webhooks;
 
 use Illuminate\Support\Collection;
 use Modules\Moysklad\HttpClient\Resources\Entities\CustomerOrder\CustomerOrder;
+use Modules\Moysklad\HttpClient\Resources\Entities\Demand;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 
 class WebhookEvent
@@ -20,6 +21,9 @@ class WebhookEvent
         switch ($meta->get('type')) {
             case 'customerorder':
                 $metaItem = new CustomerOrder();
+                break;
+            case 'demand':
+                $metaItem = new Demand();
                 break;
             default:
                 $metaItem = new Product();
