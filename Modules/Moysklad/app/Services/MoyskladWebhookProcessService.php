@@ -63,6 +63,7 @@ class MoyskladWebhookProcessService
 
             /** @var Demand $demand */
             $demand = $event->getMeta();
+            $demand->fetch($this->webhook->moysklad->api_key);
             if ($orderUuid = MoyskladOrderUuid::where('moysklad_id', $this->webhook->moysklad_id)->where('uuid', $demand->getCustomerOrder()->id)->first()) {
                 $demand->put($this->webhook->moysklad->api_key, [
                     'store' => [
