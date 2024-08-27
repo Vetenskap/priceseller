@@ -38,7 +38,7 @@ class WebhookEvent
         $this->updatedFields = collect($event->get('updatedFields'));
     }
 
-    public function getMeta(): Product|CustomerOrder
+    public function getMeta(): Product|CustomerOrder|Demand
     {
         return $this->meta;
     }
