@@ -4,6 +4,7 @@ namespace Modules\Moysklad\HttpClient\Resources\Entities\CustomerOrder;
 
 use Illuminate\Support\Collection;
 use Modules\Moysklad\HttpClient\MoyskladClient;
+use Modules\Moysklad\HttpClient\Resources\Entities\Counterparty;
 use Modules\Moysklad\HttpClient\Resources\Entities\CustomerOrder\MetaArrays\Position;
 use Modules\Moysklad\HttpClient\Resources\Entities\Entity;
 use Modules\Moysklad\HttpClient\Resources\Entities\Project;
@@ -16,6 +17,7 @@ class CustomerOrder extends Entity
     protected Collection $positions;
     protected ?Project $project = null;
     protected ?Store $store = null;
+    protected Counterparty $agent;
 
     public function __construct(?Collection $customerOrder = null)
     {
@@ -54,6 +56,10 @@ class CustomerOrder extends Entity
             $store->setId(collect($customerOrder->get('store'))->toCollectionSpread()->get('meta')->get('href'));
             $this->store = $store;
         }
+
+        $counterparty = new Counterparty();
+        $counterparty->setId(collect($customerOrder->get('agent'))->toCollectionSpread()->get('meta')->get('href'));
+        $this->agent = $counterparty;
     }
 
     public function fetchPositions(string $apiKey): void
@@ -78,6 +84,16 @@ class CustomerOrder extends Entity
     public function getProject(): ?Project
     {
         return $this->project;
+    }
+
+    public function getStore(): ?Store
+    {
+        return $this->store;
+    }
+
+    public function getAgent(): Counterparty
+    {
+        return $this->agent;
     }
 
 }
