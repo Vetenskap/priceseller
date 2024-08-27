@@ -30,6 +30,9 @@ class CustomerOrder extends Entity
         $this->id = $customerOrder->get('id');
 
         if ($customerOrder->has('positions')) {
+
+            $this->positions = collect();
+
             $positions = collect($customerOrder->get('positions'));
             if ($positions->has('rows')) {
                 collect($positions->get('rows'))->each(function (array $row) {

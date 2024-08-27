@@ -22,7 +22,7 @@ class MoyskladChangeWarehouseIndex extends Component
         $service->deleteWebhook();
     }
 
-    public function addUpdateWebhook(): void
+    public function addWebhook(): void
     {
         $data = collect(config('moysklad.available_webhooks'))->where('type', 'demand')->where('action', 'CREATE')->first();
 
