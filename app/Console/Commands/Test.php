@@ -27,6 +27,6 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(null < 0);
+        dd(intval(-1) < 0);
     }
 }
