@@ -289,7 +289,7 @@ class MoyskladService
 
             if ($item = $this->moysklad->user->items()->where('ms_uuid', $component->getAssortment()->id)->first()) {
 
-                if ($supplierBundle->id !== $item->supplier->id) {
+                if ($supplierBundle && $supplierBundle->id !== $item->supplier->id) {
                     // TODO: supplier bundle moysklad
                     return;
                 }
@@ -299,7 +299,7 @@ class MoyskladService
                 $component->getAssortment()->fetch($this->moysklad->api_key);
                 if ($item = $this->createItemFromProduct($component->getAssortment())) {
 
-                    if ($supplierBundle->id !== $item->supplier->id) {
+                    if ($supplierBundle && $supplierBundle->id !== $item->supplier->id) {
                         // TODO: supplier bundle moysklad
                         return;
                     }
@@ -341,7 +341,7 @@ class MoyskladService
 
             if ($item = $this->moysklad->user->items()->where('ms_uuid', $component->getAssortment()->id)->first()) {
 
-                if ($supplierBundle->id !== $item->supplier->id) {
+                if ($supplierBundle && $supplierBundle->id !== $item->supplier->id) {
                     // TODO: supplier bundle moysklad
                     return;
                 }
@@ -351,7 +351,7 @@ class MoyskladService
                 $component->getAssortment()->fetch($this->moysklad->api_key);
                 if ($item = $this->createItemFromProduct($component->getAssortment())) {
 
-                    if ($supplierBundle->id !== $item->supplier->id) {
+                    if ($supplierBundle && $supplierBundle->id !== $item->supplier->id) {
                         // TODO: supplier bundle moysklad
                         return;
                     }

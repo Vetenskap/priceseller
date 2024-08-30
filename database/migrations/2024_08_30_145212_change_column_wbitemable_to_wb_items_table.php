@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('wb_items', function (Blueprint $table) {
             $table->string('wbitemable_id')->change();
-            $table->string('wbitemable_type')->default('App\\Models\\Item')->after('wbitemable_id');
+            $table->string('wbitemable_type')->default("App\\Models\\Item")->after('wbitemable_id');
         });
     }
 
