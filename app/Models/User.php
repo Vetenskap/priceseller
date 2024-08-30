@@ -158,6 +158,26 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
         return $this->morphMany(ItemsExportReport::class, 'reportable');
     }
 
+    public function bundlesExportReports()
+    {
+        return $this->hasMany(BundlesExportReport::class);
+    }
+
+    public function bundlesImportReports()
+    {
+        return $this->hasMany(BundlesImportReport::class);
+    }
+
+    public function bundleItemsExportReports()
+    {
+        return $this->hasMany(BundleItemsExportReport::class);
+    }
+
+    public function bundleItemsImportReports()
+    {
+        return $this->hasMany(BundleItemsImportReport::class);
+    }
+
     public function items()
     {
         return $this->hasMany(Item::class);
@@ -226,5 +246,10 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
     public function modules()
     {
         return $this->hasMany(UserModule::class);
+    }
+
+    public function bundles()
+    {
+        return $this->hasMany(Bundle::class);
     }
 }

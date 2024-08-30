@@ -26,6 +26,7 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
         'product_id',
         'Артикул ozon (offer_id)',
         'Код',
+        'Тип (Комплект или Товар)',
         'Мин. Цена, процент',
         'Мин. Цена',
         'Обработка отправления',
@@ -61,7 +62,9 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
     {
         $row = collect($row);
 
-        $item = $this->user->items()->where('code', $row->get('Код'))->first();
+        $item = $row->get('Тип (Комплект или Товар)') === 'Комплект'
+            ? $this->user->bundles()->where('code', $row->get('Код'))->first()
+            : $this->user->items()->where('code', $row->get('Код'))->first();
 
         if (!$item) {
 
@@ -135,14 +138,15 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
             'direct_flow_trans' => $row->get('Магистраль'),
             'deliv_to_customer' => $row->get('Последняя миля'),
             'sales_percent' => (int) $row->get('Комиссия'),
-            'item_id' => $item->id,
+            'ozonitemable_id' => $item->id,
+            'ozonitemable_type' => $item->getMorphClass(),
             'id' => Str::uuid()
         ]);
     }
 
     public function prepareForValidation($data, $index)
     {
-        if ($index % 1000 === 0) ItemsImportReportService::flush($this->market, $this->correct, $this->error);
+        if ($index % 1000 === 0) ItemsImportReportService::flush($this->market, $this->correct, $this->error, $this->updated);
 
         return $data;
     }
@@ -159,6 +163,7 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
             'Последняя миля' => ['nullable', 'numeric', 'min:0'],
             'Комиссия' => ['nullable', 'integer', 'min:0'],
             'Код' => ['required'],
+            'Тип (Комплект или Товар)' => ['nullable'],
         ];
     }
 

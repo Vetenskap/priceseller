@@ -89,10 +89,14 @@ class OzonMarketService
                 $priceIndexes = collect($ozonItem['price_indexes']);
 
                 try {
-                    $item = Item::where('code', $ozonItem['offer_id'])->where('user_id', $this->market->user_id)->firstOrFail();
+                    $item = $this->market->user->items()->where('code', $ozonItem['offer_id'])->first();
+
+                    if (!$item) {
+                        $item = $this->market->user->bundles()->where('code', $ozonItem['offer_id'])->firstOrFail();
+                    }
                 } catch (ModelNotFoundException) {
                     try {
-                        $item = OzonItem::where('offer_id', $ozonItem['offer_id'])->where('ozon_market_id', $this->market->id)->firstOrFail()->item;
+                        $item = $this->market->items()->where('offer_id', $ozonItem['offer_id'])->firstOrFail()->ozonitemable;
                     } catch (ModelNotFoundException) {
 
                         $error++;
@@ -123,7 +127,8 @@ class OzonMarketService
                     'price_market' => (int)$price->get('price'),
                     'price_seller' => (int)collect($priceIndexes->get('ozon_index_data'))->get('minimal_price'),
                     'ozon_market_id' => $this->market->id,
-                    'item_id' => $item->id,
+                    'ozonitemable_id' => $item->id,
+                    'ozonitemable_type' => $item->getMorphClass(),
                 ]);
 
                 $defaultFields->each(function ($value, $key) use ($newOzonItem) {

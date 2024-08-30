@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\HttpClient\WbClient;
+use App\Models\Bundle;
+use App\Models\Item;
+use App\Models\ItemWarehouseStock;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbItem;
@@ -30,12 +33,25 @@ class WbItemPriceService
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт цен");
 
         WbItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                        $query->where('updated', true);
-                    })
-                    ->where('supplier_id', $this->supplier->id);
+            ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                if ($type === Item::class) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                            $query->where('updated', true);
+                        });
+                } elseif ($type === Bundle::class) {
+                    $query
+                        ->whereHas('items', function (Builder $query) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        })
+                        ->whereDoesntHave('items', function (Builder $query) {
+                            $query
+                                ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                                    $query->where('updated', false);
+                                });
+                        });
+                }
             })
             ->chunk(1000, function ($items) {
                 $items->each(function (WbItem $wbItem) {
@@ -50,9 +66,14 @@ class WbItemPriceService
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт цен");
 
         WbItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('supplier_id', $this->supplier->id);
+            ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                if ($type === Item::class) {
+                    $query->where('supplier_id', $this->supplier->id);
+                } elseif ($type === Bundle::class) {
+                    $query->whereHas('items', function (Builder $query) {
+                        $query->where('supplier_id', $this->supplier->id);
+                    });
+                }
             })
             ->chunk(1000, function ($items) {
                 $items->each(function (WbItem $wbItem) {
@@ -64,10 +85,27 @@ class WbItemPriceService
 
     public function recountPriceWbItem(WbItem $wbItem): WbItem
     {
-        if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$wbItem->item->price) {
-            $price = $wbItem->item->buy_price_reserve;
+        if ($wbItem->wbitemable_type === 'App\Models\Item') {
+
+            $multiplicity = $wbItem->wbitemable->multiplicity;
+
+            if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$wbItem->item->price) {
+                $price = $wbItem->wbitemable->buy_price_reserve;
+            } else {
+                $price = $wbItem->wbitemable->price;
+            }
+
         } else {
-            $price = $wbItem->item->price;
+
+            $multiplicity = 1;
+
+            $price = $wbItem->wbitemable->items->map(function (Item $item) {
+                if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$item->price) {
+                    return $item->buy_price_reserve * $item->pivot->multiplicity;
+                } else {
+                    return $item->price * $item->pivot->multiplicity;
+                }
+            })->sum();
         }
 
         $coefficient = (float)$this->market->coefficient;
@@ -76,7 +114,6 @@ class WbItemPriceService
         $volume = (int)$this->market->volume;
 
         $volumeColumn = $wbItem->volume;
-        $multiplicity = $wbItem->item->multiplicity;
         $retailMarkupPercent = $wbItem->retail_markup_percent / 100 + 1;
         $package = $wbItem->package;
         $salesPercent = $wbItem->sales_percent;
@@ -102,10 +139,20 @@ class WbItemPriceService
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт остатков");
 
         WbItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('updated', true)
-                    ->where('supplier_id', $this->supplier->id);
+            ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                if ($type === Item::class) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->where('updated', true);
+                } elseif ($type === Bundle::class) {
+                    $query
+                        ->whereHas('items', function (Builder $query) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        })
+                        ->whereDoesntHave('items', function (Builder $query) {
+                            $query->where('updated', false);
+                        });
+                }
             })
             ->chunk(1000, function ($items) {
                 $items->each(function (WbItem $wbItem) {
@@ -120,25 +167,50 @@ class WbItemPriceService
     public function recountStockWbItem(WbItem $wbItem): WbItem
     {
         $this->market->warehouses->each(function (WbWarehouse $warehouse) use ($wbItem) {
-            $myWarehousesStocks = $warehouse->userWarehouses->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($wbItem) {
-                return $userWarehouse->warehouse->stocks()->where('item_id', $wbItem->item_id)->first()?->stock;
-            })->sum();
 
-            $new_count = $wbItem->item->count - $this->market->minus_stock;
-            $new_count = $new_count < $this->market->min ? 0 : $new_count;
-            $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $wbItem->item->multiplicity === 1) ? 1 : $new_count;
-            $new_count = ($new_count + $myWarehousesStocks) / $wbItem->item->multiplicity;
+            $new_count = 0;
 
-            if (ModuleService::moduleIsEnabled('Order', $this->user)) {
-                $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $wbItem->item->multiplicity);
+            if ($wbItem->wbitemable_type === 'App\Models\Item') {
+                $unload_wb = !$wbItem->wbitemable->unload_wb;
+            } else {
+                $unload_wb = boolval($wbItem->wbitemable->items->first(fn(Item $item) => !$item->unload_wb));
             }
 
-            if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                $new_count = $new_count - (($wbItem->item->moyskladOrders()->where('new', true)->exists() ? $wbItem->item->moyskladOrders()->where('new')->sum('orders') : 0) * $wbItem->item->multiplicity);
-            }
+            if (!$unload_wb) {
 
-            $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
-            $new_count = (int)max($new_count, 0);
+                $itemIds = $wbItem->wbitemable_type === 'App\Models\Item' ? [$wbItem->wbitemable_id] : $wbItem->wbitemable->items->pluck('id')->toArray();
+
+                $myWarehousesStocks = $warehouse->userWarehouses->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($wbItem, $itemIds) {
+                    return $userWarehouse->warehouse->stocks()->whereIn('item_id', $itemIds)->map(fn(ItemWarehouseStock $stock) => $stock->stock)->sum();
+                })->sum();
+
+                if ($wbItem->wbitemable_type === 'App\Models\Item') {
+                    $new_count = $wbItem->wbitemable->count;
+                    $multiplicity = $wbItem->wbitemable->multiplicity;
+                } else {
+                    $new_count = $wbItem->wbitemable->items->map(function (Item $item) {
+                        return $item->count / $item->pivot->multiplicity;
+                    })->min();
+                    $multiplicity = 1;
+                }
+
+                $new_count = $new_count - $this->market->minus_stock;
+                $new_count = $new_count < $this->market->min ? 0 : $new_count;
+                $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $multiplicity === 1) ? 1 : $new_count;
+                $new_count = ($new_count + $myWarehousesStocks) / $multiplicity;
+
+                if (ModuleService::moduleIsEnabled('Order', $this->user)) {
+                    $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $wbItem->item->multiplicity);
+                }
+
+                if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+                    $new_count = $new_count - (($wbItem->item->moyskladOrders()->where('new', true)->exists() ? $wbItem->item->moyskladOrders()->where('new')->sum('orders') : 0) * $wbItem->item->multiplicity);
+                }
+
+                $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
+                $new_count = (int)max($new_count, 0);
+
+            }
 
             $warehouse->stocks()->updateOrCreate([
                 'wb_item_id' => $wbItem->id
@@ -155,10 +227,19 @@ class WbItemPriceService
     {
         WbWarehouseStock::query()
             ->whereHas('wbItem', function (Builder $query) {
-                $query->whereHas('item', function (Builder $query) {
-                    $query
-                        ->where('updated', false)
-                        ->where('supplier_id', $this->supplier->id);
+                $query->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                    if ($type === Item::class) {
+                        $query
+                            ->where('supplier_id', $this->supplier->id)
+                            ->where('updated', false);
+                    } elseif ($type === Bundle::class) {
+                        $query
+                            ->whereHas('items', function (Builder $query) {
+                                $query
+                                    ->where('supplier_id', $this->supplier->id)
+                                    ->where('updated', false);
+                            });
+                    }
                 });
             })
             ->update(['stock' => 0]);
@@ -168,9 +249,15 @@ class WbItemPriceService
     {
         WbWarehouseStock::query()
             ->whereHas('wbItem', function (Builder $query) {
-                $query->whereHas('item', function (Builder $query) {
-                    $query
-                        ->where('supplier_id', $this->supplier->id);
+                $query->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                    if ($type === Item::class) {
+                        $query->where('supplier_id', $this->supplier->id);
+                    } elseif ($type === Bundle::class) {
+                        $query
+                            ->whereHas('items', function (Builder $query) {
+                                $query->where('supplier_id', $this->supplier->id);
+                            });
+                    }
                 });
             })
             ->update(['stock' => 0]);
@@ -190,7 +277,7 @@ class WbItemPriceService
                 $data = collect([
                     [
                         "sku" => (string)$wbItem->sku,
-                        "amount" => (int) $wbItem->warehouseStock($warehouse) ? $wbItem->warehouseStock($warehouse)->stock : 0,
+                        "amount" => (int)$wbItem->warehouseStock($warehouse) ? $wbItem->warehouseStock($warehouse)->stock : 0,
                     ]
                 ]);
 
@@ -219,17 +306,21 @@ class WbItemPriceService
                 SupplierReportService::addLog($this->supplier, "Склад {$warehouse->name}: выгрузка остатков");
 
                 WbItem::query()
-                    ->whereHas('item', function (Builder $query) {
-                        $query
-                            ->where('unload_wb', true)
-                            ->where('supplier_id', $this->supplier->id);
+                    ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                        if ($type === Item::class) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        } elseif ($type === Bundle::class) {
+                            $query->whereHas('items', function (Builder $query) {
+                                $query->where('supplier_id', $this->supplier->id);
+                            });
+                        }
                     })
                     ->chunk(1000, function (Collection $items) use ($warehouse) {
 
                         $data = $items->map(function (WbItem $item) use ($warehouse) {
                             return [
                                 "sku" => (string)$item->sku,
-                                "amount" => (int) ($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
+                                "amount" => (int)($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
                             ];
                         });
 
@@ -252,12 +343,25 @@ class WbItemPriceService
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: выгрузка цен в кабинет");
 
         WbItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                        $query->where('updated', true);
-                    })
-                    ->where('supplier_id', $this->supplier->id);
+            ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                if ($type === Item::class) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                            $query->where('updated', true);
+                        });
+                } elseif ($type === Bundle::class) {
+                    $query
+                        ->whereHas('items', function (Builder $query) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        })
+                        ->whereDoesntHave('items', function (Builder $query) {
+                            $query
+                                ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                                    $query->where('updated', false);
+                                });
+                        });
+                }
             })
             ->whereNotNull('volume')
             ->whereNotNull('retail_markup_percent')

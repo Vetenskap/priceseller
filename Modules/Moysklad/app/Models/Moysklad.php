@@ -44,6 +44,11 @@ class Moysklad extends Model
         return $this->hasMany(MoyskladItemMainAttributeLink::class);
     }
 
+    public function bundleMainAttributeLinks()
+    {
+        return $this->hasMany(MoyskladBundleMainAttributeLink::class);
+    }
+
     public function itemAdditionalAttributeLinks()
     {
         return $this->hasMany(MoyskladItemAdditionalAttributeLink::class);

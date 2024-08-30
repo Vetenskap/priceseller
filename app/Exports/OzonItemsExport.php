@@ -39,12 +39,14 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
 
         $this->market->items()
             ->orderByDesc('updated_at')
+            ->with('ozonitemable')
             ->chunk(1000, function (Collection $items) use (&$allData) {
                 $chunkData = $items->map(function (OzonItem $item) {
                     $main = [
                         'product_id' => $item->product_id,
                         'offer_id' => $item->offer_id,
-                        'item_code' => $item->item->code,
+                        'item_code' => $item->ozonitemable->code,
+                        'item_type' => $item->ozonitemable->getMorphClass() === 'App\Models\Item' ? 'Товар' : 'Комплект',
                         'min_price_percent' => $item->min_price_percent,
                         'min_price' => $item->min_price,
                         'shipping_processing' => $item->shipping_processing,
@@ -57,8 +59,8 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
                         'price_max' => $item->price_max,
                         'price_market' => $item->price_market,
                         'count' => $item->count,
-                        'item_price' => $item->item->price,
-                        'multiplicity' => $item->item->multiplicity,
+                        'item_price' => $item->ozonitemable->getMorphClass() === 'App\Models\Item' ? $item->ozonitemable->price : $item->ozonitemable->items()->sum('price'),
+                        'multiplicity' => $item->ozonitemable->getMorphClass() === 'App\Models\Item' ? $item->ozonitemable->multiplicity : $item->ozonitemable->items()->min('bundle_items.multiplicity'),
                         'updated_at' => $item->updated_at,
                         'created_at' => $item->created_at,
                         'delete' => 'Нет'

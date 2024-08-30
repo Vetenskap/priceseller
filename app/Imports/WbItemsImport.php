@@ -28,6 +28,7 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
         'Артикул WB (nmID)',
         'Артикул продавца (vendorCode)',
         'Код',
+        'Тип (Комплект или Товар)',
         'Баркод (sku)',
         'Комиссия, процент',
         'Мин. цена',
@@ -60,7 +61,9 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
     {
         $row = collect($row);
 
-        $item = $this->user->items()->where('code', $row->get('Код'))->first();
+        $item = $row->get('Тип (Комплект или Товар)') === 'Комплект'
+            ? $this->user->bundles()->where('code', $row->get('Код'))->first()
+            : $this->user->items()->where('code', $row->get('Код'))->first();
 
         if (!$item) {
             MarketItemRelationshipService::handleNotFoundItem(
@@ -134,7 +137,8 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
             'retail_markup_percent' => $row->get('Розничная наценка, процент'),
             'package' => $row->get('Упаковка'),
             'volume' => $row->get('Объем'),
-            'item_id' => $item->id,
+            'wbitemable_id' => $item->id,
+            'wbitemable_type' => $item->getMorphClass(),
             'id' => Str::uuid()
         ]);
     }
@@ -158,6 +162,7 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
             'Упаковка' => ['nullable', 'numeric', 'min:0'],
             'Объем' => ['nullable', 'numeric'],
             'Код' => ['required'],
+            'Тип (Комплект или Товар)' => ['nullable'],
         ];
     }
 

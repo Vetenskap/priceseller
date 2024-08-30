@@ -44,7 +44,8 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
                     $main = [
                         'nmID' => $item->nm_id,
                         'vendor_code' => $item->vendor_code,
-                        'item_code' => $item->item->code,
+                        'item_code' => $item->wbitemable->code,
+                        'item_type' => $item->wbitemable->getMorphClass() === 'App\Models\Item' ? 'Товар' : 'Комплект',
                         'sku' => $item->sku,
                         'sales_percent' => $item->sales_percent,
                         'min_price' => $item->min_price,
@@ -54,8 +55,8 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
                         'price' => $item->price,
                         'price_market' => $item->price_market,
                         'count' => $item->count,
-                        'item_price' => $item->item->price,
-                        'multiplicity' => $item->item->multiplicity,
+                        'item_price' => $item->wbitemable->getMorphClass() === 'App\Models\Item' ? $item->wbitemable->price : $item->wbitemable->items()->sum('price'),
+                        'multiplicity' => $item->wbitemable->getMorphClass() === 'App\Models\Item' ? $item->wbitemable->multiplicity : $item->wbitemable->items()->min('bundle_items.multiplicity'),
                         'updated_at' => $item->updated_at,
                         'created_at' => $item->created_at,
                         'delete' => 'Нет'

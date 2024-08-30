@@ -51,6 +51,10 @@ new class extends Component {
                                 wire:navigate.hover>
                         {{ __('Товары') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('bundles.index')" :active="request()->routeIs('bundles.index', 'bundles.edit')"
+                                wire:navigate.hover>
+                        {{ __('Комплекты') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('ozon')" :active="request()->routeIs('ozon', 'ozon-market-edit')"
                                 wire:navigate.hover>
                         {{ __('ОЗОН') }}
@@ -153,6 +157,10 @@ new class extends Component {
             <x-responsive-nav-link :href="route('items')" :active="request()->routeIs('items', 'item-edit')"
                                    wire:navigate.hover>
                 {{ __('Товары') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('bundles.index')" :active="request()->routeIs('bundles.index', 'bundles.edit')"
+                                   wire:navigate.hover>
+                {{ __('Комплекты') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('ozon')" :active="request()->routeIs('ozon', 'ozon-market-edit')"
                                    wire:navigate.hover>

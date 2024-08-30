@@ -2,9 +2,12 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Bundle;
+use App\Models\Item;
+use App\Models\User;
+use App\Models\WbItem;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Validator;
+use Illuminate\Database\Eloquent\Builder;
 
 class Test extends Command
 {
@@ -27,6 +30,12 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(intval(-1) < 0);
+        $collection = collect([
+            ['id' => 1, 'unload_wb' => true],
+            ['id' => 2, 'unload_wb' => true],
+            ['id' => 3, 'unload_wb' => false]
+        ]);
+
+        dd(boolval($collection->first(fn (array $item) => !$item['unload_wb'])));
     }
 }

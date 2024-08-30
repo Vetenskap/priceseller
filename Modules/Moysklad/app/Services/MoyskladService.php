@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 use Modules\Moysklad\HttpClient\MoyskladClient;
 use Modules\Moysklad\HttpClient\MoyskladClientActions;
+use Modules\Moysklad\HttpClient\Resources\Entities\Bundle\Bundle;
+use Modules\Moysklad\HttpClient\Resources\Entities\Bundle\MetaArrays\Component;
 use Modules\Moysklad\HttpClient\Resources\Entities\Counterparty;
 use Modules\Moysklad\HttpClient\Resources\Entities\EntityList;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Metadata\Attribute;
@@ -16,6 +18,7 @@ use Modules\Moysklad\HttpClient\Resources\Entities\Product\Organization;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 use Modules\Moysklad\HttpClient\Resources\Entities\Store;
 use Modules\Moysklad\Models\Moysklad;
+use Modules\Moysklad\Models\MoyskladBundleMainAttributeLink;
 use Modules\Moysklad\Models\MoyskladItemAdditionalAttributeLink;
 use Modules\Moysklad\Models\MoyskladItemMainAttributeLink;
 use Modules\Moysklad\Models\MoyskladWarehouseWarehouse;
@@ -77,13 +80,13 @@ class MoyskladService
         });
     }
 
-    public function getAllAssortmentAttributes()
+    public function getAllAssortmentAttributes(): Collection
     {
-        return Cache::tags(['moysklad', 'assortment', 'attributes'])->remember($this->moysklad->id, now()->addDay(), function () {
+        $assortmentAttributes = Cache::tags(['moysklad', 'assortment', 'attributes'])->remember($this->moysklad->id, now()->addDay(), function () {
 
             $entityList = new EntityList(Attribute::class, $this->moysklad->api_key);
 
-            $allAttributes = collect(Product::FIELDS);
+            $allAttributes = collect();
 
             do {
 
@@ -98,6 +101,33 @@ class MoyskladService
             return $allAttributes;
 
         });
+
+        return $assortmentAttributes->merge(Product::FIELDS);
+    }
+
+    public function getAllBundleAttributes(): Collection
+    {
+        $assortmentAttributes = Cache::tags(['moysklad', 'assortment', 'attributes'])->remember($this->moysklad->id, now()->addDay(), function () {
+
+            $entityList = new EntityList(Attribute::class, $this->moysklad->api_key);
+
+            $allAttributes = collect();
+
+            do {
+
+                $attributes = $entityList->getNext()->map(function (Attribute $attribute) {
+                    return ['name' => $attribute->getId(), 'label' => $attribute->getName(), 'type' => 'metadata'];
+                });
+
+                $allAttributes = $allAttributes->merge($attributes);
+
+            } while ($entityList->hasNext());
+
+            return $allAttributes;
+
+        });
+
+        return $assortmentAttributes->merge(Bundle::FIELDS);
     }
 
     public function importApiItems(): void
@@ -130,7 +160,37 @@ class MoyskladService
         } while ($entityList->hasNext());
     }
 
-    public function createItemFromProduct(Product $product): void
+    public function importApiBundles()
+    {
+        $offset = Cache::tags(['moysklad', 'bundle', 'offset'])->get($this->moysklad->id, 0);
+
+        $entityList = new EntityList(Bundle::class, $this->moysklad->api_key, offset: $offset, limit: 100, queryParameters: ['expand' => 'components']);
+
+        do {
+
+            $bundles = $entityList->getNext();
+
+            $bundles->each(function (Bundle $bundle) use (&$dirtyItems) {
+
+                $code = $this->getValueFromAttributesAndProduct($this->moysklad->bundleMainAttributeLinks->where('attribute_name', 'code')->first(), $bundle);
+
+                if ($userBundle = $this->moysklad->user->bundles()->where('ms_uuid', $bundle->id)
+                    ->orWhere('code', $code)
+                    ->first()
+                ) {
+                    $this->updateBundle($bundle, $userBundle);
+                } else {
+                    $this->createBundle($bundle);
+                }
+
+            });
+
+            Cache::tags(['moysklad', 'product', 'offset'])->set($this->moysklad->id, $entityList->getOffset(), now()->addDay());
+
+        } while ($entityList->hasNext());
+    }
+
+    public function createItemFromProduct(Product $product): ?Item
     {
         $itemService = new ItemService($this->moysklad->user);
 
@@ -166,8 +226,10 @@ class MoyskladService
                 }
             }
 
-            $itemService->createFromMs($data);
+            return $itemService->createFromMs($data);
         }
+
+        return  null;
     }
 
     public function updateItemFromProductWithUpdatedFields(Product $product, Item $item, Collection $updatedFields): void
@@ -199,6 +261,104 @@ class MoyskladService
                 ]);
             }
 
+        });
+    }
+
+    public function createBundle(Bundle $bundle): void
+    {
+        $data['ms_uuid'] = $bundle->id;
+
+        foreach ($this->moysklad->bundleMainAttributeLinks as $bundleMainAttributeLink) {
+
+            $value = $this->getValueFromAttributesAndProduct($bundleMainAttributeLink, $bundle);
+
+            $data[$bundleMainAttributeLink->attribute_name] = $value;
+
+        }
+
+        try {
+            $userBundle = $this->moysklad->user->bundles()->create($data);
+        } catch (\Throwable $e) {
+            report($e);
+            return;
+        }
+
+        $bundle->getComponents()->each(function (Component $component) use ($userBundle) {
+
+            $supplierBundle = $userBundle->items()->first()?->supplier;
+
+            if ($item = $this->moysklad->user->items()->where('ms_uuid', $component->getAssortment()->id)->first()) {
+
+                if ($supplierBundle->id !== $item->supplier->id) {
+                    // TODO: supplier bundle moysklad
+                    return;
+                }
+
+                $userBundle->items()->attach($item->id, ['multiplicity' => $component->getQuantity()]);
+            } else {
+                $component->getAssortment()->fetch($this->moysklad->api_key);
+                if ($item = $this->createItemFromProduct($component->getAssortment())) {
+
+                    if ($supplierBundle->id !== $item->supplier->id) {
+                        // TODO: supplier bundle moysklad
+                        return;
+                    }
+
+                    $userBundle->items()->attach($item->id, ['multiplicity' => $component->getQuantity()]);
+                }
+            }
+        });
+    }
+
+    public function updateBundle(Bundle $bundle, \App\Models\Bundle $userBundle): void
+    {
+        $userBundle->ms_uuid = $bundle->id;
+
+        foreach ($this->moysklad->bundleMainAttributeLinks as $bundleMainAttributeLink) {
+
+            $value = $this->getValueFromAttributesAndProduct($bundleMainAttributeLink, $bundle);
+
+            $userBundle->{$bundleMainAttributeLink->attribute_name} = $value;
+
+        }
+
+        try {
+            $userBundle->save();
+        } catch (\Throwable $e) {
+            report($e);
+            return;
+        }
+
+        $userBundle->items()->each(function (Item $item) use ($bundle, $userBundle) {
+            if (!$bundle->getComponents()->first(fn (Component $component) => $component->getAssortment()->id == $item->ms_uuid)) {
+                $userBundle->items()->detach($item->id);
+            }
+        });
+
+        $bundle->getComponents()->each(function (Component $component) use ($userBundle) {
+
+            $supplierBundle = $userBundle->items()->first()?->supplier;
+
+            if ($item = $this->moysklad->user->items()->where('ms_uuid', $component->getAssortment()->id)->first()) {
+
+                if ($supplierBundle->id !== $item->supplier->id) {
+                    // TODO: supplier bundle moysklad
+                    return;
+                }
+
+                $userBundle->items()->attach($item->id, ['multiplicity' => $component->getQuantity()]);
+            } else {
+                $component->getAssortment()->fetch($this->moysklad->api_key);
+                if ($item = $this->createItemFromProduct($component->getAssortment())) {
+
+                    if ($supplierBundle->id !== $item->supplier->id) {
+                        // TODO: supplier bundle moysklad
+                        return;
+                    }
+
+                    $userBundle->items()->attach($item->id, ['multiplicity' => $component->getQuantity()]);
+                }
+            }
         });
     }
 
@@ -255,7 +415,7 @@ class MoyskladService
         return null;
     }
 
-    public function getValueFromAttributesAndProduct(MoyskladItemMainAttributeLink|MoyskladItemAdditionalAttributeLink $link, Product $product): int|bool|float|string|null
+    public function getValueFromAttributesAndProduct(MoyskladItemMainAttributeLink|MoyskladItemAdditionalAttributeLink|MoyskladBundleMainAttributeLink $link, Product|Bundle $product): int|bool|float|string|null
     {
         if ($link->type === 'metadata') {
             return $this->prepareAttributes($link, $product);

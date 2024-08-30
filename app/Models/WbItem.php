@@ -22,9 +22,10 @@ class WbItem extends MainModel
         'package',
         'volume',
         'price_market',
-        'item_id',
         'wb_market_id',
-        'id'
+        'id',
+        'wbitemable_id',
+        'wbitemable_type'
     ];
 
     public function item()
@@ -50,5 +51,10 @@ class WbItem extends MainModel
     public function stocks()
     {
         return $this->hasMany(WbWarehouseStock::class);
+    }
+
+    public function wbitemable()
+    {
+        return $this->morphTo('wbitemable', 'wbitemable_type', 'wbitemable_id');
     }
 }

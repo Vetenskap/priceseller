@@ -74,10 +74,13 @@ class WbMarketService
             $result->get('cards')->each(function (array $wbItem) use ($externalClient, $defaultFields, &$error, &$correct, &$updated) {
 
                 try {
-                    $item = Item::where('code', $wbItem['vendorCode'])->where('user_id', $this->market->user_id)->firstOrFail();
+                    $item = $this->market->user->items()->where('code', $wbItem['vendorCode'])->first();
+                    if (!$item) {
+                        $item = $this->market->user->bundles()->where('code', $wbItem['vendorCode'])->firstOrFail();
+                    }
                 } catch (ModelNotFoundException) {
                     try {
-                        $item = WbItem::where('vendor_code', $wbItem['vendorCode'])->where('wb_market_id', $this->market->id)->firstOrFail()->item;
+                        $item = $this->market->items()->where('vendor_code', $wbItem['vendorCode'])->firstOrFail()->wbitemable;
                     } catch (ModelNotFoundException) {
 
                         $error++;
@@ -114,7 +117,8 @@ class WbMarketService
                     'nm_id' => $wbItem['nmID'],
                     'sku' => $sku,
                     'wb_market_id' => $this->market->id,
-                    'item_id' => $item->id,
+                    'wbitemable_id' => $item->id,
+                    'wbitemable_type' => $item->getMorphClass(),
                 ]);
 
                 $defaultFields->each(function ($value, $key) use ($newWbItem) {

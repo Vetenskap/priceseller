@@ -12,6 +12,7 @@ class EntityList
     protected int $offset = 0;
     protected int $size = 0;
     protected string $apiKey;
+    protected Collection $queryParameters;
 
     /**
      * @param string $entityClass
@@ -19,12 +20,13 @@ class EntityList
      * @param int $offset
      * @param string $apiKey
      */
-    public function __construct(string $entityClass, string $apiKey, int $limit = 1000, int $offset = 0)
+    public function __construct(string $entityClass, string $apiKey, int $limit = 1000, int $offset = 0, array $queryParameters = [])
     {
         $this->entityClass = $entityClass;
         $this->limit = $limit;
         $this->offset = $offset;
         $this->apiKey = $apiKey;
+        $this->queryParameters = collect($queryParameters);
     }
 
 
@@ -32,10 +34,10 @@ class EntityList
     {
         $client = new MoyskladClient($this->apiKey);
 
-        $result = $client->get($this->entityClass::ENDPOINT, [
+        $result = $client->get($this->entityClass::ENDPOINT, $this->queryParameters->merge([
             'limit' => $this->limit,
             'offset' => $this->offset
-        ]);
+        ])->all());
 
         if (!$this->size) {
             $meta = collect($result->get('meta'));

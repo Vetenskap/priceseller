@@ -37,6 +37,9 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/items/{page?}', \App\Livewire\Item\ItemIndex::class)->name('items');
     Route::get('/items/list/{item}', \App\Livewire\Item\ItemEdit::class)->name('item-edit')->whereUuid('item');
 
+    Route::get('/bundles/{page?}', \App\Livewire\Bundle\BundleIndex::class)->name('bundles.index');
+    Route::get('/bundles/list/{bundle}', \App\Livewire\Item\ItemEdit::class)->name('bundles.edit')->whereUuid('bundle');
+
 
     Route::get('/ozon', \App\Livewire\OzonMarket\OzonMarketIndex::class)->name('ozon');
     Route::get('/ozon/{market}/{page?}', \App\Livewire\OzonMarket\OzonMarketEdit::class)->name('ozon-market-edit')->whereUuid('market');

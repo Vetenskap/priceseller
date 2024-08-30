@@ -27,15 +27,11 @@ class OzonItem extends MainModel
         'price_max',
         'price_market',
         'count',
-        'item_id',
         'ozon_market_id',
-        'id'
+        'id',
+        'ozonitemable_id',
+        'ozonitemable_type'
     ];
-
-    public function item()
-    {
-        return $this->belongsTo(Item::class);
-    }
 
     public function orders()
     {
@@ -55,5 +51,10 @@ class OzonItem extends MainModel
     public function warehouseStock(OzonWarehouse $warehouse): ?OzonWarehouseStock
     {
         return $warehouse->stocks()->where('ozon_item_id', $this->id)->first();
+    }
+
+    public function ozonitemable()
+    {
+        return $this->morphTo('ozonitemable', 'ozonitemable_type', 'ozonitemable_id');
     }
 }
