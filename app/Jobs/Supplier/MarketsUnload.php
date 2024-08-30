@@ -2,6 +2,8 @@
 
 namespace App\Jobs\Supplier;
 
+use App\Models\Bundle;
+use App\Models\Item;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Services\OzonItemPriceService;
@@ -35,8 +37,14 @@ class MarketsUnload implements ShouldQueue, ShouldBeUnique
     {
         $ozonMarkets = $this->user->ozonMarkets()
             ->whereHas('items', function (Builder $query) {
-                $query->whereHas('item', function (Builder $query) {
-                    $query->where('supplier_id', $this->supplier->id);
+                $query->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                    if ($type === Item::class) {
+                        $query->where('supplier_id', $this->supplier->id)
+                } elseif ($type === Bundle::class) {
+                        $query->whereHas('items', function (Builder $query) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        });
+                    }
                 });
             })
             ->where('open', true)
@@ -45,8 +53,14 @@ class MarketsUnload implements ShouldQueue, ShouldBeUnique
 
         $wbMarkets = $this->user->wbMarkets()
             ->whereHas('items', function (Builder $query) {
-                $query->whereHas('item', function (Builder $query) {
-                    $query->where('supplier_id', $this->supplier->id);
+                $query->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                    if ($type === Item::class) {
+                        $query->where('supplier_id', $this->supplier->id)
+                } elseif ($type === Bundle::class) {
+                        $query->whereHas('items', function (Builder $query) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        });
+                    }
                 });
             })
             ->where('open', true)
