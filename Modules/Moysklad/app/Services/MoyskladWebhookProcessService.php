@@ -97,12 +97,14 @@ class MoyskladWebhookProcessService
                 ]);
                 $stocksAll->fetchStocks($this->webhook->moysklad->api_key);
 
+                logger('filter=product=' . MoyskladClient::BASEURL . Product::ENDPOINT . $position->getAssortment()->id . ';' . 'store=' . MoyskladClient::BASEURL . Store::ENDPOINT . '64232c0a-9a30-11ed-0a80-098900246f45');
+                logger('stocks');
+                logger($stocksAll->getStocks());
+
                 $stocksAll->getStocks()->get('rows')->each(function (Collection $stock) use ($order, $stocksAll) {
+                    logger('stock');
+                    logger($stock);
                     if (intval($stock->get('quantity')) < 0) {
-                        logger('stocks');
-                        logger($stocksAll->getStocks());
-                        logger('stock');
-                        logger($stock);
                         $order->put($this->webhook->moysklad->api_key, [
                             'store' => [
                                 'meta' => [
