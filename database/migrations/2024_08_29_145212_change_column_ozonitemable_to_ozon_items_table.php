@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::table('ozon_items', function (Blueprint $table) {
             $table->string('ozonitemable_id')->change();
-            $table->string('ozonitemable_type')->default('App\Models\Item')->after('ozonitemable_id');
+            $table->string('ozonitemable_type')->default('App\\Models\\Item')->after('ozonitemable_id');
         });
     }
 
