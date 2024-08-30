@@ -39,7 +39,7 @@ class MarketsUnload implements ShouldQueue, ShouldBeUnique
             ->whereHas('items', function (Builder $query) {
                 $query->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
                     if ($type === Item::class) {
-                        $query->where('supplier_id', $this->supplier->id)
+                        $query->where('supplier_id', $this->supplier->id);
                 } elseif ($type === Bundle::class) {
                         $query->whereHas('items', function (Builder $query) {
                             $query->where('supplier_id', $this->supplier->id);
@@ -55,7 +55,7 @@ class MarketsUnload implements ShouldQueue, ShouldBeUnique
             ->whereHas('items', function (Builder $query) {
                 $query->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
                     if ($type === Item::class) {
-                        $query->where('supplier_id', $this->supplier->id)
+                        $query->where('supplier_id', $this->supplier->id);
                 } elseif ($type === Bundle::class) {
                         $query->whereHas('items', function (Builder $query) {
                             $query->where('supplier_id', $this->supplier->id);
