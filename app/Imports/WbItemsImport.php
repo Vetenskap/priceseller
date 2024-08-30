@@ -104,6 +104,8 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
             $wbItem->retail_markup_percent = $row->get('Розничная наценка, процент');
             $wbItem->package = $row->get('Упаковка');
             $wbItem->volume = $row->get('Объем');
+            $wbItem->wbitemable_id = $item->id;
+            $wbItem->wbitemable_type = $item->getMorphClass();
 
             $wbItem->save();
 
