@@ -44,7 +44,7 @@ class WbMarketService
         return $uuid;
     }
 
-    public function directRelationships(Collection $defaultFields): Collection
+    public function directRelationships(Collection $defaultFields, bool $directLink = false): Collection
     {
         $defaultFields = $defaultFields->filter();
 
@@ -71,11 +71,20 @@ class WbMarketService
             $nmId = $result->get('cursor')->get('nmID');
             $total = $result->get('cursor')->get('total');
 
-            $result->get('cards')->each(function (array $wbItem) use ($externalClient, $defaultFields, &$error, &$correct, &$updated) {
+            $result->get('cards')->each(function (array $wbItem) use ($externalClient, $defaultFields, &$error, &$correct, &$updated, $directLink) {
 
-                try {
-                    $item = Item::where('code', $wbItem['vendorCode'])->where('user_id', $this->market->user_id)->firstOrFail();
-                } catch (ModelNotFoundException) {
+                if ($directLink) {
+                    try {
+                        $item = Item::where('code', $wbItem['vendorCode'])->where('user_id', $this->market->user_id)->firstOrFail();
+                    } catch (ModelNotFoundException) {
+
+                        $error++;
+
+                        MarketItemRelationshipService::handleNotFoundItem($wbItem['vendorCode'], $this->market->id, 'App\Models\WbMarket');
+
+                        return;
+                    }
+                } else {
                     try {
                         $item = WbItem::where('vendor_code', $wbItem['vendorCode'])->where('wb_market_id', $this->market->id)->firstOrFail()->item;
                     } catch (ModelNotFoundException) {

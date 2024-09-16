@@ -71,7 +71,7 @@
                 <x-marketPages.export :market="$market"/>
                 @break
             @case('relationships_commissions')
-                <x-marketPages.relationships-commissions :market="$market" :items="$items" :status-filters="$statusFilters" :file="$file">
+                <x-marketPages.relationships-commissions :market="$market" :items="$items" :status-filters="$statusFilters" :file="$file" :direct-link="$directLink">
                     <x-inputs.input-with-label name="sales_percent"
                                                type="number"
                                                field="sales_percent"

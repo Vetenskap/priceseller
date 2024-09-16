@@ -20,7 +20,7 @@ class MarketRelationshipsAndCommissions implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public Collection $defaultFields, public OzonMarket|WbMarket $model, public string $service)
+    public function __construct(public Collection $defaultFields, public OzonMarket|WbMarket $model, public string $service, public bool $directLink = false)
     {
         if (!ItemsImportReportService::newOrFail($this->model, '') ){
             throw new \Exception("Уже идёт импорт");
@@ -38,7 +38,7 @@ class MarketRelationshipsAndCommissions implements ShouldQueue
 
             if (method_exists($service, 'directRelationships')) {
 
-                $result = $service->directRelationships($this->defaultFields);
+                $result = $service->directRelationships($this->defaultFields, $this->directLink);
 
                 ItemsImportReportService::success(
                     model: $this->model,

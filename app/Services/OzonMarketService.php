@@ -62,7 +62,7 @@ class OzonMarketService
 
     }
 
-    public function directRelationships(Collection $defaultFields): Collection
+    public function directRelationships(Collection $defaultFields, bool $directLink = false): Collection
     {
         $defaultFields = $defaultFields->filter();
 
@@ -82,15 +82,23 @@ class OzonMarketService
 
             $lastId = $result->get('last_id');
 
-            $result->get('items')->each(function (array $ozonItem) use ($defaultFields, &$correct, &$error, &$updated) {
+            $result->get('items')->each(function (array $ozonItem) use ($defaultFields, &$correct, &$error, &$updated, $directLink) {
 
                 $commissions = collect($ozonItem['commissions']);
                 $price = collect($ozonItem['price']);
                 $priceIndexes = collect($ozonItem['price_indexes']);
 
-                try {
-                    $item = Item::where('code', $ozonItem['offer_id'])->where('user_id', $this->market->user_id)->firstOrFail();
-                } catch (ModelNotFoundException) {
+                if ($directLink) {
+                    try {
+                        $item = Item::where('code', $ozonItem['offer_id'])->where('user_id', $this->market->user_id)->firstOrFail();
+                    } catch (ModelNotFoundException) {
+                        $error++;
+
+                        MarketItemRelationshipService::handleNotFoundItem($ozonItem['offer_id'], $this->market->id, 'App\Models\OzonMarket');
+
+                        return;
+                    }
+                } else {
                     try {
                         $item = OzonItem::where('offer_id', $ozonItem['offer_id'])->where('ozon_market_id', $this->market->id)->firstOrFail()->item;
                     } catch (ModelNotFoundException) {
