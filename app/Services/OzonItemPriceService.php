@@ -3,6 +3,9 @@
 namespace App\Services;
 
 use App\HttpClient\OzonClient;
+use App\Models\Bundle;
+use App\Models\Item;
+use App\Models\ItemWarehouseStock;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
@@ -34,12 +37,25 @@ class OzonItemPriceService
         SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт цен");
 
         OzonItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                        $query->where('updated', true);
-                    })
-                    ->where('supplier_id', $this->supplier->id);
+            ->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                if ($type === Item::class) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                            $query->where('updated', true);
+                        });
+                } elseif ($type === Bundle::class) {
+                    $query
+                        ->whereHas('items', function (Builder $query) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        })
+                        ->whereDoesntHave('items', function (Builder $query) {
+                            $query
+                                ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                                    $query->where('updated', false);
+                                });
+                        });
+                }
             })
             ->chunk(1000, function ($items) {
                 $items->each(function (OzonItem $ozonItem) {
@@ -52,9 +68,14 @@ class OzonItemPriceService
     public function updatePriceTest()
     {
         OzonItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('supplier_id', $this->supplier->id);
+            ->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                if ($type === Item::class) {
+                    $query->where('supplier_id', $this->supplier->id);
+                } elseif ($type === Bundle::class) {
+                    $query->whereHas('items', function (Builder $query) {
+                        $query->where('supplier_id', $this->supplier->id);
+                    });
+                }
             })
             ->chunk(1000, function ($items) {
                 $items->each(function (OzonItem $ozonItem) {
@@ -66,10 +87,27 @@ class OzonItemPriceService
 
     public function recountPriceOzonItem(OzonItem $ozonItem): OzonItem
     {
-        if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$ozonItem->item->price) {
-            $price = $ozonItem->item->buy_price_reserve;
+        if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
+
+            $multiplicity = $ozonItem->ozonitemable->multiplicity;
+
+            if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$ozonItem->ozonitemable->price) {
+                $price = $ozonItem->ozonitemable->buy_price_reserve;
+            } else {
+                $price = $ozonItem->ozonitemable->price;
+            }
+
         } else {
-            $price = $ozonItem->item->price;
+
+            $multiplicity = 1;
+
+            $price = $ozonItem->ozonitemable->items->map(function (Item $item) {
+                if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$item->price) {
+                    return $item->buy_price_reserve * $item->pivot->multiplicity;
+                } else {
+                    return $item->price * $item->pivot->multiplicity;
+                }
+            })->sum();
         }
 
         $min_price_percent = (float)$this->market->min_price_percent;
@@ -79,7 +117,6 @@ class OzonItemPriceService
         $lastMile = (float)$this->market->last_mile;
         $maxMile = (float)$this->market->max_mile;
 
-        $multiplicity = $ozonItem->item->multiplicity;
         $shipping_processing = $ozonItem->shipping_processing;
         $direct_flow_trans = $ozonItem->direct_flow_trans;
         $sales_percent = $ozonItem->sales_percent;
@@ -128,10 +165,20 @@ class OzonItemPriceService
         SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
 
         OzonItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('updated', true)
-                    ->where('supplier_id', $this->supplier->id);
+            ->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                if ($type === Item::class) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->where('updated', true);
+                } elseif ($type === Bundle::class) {
+                    $query
+                        ->whereHas('items', function (Builder $query) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        })
+                        ->whereDoesntHave('items', function (Builder $query) {
+                            $query->where('updated', false);
+                        });
+                }
             })
             ->chunk(1000, function ($items) {
                 $items->each(function (OzonItem $ozonItem) {
@@ -146,25 +193,50 @@ class OzonItemPriceService
     public function recountStockOzonItem(OzonItem $ozonItem): OzonItem
     {
         $this->market->warehouses->each(function (OzonWarehouse $warehouse) use ($ozonItem) {
-            $myWarehousesStocks = $warehouse->userWarehouses->map(function (OzonWarehouseUserWarehouse $userWarehouse) use ($ozonItem) {
-                return $userWarehouse->warehouse->stocks()->where('item_id', $ozonItem->item_id)->first()?->stock;
-            })->sum();
 
-            $new_count = $ozonItem->item->count - $this->market->minus_stock;
-            $new_count = $new_count < $this->market->min ? 0 : $new_count;
-            $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $ozonItem->item->multiplicity === 1) ? 1 : $new_count;
-            $new_count = ($new_count + $myWarehousesStocks) / $ozonItem->item->multiplicity;
+            $new_count = 0;
 
-            if (ModuleService::moduleIsEnabled('Order', $this->user)) {
-                $new_count = $new_count - ($ozonItem->orders()->where('state', 'new')->sum('count') * $ozonItem->item->multiplicity);
+            if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
+                $unload_ozon = !$ozonItem->ozonitemable->unload_ozon;
+            } else {
+                $unload_ozon = boolval($ozonItem->ozonitemable->items->first(fn(Item $item) => !$item->unload_ozon));
             }
 
-            if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                $new_count = $new_count - (($ozonItem->item->moyskladOrders()->where('new', true)->exists() ? $ozonItem->item->moyskladOrders()->where('new')->sum('orders') : 0) * $ozonItem->item->multiplicity);
-            }
+            if (!$unload_ozon) {
 
-            $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
-            $new_count = (int)max($new_count, 0);
+                $itemIds = $ozonItem->ozonitemable_type === 'App\Models\Item' ? [$ozonItem->ozonitemable_id] : $ozonItem->ozonitemable->items->pluck('id')->toArray();
+
+                $myWarehousesStocks = $warehouse->userWarehouses->map(function (OzonWarehouseUserWarehouse $userWarehouse) use ($ozonItem, $itemIds) {
+                    return $userWarehouse->warehouse->stocks()->whereIn('item_id', $itemIds)->map(fn(ItemWarehouseStock $stock) => $stock->stock)->sum();
+                })->sum();
+
+                if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
+                    $new_count = $ozonItem->ozonitemable->count;
+                    $multiplicity = $ozonItem->ozonitemable->multiplicity;
+                } else {
+                    $new_count = $ozonItem->ozonitemable->items->map(function (Item $item) {
+                        return $item->count / $item->pivot->multiplicity;
+                    })->min();
+                    $multiplicity = 1;
+                }
+
+                $new_count = $new_count - $this->market->minus_stock;
+                $new_count = $new_count < $this->market->min ? 0 : $new_count;
+                $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $multiplicity === 1) ? 1 : $new_count;
+                $new_count = ($new_count + $myWarehousesStocks) / $multiplicity;
+
+//                if (ModuleService::moduleIsEnabled('Order', $this->user)) {
+//                    $new_count = $new_count - ($ozonItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
+//                }
+//
+//                if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+//                    $new_count = $new_count - (($ozonItem->item->moyskladOrders()->where('new', true)->exists() ? $wbItem->item->moyskladOrders()->where('new')->sum('orders') : 0) * $wbItem->item->multiplicity);
+//                }
+
+                $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
+                $new_count = (int)max($new_count, 0);
+
+            }
 
             $warehouse->stocks()->updateOrCreate([
                 'ozon_item_id' => $ozonItem->id
@@ -172,6 +244,7 @@ class OzonItemPriceService
                 'ozon_item_id' => $ozonItem->id,
                 'stock' => $new_count
             ]);
+
         });
 
         return $ozonItem;
@@ -181,10 +254,19 @@ class OzonItemPriceService
     {
         OzonWarehouseStock::query()
             ->whereHas('ozonItem', function (Builder $query) {
-                $query->whereHas('item', function (Builder $query) {
-                    $query
-                        ->where('updated', false)
-                        ->where('supplier_id', $this->supplier->id);
+                $query->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                    if ($type === Item::class) {
+                        $query
+                            ->where('supplier_id', $this->supplier->id)
+                            ->where('updated', false);
+                    } elseif ($type === Bundle::class) {
+                        $query
+                            ->whereHas('items', function (Builder $query) {
+                                $query
+                                    ->where('supplier_id', $this->supplier->id)
+                                    ->where('updated', false);
+                            });
+                    }
                 });
             })
             ->update(['stock' => 0]);
@@ -194,39 +276,45 @@ class OzonItemPriceService
     {
         OzonWarehouseStock::query()
             ->whereHas('ozonItem', function (Builder $query) {
-                $query->whereHas('item', function (Builder $query) {
-                    $query
-                        ->where('supplier_id', $this->supplier->id);
+                $query->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                    if ($type === Item::class) {
+                        $query->where('supplier_id', $this->supplier->id);
+                    } elseif ($type === Bundle::class) {
+                        $query
+                            ->whereHas('items', function (Builder $query) {
+                                $query->where('supplier_id', $this->supplier->id);
+                            });
+                    }
                 });
             })
             ->update(['stock' => 0]);
     }
 
-    public function unloadOzonItemStocks(OzonItem $ozonItem): void
-    {
-        $this->market->warehouses()
-            ->whereHas('market', function (Builder $query) use ($ozonItem) {
-                $query->whereHas('items', function (Builder $query) use ($ozonItem) {
-                    $query->where('id', $ozonItem->item_id);
-                });
-            })
-            ->get()
-            ->map(function (OzonWarehouse $warehouse) use ($ozonItem) {
-
-                $data = [
-                    [
-                        'offer_id' => (string)$ozonItem->offer_id,
-                        'product_id' => (int)$ozonItem->product_id,
-                        'stock' => (int)$ozonItem->warehouseStock($warehouse) ? $ozonItem->warehouseStock($warehouse)->stock : 0,
-                        'warehouse_id' => (int)$warehouse->warehouse_id
-                    ]
-                ];
-
-                if (App::isProduction()) {
-                    $this->ozonClient->putStocks($data, $this->supplier);
-                }
-            });
-    }
+//    public function unloadOzonItemStocks(OzonItem $ozonItem): void
+//    {
+//        $this->market->warehouses()
+//            ->whereHas('market', function (Builder $query) use ($ozonItem) {
+//                $query->whereHas('items', function (Builder $query) use ($ozonItem) {
+//                    $query->where('id', $ozonItem->item_id);
+//                });
+//            })
+//            ->get()
+//            ->map(function (OzonWarehouse $warehouse) use ($ozonItem) {
+//
+//                $data = [
+//                    [
+//                        'offer_id' => (string)$ozonItem->offer_id,
+//                        'product_id' => (int)$ozonItem->product_id,
+//                        'stock' => (int)$ozonItem->warehouseStock($warehouse) ? $ozonItem->warehouseStock($warehouse)->stock : 0,
+//                        'warehouse_id' => (int)$warehouse->warehouse_id
+//                    ]
+//                ];
+//
+//                if (App::isProduction()) {
+//                    $this->ozonClient->putStocks($data, $this->supplier);
+//                }
+//            });
+//    }
 
     public function unloadAllStocks(): void
     {
@@ -248,10 +336,14 @@ class OzonItemPriceService
                 SupplierReportService::addLog($this->supplier, "Склад {$warehouse->name}: выгрузка остатков");
 
                 OzonItem::query()
-                    ->whereHas('item', function (Builder $query) {
-                        $query
-                            ->where('unload_ozon', true)
-                            ->where('supplier_id', $this->supplier->id);
+                    ->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                        if ($type === Item::class) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        } elseif ($type === Bundle::class) {
+                            $query->whereHas('items', function (Builder $query) {
+                                $query->where('supplier_id', $this->supplier->id);
+                            });
+                        }
                     })
                     ->chunk(100, function (Collection $items) use ($warehouse) {
 
@@ -283,12 +375,25 @@ class OzonItemPriceService
         SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: цен в кабинет");
 
         OzonItem::query()
-            ->whereHas('item', function (Builder $query) {
-                $query
-                    ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                        $query->where('updated', true);
-                    })
-                    ->where('supplier_id', $this->supplier->id);
+            ->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
+                if ($type === Item::class) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                            $query->where('updated', true);
+                        });
+                } elseif ($type === Bundle::class) {
+                    $query
+                        ->whereHas('items', function (Builder $query) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        })
+                        ->whereDoesntHave('items', function (Builder $query) {
+                            $query
+                                ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                                    $query->where('updated', false);
+                                });
+                        });
+                }
             })
             ->whereNotNull('price_min')
             ->whereNotNull('offer_id')

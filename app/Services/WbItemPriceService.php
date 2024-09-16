@@ -89,7 +89,7 @@ class WbItemPriceService
 
             $multiplicity = $wbItem->wbitemable->multiplicity;
 
-            if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$wbItem->item->price) {
+            if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$wbItem->wbitemable->price) {
                 $price = $wbItem->wbitemable->buy_price_reserve;
             } else {
                 $price = $wbItem->wbitemable->price;
@@ -199,13 +199,13 @@ class WbItemPriceService
                 $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $multiplicity === 1) ? 1 : $new_count;
                 $new_count = ($new_count + $myWarehousesStocks) / $multiplicity;
 
-                if (ModuleService::moduleIsEnabled('Order', $this->user)) {
-                    $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $wbItem->item->multiplicity);
-                }
-
-                if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                    $new_count = $new_count - (($wbItem->item->moyskladOrders()->where('new', true)->exists() ? $wbItem->item->moyskladOrders()->where('new')->sum('orders') : 0) * $wbItem->item->multiplicity);
-                }
+//                if (ModuleService::moduleIsEnabled('Order', $this->user)) {
+//                    $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $wbItem->item->multiplicity);
+//                }
+//
+//                if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+//                    $new_count = $new_count - (($wbItem->item->moyskladOrders()->where('new', true)->exists() ? $wbItem->item->moyskladOrders()->where('new')->sum('orders') : 0) * $wbItem->item->multiplicity);
+//                }
 
                 $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
                 $new_count = (int)max($new_count, 0);
@@ -263,29 +263,29 @@ class WbItemPriceService
             ->update(['stock' => 0]);
     }
 
-    public function unloadWbItemStocks(WbItem $wbItem): void
-    {
-        $this->market->warehouses()
-            ->whereHas('market', function (Builder $query) use ($wbItem) {
-                $query->whereHas('items', function (Builder $query) use ($wbItem) {
-                    $query->where('id', $wbItem->item_id);
-                });
-            })
-            ->get()
-            ->map(function (WbWarehouse $warehouse) use ($wbItem) {
-
-                $data = collect([
-                    [
-                        "sku" => (string)$wbItem->sku,
-                        "amount" => (int)$wbItem->warehouseStock($warehouse) ? $wbItem->warehouseStock($warehouse)->stock : 0,
-                    ]
-                ]);
-
-                if (App::isProduction()) {
-                    $this->wbClient->putStocks($data, $warehouse->warehouse_id, $this->supplier);
-                }
-            });
-    }
+//    public function unloadWbItemStocks(WbItem $wbItem): void
+//    {
+//        $this->market->warehouses()
+//            ->whereHas('market', function (Builder $query) use ($wbItem) {
+//                $query->whereHas('items', function (Builder $query) use ($wbItem) {
+//                    $query->where('id', $wbItem->item_id);
+//                });
+//            })
+//            ->get()
+//            ->map(function (WbWarehouse $warehouse) use ($wbItem) {
+//
+//                $data = collect([
+//                    [
+//                        "sku" => (string)$wbItem->sku,
+//                        "amount" => (int)$wbItem->warehouseStock($warehouse) ? $wbItem->warehouseStock($warehouse)->stock : 0,
+//                    ]
+//                ]);
+//
+//                if (App::isProduction()) {
+//                    $this->wbClient->putStocks($data, $warehouse->warehouse_id, $this->supplier);
+//                }
+//            });
+//    }
 
     public function unloadAllStocks(): void
     {

@@ -28,11 +28,6 @@ class WbItem extends MainModel
         'wbitemable_type'
     ];
 
-    public function item()
-    {
-        return $this->belongsTo(Item::class);
-    }
-
     public function orders()
     {
         return $this->morphMany(Order::class, 'orderable');
