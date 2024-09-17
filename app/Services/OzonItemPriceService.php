@@ -169,6 +169,7 @@ class OzonItemPriceService
                 if ($type === Item::class) {
                     $query
                         ->where('supplier_id', $this->supplier->id)
+                        ->where('unload_ozon', true)
                         ->where('updated', true);
                 } elseif ($type === Bundle::class) {
                     $query
@@ -176,7 +177,9 @@ class OzonItemPriceService
                             $query->where('supplier_id', $this->supplier->id);
                         })
                         ->whereDoesntHave('items', function (Builder $query) {
-                            $query->where('updated', false);
+                            $query
+                                ->where('unload_ozon', false)
+                                ->where('updated', false);
                         });
                 }
             })

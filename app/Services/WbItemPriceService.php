@@ -143,6 +143,7 @@ class WbItemPriceService
                 if ($type === Item::class) {
                     $query
                         ->where('supplier_id', $this->supplier->id)
+                        ->where('unload_wb', true)
                         ->where('updated', true);
                 } elseif ($type === Bundle::class) {
                     $query
@@ -150,7 +151,9 @@ class WbItemPriceService
                             $query->where('supplier_id', $this->supplier->id);
                         })
                         ->whereDoesntHave('items', function (Builder $query) {
-                            $query->where('updated', false);
+                            $query
+                                ->where('unload_wb', false)
+                                ->where('updated', false);
                         });
                 }
             })
