@@ -56,7 +56,7 @@ return [
 
     'prefix' => env(
         'HORIZON_PREFIX',
-        Str::slug(env('APP_NAME', 'laravel'), '_').'_horizon:'
+        Str::slug(env('APP_NAME', 'laravel'), '_') . '_horizon:'
     ),
 
     /*
@@ -119,7 +119,9 @@ return [
     */
 
     'silenced' => [
-         App\Jobs\Email\CheckEmails::class,
+        App\Jobs\Email\CheckEmails::class,
+        \Laravel\Telescope\Jobs\ProcessPendingUpdates::class,
+        \Modules\Moysklad\Jobs\MoyskladWebhookProcess::class
     ],
 
     /*

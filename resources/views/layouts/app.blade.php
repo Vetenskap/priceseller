@@ -67,7 +67,7 @@
                 {{--                    </div>--}}
                 {{--                </div>--}}
                 <div class=" flex flex-col md:flex-row md:justify-between items-center text-sm dark:text-white">
-                    <p class="order-2 md:order-1 mt-8 md:mt-0"> Copyright &copy; 2024 - {{ date('Y') }}. </p>
+                    <p class="order-2 md:order-1 mt-8 md:mt-0"> Copyright &copy; 2023 - {{ date('Y') }}. </p>
                     <div class="order-1 md:order-2">
                         <a href="/" class="px-2 hover:text-indigo-400 dark:hover:text-indigo-600">Связаться с нами</a>
                         <a href="{{route('privacy-policy')}}"
