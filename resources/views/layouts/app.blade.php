@@ -36,8 +36,11 @@
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="font-sans antialiased">
+
+<livewire:cookies />
+
 <div class="page-content min-h-screen bg-gray-100 dark:bg-gray-900">
-    <livewire:notification-div />
+    <livewire:notification-div/>
     <livewire:layout.navigation/>
 
     <!-- Page Heading -->
@@ -57,18 +60,21 @@
     <footer>
         <div class="bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-700">
             <div class="w-1/2 mx-auto py-5">
-{{--                <div class="text-center">--}}
-{{--                    <h3 class="text-xl mb-3"> Download our fitness app </h3>--}}
-{{--                    <p> Stay fit. All day, every day. </p>--}}
-{{--                    <div class="flex justify-center my-10">--}}
-{{--                    </div>--}}
-{{--                </div>--}}
+                {{--                <div class="text-center">--}}
+                {{--                    <h3 class="text-xl mb-3"> Download our fitness app </h3>--}}
+                {{--                    <p> Stay fit. All day, every day. </p>--}}
+                {{--                    <div class="flex justify-center my-10">--}}
+                {{--                    </div>--}}
+                {{--                </div>--}}
                 <div class=" flex flex-col md:flex-row md:justify-between items-center text-sm dark:text-white">
                     <p class="order-2 md:order-1 mt-8 md:mt-0"> Copyright &copy; 2024 - {{ date('Y') }}. </p>
                     <div class="order-1 md:order-2">
                         <a href="/" class="px-2 hover:text-indigo-400 dark:hover:text-indigo-600">Связаться с нами</a>
-                        <a href="{{route('privacy-policy')}}" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Политика конфиденциальности</a>
-                        <a href="{{route('cookies')}}" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Куки</a>
+                        <a href="{{route('privacy-policy')}}"
+                           class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Политика
+                            конфиденциальности</a>
+                        <a href="{{route('cookies')}}"
+                           class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Куки</a>
                     </div>
                 </div>
                 <p class="order-2 md:order-1 mt-8 md:mt-0 text-sm dark:text-white">ООО "ИВиКО". </p>
