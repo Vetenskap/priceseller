@@ -67,8 +67,8 @@
                     <p class="order-2 md:order-1 mt-8 md:mt-0"> Copyright &copy; 2024 - {{ date('Y') }}. </p>
                     <div class="order-1 md:order-2">
                         <a href="/" class="px-2 hover:text-indigo-400 dark:hover:text-indigo-600">Связаться с нами</a>
-                        <a href="/" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Политика конфиденциальности</a>
-                        <a href="/" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Куки</a>
+                        <a href="{{route('privacy-policy')}}" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Политика конфиденциальности</a>
+                        <a href="{{route('cookies')}}" class="px-2 border-l hover:text-indigo-400 dark:hover:text-indigo-600">Куки</a>
                     </div>
                 </div>
                 <p class="order-2 md:order-1 mt-8 md:mt-0 text-sm dark:text-white">ООО "ИВиКО". </p>

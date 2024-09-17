@@ -51,8 +51,15 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/modules', ModuleIndex::class)->name('modules.index');
 
-
 });
+
+Route::get('/privacy-policy', function () {
+    return response()->file(\Illuminate\Support\Facades\Storage::path('main/privacy-policy.pdf'));
+})->name('privacy-policy');
+
+Route::get('/cookies', function () {
+    return response()->file(\Illuminate\Support\Facades\Storage::path('main/cookies.pdf'));
+})->name('cookies');
 
 Route::middleware(['auth'])->group(function () {
 
