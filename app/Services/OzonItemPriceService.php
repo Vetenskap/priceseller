@@ -218,7 +218,15 @@ class OzonItemPriceService
                     $multiplicity = $ozonItem->ozonitemable->multiplicity;
                 } else {
                     $new_count = $ozonItem->ozonitemable->items->map(function (Item $item) {
-                        return $item->count / $item->pivot->multiplicity;
+
+                        $count = $item->count / $item->pivot->multiplicity;
+
+                        if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+                            $count = $count - (($item->moyskladOrders()->where('new', true)->exists() ? $item->moyskladOrders()->where('new')->sum('orders') : 0));
+                        }
+
+                        return $count;
+
                     })->min();
                     $multiplicity = 1;
                 }
@@ -228,13 +236,15 @@ class OzonItemPriceService
                 $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $multiplicity === 1) ? 1 : $new_count;
                 $new_count = ($new_count + $myWarehousesStocks) / $multiplicity;
 
-//                if (ModuleService::moduleIsEnabled('Order', $this->user)) {
-//                    $new_count = $new_count - ($ozonItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
-//                }
-//
-//                if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-//                    $new_count = $new_count - (($ozonItem->item->moyskladOrders()->where('new', true)->exists() ? $wbItem->item->moyskladOrders()->where('new')->sum('orders') : 0) * $wbItem->item->multiplicity);
-//                }
+                if (ModuleService::moduleIsEnabled('Order', $this->user)) {
+                    $new_count = $new_count - ($ozonItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
+                }
+
+                if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
+                    if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+                        $new_count = $new_count - (($ozonItem->ozonitemable->moyskladOrders()->where('new', true)->exists() ? $ozonItem->ozonitemable->moyskladOrders()->where('new')->sum('orders') : 0) * $ozonItem->ozonitemable->multiplicity);
+                    }
+                }
 
                 $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
                 $new_count = (int)max($new_count, 0);
@@ -356,7 +366,7 @@ class OzonItemPriceService
                             return [
                                 'offer_id' => (string)$item->offer_id,
                                 'product_id' => (int)$item->product_id,
-                                'stock' => (int) ($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
+                                'stock' => (int)($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
                                 'warehouse_id' => (int)$warehouse->warehouse_id
                             ];
                         });

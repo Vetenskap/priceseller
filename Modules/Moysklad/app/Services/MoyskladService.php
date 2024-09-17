@@ -294,7 +294,11 @@ class MoyskladService
                     return;
                 }
 
-                $userBundle->items()->attach($item->id, ['multiplicity' => $component->getQuantity()]);
+                $userBundle->items()->attach($item->id, [
+                    'multiplicity' => $component->getQuantity(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
             } else {
                 $component->getAssortment()->fetch($this->moysklad->api_key);
                 if ($item = $this->createItemFromProduct($component->getAssortment())) {
@@ -304,7 +308,11 @@ class MoyskladService
                         return;
                     }
 
-                    $userBundle->items()->attach($item->id, ['multiplicity' => $component->getQuantity()]);
+                    $userBundle->items()->attach($item->id, [
+                        'multiplicity' => $component->getQuantity(),
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
                 }
             }
         });
@@ -346,7 +354,11 @@ class MoyskladService
                     return;
                 }
 
-                $userBundle->items()->attach($item->id, ['multiplicity' => $component->getQuantity()]);
+                $userBundle->items()->attach($item->id, [
+                    'multiplicity' => $component->getQuantity(),
+                    'created_at' => now(),
+                    'updated_at' => now()
+                ]);
             } else {
                 $component->getAssortment()->fetch($this->moysklad->api_key);
                 if ($item = $this->createItemFromProduct($component->getAssortment())) {
@@ -356,7 +368,11 @@ class MoyskladService
                         return;
                     }
 
-                    $userBundle->items()->attach($item->id, ['multiplicity' => $component->getQuantity()]);
+                    $userBundle->items()->attach($item->id, [
+                        'multiplicity' => $component->getQuantity(),
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
                 }
             }
         });
