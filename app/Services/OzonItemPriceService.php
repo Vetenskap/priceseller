@@ -261,13 +261,15 @@ class OzonItemPriceService
                     if ($type === Item::class) {
                         $query
                             ->where('supplier_id', $this->supplier->id)
-                            ->where('updated', false);
+                            ->where('updated', false)
+                            ->orWhere('unload_ozon', false);
                     } elseif ($type === Bundle::class) {
                         $query
                             ->whereHas('items', function (Builder $query) {
                                 $query
                                     ->where('supplier_id', $this->supplier->id)
-                                    ->where('updated', false);
+                                    ->where('updated', false)
+                                    ->orWhere('unload_ozon', false);
                             });
                     }
                 });
@@ -361,12 +363,6 @@ class OzonItemPriceService
 
                         if (App::isProduction()) {
                             $this->ozonClient->putStocks($data->all(), $this->supplier);
-                        } else {
-//                        Log::debug('Озон: обновление остатков', [
-//                            'market' => $this->market->name,
-//                            'supplier' => $this->supplier->name,
-//                            'data' => $data
-//                        ]);
                         }
 
                     });
@@ -426,12 +422,6 @@ class OzonItemPriceService
 
                 if (App::isProduction()) {
                     $this->ozonClient->putPrices($data->all());
-                } else {
-//                    Log::debug('Озон: обновление цен', [
-//                        'market' => $this->market->name,
-//                        'supplier' => $this->supplier->name,
-//                        'data' => $data
-//                    ]);
                 }
             });
     }

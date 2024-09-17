@@ -54,6 +54,10 @@ class WbMarketEdit extends BaseComponent
     #[Session('WbMarketEdit.package.{market.id}')]
     public $package = null;
 
+    public $directLink = false;
+
+    public $apiWarehouses = [];
+
     public array $statusFilters = [
         [
             'status' => 1,
@@ -125,7 +129,8 @@ class WbMarketEdit extends BaseComponent
         MarketRelationshipsAndCommissions::dispatch(
             defaultFields: collect($this->only(['package', 'retail_markup_percent', 'min_price', 'sales_percent'])),
             model: $this->market,
-            service: WbMarketService::class
+            service: WbMarketService::class,
+            directLink: $this->directLink
         );
 
         $this->addJobNotification();

@@ -54,6 +54,8 @@ class OzonMarketEdit extends BaseComponent
     #[Session('OzonMarketEdit.shipping_processing.{market.id}')]
     public $shipping_processing = null;
 
+    public $directLink = false;
+
     public array $statusFilters = [
         [
             'status' => 1,
@@ -98,7 +100,8 @@ class OzonMarketEdit extends BaseComponent
         MarketRelationshipsAndCommissions::dispatch(
             defaultFields: collect($this->only(['shipping_processing', 'min_price', 'min_price_percent'])),
             model: $this->market,
-            service: OzonMarketService::class
+            service: OzonMarketService::class,
+            directLink: $this->directLink
         );
 
         $this->addJobNotification();

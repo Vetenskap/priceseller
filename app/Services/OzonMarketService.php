@@ -62,7 +62,7 @@ class OzonMarketService
 
     }
 
-    public function directRelationships(Collection $defaultFields): Collection
+    public function directRelationships(Collection $defaultFields, bool $directLink = false): Collection
     {
         $defaultFields = $defaultFields->filter();
 
@@ -82,19 +82,32 @@ class OzonMarketService
 
             $lastId = $result->get('last_id');
 
-            $result->get('items')->each(function (array $ozonItem) use ($defaultFields, &$correct, &$error, &$updated) {
+            $result->get('items')->each(function (array $ozonItem) use ($defaultFields, &$correct, &$error, &$updated, $directLink) {
 
                 $commissions = collect($ozonItem['commissions']);
                 $price = collect($ozonItem['price']);
                 $priceIndexes = collect($ozonItem['price_indexes']);
 
-                try {
-                    $item = $this->market->user->items()->where('code', $ozonItem['offer_id'])->first();
+                if ($directLink) {
 
-                    if (!$item) {
-                        $item = $this->market->user->bundles()->where('code', $ozonItem['offer_id'])->firstOrFail();
+                    try {
+                        $item = $this->market->user->items()->where('code', $ozonItem['offer_id'])->first();
+
+                        if (!$item) {
+                            $item = $this->market->user->bundles()->where('code', $ozonItem['offer_id'])->firstOrFail();
+                        }
+                    } catch (ModelNotFoundException) {
+
+                        $error++;
+
+                        MarketItemRelationshipService::handleNotFoundItem($ozonItem['offer_id'], $this->market->id, 'App\Models\OzonMarket');
+
+                        return;
+
                     }
-                } catch (ModelNotFoundException) {
+
+                } else {
+
                     try {
                         $item = $this->market->items()->where('offer_id', $ozonItem['offer_id'])->firstOrFail()->ozonitemable;
                     } catch (ModelNotFoundException) {
@@ -105,7 +118,10 @@ class OzonMarketService
 
                         return;
                     }
+
                 }
+
+
 
                 MarketItemRelationshipService::handleFoundItem($ozonItem['offer_id'], $item->code, $this->market->id, 'App\Models\OzonMarket');
 

@@ -1,4 +1,4 @@
-@props(['market' => null, 'items' => null, 'statusFilters' => null, 'file' => null])
+@props(['market' => null, 'items' => null, 'statusFilters' => null, 'file' => null, 'directLink' => false])
 
 <div>
     <x-blocks.main-block>
@@ -20,10 +20,16 @@
             {{$slot}}
         </x-blocks.flex-block>
     @endisset
-    <x-blocks.main-block>
-        <x-success-button wire:click="relationshipsAndCommissions">Загрузить связи и комиссии
-        </x-success-button>
-    </x-blocks.main-block>
+    <x-blocks.flex-block>
+        <div class="self-center">
+            <x-secondary-button wire:click="relationshipsAndCommissions">Загрузить связи и комиссии
+            </x-secondary-button>
+        </div>
+        <x-blocks.flex-block>
+            <x-inputs.switcher :checked="$directLink" wire:model="directLink" />
+            <x-layouts.simple-text name="Прямая связь" />
+        </x-blocks.flex-block>
+    </x-blocks.flex-block>
     <x-blocks.main-block>
         <x-danger-button wire:click="clearRelationships">Очистить связи</x-danger-button>
     </x-blocks.main-block>

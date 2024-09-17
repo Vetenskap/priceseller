@@ -234,13 +234,15 @@ class WbItemPriceService
                     if ($type === Item::class) {
                         $query
                             ->where('supplier_id', $this->supplier->id)
-                            ->where('updated', false);
+                            ->where('updated', false)
+                            ->orWhere('unload_wb', false);
                     } elseif ($type === Bundle::class) {
                         $query
                             ->whereHas('items', function (Builder $query) {
                                 $query
                                     ->where('supplier_id', $this->supplier->id)
-                                    ->where('updated', false);
+                                    ->where('updated', false)
+                                    ->orWhere('unload_wb', false);
                             });
                     }
                 });
@@ -329,12 +331,6 @@ class WbItemPriceService
 
                         if (App::isProduction()) {
                             $this->wbClient->putStocks($data, $warehouse->warehouse_id, $this->supplier);
-                        } else {
-//                        Log::debug('Вб: обновление остатков', [
-//                            'market' => $this->market->name,
-//                            'supplier' => $this->supplier->name,
-//                            'data' => $data
-//                        ]);
                         }
 
                     });
@@ -386,12 +382,6 @@ class WbItemPriceService
 
                 if (App::isProduction()) {
                     $this->wbClient->putPrices($data, $this->supplier);
-                } else {
-//                    Log::debug('Вб: обновление цен', [
-//                        'market' => $this->market->name,
-//                        'supplier' => $this->supplier->name,
-//                        'data' => $data
-//                    ]);
                 }
 
             });
