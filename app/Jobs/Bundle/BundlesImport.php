@@ -6,12 +6,13 @@ use App\Models\User;
 use App\Services\Bundle\BundleService;
 use App\Services\Bundle\BundlesImportReportService;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class BundlesImport implements ShouldQueue
+class BundlesImport implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -51,5 +52,10 @@ class BundlesImport implements ShouldQueue
     public function uniqueId(): string
     {
         return $this->user->id . 'import_bundles';
+    }
+
+    public static function getUniqueId(User $user): string
+    {
+        return $user->id . 'import_bundles';
     }
 }

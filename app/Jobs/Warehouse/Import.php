@@ -46,4 +46,9 @@ class Import implements ShouldQueue, ShouldBeUnique
     {
         return $this->user->id . 'import_warehouse';
     }
+
+    public static function getUniqueId(User $user): string
+    {
+        return $user->id . 'import_warehouse';
+    }
 }

@@ -43,8 +43,9 @@ class ItemIndex extends BaseComponent
 
     public function export(): void
     {
-        Export::dispatch(auth()->user(), ItemService::class);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(Export::getUniqueId($this->user), Export::class);
+
+        if ($status) Export::dispatch(auth()->user(), ItemService::class);
     }
 
     public function import(): void
@@ -58,8 +59,9 @@ class ItemIndex extends BaseComponent
             return;
         }
 
-        Import::dispatch($uuid, $ext, auth()->user(), ItemService::class);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(Import::getUniqueId($this->user), Import::class);
+
+        if ($status) Import::dispatch($uuid, $ext, $this->user, ItemService::class);
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application

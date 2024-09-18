@@ -101,8 +101,9 @@ class WbMarketEdit extends BaseComponent
 
     public function export(): void
     {
-        Export::dispatch($this->market, WbMarketService::class);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(Export::getUniqueId($this->market), Export::class);
+
+        if ($status) Export::dispatch($this->market, WbMarketService::class);
     }
 
     public function import(): void
@@ -120,20 +121,21 @@ class WbMarketEdit extends BaseComponent
             return;
         }
 
-        Import::dispatch($uuid, $ext, $this->market, WbMarketService::class);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(Import::getUniqueId($this->market), Import::class);
+
+        if ($status) Import::dispatch($uuid, $ext, $this->market, WbMarketService::class);
     }
 
     public function relationshipsAndCommissions(): void
     {
-        MarketRelationshipsAndCommissions::dispatch(
+        $status = $this->checkTtlJob(MarketRelationshipsAndCommissions::getUniqueId($this->market), MarketRelationshipsAndCommissions::class);
+
+        if ($status) MarketRelationshipsAndCommissions::dispatch(
             defaultFields: collect($this->only(['package', 'retail_markup_percent', 'min_price', 'sales_percent'])),
             model: $this->market,
             service: WbMarketService::class,
             directLink: $this->directLink
         );
-
-        $this->addJobNotification();
     }
 
     public function getWarehouses(): Collection

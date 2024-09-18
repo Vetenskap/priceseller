@@ -37,4 +37,9 @@ class MoyskladItemsApiImport implements ShouldQueue, ShouldBeUnique
     {
         return $this->moysklad->id . 'items_api_import';
     }
+
+    public static function getUniqueId(Moysklad $moysklad): string
+    {
+        return $moysklad->id . 'items_api_import';
+    }
 }

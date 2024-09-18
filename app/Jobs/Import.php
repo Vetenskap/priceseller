@@ -73,4 +73,9 @@ class Import implements ShouldQueue, ShouldBeUnique
     {
         return $this->model->id . 'import';
     }
+
+    public static function getUniqueId(OzonMarket|WbMarket|User|Warehouse $model): string
+    {
+        return $model->id . 'import';
+    }
 }

@@ -46,4 +46,9 @@ class Export implements ShouldQueue, ShouldBeUnique
     {
         return $this->user->id . 'export_warehouse';
     }
+
+    public static function getUniqueId(User $user): string
+    {
+        return $user->id . 'export_warehouse';
+    }
 }

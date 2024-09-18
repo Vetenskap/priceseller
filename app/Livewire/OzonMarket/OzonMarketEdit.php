@@ -69,8 +69,9 @@ class OzonMarketEdit extends BaseComponent
 
     public function export(): void
     {
-        Export::dispatch($this->market, OzonMarketService::class);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(Export::getUniqueId($this->market), Export::class);
+
+        if ($status) Export::dispatch($this->market, OzonMarketService::class);
     }
 
     public function downloadTemplate(): BinaryFileResponse
@@ -91,8 +92,9 @@ class OzonMarketEdit extends BaseComponent
             return;
         }
 
-        Import::dispatch($uuid, $ext, $this->market, OzonMarketService::class);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(Import::getUniqueId($this->market), Import::class);
+
+        if ($status) Import::dispatch($uuid, $ext, $this->market, OzonMarketService::class);
     }
 
     public function relationshipsAndCommissions(): void

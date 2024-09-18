@@ -2,6 +2,7 @@
 
 namespace Modules\Moysklad\Livewire\MoyskladItem;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithJsNotifications;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -19,7 +20,7 @@ use Modules\Moysklad\Models\MoyskladWebhook;
 use Modules\Moysklad\Services\MoyskladService;
 use Modules\Moysklad\Services\MoyskladWebhookService;
 
-class MoyskladItemIndex extends Component
+class MoyskladItemIndex extends BaseComponent
 {
     use WithFileUploads, WithJsNotifications;
 
@@ -89,8 +90,8 @@ class MoyskladItemIndex extends Component
 
     public function importApi(): void
     {
-        MoyskladItemsApiImport::dispatch($this->moysklad);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(MoyskladItemsApiImport::getUniqueId($this->moysklad), MoyskladItemsApiImport::class);
+        if ($status) MoyskladItemsApiImport::dispatch($this->moysklad);
     }
 
     public function mount(): void

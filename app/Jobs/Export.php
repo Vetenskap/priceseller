@@ -63,4 +63,9 @@ class Export implements ShouldQueue, ShouldBeUnique
     {
         return $this->model->id . 'export';
     }
+
+    public static function getUniqueId(OzonMarket|WbMarket|User|Warehouse $model): string
+    {
+        return $model->id . 'export';
+    }
 }

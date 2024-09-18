@@ -43,4 +43,9 @@ class BundleItemsExport implements ShouldQueue, ShouldBeUnique
     {
         return $this->user->id . 'export_bundle_items';
     }
+
+    public static function getUniqueId(User $user): string
+    {
+        return $user->id . 'export_bundle_items';
+    }
 }

@@ -2,15 +2,15 @@
 
 namespace Modules\Moysklad\Livewire\MoyskladBundle;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithJsNotifications;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
-use Livewire\Component;
 use Modules\Moysklad\Jobs\MoyskladBundlesApiImport;
 use Modules\Moysklad\Models\Moysklad;
 
-class MoyskladBundleIndex extends Component
+class MoyskladBundleIndex extends BaseComponent
 {
     use WithJsNotifications;
 
@@ -18,8 +18,9 @@ class MoyskladBundleIndex extends Component
 
     public function importApi()
     {
-        MoyskladBundlesApiImport::dispatch($this->moysklad);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(MoyskladBundlesApiImport::getUniqueId($this->moysklad), MoyskladBundlesApiImport::class);
+
+        if ($status) MoyskladBundlesApiImport::dispatch($this->moysklad);
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application

@@ -79,8 +79,9 @@ class BundleIndex extends BaseComponent
 
     public function exportBundles(): void
     {
-        \App\Jobs\Bundle\BundlesExport::dispatch($this->user);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(\App\Jobs\Bundle\BundlesExport::getUniqueId($this->user), \App\Jobs\Bundle\BundlesExport::class);
+
+        if ($status) \App\Jobs\Bundle\BundlesExport::dispatch($this->user);
     }
 
     public function importBundles(): void
@@ -94,8 +95,9 @@ class BundleIndex extends BaseComponent
             return;
         }
 
-        BundlesImport::dispatch($uuid, $ext, $this->user);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(BundlesImport::getUniqueId($this->user), BundlesImport::class);
+
+        if ($status) BundlesImport::dispatch($uuid, $ext, $this->user);
     }
 
     public function downloadBundleItemsExport(int $id)
@@ -126,8 +128,9 @@ class BundleIndex extends BaseComponent
 
     public function exportBundleItems(): void
     {
-        BundleItemsExport::dispatch($this->user);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(BundleItemsExport::getUniqueId($this->user), BundleItemsExport::class);
+
+        if ($status) BundleItemsExport::dispatch($this->user);
     }
 
     public function importBundleItems(): void
@@ -141,8 +144,9 @@ class BundleIndex extends BaseComponent
             return;
         }
 
-        BundleItemsImport::dispatch($uuid, $ext, $this->user);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(BundleItemsImport::getUniqueId($this->user), BundleItemsImport::class);
+
+        if ($status) BundleItemsImport::dispatch($uuid, $ext, $this->user);
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application

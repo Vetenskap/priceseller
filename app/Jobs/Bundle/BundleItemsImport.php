@@ -53,4 +53,9 @@ class BundleItemsImport implements ShouldQueue, ShouldBeUnique
     {
         return $this->user->id . 'import_bundle_items';
     }
+
+    public static function getUniqueId(User $user): string
+    {
+        return $user->id . 'import_bundle_items';
+    }
 }

@@ -62,4 +62,9 @@ class MarketRelationshipsAndCommissions implements ShouldQueue, ShouldBeUnique
     {
         return $this->model->id . 'marketRelationshipsAndCommissions';
     }
+
+    public static function getUniqueId(OzonMarket|WbMarket $model): string
+    {
+        return $model->id . 'marketRelationshipsAndCommissions';
+    }
 }

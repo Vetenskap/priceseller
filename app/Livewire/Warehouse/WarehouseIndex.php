@@ -50,9 +50,8 @@ class WarehouseIndex extends BaseComponent
 
     public function export(): void
     {
-
-        Export::dispatch(auth()->user());
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(Export::getUniqueId(auth()->user()), Export::class);
+        if ($status) Export::dispatch(auth()->user());
     }
 
     public function import(): void
@@ -71,8 +70,9 @@ class WarehouseIndex extends BaseComponent
             return;
         }
 
-        Import::dispatch(auth()->user(), $uuid);
-        $this->addJobNotification();
+        $status = $this->checkTtlJob(Import::getUniqueId(auth()->user()), Import::class);
+
+        if ($status) Import::dispatch(auth()->user(), $uuid);
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
