@@ -66,7 +66,7 @@
             </x-blocks.main-block>
         </x-layouts.main-container>
     </div>
-    <x-layouts.main-container wire:poll>
+    <x-layouts.main-container>
         <x-blocks.main-block>
             <x-layouts.title name="Список" />
         </x-blocks.main-block>
