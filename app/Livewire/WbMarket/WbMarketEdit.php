@@ -178,7 +178,7 @@ class WbMarketEdit extends BaseComponent
                 return view('livewire.wb-market.pages.wb-market-prices-page');
             case 'stocks_warehouses':
                 return view('livewire.wb-market.pages.wb-market-stocks_warehouses-page', [
-                    'apiWarehouses' => $this->getWarehouses()
+                    'apiWarehouses2' => $this->getWarehouses()
                 ]);
             case 'relationships_commissions':
                 $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
