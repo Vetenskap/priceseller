@@ -135,12 +135,21 @@
         <livewire:item.item-attribute-dialog-form></livewire:item.item-attribute-dialog-form>
         <x-blocks.main-block>
             <x-layouts.title name="Прочая информация"/>
+            <x-titles.sub-title name="Основная" />
         </x-blocks.main-block>
         <x-blocks.flex-block>
             <x-layouts.simple-text :name="'Цена: ' . $item->price"/>
-            <x-layouts.simple-text :name="'Остаток: ' . $item->count"/>
             <x-layouts.simple-text :name="'Был обновлен: ' . ($item->updated ? 'Да' : 'Нет')"/>
         </x-blocks.flex-block>
+        <x-blocks.main-block>
+            <x-titles.sub-title name="Остатки" />
+        </x-blocks.main-block>
+        @foreach($item->supplierWarehouseStocks as $stock)
+            <x-blocks.flex-block>
+                <x-layouts.title :name="$stock->warehouse->name" />
+                <x-information>{{$stock->stock}}</x-information>
+            </x-blocks.flex-block>
+        @endforeach
         <x-blocks.main-block>
             <x-layouts.title name="Из прайса"/>
         </x-blocks.main-block>

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ItemSupplierWarehouseStock extends Model
 {
@@ -14,4 +15,9 @@ class ItemSupplierWarehouseStock extends Model
         'supplier_warehouse_id',
         'item_id',
     ];
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(SupplierWarehouse::class);
+    }
 }
