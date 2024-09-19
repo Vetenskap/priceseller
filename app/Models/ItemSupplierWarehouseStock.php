@@ -18,6 +18,6 @@ class ItemSupplierWarehouseStock extends Model
 
     public function warehouse(): BelongsTo
     {
-        return $this->belongsTo(SupplierWarehouse::class);
+        return $this->belongsTo(SupplierWarehouse::class, 'supplier_warehouse_id', 'id');
     }
 }
