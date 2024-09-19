@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends MainModel
@@ -53,5 +54,10 @@ class Supplier extends MainModel
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function warehouses(): HasMany
+    {
+        return $this->hasMany(SupplierWarehouse::class);
     }
 }

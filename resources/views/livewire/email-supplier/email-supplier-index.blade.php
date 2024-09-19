@@ -60,6 +60,11 @@
                                            field="form.header_count"
                 >Остаток
                 </x-inputs.input-with-label>
+                <x-inputs.input-with-label name="header_warehouse"
+                                           type="number"
+                                           field="form.header_warehouse"
+                >Склад
+                </x-inputs.input-with-label>
             </x-blocks.flex-block>
             <x-blocks.main-block>
                 <x-success-button wire:click="store">Добавить</x-success-button>

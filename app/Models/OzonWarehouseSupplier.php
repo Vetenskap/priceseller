@@ -23,4 +23,9 @@ class OzonWarehouseSupplier extends MainModel
     {
         return $this->belongsTo(Supplier::class);
     }
+
+    public function warehouses()
+    {
+        return $this->hasMany(OzonWarehouseSupplierWarehouse::class);
+    }
 }

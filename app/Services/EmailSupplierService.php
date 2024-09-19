@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Imports\SupplierPriceImport;
 use App\Models\EmailSupplier;
+use App\Models\Item;
 use App\Services\Item\ItemPriceService;
 use App\Services\Item\ItemPriceWithCacheService;
 use Box\Spout\Common\Exception\IOException;
@@ -14,11 +15,13 @@ use Maatwebsite\Excel\Facades\Excel;
 class EmailSupplierService
 {
     protected Collection $stockValues;
+    protected Collection $warehouses;
     protected int $totalRows = 0;
 
     public function __construct(protected EmailSupplier $supplier, protected string $path)
     {
         $this->stockValues = $this->supplier->stockValues->pluck('value', 'name');
+        $this->warehouses = $this->supplier->warehouses->pluck('supplier_warehouse_id', 'value');
     }
 
     public function unload(): void
@@ -94,12 +97,14 @@ class EmailSupplierService
         $brand = $row->get($this->supplier->header_brand - 1);
         $price = $row->get($this->supplier->header_price - 1);
         $stock = $row->get($this->supplier->header_count - 1);
+        $warehouse = $row->get($this->supplier->header_warehouse - 1);
 
         $itemService = new ItemPriceService($article, $this->supplier->supplier->id);
         $items = $this->supplier->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
 
         if (count($items) > 0) {
 
+            /** @var Item $item */
             foreach ($items as $item) {
 
                 EmailPriceItemService::handleFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock, $item->id);
@@ -107,11 +112,38 @@ class EmailSupplierService
                 $stock = $this->prepareStock($stock);
                 $price = $this->preparePrice($price);
 
-                $item->count = $stock;
                 $item->price = $price;
                 $item->updated = true;
 
                 $itemService->save($item);
+
+                if (!is_null($this->supplier->header_warehouse)) {
+
+                    if ($supplier_warehouse_id = $this->warehouses->get($warehouse)) {
+
+                        $item->supplierWarehouseStocks()->updateOrCreate([
+                            'supplier_warehouse_id' => $supplier_warehouse_id,
+                            'item_id' => $item->id
+                        ], [
+                            'supplier_warehouse_id' => $supplier_warehouse_id,
+                            'stock' => $stock
+                        ]);
+
+                    }
+
+                } else {
+
+                    $supplier_warehouse_id = $this->warehouses->first();
+
+                    $item->supplierWarehouseStocks()->updateOrCreate([
+                        'supplier_warehouse_id' => $supplier_warehouse_id,
+                        'item_id' => $item->id
+                    ], [
+                        'supplier_warehouse_id' => $supplier_warehouse_id,
+                        'stock' => $stock
+                    ]);
+
+                }
             }
 
 

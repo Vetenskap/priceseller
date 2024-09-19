@@ -45,28 +45,15 @@
                     <x-success-button wire:click="addSupplier">Добавить</x-success-button>
                 </div>
             </x-blocks.flex-block>
-        @if($warehouse->suppliers()->count())
-                <x-table.table-layout>
-                    <x-table.table-header>
-                        <x-table.table-child>
-                            <x-layouts.simple-text name="Наименование"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-
-                        </x-table.table-child>
-                    </x-table.table-header>
-                    @foreach($warehouse->suppliers as $supplier)
-                        <x-table.table-item wire:key="{{$supplier->getKey()}}">
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$supplier->supplier->name"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-danger-button wire:click="deleteSupplier({{$supplier}})">Удалить</x-danger-button>
-                            </x-table.table-child>
-                        </x-table.table-item>
-                    @endforeach
-                </x-table.table-layout>
-        @endif
+            @foreach($warehouse->suppliers as $supplier)
+                <x-blocks.flex-block wire:key="{{$supplier->getKey()}}">
+                    <x-layouts.simple-text :name="$supplier->supplier->name"/>
+                    <div class="self-center">
+                        <x-danger-button wire:click="deleteSupplier({{$supplier}})">Удалить</x-danger-button>
+                    </div>
+                </x-blocks.flex-block>
+                <livewire:ozon-warehouse-supplier-warehouse.ozon-warehouse-supplier-warehouse-index :supplier="$supplier"/>
+            @endforeach
         @endif
         @if($selectedTab === 'warehouses')
             <x-blocks.flex-block>
@@ -77,7 +64,7 @@
                     <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
                 </div>
             </x-blocks.flex-block>
-        @if($warehouse->userWarehouses()->count())
+            @if($warehouse->userWarehouses()->count())
                 <x-table.table-layout>
                     <x-table.table-header>
                         <x-table.table-child>
@@ -93,12 +80,13 @@
                                 <x-layouts.simple-text :name="$userWarehouse->warehouse->name"/>
                             </x-table.table-child>
                             <x-table.table-child>
-                                <x-danger-button wire:click="deleteWarehouse({{$userWarehouse}})">Удалить</x-danger-button>
+                                <x-danger-button wire:click="deleteWarehouse({{$userWarehouse}})">Удалить
+                                </x-danger-button>
                             </x-table.table-child>
                         </x-table.table-item>
                     @endforeach
                 </x-table.table-layout>
-        @endif
+            @endif
         @endif
     </x-layouts.main-container>
 </div>

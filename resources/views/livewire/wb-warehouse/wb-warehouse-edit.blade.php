@@ -37,36 +37,23 @@
             </x-blocks.flex-block>
         @endif
         @if($selectedTab === 'suppliers')
-            <x-blocks.flex-block-end>
+            <x-blocks.flex-block>
                 <x-dropdown-select name="supplier" field="selectedSupplier" :options="auth()->user()->suppliers">
                     Выберите поставщика
                 </x-dropdown-select>
                 <div class="self-center">
                     <x-success-button wire:click="addSupplier">Добавить</x-success-button>
                 </div>
-            </x-blocks.flex-block-end>
-        @if($warehouse->suppliers()->count())
-                <x-table.table-layout>
-                    <x-table.table-header>
-                        <x-table.table-child>
-                            <x-layouts.simple-text name="Наименование"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
-
-                        </x-table.table-child>
-                    </x-table.table-header>
-                    @foreach($warehouse->suppliers as $supplier)
-                        <x-table.table-item wire:key="{{$supplier->getKey()}}">
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$supplier->supplier->name"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-danger-button wire:click="deleteSupplier({{$supplier}})">Удалить</x-danger-button>
-                            </x-table.table-child>
-                        </x-table.table-item>
-                    @endforeach
-                </x-table.table-layout>
-        @endif
+            </x-blocks.flex-block>
+            @foreach($warehouse->suppliers as $supplier)
+                <x-blocks.flex-block wire:key="{{$supplier->getKey()}}">
+                    <x-layouts.simple-text :name="$supplier->supplier->name"/>
+                    <div class="self-center">
+                        <x-danger-button wire:click="deleteSupplier({{$supplier}})">Удалить</x-danger-button>
+                    </div>
+                </x-blocks.flex-block>
+                <livewire:wb-warehouse-supplier-warehouse.wb-warehouse-supplier-warehouse-index :supplier="$supplier"/>
+            @endforeach
         @endif
         @if($selectedTab === 'warehouses')
             <x-blocks.flex-block-end>

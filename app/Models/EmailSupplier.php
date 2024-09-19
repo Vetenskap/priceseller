@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmailSupplier extends MainModel
 {
@@ -18,6 +19,7 @@ class EmailSupplier extends MainModel
         'header_count',
         'email_id',
         'supplier_id',
+        'header_warehouse'
     ];
 
     public function supplier()
@@ -33,6 +35,11 @@ class EmailSupplier extends MainModel
     public function mainEmail()
     {
         return $this->belongsTo(Email::class, 'email_id', 'id');
+    }
+
+    public function warehouses(): HasMany
+    {
+        return $this->hasMany(EmailSupplierWarehouse::class);
     }
 
 }

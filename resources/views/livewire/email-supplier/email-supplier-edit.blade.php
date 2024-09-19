@@ -46,7 +46,13 @@
                                    field="form.header_count"
         >Остаток
         </x-inputs.input-with-label>
+        <x-inputs.input-with-label name="header_warehouse"
+                                   type="number"
+                                   field="form.header_warehouse"
+        >Склад
+        </x-inputs.input-with-label>
     </x-blocks.flex-block>
+    <livewire:email-supplier-warehouse.email-supplier-warehouse-index :email-supplier="$emailSupplier" />
     {{--        @elseif($selectedTab === 'stocks')--}}
     {{--            <x-blocks.main-block>--}}
     {{--                <x-success-button wire:click="addEmailSupplierStockValue">Добавить</x-success-button>--}}

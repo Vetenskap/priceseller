@@ -10,6 +10,7 @@ use App\Models\OzonItem;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
 use App\Models\OzonWarehouseStock;
+use App\Models\OzonWarehouseSupplierWarehouse;
 use App\Models\OzonWarehouseUserWarehouse;
 use App\Models\Supplier;
 use App\Models\User;
@@ -197,6 +198,14 @@ class OzonItemPriceService
     {
         $this->market->warehouses->each(function (OzonWarehouse $warehouse) use ($ozonItem) {
 
+            $supplierWarehousesIds = $warehouse->suppliers()
+                ->where('supplier_id', $this->supplier->id)
+                ->get()
+                ->warehouses
+                ->map(function (OzonWarehouseSupplierWarehouse $warehouse) {
+                    return $warehouse->supplierWarehouse->id;
+                });
+
             $new_count = 0;
 
             if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
@@ -214,12 +223,12 @@ class OzonItemPriceService
                 })->sum();
 
                 if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
-                    $new_count = $ozonItem->ozonitemable->count;
+                    $new_count = $ozonItem->ozonitemable->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock');
                     $multiplicity = $ozonItem->ozonitemable->multiplicity;
                 } else {
-                    $new_count = $ozonItem->ozonitemable->items->map(function (Item $item) {
+                    $new_count = $ozonItem->ozonitemable->items->map(function (Item $item) use ($supplierWarehousesIds) {
 
-                        $count = $item->count / $item->pivot->multiplicity;
+                        $count = $item->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock') / $item->pivot->multiplicity;
 
                         if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
                             $count = $count - (($item->moyskladOrders()->where('new', true)->exists() ? $item->moyskladOrders()->where('new')->sum('orders') : 0));

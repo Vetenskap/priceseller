@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class WbWarehouseSupplier extends MainModel
 {
@@ -22,5 +23,10 @@ class WbWarehouseSupplier extends MainModel
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
+    }
+
+    public function warehouses(): HasMany
+    {
+        return $this->hasMany(WbWarehouseSupplierWarehouse::class);
     }
 }

@@ -51,14 +51,6 @@ class SupplierEdit extends BaseComponent
     {
         $this->authorize('view', $this->supplier);
 
-        if ($this->page === 'main') {
-            return view('livewire.supplier.pages.supplier-edit-main-page');
-        } else if ($this->page === 'price') {
-            return view('livewire.supplier.pages.supplier-edit-price-page', [
-                'priceItems' => $this->supplier->priceItems
-            ]);
-        }
-
-        abort(404);
+        return view('livewire.supplier.supplier-edit');
     }
 }

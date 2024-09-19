@@ -11,7 +11,7 @@ use Livewire\Form;
 
 class EmailSupplierPostForm extends Form
 {
-    public Email $mainEmal;
+    public Email $mainEmail;
     public ?EmailSupplier $emailSupplier = null;
 
     #[Validate]
@@ -35,9 +35,12 @@ class EmailSupplierPostForm extends Form
     #[Validate]
     public $header_count;
 
-    public function setMainEmal(Email $mainEmal): void
+    #[Validate]
+    public $header_warehouse;
+
+    public function setMainEmal(Email $mainEmail): void
     {
-        $this->mainEmal = $mainEmal;
+        $this->mainEmail = $mainEmail;
     }
 
     public function setEmailSupplier(EmailSupplier $emailSupplier): void
@@ -50,6 +53,7 @@ class EmailSupplierPostForm extends Form
         $this->header_article = $emailSupplier->header_article;
         $this->header_brand = $emailSupplier->header_brand;
         $this->header_count = $emailSupplier->header_count;
+        $this->header_warehouse = $emailSupplier->header_warehouse;
     }
 
     public function rules(): array
@@ -73,6 +77,7 @@ class EmailSupplierPostForm extends Form
             'header_brand' => ['nullable', 'integer'],
             'header_price' => ['required', 'integer'],
             'header_count' => ['required', 'integer'],
+            'header_warehouse' => ['nullable', 'integer'],
         ];
     }
 
@@ -85,21 +90,21 @@ class EmailSupplierPostForm extends Form
             'updated_at' => now(),
         ];
 
-        $this->mainEmal->suppliers()->attach($this->supplier_id, array_merge($date, $this->except(['mainEmal', 'emailSupplier'])));
+        $this->mainEmail->suppliers()->attach($this->supplier_id, array_merge($date, $this->except(['mainEmail', 'emailSupplier'])));
 
-        $this->reset('supplier_id', 'email', 'filename', 'header_article', 'header_brand', 'header_price', 'header_count');
+        $this->reset('supplier_id', 'email', 'filename', 'header_article', 'header_brand', 'header_price', 'header_count', 'header_warehouse');
     }
 
     public function update(): void
     {
         $this->validate();
 
-        $this->emailSupplier->update($this->except(['mainEmal', 'emailSupplier']));
+        $this->emailSupplier->update($this->except(['mainEmail', 'emailSupplier']));
 
     }
 
     public function destroy(string $id): void
     {
-        $this->mainEmal->suppliers()->detach($id);
+        $this->mainEmail->suppliers()->detach($id);
     }
 }
