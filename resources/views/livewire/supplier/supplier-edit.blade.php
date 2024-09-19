@@ -46,7 +46,7 @@
             <livewire:supplier-report.supplier-report-index :supplier="$supplier"/>
         @endif
         @if($page === 'price')
-            <livewire:supplier.pages.supplier-edit-price-page :price-items="$supplier->priceItems" />
+            <livewire:supplier.pages.supplier-edit-price-page :supplier="$supplier" />
         @endif
         @if($page === 'warehouses')
             <livewire:supplier-warehouse.supplier-warehouse-index :supplier="$supplier" />

@@ -4,7 +4,13 @@ use Livewire\Volt\Component;
 
 new class extends Component
 {
-    public $priceItems;
+    public \App\Models\Supplier $supplier;
+    public \Illuminate\Support\Collection $priceItems;
+
+    public function mount(): void
+    {
+        $this->priceItems = $this-$this->supplier->priceItems()->paginate(10);
+    }
 
 }; ?>
 
@@ -61,5 +67,8 @@ new class extends Component
                 </x-table.table-item>
             @endforeach
         </x-table.table-layout>
+        <x-blocks.main-block>
+            {{$priceItems->links()->withQueryString()}}
+        </x-blocks.main-block>
     @endif
 </div>
