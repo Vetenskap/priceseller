@@ -51,6 +51,7 @@ class DatabaseSeeder extends Seeder
             ['label' => 'Самсон (апи)', 'name' => 'SamsonApi'],
             ['label' => 'Берг (апи)', 'name' => 'BergApi'],
             ['label' => 'Сималенд (апи)', 'name' => 'SimalandApi'],
+            ['label' => 'Редактор контента', 'name' => 'EditorContent'],
         ];
 
         foreach ($modules as $module) {
