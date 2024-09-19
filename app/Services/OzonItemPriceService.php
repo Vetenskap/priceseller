@@ -20,6 +20,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Log;
 use Modules\Moysklad\Models\Moysklad;
+use Modules\Moysklad\Services\MoyskladItemOrderService;
 use Modules\Order\Models\Order;
 
 class OzonItemPriceService
@@ -231,7 +232,7 @@ class OzonItemPriceService
                         $count = $item->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock') / $item->pivot->multiplicity;
 
                         if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                            $count = $count - (($item->moyskladOrders()->where('new', true)->exists() ? $item->moyskladOrders()->where('new')->sum('orders') : 0));
+                            $count = $count - (($item->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($item)->sum('orders') : 0));
                         }
 
                         return $count;
@@ -251,7 +252,7 @@ class OzonItemPriceService
 
                 if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
                     if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                        $new_count = $new_count - (($ozonItem->ozonitemable->moyskladOrders()->where('new', true)->exists() ? $ozonItem->ozonitemable->moyskladOrders()->where('new')->sum('orders') : 0) * $ozonItem->ozonitemable->multiplicity);
+                        $new_count = $new_count - (($ozonItem->ozonitemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($ozonItem->ozonitemable)->sum('orders') : 0) * $ozonItem->ozonitemable->multiplicity);
                     }
                 }
 

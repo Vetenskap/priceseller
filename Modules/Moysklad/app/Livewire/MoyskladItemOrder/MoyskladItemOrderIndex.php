@@ -6,6 +6,7 @@ use App\Livewire\Traits\WithJsNotifications;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Livewire\Attributes\Validate;
 use Livewire\Component;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Models\MoyskladWebhook;
@@ -16,11 +17,25 @@ class MoyskladItemOrderIndex extends Component
     use WithJsNotifications;
 
     public Moysklad $moysklad;
+
+    #[Validate]
     public $enabled_orders;
+
+    #[Validate]
+    public $clear_order_time;
+
+    public function rules(): array
+    {
+        return [
+            'enabled_orders' => ['nullable', 'boolean'],
+            'clear_order_time' => ['nullable', 'integer']
+        ];
+    }
 
     public function mount(): void
     {
         $this->enabled_orders = $this->moysklad->enabled_orders;
+        $this->clear_order_time = $this->moysklad->clear_order_time;
     }
 
     public function deleteWebhook(array $webhook): void
@@ -47,7 +62,10 @@ class MoyskladItemOrderIndex extends Component
 
     public function save(): void
     {
+        $this->validate();
+
         $this->moysklad->enabled_orders = $this->enabled_orders;
+        $this->moysklad->clear_order_time = $this->clear_order_time;
         $this->moysklad->save();
         $this->addSuccessSaveNotification();
     }

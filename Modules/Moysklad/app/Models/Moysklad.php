@@ -17,6 +17,8 @@ class Moysklad extends Model
     protected $fillable = [
         'api_key',
         'user_id',
+        'clear_order_time',
+        'enabled_orders'
     ];
 
     public function warehouses()

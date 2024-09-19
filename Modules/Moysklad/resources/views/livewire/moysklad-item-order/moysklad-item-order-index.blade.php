@@ -18,6 +18,16 @@
         <x-blocks.main-block>
             <x-danger-button wire:click="clear">Очистить все заказы</x-danger-button>
         </x-blocks.main-block>
+        <x-blocks.main-block>
+            <x-layouts.title name="Автоматическое очищение" />
+            <x-information>Вы можете добавить срок жизни заказа, после его истечения заказ не будет учитываться</x-information>
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            <x-inputs.input-with-label name="clear_order_time"
+                                       field="clear_order_time"
+                                       type="number"
+            >Время в минутах</x-inputs.input-with-label>
+        </x-blocks.main-block>
     </x-layouts.main-container>
     <x-layouts.main-container>
         <x-blocks.main-block>

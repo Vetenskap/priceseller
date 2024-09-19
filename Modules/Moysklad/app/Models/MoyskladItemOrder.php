@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MoyskladItemOrder extends Model
 {
@@ -11,4 +12,9 @@ class MoyskladItemOrder extends Model
         'item_id',
         'moysklad_id',
     ];
+
+    public function moysklad(): BelongsTo
+    {
+        return $this->belongsTo(Moysklad::class);
+    }
 }

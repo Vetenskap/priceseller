@@ -16,6 +16,7 @@ use App\Models\WbWarehouseUserWarehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
+use Modules\Moysklad\Services\MoyskladItemOrderService;
 
 class WbItemPriceService
 {
@@ -196,7 +197,7 @@ class WbItemPriceService
                         $count = $item->count / $item->pivot->multiplicity;
 
                         if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                            $count = $count - (($item->moyskladOrders()->where('new', true)->exists() ? $item->moyskladOrders()->where('new')->sum('orders') : 0));
+                            $count = $count - (($item->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($item)->sum('orders') : 0));
                         }
 
                         return $count;
@@ -216,7 +217,7 @@ class WbItemPriceService
 
                 if ($wbItem->wbitemable_type === 'App\Models\Item') {
                     if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                        $new_count = $new_count - (($wbItem->wbitemable->moyskladOrders()->where('new', true)->exists() ? $wbItem->wbitemable->moyskladOrders()->where('new')->sum('orders') : 0) * $wbItem->wbitemable->multiplicity);
+                        $new_count = $new_count - (($wbItem->wbitemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($wbItem->wbitemable)->sum('orders') : 0) * $wbItem->wbitemable->multiplicity);
                     }
                 }
 
