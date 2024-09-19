@@ -4,10 +4,12 @@ namespace App\Livewire\EmailSupplier;
 
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\EmailSupplierPostForm;
+use App\Livewire\Traits\WithJsNotifications;
 use App\Models\EmailSupplierStockValue;
 
 class EmailSupplierEdit extends BaseComponent
 {
+    use WithJsNotifications;
 
     public EmailSupplierPostForm $form;
 
