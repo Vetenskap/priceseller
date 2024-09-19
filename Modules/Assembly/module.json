@@ -1,0 +1,11 @@
+{
+    "name": "Assembly",
+    "alias": "assembly",
+    "description": "",
+    "keywords": [],
+    "priority": 0,
+    "providers": [
+        "Modules\\Assembly\\Providers\\AssemblyServiceProvider"
+    ],
+    "files": []
+}

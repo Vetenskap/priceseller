@@ -6,5 +6,6 @@
     "SamsonApi": true,
     "BergApi": true,
     "SimalandApi": true,
-    "EditorContent": true
+    "EditorContent": true,
+    "Assembly": true
 }

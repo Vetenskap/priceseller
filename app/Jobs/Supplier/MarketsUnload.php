@@ -95,4 +95,9 @@ class MarketsUnload implements ShouldQueue, ShouldBeUnique
     {
         return $this->supplier->id . 'markets_unload';
     }
+
+    public static function getUniqueId(Supplier $supplier): string
+    {
+        return $supplier->id . 'markets_unload';
+    }
 }

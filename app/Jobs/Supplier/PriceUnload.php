@@ -18,6 +18,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 
 class PriceUnload implements ShouldQueue, ShouldBeUnique
@@ -53,7 +54,14 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
         $supplier = $emailSupplier->supplier;
         $user = User::findOrFail($supplier->user_id);
 
-        MarketsUnload::dispatch($user, $supplier);
+        $ttl = Redis::ttl('laravel_unique_job:'.MarketsUnload::class.':'.MarketsUnload::getUniqueId($supplier));
+
+        if ($ttl > 0) {
+            SupplierReportService::addLog($supplier, 'Кабинеты этого поставщика уже выгружаются или не прошло 10 минут с первой выгрузки. Оставшееся время: ' . $ttl . ' секунд');
+            SupplierReportService::error($supplier);
+        } else {
+            MarketsUnload::dispatch($user, $supplier);
+        }
 
     }
 
