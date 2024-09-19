@@ -53,11 +53,5 @@
         </x-inputs.input-with-label>
     </x-blocks.flex-block>
     <livewire:email-supplier-warehouse.email-supplier-warehouse-index :email-supplier="$emailSupplier" />
-    {{--        @elseif($selectedTab === 'stocks')--}}
-    {{--            <x-blocks.main-block>--}}
-    {{--                <x-success-button wire:click="addEmailSupplierStockValue">Добавить</x-success-button>--}}
-    {{--            </x-blocks.main-block>--}}
-    {{--            @foreach($emailSupplier->stockValues as $stockValue)--}}
-    {{--                <livewire:email-supplier-stock-value wire:key="{{$stockValue->getKey()}}" :stock-value="$stockValue"/>--}}
-    {{--            @endforeach--}}
+    <livewire:email-supplier-stock-value.email-supplier-stock-value-index :email-supplier="$emailSupplier" />
 </x-blocks.child-block>

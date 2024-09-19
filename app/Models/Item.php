@@ -38,7 +38,7 @@ class Item extends MainModel
     const MAINATTRIBUTES = [
         [
             'name' => 'article',
-            'label' => 'Артикул'
+            'label' => 'Артикул поставщика'
         ],
         [
             'name' => 'brand',
