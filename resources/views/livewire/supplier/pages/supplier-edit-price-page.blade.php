@@ -9,7 +9,7 @@ new class extends Component
 
     public function mount(): void
     {
-        $this->priceItems = $this->supplier->priceItems()->paginate(10, pageName: 'p');
+        $this->priceItems = $this->supplier->priceItems()->paginate(10, pageName: 'price_page');
     }
 
 }; ?>
@@ -67,5 +67,8 @@ new class extends Component
                 </x-table.table-item>
             @endforeach
         </x-table.table-layout>
+        <x-blocks.main-block>
+            {{$priceItems->links()}}
+        </x-blocks.main-block>
     @endif
 </div>
