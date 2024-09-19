@@ -5,7 +5,6 @@ namespace App\Livewire\Forms\SupplierWarehouse;
 use App\Models\Supplier;
 use App\Models\SupplierWarehouse;
 use Illuminate\Validation\Rule;
-use Illuminate\Validation\Rules\Unique;
 use Livewire\Attributes\Validate;
 use Livewire\Form;
 
@@ -35,7 +34,7 @@ class SupplierWarehousePostForm extends Form
                 'required',
                 'string',
                 Rule::unique('supplier_warehouses', 'name')
-                    ->when($this->supplierWarehouse, fn (Unique $unique) => $unique->ignore($this->supplierWarehouse->id, 'id')),
+                    ->where('supplier_id', $this->supplier->id),
             ]
         ];
     }
