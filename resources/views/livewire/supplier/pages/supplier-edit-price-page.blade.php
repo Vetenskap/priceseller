@@ -5,7 +5,7 @@ use Livewire\Volt\Component;
 new class extends Component
 {
     public \App\Models\Supplier $supplier;
-    public \Illuminate\Support\Collection $priceItems;
+    public Illuminate\Pagination\LengthAwarePaginator $priceItems;
 
     public function mount(): void
     {
