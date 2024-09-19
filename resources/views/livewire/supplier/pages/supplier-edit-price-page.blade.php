@@ -68,7 +68,7 @@ new class extends Component
             @endforeach
         </x-table.table-layout>
         <x-blocks.main-block>
-            {{$priceItems->links()->withQueryString()}}
+            {{$priceItems->links()}}
         </x-blocks.main-block>
     @endif
 </div>
