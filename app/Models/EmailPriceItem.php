@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmailPriceItem extends MainModel
 {
@@ -29,5 +30,10 @@ class EmailPriceItem extends MainModel
             ->when(request('filters.article'), function (Builder $query) {
                 $query->where('article', 'like', '%' . request('filters.article') . '%');
             });
+    }
+
+    public function item(): BelongsTo
+    {
+        return $this->belongsTo(Item::class);
     }
 }
