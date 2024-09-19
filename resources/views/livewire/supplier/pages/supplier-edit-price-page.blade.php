@@ -67,8 +67,5 @@ new class extends Component
                 </x-table.table-item>
             @endforeach
         </x-table.table-layout>
-        <x-blocks.main-block>
-            {{$priceItems->links()}}
-        </x-blocks.main-block>
     @endif
 </div>
