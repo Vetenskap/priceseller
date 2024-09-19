@@ -9,7 +9,7 @@ new class extends Component
 
     public function mount(): void
     {
-        $this->priceItems = $this-$this->supplier->priceItems()->paginate(10);
+        $this->priceItems = $this->supplier->priceItems()->paginate(10);
     }
 
 }; ?>
