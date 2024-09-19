@@ -19,4 +19,7 @@ new class extends Component
     <x-blocks.flex-block>
         <x-success-button wire:click="download">Скачать</x-success-button>
     </x-blocks.flex-block>
+    <div wire:loading wire:target="download">
+        <x-loader />
+    </div>
 </div>

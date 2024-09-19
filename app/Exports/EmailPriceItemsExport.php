@@ -30,7 +30,7 @@ class EmailPriceItemsExport implements FromCollection, WithHeadings
                     'price' => $emailPriceItem->price,
                     'stock' => $emailPriceItem->stock,
                     'status' => $emailPriceItem->message,
-                    'item_code' => $emailPriceItem->item->code
+                    'item_code' => $emailPriceItem->item?->code
                 ];
             });
             $allData = $allData->merge($chunkData);
