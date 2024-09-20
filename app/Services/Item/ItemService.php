@@ -66,16 +66,15 @@ class ItemService
 
         $newItem = $this->user->items()->create($item);
 
-        logger('new Item');
-        logger($newItem);
-
-        foreach ($item['attributes'] as $attribute) {
-            $newItem->attributesValues()->updateOrCreate([
-                'item_attribute_id' => $attribute['item_attribute_id'],
-            ], [
-                'item_attribute_id' => $attribute['item_attribute_id'],
-                'value' => $attribute['value']
-            ]);
+        if (isset($item['attributes'])) {
+            foreach ($item['attributes'] as $attribute) {
+                $newItem->attributesValues()->updateOrCreate([
+                    'item_attribute_id' => $attribute['item_attribute_id'],
+                ], [
+                    'item_attribute_id' => $attribute['item_attribute_id'],
+                    'value' => $attribute['value']
+                ]);
+            }
         }
 
         return $newItem;

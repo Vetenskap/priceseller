@@ -381,6 +381,8 @@ class MoyskladService
     public function updateItemFromProduct(Product $product, Item $item): void
     {
         $item->ms_uuid = $product->id;
+        $item->unload_wb = true;
+        $item->unload_ozon = true;
 
         foreach ($this->moysklad->itemMainAttributeLinks as $itemMainAttributeLink) {
 

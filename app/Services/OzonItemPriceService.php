@@ -163,6 +163,13 @@ class OzonItemPriceService
         return $ozonItem;
     }
 
+    public function updateOzonItem(OzonItem $ozonItem): void
+    {
+        $ozonItem = $this->recountPriceOzonItem($ozonItem);
+        $ozonItem = $this->recountStockOzonItem($ozonItem);
+        $ozonItem->save();
+    }
+
     public function updateStock(): void
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
