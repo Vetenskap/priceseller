@@ -2,7 +2,7 @@
 
 namespace App\Services;
 
-use App\HttpClient\OzonClient;
+use App\HttpClient\OzonClient\OzonClient;
 use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\ItemWarehouseStock;
@@ -14,14 +14,10 @@ use App\Models\OzonWarehouseSupplierWarehouse;
 use App\Models\OzonWarehouseUserWarehouse;
 use App\Models\Supplier;
 use App\Models\User;
-use App\Models\Warehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Log;
-use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Services\MoyskladItemOrderService;
-use Modules\Order\Models\Order;
 
 class OzonItemPriceService
 {

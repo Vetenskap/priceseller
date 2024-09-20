@@ -430,6 +430,10 @@ class MoyskladService
             }
         }
 
+        if ($link->attribute_name === 'unload_ozon' || $link->attribute_name === 'unload_wb') {
+            return true;
+        }
+
         return null;
     }
 

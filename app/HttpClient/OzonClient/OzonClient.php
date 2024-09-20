@@ -1,6 +1,6 @@
 <?php
 
-namespace App\HttpClient;
+namespace App\HttpClient\OzonClient;
 
 use App\Models\Supplier;
 use App\Services\SupplierReportService;
@@ -9,11 +9,11 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 
 class OzonClient
 {
+    const BASEURL = 'https://api-seller.ozon.ru';
     public PendingRequest $request;
 
     public function __construct(string $apiKey, int $clientId)
@@ -27,7 +27,27 @@ class OzonClient
                 'Client-Id' => $clientId,
                 'Api-Key' => $apiKey,
                 'Content-Type' => 'application/json'
-            ])->baseUrl('https://api-seller.ozon.ru');
+            ])->baseUrl(self::BASEURL);
+    }
+
+    public function get(string $endpoint, array $queryParameters = []): Collection
+    {
+        return $this->request->withQueryParameters($queryParameters)->get($endpoint)->throw()->collect();
+    }
+
+    public function delete(string $endpoint): bool
+    {
+        return $this->request->delete($endpoint)->throw()->successful();
+    }
+
+    public function post(string $endpoint, array $data): Collection
+    {
+        return $this->request->post($endpoint, $data)->throw()->collect();
+    }
+
+    public function put(string $endpoint, array $data): bool
+    {
+        return $this->request->put($endpoint, $data)->throw()->successful();
     }
 
     public function getProductList(string $lastId = "", array $offerIds = []): Collection

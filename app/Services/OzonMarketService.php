@@ -3,22 +3,15 @@
 namespace App\Services;
 
 use App\Exports\OzonItemsExport;
-use App\HttpClient\OzonClient;
+use App\HttpClient\OzonClient\OzonClient;
 use App\Imports\OzonItemsImport;
-use App\Models\Item;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
 use App\Models\User;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Gate;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
-use Maatwebsite\Excel\Excel;
-use function Filament\authorize;
 
 class OzonMarketService
 {
