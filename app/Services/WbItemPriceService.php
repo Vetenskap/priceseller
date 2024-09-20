@@ -174,10 +174,13 @@ class WbItemPriceService
     {
         $this->market->warehouses->each(function (WbWarehouse $warehouse) use ($wbItem) {
 
-            $supplierWarehousesIds = $warehouse->suppliers()
+            $wbWarehouseSupplier = $warehouse->suppliers()
                 ->where('supplier_id', $this->supplier->id)
-                ->first()
-                ->warehouses
+                ->first();
+
+            if (!$wbWarehouseSupplier) return;
+
+            $supplierWarehousesIds = $wbWarehouseSupplier->warehouses
                 ->map(function (WbWarehouseSupplierWarehouse $warehouse) {
                     return $warehouse->supplierWarehouse->id;
                 });

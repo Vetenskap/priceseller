@@ -200,13 +200,15 @@ class OzonItemPriceService
     {
         $this->market->warehouses->each(function (OzonWarehouse $warehouse) use ($ozonItem) {
 
-            $supplierWarehousesIds = $warehouse->suppliers()
+            $ozonWarehouseSupplier = $warehouse->suppliers()
                 ->where('supplier_id', $this->supplier->id)
-                ->first()
-                ->warehouses
-                ->map(function (OzonWarehouseSupplierWarehouse $warehouse) {
-                    return $warehouse->supplierWarehouse->id;
-                });
+                ->first();
+
+            if (!$ozonWarehouseSupplier) return;
+
+            $supplierWarehousesIds = $ozonWarehouseSupplier->warehouses->map(function (OzonWarehouseSupplierWarehouse $warehouse) {
+                return $warehouse->supplierWarehouse->id;
+            });
 
             $new_count = 0;
 
