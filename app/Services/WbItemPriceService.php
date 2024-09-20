@@ -12,6 +12,7 @@ use App\Models\WbItem;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
 use App\Models\WbWarehouseStock;
+use App\Models\WbWarehouseSupplierWarehouse;
 use App\Models\WbWarehouseUserWarehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -173,6 +174,14 @@ class WbItemPriceService
     {
         $this->market->warehouses->each(function (WbWarehouse $warehouse) use ($wbItem) {
 
+            $supplierWarehousesIds = $warehouse->suppliers()
+                ->where('supplier_id', $this->supplier->id)
+                ->first()
+                ->warehouses
+                ->map(function (WbWarehouseSupplierWarehouse $warehouse) {
+                    return $warehouse->supplierWarehouse->id;
+                });
+
             $new_count = 0;
 
             if ($wbItem->wbitemable_type === 'App\Models\Item') {
@@ -190,12 +199,12 @@ class WbItemPriceService
                 })->sum();
 
                 if ($wbItem->wbitemable_type === 'App\Models\Item') {
-                    $new_count = $wbItem->wbitemable->count;
+                    $new_count = $wbItem->wbitemable->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock');
                     $multiplicity = $wbItem->wbitemable->multiplicity;
                 } else {
-                    $new_count = $wbItem->wbitemable->items->map(function (Item $item) {
+                    $new_count = $wbItem->wbitemable->items->map(function (Item $item) use ($supplierWarehousesIds) {
 
-                        $count = $item->count / $item->pivot->multiplicity;
+                        $count = $item->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock') / $item->pivot->multiplicity;
 
                         if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
                             $count = $count - (($item->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($item)->sum('orders') : 0));

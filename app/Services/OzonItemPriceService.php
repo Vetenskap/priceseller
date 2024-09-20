@@ -202,7 +202,7 @@ class OzonItemPriceService
 
             $supplierWarehousesIds = $warehouse->suppliers()
                 ->where('supplier_id', $this->supplier->id)
-                ->get()
+                ->first()
                 ->warehouses
                 ->map(function (OzonWarehouseSupplierWarehouse $warehouse) {
                     return $warehouse->supplierWarehouse->id;
