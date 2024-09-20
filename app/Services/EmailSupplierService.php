@@ -102,24 +102,43 @@ class EmailSupplierService
         $itemService = new ItemPriceService($article, $this->supplier->supplier->id);
         $items = $this->supplier->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
 
-        if (count($items) > 0) {
+        if (count($items) > 0 && !is_null($article)) {
 
             /** @var Item $item */
             foreach ($items as $item) {
 
                 EmailPriceItemService::handleFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock, $item->id);
 
-                $stock = $this->prepareStock($stock);
-                $price = $this->preparePrice($price);
+                if (!is_null($price)) {
+                    $price = $this->preparePrice($price);
+                    $item->price = $price;
+                }
 
-                $item->price = $price;
                 $item->updated = true;
 
                 $itemService->save($item);
 
-                if (!is_null($this->supplier->header_warehouse)) {
+                if (!is_null($stock)) {
 
-                    if ($supplier_warehouse_id = $this->warehouses->get($warehouse)) {
+                    $stock = $this->prepareStock($stock);
+
+                    if (!is_null($this->supplier->header_warehouse)) {
+
+                        if ($supplier_warehouse_id = $this->warehouses->get($warehouse)) {
+
+                            $item->supplierWarehouseStocks()->updateOrCreate([
+                                'supplier_warehouse_id' => $supplier_warehouse_id,
+                                'item_id' => $item->id
+                            ], [
+                                'supplier_warehouse_id' => $supplier_warehouse_id,
+                                'stock' => $stock
+                            ]);
+
+                        }
+
+                    } else {
+
+                        $supplier_warehouse_id = $this->warehouses->first();
 
                         $item->supplierWarehouseStocks()->updateOrCreate([
                             'supplier_warehouse_id' => $supplier_warehouse_id,
@@ -130,18 +149,6 @@ class EmailSupplierService
                         ]);
 
                     }
-
-                } else {
-
-                    $supplier_warehouse_id = $this->warehouses->first();
-
-                    $item->supplierWarehouseStocks()->updateOrCreate([
-                        'supplier_warehouse_id' => $supplier_warehouse_id,
-                        'item_id' => $item->id
-                    ], [
-                        'supplier_warehouse_id' => $supplier_warehouse_id,
-                        'stock' => $stock
-                    ]);
 
                 }
             }
@@ -159,11 +166,11 @@ class EmailSupplierService
     public function prepareStock(string $stock): int
     {
         $stock = $this->stockValues->get($stock, $stock);
-        return (int) preg_replace("/[^0-9]/", "", $stock);
+        return (int)preg_replace("/[^0-9]/", "", $stock);
     }
 
     public function preparePrice(string $price): float
     {
-        return (float) preg_replace("/,/", '.', $price);
+        return (float)preg_replace("/,/", '.', $price);
     }
 }

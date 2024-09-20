@@ -26,7 +26,7 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $uniqueFor = 600;
-    public int $tries = 2;
+    public int $tries = 1;
 
     /**
      * Create a new job instance.
