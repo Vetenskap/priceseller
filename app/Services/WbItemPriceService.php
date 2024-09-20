@@ -79,6 +79,7 @@ class WbItemPriceService
             ->chunk(1000, function ($items) {
                 $items->each(function (WbItem $wbItem) {
                     $wbItem = $this->recountPriceWbItem($wbItem);
+                    $wbItem = $this->recountStockWbItem($wbItem);
                     $wbItem->save();
                 });
             });
@@ -185,7 +186,7 @@ class WbItemPriceService
                 $itemIds = $wbItem->wbitemable_type === 'App\Models\Item' ? [$wbItem->wbitemable_id] : $wbItem->wbitemable->items->pluck('id')->toArray();
 
                 $myWarehousesStocks = $warehouse->userWarehouses->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($wbItem, $itemIds) {
-                    return $userWarehouse->warehouse->stocks()->whereIn('item_id', $itemIds)->map(fn(ItemWarehouseStock $stock) => $stock->stock)->sum();
+                    return $userWarehouse->warehouse->stocks()->whereIn('item_id', $itemIds)->get()->map(fn(ItemWarehouseStock $stock) => $stock->stock)->sum();
                 })->sum();
 
                 if ($wbItem->wbitemable_type === 'App\Models\Item') {

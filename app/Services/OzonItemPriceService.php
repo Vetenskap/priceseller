@@ -82,6 +82,7 @@ class OzonItemPriceService
             ->chunk(1000, function ($items) {
                 $items->each(function (OzonItem $ozonItem) {
                     $ozonItem = $this->recountPriceOzonItem($ozonItem);
+                    $ozonItem = $this->recountStockOzonItem($ozonItem);
                     $ozonItem->save();
                 });
             });
@@ -220,7 +221,7 @@ class OzonItemPriceService
                 $itemIds = $ozonItem->ozonitemable_type === 'App\Models\Item' ? [$ozonItem->ozonitemable_id] : $ozonItem->ozonitemable->items->pluck('id')->toArray();
 
                 $myWarehousesStocks = $warehouse->userWarehouses->map(function (OzonWarehouseUserWarehouse $userWarehouse) use ($ozonItem, $itemIds) {
-                    return $userWarehouse->warehouse->stocks()->whereIn('item_id', $itemIds)->map(fn(ItemWarehouseStock $stock) => $stock->stock)->sum();
+                    return $userWarehouse->warehouse->stocks()->whereIn('item_id', $itemIds)->get()->map(fn(ItemWarehouseStock $stock) => $stock->stock)->sum();
                 })->sum();
 
                 if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
