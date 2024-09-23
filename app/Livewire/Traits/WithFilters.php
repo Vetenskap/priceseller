@@ -6,7 +6,7 @@ trait WithFilters
 {
     public array $filters = [];
 
-    public function updatedFilters()
+    public function updatedFilters(): void
     {
         request()->merge(['filters' => $this->filters]);
     }

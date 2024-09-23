@@ -59,47 +59,75 @@
 
                 <!-- Блок с выбором фото -->
                 <x-blocks.flex-block>
-                    <div id="image-picker"
-                         class="relative w-24 h-24 border-2 border-dashed rounded-lg bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-gray-100 transition"
-                         onclick="document.getElementById('file-input').click()">
-                        <input type="file" id="file-input" accept="image/*"
-                               class="absolute inset-0 opacity-0 cursor-pointer" multiple wire:model="images">
-                        <div class="text-center" id="image-placeholder">
-                            <span class="text-2xl font-bold text-gray-400">+</span>
-                            <p class="text-sm text-gray-500 mt-1">Фото</p>
+                    <div class="grid grid-cols-2 p-6 gap-4">
+                        <div id="image-picker"
+                             class="relative w-24 h-24 border-2 border-dashed rounded-lg bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-gray-100 transition"
+                             onclick="document.getElementById('file-input').click()">
+                            <input type="file" id="file-input" accept="image/*"
+                                   class="absolute inset-0 opacity-0 cursor-pointer" multiple wire:model="images">
+                            <div class="text-center" id="image-placeholder">
+                                <span class="text-2xl font-bold text-gray-400">+</span>
+                                <p class="text-sm text-gray-500 mt-1">Фото</p>
+                            </div>
                         </div>
+
+                        @foreach($images as $image)
+                            <div class="relative w-24 h-24 border rounded-lg bg-gray-50 flex items-center justify-center">
+                                <img src="{{ $image->temporaryUrl() }}" class="object-cover rounded-lg w-full h-full" />
+                                <button type="button" wire:click="$set('images', array_diff($images, [$image]))"
+                                        class="absolute top-0 right-0 m-1 text-white bg-red-500 rounded-full w-4 h-4 flex items-center justify-center">
+                                    &times;
+                                </button>
+                            </div>
+                        @endforeach
                     </div>
 
-                    @foreach($images as $image)
-                        <div class="relative w-24 h-24 border rounded-lg bg-gray-50 flex items-center justify-center">
-                            <img src="{{ $image->temporaryUrl() }}" class="object-cover rounded-lg w-full h-full" />
-                            <button type="button" wire:click="$set('images', array_diff($images, [$image]))"
-                                    class="absolute top-0 right-0 m-1 text-white bg-red-500 rounded-full w-4 h-4 flex items-center justify-center">
-                                &times;
-                            </button>
-                        </div>
-                    @endforeach
-                </x-blocks.flex-block>
+                    <!-- Ошибки загрузки файлов -->
+                    @error('images.*')
+                    <div class="text-red-600 mt-2 text-sm">
+                        {{ $message }} <!-- Сообщение об ошибке для каждого файла -->
+                    </div>
+                    @enderror
 
-                <!-- Ошибки загрузки файлов -->
-                @error('images.*')
-                <div class="text-red-600 mt-2 text-sm">
-                    {{ $message }} <!-- Сообщение об ошибке для каждого файла -->
-                </div>
-                @enderror
-
-                <!-- Поля для редактирования информации карточки -->
-                <x-blocks.flex-block>
-                    <x-inputs.input-with-label name="name"
-                                               field="name"
-                                               type="text"
-                    >Наименование
-                    </x-inputs.input-with-label>
-                    <x-inputs.input-with-label name="description"
-                                               field="description"
-                                               type="text"
-                    >Описание
-                    </x-inputs.input-with-label>
+                    <!-- Поля для редактирования информации карточки -->
+                    <x-blocks.main-block>
+                        <x-inputs.input-with-label name="offer_id"
+                                                   field="offer_id"
+                                                   type="text"
+                        >offer_id
+                        </x-inputs.input-with-label>
+                        <x-inputs.input-with-label name="name"
+                                                   field="name"
+                                                   type="text"
+                        >Наименование
+                        </x-inputs.input-with-label>
+                        <x-inputs.input-with-label name="depth"
+                                                   field="depth"
+                                                   type="number"
+                        >Глубина
+                        </x-inputs.input-with-label>
+                        <x-inputs.input-with-label name="width"
+                                                   field="width"
+                                                   type="number"
+                        >Ширина
+                        </x-inputs.input-with-label>
+                        <x-inputs.input-with-label name="height"
+                                                   field="height"
+                                                   type="number"
+                        >Высота
+                        </x-inputs.input-with-label>
+                        <x-inputs.input-with-label name="dimension_unit"
+                                                   field="dimension_unit"
+                                                   type="text"
+                        >Единица измерения размеров
+                        </x-inputs.input-with-label>
+                        <x-inputs.input-with-label name="weight"
+                                                   field="weight"
+                                                   type="number"
+                        >Вес
+                        </x-inputs.input-with-label>
+                        <x-textarea name="Описание" value="description"/>
+                    </x-blocks.main-block>
                 </x-blocks.flex-block>
 
                 <x-blocks.main-block>

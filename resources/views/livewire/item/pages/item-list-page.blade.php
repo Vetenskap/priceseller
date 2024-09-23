@@ -1,5 +1,5 @@
 <div>
-    <x-layouts.header name="Товары" />
+    <x-layouts.header name="Товары"/>
     <x-layouts.main-container>
         <x-navigate-pages>
             <x-links.tab-link href="{{route('items', ['page' => 'list'])}}" :active="$page === 'list'">Список
@@ -10,37 +10,43 @@
         <x-blocks.main-block>
             <x-layouts.title name="Список"/>
         </x-blocks.main-block>
+        <x-blocks.main-block>
+            <x-titles.sub-title name="Фильтры"/>
+        </x-blocks.main-block>
+        <x-blocks.flex-block-end>
+            <x-inputs.input-with-label name="name"
+                                       type="text"
+                                       field="filters.name"
+            >Наименование
+            </x-inputs.input-with-label>
+            <x-inputs.input-with-label name="code"
+                                       type="text"
+                                       field="filters.code"
+            >Код
+            </x-inputs.input-with-label>
+            <x-inputs.input-with-label name="article"
+                                       type="text"
+                                       field="filters.article"
+            >Артикул
+            </x-inputs.input-with-label>
+            <x-dropdown-select name="unloadWb"
+                               field="filters.unload_wb"
+                               :options="[['id' => 1, 'name' => 'Да'],['id' => 0, 'name' => 'Нет']]"
+            >Выгружать на ВБ
+            </x-dropdown-select>
+            <x-dropdown-select name="unloadOzon"
+                               field="filters.unload_ozon"
+                               :options="[['id' => 1, 'name' => 'Да'],['id' => 0, 'name' => 'Нет']]"
+            >Выгружать на ОЗОН
+            </x-dropdown-select>
+            <x-dropdowns.dropdown-select :items="$user->suppliers->all()"
+                                         :current-id="isset($filters['supplier_id']) ? $filters['supplier_id'] : null"
+                                         name="supplier_id"
+                                         field="filters.supplier_id"
+            >Поставщик
+            </x-dropdowns.dropdown-select>
+        </x-blocks.flex-block-end>
         @if($items->count() > 0)
-            <x-blocks.main-block>
-                <x-titles.sub-title name="Фильтры"/>
-            </x-blocks.main-block>
-            <x-blocks.flex-block-end>
-                <x-inputs.input-with-label name="name"
-                                           type="text"
-                                           field="filters.name"
-                >Наименование
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="code"
-                                           type="text"
-                                           field="filters.code"
-                >Код
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="article"
-                                           type="text"
-                                           field="filters.article"
-                >Артикул
-                </x-inputs.input-with-label>
-                <x-dropdown-select name="unloadWb"
-                                   field="filters.unload_wb"
-                                   :options="[['id' => 1, 'name' => 'Да'],['id' => 0, 'name' => 'Нет']]"
-                >Выгружать на ВБ
-                </x-dropdown-select>
-                <x-dropdown-select name="unloadOzon"
-                                   field="filters.unload_ozon"
-                                   :options="[['id' => 1, 'name' => 'Да'],['id' => 0, 'name' => 'Нет']]"
-                >Выгружать на ОЗОН
-                </x-dropdown-select>
-            </x-blocks.flex-block-end>
             <x-table.table-layout>
                 <x-table.table-header>
                     <x-table.table-child>
@@ -84,4 +90,7 @@
             </x-blocks.main-block>
         @endif
     </x-layouts.main-container>
+    <div wire:loading>
+        <x-loader/>
+    </div>
 </div>
