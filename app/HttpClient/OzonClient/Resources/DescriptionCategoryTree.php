@@ -45,4 +45,9 @@ class DescriptionCategoryTree
         return $this->descriptionCategories;
     }
 
+    public function toArray(): array
+    {
+        return $this->descriptionCategories->map(fn (DescriptionCategoryTree|DescriptionCategory $description) => $description->toArray())->toArray();
+    }
+
 }

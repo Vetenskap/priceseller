@@ -8,7 +8,9 @@ use App\Models\Email;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Livewire\Attributes\Title;
 
+#[Title('Почта')]
 class EmailIndex extends BaseComponent
 {
     public EmailPostForm $form;

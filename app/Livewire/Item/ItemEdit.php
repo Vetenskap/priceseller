@@ -11,7 +11,9 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Title;
 
+#[Title('Товары')]
 class ItemEdit extends BaseComponent
 {
     use WithJsNotifications;

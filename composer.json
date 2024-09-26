@@ -16,6 +16,7 @@
         "laravel/sanctum": "^4.0",
         "laravel/telescope": "^5.0",
         "laravel/tinker": "^2.9",
+        "livewire/flux": "*",
         "livewire/livewire": "^3.4",
         "livewire/volt": "^1.0",
         "maatwebsite/excel": "^3.1",
@@ -89,5 +90,11 @@
     "prefer-stable": true,
     "files": [
         "app/Helpers/Helpers.php"
-    ]
+    ],
+    "repositories": {
+        "flux-pro": {
+            "type": "composer",
+            "url": "https://composer.fluxui.dev"
+        }
+    }
 }

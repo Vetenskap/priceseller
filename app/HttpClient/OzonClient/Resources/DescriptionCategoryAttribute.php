@@ -39,46 +39,45 @@ class DescriptionCategoryAttribute
         $this->is_collection = $descriptionCategoryAttribute->get('is_collection');
         $this->is_required = $descriptionCategoryAttribute->get('is_required');
         $this->name = $descriptionCategoryAttribute->get('name');
-        $this->type = $descriptionCategoryAttribute->get('type');
+        $this->type = $this->switchType($descriptionCategoryAttribute->get('type'));
         $this->attribute_complex_id = $descriptionCategoryAttribute->get('attribute_complex_id');
         $this->max_value_count = $descriptionCategoryAttribute->get('max_value_count');
     }
 
-    public function fetchValues(OzonMarket $market, int $descriptionCategoryId, int $typeId): void
+    public function switchType(string $type): string
+    {
+        return match ($type) {
+            'Integer', 'Decimal' => 'number',
+            'multiline' => 'textarea',
+            default => 'text',
+        };
+    }
+
+    public function fetchValues(OzonMarket $market, int $descriptionCategoryId, int $typeId, string $value): void
     {
         if ($this->dictionary_id) {
 
             $values = new Collection();
 
-            $last_id = 1000;
+            $data = [
+                'attribute_id' => $this->id,
+                'description_category_id' => $descriptionCategoryId,
+                'type_id' => $typeId,
+                'limit' => 100,
+                'value' => $value
+            ];
 
-            do {
-                $data = [
-                    'attribute_id' => $this->id,
-                    'description_category_id' => $descriptionCategoryId,
-                    'type_id' => $typeId,
-                    'last_value_id' => $last_id,
-                    'limit' => 5000
-                ];
+            $client = new OzonClient($market->api_key, $market->client_id);
+            $result = Cache::tags(['ozon', 'market', 'description', 'category', 'attribute', 'value'])->remember(json_encode($data), now()->addDay(), fn() => $client->post(DescriptionCategoryAttributeValue::ENDPOINT, $data))->toCollectionSpread();
 
-                $last_id += 5000;
+            $dictionary = $result->get('result');
 
-                $client = new OzonClient($market->api_key, $market->client_id);
-                $result = Cache::tags(['ozon', 'market', 'description', 'category', 'attribute', 'value'])->remember(json_encode($data), now()->addDay(), fn() => $client->post(DescriptionCategoryAttributeValue::ENDPOINT, $data))->toCollectionSpread();
+            $dictionary->each(function (Collection $value) use ($values) {
+                $newValue = new DescriptionCategoryAttributeValue();
+                $newValue->setDescriptionCategoryAttributeValue($value);
+                $values->push($newValue);
+            });
 
-                $dictionary = $result->get('result');
-
-                dd($dictionary->first());
-
-                $hasNext = $result->get('has_next');
-
-                $dictionary->each(function (Collection $value) use ($values) {
-                    $newValue = new DescriptionCategoryAttributeValue();
-                    $newValue->setDescriptionCategoryAttributeValue($value);
-                    $values->push($newValue);
-                });
-
-            } while ($hasNext);
 
             $this->values = $values;
 
@@ -153,6 +152,26 @@ class DescriptionCategoryAttribute
     public function getValues(): ?Collection
     {
         return $this->values;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'category_dependent' => $this->category_dependent,
+            'description' => $this->description,
+            'dictionary_id' => $this->dictionary_id,
+            'group_id' => $this->group_id,
+            'group_name' => $this->group_name,
+            'id' => $this->id,
+            'is_aspect' => $this->is_aspect,
+            'is_collection' => $this->is_collection,
+            'is_required' => $this->is_required,
+            'name' => $this->name,
+            'type' => $this->type,
+            'attribute_complex_id' => $this->attribute_complex_id,
+            'max_value_count' => $this->max_value_count,
+            'values' => $this->values ? $this->values->map(fn (DescriptionCategoryAttributeValue $value) => $value->toArray())->toArray() : [],
+        ];
     }
 
 }

@@ -8,7 +8,9 @@ use App\Models\Supplier;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Livewire\Attributes\Title;
 
+#[Title('Поставщики')]
 class SupplierIndex extends BaseComponent
 {
     public SupplierPostForm $form;

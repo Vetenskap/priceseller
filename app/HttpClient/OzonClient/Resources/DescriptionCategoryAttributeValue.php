@@ -6,7 +6,7 @@ use Illuminate\Support\Collection;
 
 class DescriptionCategoryAttributeValue
 {
-    const ENDPOINT = '/v1/description-category/attribute/values';
+    const ENDPOINT = '/v1/description-category/attribute/values/search';
 
     protected int $id;
 
@@ -42,6 +42,16 @@ class DescriptionCategoryAttributeValue
     public function getValue(): string
     {
         return $this->value;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->getId(),
+            'info' => $this->getInfo(),
+            'picture' => $this->getPicture(),
+            'value' => $this->getValue()
+        ];
     }
 
 }

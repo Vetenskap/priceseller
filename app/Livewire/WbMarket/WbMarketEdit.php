@@ -23,10 +23,12 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
 use Livewire\Attributes\Session;
+use Livewire\Attributes\Title;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+#[Title('ВБ')]
 class WbMarketEdit extends BaseComponent
 {
     use WithFileUploads, WithJsNotifications, WithFilters;

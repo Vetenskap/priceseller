@@ -13,7 +13,7 @@ class DescriptionCategory
 
     protected ?string $category_name = null;
 
-    protected bool $disabled;
+    protected ?bool $disabled = null;
 
     protected ?string $type_name = null;
 
@@ -71,7 +71,7 @@ class DescriptionCategory
         $this->attributes = $attributes;
     }
 
-    public function getDescriptionCategoryId(): int
+    public function getDescriptionCategoryId(): ?int
     {
         return $this->description_category_id;
     }
@@ -109,6 +109,19 @@ class DescriptionCategory
     public function getAttributes(): ?Collection
     {
         return $this->attributes;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'description_category_id' => $this->description_category_id,
+            'category_name' => $this->category_name,
+            'disabled' => $this->disabled,
+            'type_name' => $this->type_name,
+            'type_id' => $this->type_id,
+            'children' => $this->children ? $this->children->toArray() : [],
+            'attributes' => $this->attributes ?$this->attributes->map(fn (DescriptionCategoryAttribute $attribute) => $attribute->toArray())->toArray() : [],
+        ];
     }
 
 }

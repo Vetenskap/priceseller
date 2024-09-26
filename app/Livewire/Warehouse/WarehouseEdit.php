@@ -10,9 +10,11 @@ use App\Models\Warehouse;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Livewire\Attributes\Title;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
+#[Title('Склады')]
 class WarehouseEdit extends BaseComponent
 {
     use WithJsNotifications;

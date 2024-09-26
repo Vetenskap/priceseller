@@ -83,6 +83,10 @@ class MoyskladWebhookProcessService
 
     private function processChangeWarehouseOrder()
     {
+        logger('Задержка');
+        sleep(10);
+        logger('Начали');
+
         $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
 
             $order = $event->getMeta();

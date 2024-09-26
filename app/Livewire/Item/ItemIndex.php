@@ -15,10 +15,12 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Title;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+#[Title('Товары')]
 class ItemIndex extends BaseComponent
 {
     use WithFileUploads, WithJsNotifications, WithFilters;

@@ -10,7 +10,9 @@ use App\Services\UsersPermissionsService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Livewire\Attributes\Title;
 
+#[Title('ОЗОН')]
 class OzonMarketIndex extends BaseComponent
 {
     public OzonMarketPostForm $form;

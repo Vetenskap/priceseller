@@ -8,7 +8,9 @@ use App\Models\Organization;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Livewire\Attributes\Title;
 
+#[Title('Организации')]
 class OrganizationIndex extends BaseComponent
 {
 

@@ -16,10 +16,12 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Title;
 use Livewire\Attributes\Url;
 use Livewire\WithFileUploads;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
+#[Title('Склады')]
 class WarehouseIndex extends BaseComponent
 {
     use WithFileUploads, WithJsNotifications;
