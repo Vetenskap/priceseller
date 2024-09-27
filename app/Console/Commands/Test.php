@@ -17,6 +17,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\EditorContent\Services\EditorContentService;
 use Modules\Moysklad\Models\Moysklad;
+use Modules\Moysklad\Services\MoyskladItemOrderService;
 use Modules\Moysklad\Services\MoyskladService;
 
 class Test extends Command
@@ -40,6 +41,11 @@ class Test extends Command
      */
     public function handle()
     {
+        $ozonItem = OzonItem::find('9d07c247-d70d-4514-b69f-54ad83d75a69');
 
+        /** @var Item $item */
+        $item = $ozonItem->ozonitemable;
+//        $ozonItem->ozonitemable->moyskladOrders()->where('new', true)->get()
+        dd((($ozonItem->ozonitemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($ozonItem->ozonitemable)->sum('orders') : 0) * $ozonItem->ozonitemable->multiplicity));
     }
 }

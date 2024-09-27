@@ -23,6 +23,10 @@ class EmailPriceItemService
             'status' => 0,
             'item_id' => $itemId
         ]);
+
+        if ($prev = EmailPriceItem::where('supplier_id', $supplierId)->where('article', $article)->where('brand', $brand)->where('status', 1)->first()) {
+            $prev->delete();
+        }
     }
 
     public static function handleNotFoundItem(string $supplierId, ?string $article, ?string $brand, ?string $price, ?string $stock): void
@@ -40,5 +44,9 @@ class EmailPriceItemService
             'message' => 'Товар не найден',
             'status' => 1
         ]);
+
+        if ($prev = EmailPriceItem::where('supplier_id', $supplierId)->where('article', $article)->where('brand', $brand)->where('status', 0)->first()) {
+            $prev->delete();
+        }
     }
 }

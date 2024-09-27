@@ -10,7 +10,7 @@ class MoyskladItemOrderService
 {
     public static function getOrders(Item $item): Collection
     {
-        $orders = $item->moyskladOrders()->where('new')->get();
+        $orders = $item->moyskladOrders()->where('new', true)->get();
 
         return $orders->filter(fn (MoyskladItemOrder $order) => static::checkOrder($order));
 
@@ -19,7 +19,7 @@ class MoyskladItemOrderService
     public static function checkOrder(MoyskladItemOrder $order): bool
     {
         if ($order->moysklad->clear_order_time) {
-            if ($order->updated_at->addMinutes($order->moysklad->clear_order_time) < now()) {
+            if ($order->updated_at->addMinutes($order->moysklad->clear_order_time)->toDateTimeString() < now()->toDateTimeString()) {
                 $order->update(['new' => false]);
                 return false;
             }

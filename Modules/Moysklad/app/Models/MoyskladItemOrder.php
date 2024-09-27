@@ -11,6 +11,7 @@ class MoyskladItemOrder extends Model
         'orders',
         'item_id',
         'moysklad_id',
+        'new'
     ];
 
     public function moysklad(): BelongsTo
