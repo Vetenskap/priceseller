@@ -36,6 +36,7 @@
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @fluxStyles
 </head>
 <body class="font-sans antialiased">
 
@@ -84,6 +85,7 @@
         </div>
     </footer>
 </div>
+<flux:toast />
 <script src="/assets/js/toast.min.js"></script>
 <script src="https://kit.fontawesome.com/5850d038fd.js" crossorigin="anonymous"></script>
 <script>
@@ -146,5 +148,6 @@
         });
     });
 </script>
+@fluxScripts
 </body>
 </html>

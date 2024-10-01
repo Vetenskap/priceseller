@@ -162,7 +162,7 @@ class EditorContentIndex extends ModuleComponent
             $image->store('photos', 'public');
         }
 
-        session()->flash('message', 'Карточки успешно обновлены.');
+        \Flux::toast('Изменения успешно отправлены!', 'Уведомление');
     }
 
     // Метод для поиска карточек по API

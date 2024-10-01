@@ -68,11 +68,22 @@ class OzonItemPriceService
         OzonItem::query()
             ->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
                 if ($type === Item::class) {
-                    $query->where('supplier_id', $this->supplier->id);
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                            $query->where('updated', true);
+                        });
                 } elseif ($type === Bundle::class) {
-                    $query->whereHas('items', function (Builder $query) {
-                        $query->where('supplier_id', $this->supplier->id);
-                    });
+                    $query
+                        ->whereHas('items', function (Builder $query) {
+                            $query->where('supplier_id', $this->supplier->id);
+                        })
+                        ->whereDoesntHave('items', function (Builder $query) {
+                            $query
+                                ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                                    $query->where('updated', false);
+                                });
+                        });
                 }
             })
             ->chunk(1000, function ($items) {
