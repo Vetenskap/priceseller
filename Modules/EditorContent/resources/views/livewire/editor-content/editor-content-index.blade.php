@@ -66,7 +66,7 @@
 
                     <flux:card class="space-y-6">
                         <div class="flex gap-6">
-                            <div class="flex flex-wrap gap-6 max-w-sm">
+                            <div class="flex flex-wrap gap-6 max-w-sm h-fit">
                                 <div id="image-picker"
                                      class="relative w-24 h-24 border-2 border-dashed rounded-lg bg-gray-50 flex items-center justify-center cursor-pointer hover:bg-gray-100 transition"
                                      onclick="document.getElementById('file-input').click()">
@@ -118,7 +118,9 @@
                                                     <flux:error name="categoryAttributesDictionarySearch.{{$attribute['id']}}" />
                                                 </flux:field>
                                             @else
-                                                <flux:input wire:model="categoryAttributesValues.{{$attribute['id']}}" type="{{$attribute['type']}}" label="{{$attribute['name']}}" />
+                                                <div class="flex gap-4 items-end">
+                                                    <flux:input wire:model="categoryAttributesValues.{{$attribute['id']}}" type="{{$attribute['type']}}" label="{{$attribute['name']}}" />
+                                                </div>
                                             @endif
                                             <flux:select variant="listbox" class="max-w-64" placeholder="Выберите {{$attribute['name']}}..."
                                                          wire:model="categoryAttributesValuesSelected.{{$attribute['id']}}" searchable>

@@ -9,6 +9,8 @@ class AssemblyIndex extends ModuleComponent
 {
     public function render()
     {
-        return view('assembly::livewire.assembly.assembly-index');
+        return view('assembly::livewire.assembly.assembly-index', [
+            'modules' => $this->getEnabledModules()
+        ]);
     }
 }

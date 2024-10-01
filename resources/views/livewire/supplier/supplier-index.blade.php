@@ -1,25 +1,26 @@
 <div>
     <x-layouts.header name="Поставщики"/>
-    <div x-data="{ open: false }">
-        <x-layouts.actions>
-            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-        </x-layouts.actions>
-        <x-layouts.main-container x-show="open">
-            <x-blocks.main-block>
-                <x-layouts.title name="Добавление нового поставщика" />
-            </x-blocks.main-block>
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="name"
-                                           type="text"
-                                           field="form.name"
-                >Наименование
-                </x-inputs.input-with-label>
-                <div class="self-center">
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </div>
-            </x-blocks.flex-block>
-        </x-layouts.main-container>
-    </div>
+
+    <flux:modal name="create-supplier" class="md:w-96 space-y-6">
+        <div>
+            <flux:heading size="lg">Создание поставщика</flux:heading>
+        </div>
+
+        <flux:input wire:model="form.name" label="Наименование" required/>
+
+        <div class="flex">
+            <flux:spacer/>
+
+            <flux:button variant="primary" wire:click="store">Создать</flux:button>
+        </div>
+    </flux:modal>
+
+    <x-layouts.actions>
+        <flux:modal.trigger name="create-supplier">
+            <flux:button>Добавить</flux:button>
+        </flux:modal.trigger>
+    </x-layouts.actions>
+
     <x-layouts.main-container>
         <x-blocks.main-block>
             <x-layouts.title name="Список" />

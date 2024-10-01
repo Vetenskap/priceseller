@@ -1,35 +1,28 @@
 <div>
     <x-layouts.header name="ОЗОН"/>
-    <div x-data="{ open: false }">
-        <x-layouts.actions>
-            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-        </x-layouts.actions>
-        <x-layouts.main-container x-show="open">
-            <x-blocks.main-block>
-                <x-layouts.title name="Добавление нового кабинета"/>
-            </x-blocks.main-block>
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="name"
-                                           type="text"
-                                           field="form.name"
-                >Наименование
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="client_id"
-                                           type="text"
-                                           field="form.client_id"
-                >Идентификатор клиента
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="api_key"
-                                           type="text"
-                                           field="form.api_key"
-                >АПИ ключ
-                </x-inputs.input-with-label>
-                <div class="self-center">
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </div>
-            </x-blocks.flex-block>
-        </x-layouts.main-container>
-    </div>
+
+    <flux:modal name="create-ozon-market" class="md:w-96 space-y-6">
+        <div>
+            <flux:heading size="lg">Создание кабинета</flux:heading>
+        </div>
+
+        <flux:input wire:model="form.name" label="Наименование" required/>
+        <flux:input wire:model="form.client_id" label="Идентификатор клиента" type="number" required/>
+        <flux:input wire:model="form.api_key" label="АПИ ключ" required/>
+
+        <div class="flex">
+            <flux:spacer/>
+
+            <flux:button variant="primary" wire:click="store">Создать</flux:button>
+        </div>
+    </flux:modal>
+
+    <x-layouts.actions>
+        <flux:modal.trigger name="create-ozon-market">
+            <flux:button>Добавить</flux:button>
+        </flux:modal.trigger>
+    </x-layouts.actions>
+
     <x-layouts.main-container>
         <x-blocks.main-block>
             <x-layouts.title name="Список"/>

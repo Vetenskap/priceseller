@@ -20,6 +20,8 @@ class SupplierIndex extends BaseComponent
         $this->authorize('create', Supplier::class);
 
         $this->form->store();
+
+        \Flux::modal('create-supplier')->close();
     }
 
     public function changeOpen(string $id): void

@@ -20,6 +20,8 @@ class EmailIndex extends BaseComponent
         $this->authorize('create', Email::class);
 
         $this->form->store();
+
+        \Flux::modal('create-email')->close();
     }
 
     public function changeOpen(string $id): void

@@ -28,6 +28,8 @@ class WbMarketIndex extends BaseComponent
 
         $this->form->store();
 
+        \Flux::modal('create-wb-market')->close();
+
     }
 
     public function changeOpen(string $id): void

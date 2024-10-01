@@ -1,41 +1,28 @@
 <div>
     <x-layouts.header name="Почта"/>
 
-    <div x-data="{ open: false }">
-        <x-layouts.actions>
-            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-        </x-layouts.actions>
+    <flux:modal name="create-email" class="md:w-96 space-y-6">
+        <div>
+            <flux:heading size="lg">Создание почты</flux:heading>
+        </div>
 
-        <x-layouts.main-container x-show="open">
-            <x-blocks.main-block>
-                <x-layouts.title name="Добавление новой почты"/>
-            </x-blocks.main-block>
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="name"
-                                           type="text"
-                                           field="form.name"
-                >Наименование
-                </x-inputs.input-with-label>
+        <flux:input wire:model="form.name" label="Наименование" required/>
+        <flux:input wire:model="form.address" label="Адрес" type="email" required/>
+        <flux:input wire:model="form.password" label="Адрес" type="password" required/>
 
+        <div class="flex">
+            <flux:spacer/>
 
-                <x-inputs.input-with-label name="address"
-                                           type="email"
-                                           field="form.address"
-                >Адрес
-                </x-inputs.input-with-label>
+            <flux:button variant="primary" wire:click="store">Создать</flux:button>
+        </div>
+    </flux:modal>
 
+    <x-layouts.actions>
+        <flux:modal.trigger name="create-email">
+            <flux:button>Добавить</flux:button>
+        </flux:modal.trigger>
+    </x-layouts.actions>
 
-                <x-inputs.input-with-label name="password"
-                                           type="password"
-                                           field="form.password"
-                >Пароль
-                </x-inputs.input-with-label>
-                <div class="self-center">
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </div>
-            </x-blocks.flex-block>
-        </x-layouts.main-container>
-    </div>
     <x-layouts.main-container>
         <x-blocks.main-block>
             <x-layouts.title name="Список"/>

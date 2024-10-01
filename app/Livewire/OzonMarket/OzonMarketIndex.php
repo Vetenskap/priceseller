@@ -28,6 +28,8 @@ class OzonMarketIndex extends BaseComponent
 
         $this->form->store();
 
+        \Flux::modal('create-ozon-market')->close();
+
     }
 
     public function changeOpen($id): void

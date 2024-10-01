@@ -64,12 +64,14 @@ class EmailSupplierPostForm extends Form
                 'exists:suppliers,id',
                 Rule::unique('email_suppliers', 'supplier_id')
                     ->when($this->emailSupplier, fn(Unique $unique) => $unique->ignore($this->emailSupplier->id, 'id'))
+                    ->where('email_id', $this->mainEmail->id),
             ],
             'email' => [
                 'required',
                 'email',
                 Rule::unique('email_suppliers', 'email')
                     ->where('supplier_id', $this->supplier_id)
+                    ->where('email_id', $this->mainEmail->id)
                     ->when($this->emailSupplier, fn(Unique $unique) => $unique->ignore($this->emailSupplier->id, 'id')),
             ],
             'filename' => ['required', 'string'],
