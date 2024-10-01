@@ -1,45 +1,54 @@
 <div>
-    <x-blocks.main-block>
-        <x-layouts.title name="Склады"/>
-        <x-titles.sub-title name="Привязка складов"/>
-        <x-information>Вы можете привязать склады с прайса к складам поставщика</x-information>
-    </x-blocks.main-block>
-    <div x-data="{ open: false }">
-        <x-blocks.main-block>
-            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-        </x-blocks.main-block>
-        <div x-show="open">
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="value"
-                                           field="form.value"
-                                           type="text"
-                >Название в прайсе
-                </x-inputs.input-with-label>
-                <x-dropdowns.dropdown-select name="supplier_warehouse_id"
-                                             :items="$emailSupplier->supplier->warehouses->all()"
-                                             field="form.supplier_warehouse_id"
-                                             :current-id="$form->supplier_warehouse_id"
-                >Склад
-                </x-dropdowns.dropdown-select>
-                <div class="self-center">
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </div>
-            </x-blocks.flex-block>
+    <flux:card class="space-y-6">
+        <flux:heading size="xl">Склады</flux:heading>
+        <flux:subheading>Вы можете привязать склады с прайса к складам поставщика</flux:subheading>
+
+        <flux:modal name="create-email-supplier-warehouse-{{$emailSupplier->getKey()}}" class="md:w-96 space-y-6">
+            <div>
+                <flux:heading size="lg">Добавление склада</flux:heading>
+            </div>
+
+            <flux:input wire:model="form.value" label="Название в прайсе" required/>
+            <flux:select variant="listbox" searchable placeholder="Выберите склад..."
+                         wire:model="form.supplier_warehouse_id" label="Склад">
+                <x-slot name="search">
+                    <flux:select.search placeholder="Поиск..."/>
+                </x-slot>
+
+                @foreach($emailSupplier->supplier->warehouses as $warehouse)
+                    <flux:option value="{{ $warehouse->id }}">{{$warehouse->name}}</flux:option>
+                @endforeach
+            </flux:select>
+
+            <div class="flex">
+                <flux:spacer/>
+
+                <flux:button variant="primary" wire:click="store">Создать</flux:button>
+            </div>
+        </flux:modal>
+
+        <div>
+            <flux:modal.trigger name="create-email-supplier-warehouse-{{$emailSupplier->getKey()}}">
+                <flux:button>Добавить</flux:button>
+            </flux:modal.trigger>
         </div>
-    </div>
-    <x-blocks.main-block>
-        <x-layouts.title name="Все склады"/>
-    </x-blocks.main-block>
-    @if($emailSupplier->warehouses->isNotEmpty())
-        <x-blocks.main-block>
-            <x-success-button wire:click="update">Сохранить</x-success-button>
-        </x-blocks.main-block>
-        @foreach($emailSupplier->warehouses as $warehouse)
-            <livewire:email-supplier-warehouse.email-supplier-warehouse-edit :email-supplier-warehouse="$warehouse" :email-supplier="$emailSupplier" wire:key="{{$warehouse->getKey()}}"/>
-        @endforeach
-    @else
-        <x-blocks.main-block>
-            <x-information>Вы пока ещё не добавляли склады</x-information>
-        </x-blocks.main-block>
-    @endif
+
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Все склады</flux:heading>
+            @if($emailSupplier->warehouses->isNotEmpty())
+                <flux:button wire:click="update">Сохранить</flux:button>
+                @foreach($emailSupplier->warehouses as $warehouse)
+                    <livewire:email-supplier-warehouse.email-supplier-warehouse-edit
+                        :email-supplier-warehouse="$warehouse"
+                        :email-supplier="$emailSupplier"
+                        wire:key="{{$warehouse->getKey()}}"/>
+                @endforeach
+            @else
+                <x-blocks.main-block>
+                    <x-information>Вы пока ещё не добавляли склады</x-information>
+                </x-blocks.main-block>
+            @endif
+        </flux:card>
+
+    </flux:card>
 </div>

@@ -1,79 +1,60 @@
 <div>
     <x-titles.title-header>Поставщики</x-titles.title-header>
 
+    <flux:modal name="create-email-supplier" class="!max-w-3xl space-y-6">
+        <div>
+            <flux:heading size="xl">Добавление поставщика</flux:heading>
+        </div>
 
-    <div x-data="{ open: false}">
-        <x-layouts.actions>
-            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-        </x-layouts.actions>
-        <x-layouts.main-container x-show="open">
-            <x-blocks.main-block>
-                <x-layouts.title name="Добавление нового поставщика"/>
-            </x-blocks.main-block>
-            <x-blocks.main-block>
-                <x-titles.sub-title name="Основная информация"/>
-            </x-blocks.main-block>
+        <div class="flex gap-6 s">
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="xl">Основная информация</flux:heading>
+                </div>
 
-            <x-blocks.main-block>
-                <x-dropdowns.dropdown-select :items="auth()->user()->suppliers"
-                                             :current-id="$form->supplier_id"
-                                             name="supplier_id"
-                                             field="form.supplier_id"
-                >Поставщик
-                </x-dropdowns.dropdown-select>
-            </x-blocks.main-block>
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="email"
-                                           type="email"
-                                           field="form.email"
-                >Почта
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="filename"
-                                           type="text"
-                                           field="form.filename"
-                >Наименование файла
-                </x-inputs.input-with-label>
-            </x-blocks.flex-block>
+                <flux:select variant="listbox" searchable placeholder="Выберите поставщика..." wire:model="form.supplier_id" label="Поставщик">
+                    <x-slot name="search">
+                        <flux:select.search placeholder="Поиск..." />
+                    </x-slot>
 
-            <x-blocks.main-block>
-                <x-titles.sub-title name="Информация по файлу"/>
-            </x-blocks.main-block>
+                    <flux:option>Photography</flux:option>
+                    @foreach(auth()->user()->suppliers as $supplier)
+                        <flux:option value="{{ $supplier->id }}">{{$supplier->name}}</flux:option>
+                    @endforeach
+                </flux:select>
 
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="header_article"
-                                           type="number"
-                                           field="form.header_article"
-                >Артикул
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="header_brand"
-                                           type="number"
-                                           field="form.header_brand"
-                >Бренд
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="header_price"
-                                           type="number"
-                                           field="form.header_price"
-                >Цена
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="header_count"
-                                           type="number"
-                                           field="form.header_count"
-                >Остаток
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="header_warehouse"
-                                           type="number"
-                                           field="form.header_warehouse"
-                >Склад
-                </x-inputs.input-with-label>
-            </x-blocks.flex-block>
-            <x-blocks.main-block>
-                <x-success-button wire:click="store">Добавить</x-success-button>
-            </x-blocks.main-block>
-        </x-layouts.main-container>
-    </div>
+                <flux:input wire:model="form.email" label="Почта" required/>
+                <flux:input wire:model="form.filename" label="Наименование файла" required/>
+            </div>
+            <div class="space-y-6">
+                <div>
+                    <flux:heading size="xl">Информация по файлу</flux:heading>
+                </div>
+
+                <flux:input wire:model="form.header_article" label="Артикул" type="number" required/>
+                <flux:input wire:model="form.header_price" label="Цена" type="number" required/>
+                <flux:input wire:model="form.header_count" label="Остаток" type="number" required/>
+                <flux:input wire:model="form.header_brand" label="Бренд" type="number" />
+                <flux:input wire:model="form.header_warehouse" label="Склад" type="number"/>
+            </div>
+        </div>
+
+        <div class="flex">
+            <flux:spacer/>
+
+            <flux:button variant="primary" wire:click="store">Создать</flux:button>
+        </div>
+    </flux:modal>
+
+    <x-layouts.actions>
+        <flux:modal.trigger name="create-email-supplier">
+            <flux:button>Добавить</flux:button>
+        </flux:modal.trigger>
+    </x-layouts.actions>
+
     <x-layouts.main-container>
         <x-blocks.main-block>
-            <x-layouts.title name="Список" />
+            <flux:heading size="xl">Список</flux:heading>
         </x-blocks.main-block>
         @foreach($email->suppliers as $supplier)
             <livewire:email-supplier.email-supplier-edit wire:key="{{$supplier->pivot->id}}"

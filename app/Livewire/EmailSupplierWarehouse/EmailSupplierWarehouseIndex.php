@@ -28,6 +28,8 @@ class EmailSupplierWarehouseIndex extends Component
     public function store(): void
     {
         $this->form->store();
+
+        \Flux::modal('create-email-supplier-warehouse')->close();
     }
 
     public function update(): void

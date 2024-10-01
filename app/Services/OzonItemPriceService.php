@@ -408,7 +408,12 @@ class OzonItemPriceService
 
     public function unloadAllPrices(): void
     {
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: цен в кабинет");
+        if (!$this->market->enabled_price) {
+            SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: пропускаем выгрузку цен в кабинет");
+            return;
+        }
+
+        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: выгрузка цен в кабинет");
 
         OzonItem::query()
             ->whereHasMorph('ozonitemable', [Item::class, Bundle::class], function (Builder $query, $type) {

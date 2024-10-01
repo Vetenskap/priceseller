@@ -1,18 +1,18 @@
 <div>
-    <x-blocks.flex-block>
-        <x-inputs.input-with-label name="value"
-                                   field="form.value"
-                                   type="text"
-        >Название в прайсе
-        </x-inputs.input-with-label>
-        <x-dropdowns.dropdown-select name="supplier_warehouse_id"
-                                     :items="$emailSupplier->supplier->warehouses->all()"
-                                     field="form.supplier_warehouse_id"
-                                     :current-id="$form->supplier_warehouse_id"
-        >Склад
-        </x-dropdowns.dropdown-select>
-        <div class="self-center">
-            <x-danger-button wire:click="destroy">Удалить</x-danger-button>
+    <div class="flex gap-6">
+        <flux:input wire:model="form.value" label="Название в прайсе" required/>
+        <flux:select variant="listbox" searchable placeholder="Выберите склад..."
+                     wire:model="form.supplier_warehouse_id" label="Склад">
+            <x-slot name="search">
+                <flux:select.search placeholder="Поиск..."/>
+            </x-slot>
+
+            @foreach($emailSupplier->supplier->warehouses as $warehouse)
+                <flux:option value="{{ $warehouse->id }}">{{$warehouse->name}}</flux:option>
+            @endforeach
+        </flux:select>
+        <div class="self-end">
+            <flux:button variant="danger" wire:click="destroy">Удалить</flux:button>
         </div>
-    </x-blocks.flex-block>
+    </div>
 </div>

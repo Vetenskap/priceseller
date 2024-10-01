@@ -45,7 +45,7 @@ trait WithJsNotifications
 
     public function addSuccessSaveNotification()
     {
-        $this->js((new Toast('Успех', "Сохранено"))->success());
+        \Flux::toast('Сохранено');
     }
 
     public function addSuccessTestPriceNotification()

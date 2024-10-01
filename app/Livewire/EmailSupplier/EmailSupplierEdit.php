@@ -49,19 +49,4 @@ class EmailSupplierEdit extends BaseComponent
         $this->form->destroy($this->emailSupplier->supplier_id);
     }
 
-//    public function addEmailSupplierStockValue()
-//    {
-//        $this->authorize('create', EmailSupplierStockValue::class);
-//
-//        $this->emailSupplier->stockValues()->create();
-//    }
-//
-//    public function deleteEmailSupplierStockValue($stockValue)
-//    {
-//        $stockValue = $this->emailSupplier->stockValues()->find($stockValue['id']);
-//
-//        $this->authorize('delete', $stockValue);
-//
-//        $stockValue->delete();
-//    }
 }

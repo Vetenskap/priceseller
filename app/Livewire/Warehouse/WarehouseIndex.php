@@ -43,6 +43,8 @@ class WarehouseIndex extends BaseComponent
 
         $this->form->store();
 
+        \Flux::modal('create-warehouse')->close();
+
     }
 
     public function downloadTemplate(): BinaryFileResponse

@@ -1,57 +1,59 @@
-<x-blocks.child-block>
-    <x-layouts.actions>
-        <x-success-button wire:click="update">Сохранить</x-success-button>
-        <x-danger-button wire:click="destroy">Удалить</x-danger-button>
-    </x-layouts.actions>
+<x-blocks.main-block>
 
+    <flux:card class="space-y-6" x-show="open">
 
-    <x-blocks.main-block>
-        <x-dropdowns.dropdown-select :items="auth()->user()->suppliers"
-                                     :current-id="$form->supplier_id"
-                                     name="supplier_id"
-                                     field="form.supplier_id"
-        >Поставщик
-        </x-dropdowns.dropdown-select>
-    </x-blocks.main-block>
-    <x-blocks.flex-block>
-        <x-inputs.input-with-label name="email"
-                                   type="email"
-                                   field="form.email"
-        >Почта
-        </x-inputs.input-with-label>
-        <x-inputs.input-with-label name="filename"
-                                   type="text"
-                                   field="form.filename"
-        >Наименование файла
-        </x-inputs.input-with-label>
-    </x-blocks.flex-block>
-    <x-blocks.flex-block>
-        <x-inputs.input-with-label name="header_article"
-                                   type="number"
-                                   field="form.header_article"
-        >Артикул
-        </x-inputs.input-with-label>
-        <x-inputs.input-with-label name="header_brand"
-                                   type="number"
-                                   field="form.header_brand"
-        >Бренд
-        </x-inputs.input-with-label>
-        <x-inputs.input-with-label name="header_price"
-                                   type="number"
-                                   field="form.header_price"
-        >Цена
-        </x-inputs.input-with-label>
-        <x-inputs.input-with-label name="header_count"
-                                   type="number"
-                                   field="form.header_count"
-        >Остаток
-        </x-inputs.input-with-label>
-        <x-inputs.input-with-label name="header_warehouse"
-                                   type="number"
-                                   field="form.header_warehouse"
-        >Склад
-        </x-inputs.input-with-label>
-    </x-blocks.flex-block>
-    <livewire:email-supplier-warehouse.email-supplier-warehouse-index :email-supplier="$emailSupplier" />
-    <livewire:email-supplier-stock-value.email-supplier-stock-value-index :email-supplier="$emailSupplier" />
-</x-blocks.child-block>
+        <flux:heading size="xl">{{$emailSupplier->supplier->name}}</flux:heading>
+
+        <div x-data="{ open: false }">
+
+            <flux:button @click="open = ! open">Редактировать</flux:button>
+
+            <div x-show="open" class="mt-6 space-y-6">
+                <div class="flex justify-between">
+                    <flux:button wire:click="update">Сохранить</flux:button>
+                    <flux:button variant="danger" wire:click="destroy">Удалить</flux:button>
+                </div>
+
+                <flux:card>
+                    <div class="flex gap-12">
+                        <div class="space-y-6">
+                            <div>
+                                <flux:heading size="xl">Основная информация</flux:heading>
+                            </div>
+
+                            <flux:select variant="listbox" searchable placeholder="Выберите поставщика..."
+                                         wire:model="form.supplier_id" label="Поставщик">
+                                <x-slot name="search">
+                                    <flux:select.search placeholder="Поиск..."/>
+                                </x-slot>
+
+                                <flux:option>Photography</flux:option>
+                                @foreach(auth()->user()->suppliers as $supplier)
+                                    <flux:option value="{{ $supplier->id }}">{{$supplier->name}}</flux:option>
+                                @endforeach
+                            </flux:select>
+
+                            <flux:input wire:model="form.email" label="Почта" required/>
+                            <flux:input wire:model="form.filename" label="Наименование файла" required/>
+                        </div>
+                        <div class="space-y-6">
+                            <div>
+                                <flux:heading size="xl">Информация по файлу</flux:heading>
+                            </div>
+
+                            <flux:input wire:model="form.header_article" label="Артикул" type="number" required/>
+                            <flux:input wire:model="form.header_price" label="Цена" type="number" required/>
+                            <flux:input wire:model="form.header_count" label="Остаток" type="number" required/>
+                            <flux:input wire:model="form.header_brand" label="Бренд" type="number"/>
+                            <flux:input wire:model="form.header_warehouse" label="Склад" type="number"/>
+                        </div>
+                    </div>
+                </flux:card>
+
+                <livewire:email-supplier-warehouse.email-supplier-warehouse-index :email-supplier="$emailSupplier"/>
+                <livewire:email-supplier-stock-value.email-supplier-stock-value-index :email-supplier="$emailSupplier"/>
+            </div>
+
+        </div>
+    </flux:card>
+</x-blocks.main-block>

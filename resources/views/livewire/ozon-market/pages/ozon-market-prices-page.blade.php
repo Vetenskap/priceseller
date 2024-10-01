@@ -4,6 +4,10 @@
         <x-layouts.simple-text name="Учитывать цену конкурента"/>
     </x-blocks.flex-block>
     <x-blocks.flex-block>
+        <x-inputs.switcher :checked="$form->enabled_price" wire:model="form.enabled_price"/>
+        <x-layouts.simple-text name="Выгружать цены"/>
+    </x-blocks.flex-block>
+    <x-blocks.flex-block>
         <x-inputs.input-with-label name="min_price_percent"
                                    type="number"
                                    field="form.min_price_percent"

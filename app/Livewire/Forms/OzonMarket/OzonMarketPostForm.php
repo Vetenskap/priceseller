@@ -47,6 +47,8 @@ class OzonMarketPostForm extends Form
     #[Validate]
     public $minus_stock = 0;
 
+    public $enabled_price = true;
+
     public function rules(): array
     {
         return [
@@ -72,6 +74,7 @@ class OzonMarketPostForm extends Form
             'max_mile' => ['nullable', 'integer'],
             'organization_id' => ['nullable', 'uuid', 'exists:organizations,id'],
             'minus_stock' => ['nullable', 'integer', 'min:0'],
+            'enabled_price' => ['nullable', 'boolean']
         ];
     }
 
@@ -94,6 +97,7 @@ class OzonMarketPostForm extends Form
         $this->max_mile = $this->market->max_mile;
         $this->organization_id = $market->organization_id;
         $this->minus_stock = $market->minus_stock;
+        $this->enabled_price = $market->enabled_price;
     }
 
     public function store(): void
