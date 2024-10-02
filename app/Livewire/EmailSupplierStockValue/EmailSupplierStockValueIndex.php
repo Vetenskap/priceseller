@@ -28,6 +28,8 @@ class EmailSupplierStockValueIndex extends Component
     public function store(): void
     {
         $this->form->store();
+
+        \Flux::modal('create-email-supplier-stock-value-'. $this->emailSupplier->getKey())->close();
     }
 
     public function update(): void

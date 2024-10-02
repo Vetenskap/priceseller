@@ -11,6 +11,7 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\Title;
+use Maatwebsite\Excel\Facades\Excel;
 
 #[Title('Поставщики')]
 class SupplierEdit extends BaseComponent
@@ -47,6 +48,11 @@ class SupplierEdit extends BaseComponent
         $this->form->destroy();
 
         $this->redirectRoute($this->backRoute);
+    }
+
+    public function download(): \Symfony\Component\HttpFoundation\BinaryFileResponse
+    {
+        return Excel::download(new \App\Exports\EmailPriceItemsExport($this->supplier), 'отчёт_прайс.xlsx');
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application

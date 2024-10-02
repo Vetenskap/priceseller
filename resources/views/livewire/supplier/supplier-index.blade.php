@@ -6,7 +6,7 @@
             <flux:heading size="lg">Создание поставщика</flux:heading>
         </div>
 
-        <flux:input wire:model="form.name" label="Наименование" required/>
+        <flux:input wire:model="form.name" label="Наименование" badge="обязательное" required/>
 
         <div class="flex">
             <flux:spacer/>
@@ -23,41 +23,54 @@
 
     <x-layouts.main-container>
         <x-blocks.main-block>
-            <x-layouts.title name="Список" />
+            <flux:heading size="xl">Список</flux:heading>
         </x-blocks.main-block>
-        @if($suppliers->count() > 0)
-            <x-table.table-layout>
-                <x-table.table-header>
-                    <x-table.table-child>
-                        <x-layouts.simple-text name="Наименование"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
-                        <x-layouts.simple-text name="Последнее обновление"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
+        <x-blocks.main-block>
+            @if($this->suppliers->count() > 0)
+                <flux:table :paginate="$this->suppliers">
+                    <flux:columns>
+                        <flux:column sortable :sorted="$sortBy === 'name'" :direction="$sortDirection"
+                                     wire:click="sort('name')">Наименование
+                        </flux:column>
+                        <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
+                                     wire:click="sort('updated_at')">Последнее обновление
+                        </flux:column>
+                    </flux:columns>
 
-                    </x-table.table-child>
-                </x-table.table-header>
-                @foreach($suppliers as $supplier)
-                    <a href="{{route('supplier.edit', ['supplier' => $supplier->getKey()])}}" wire:key="{{$supplier->getKey()}}">
-                        <x-table.table-item>
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$supplier->name"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-information>{{$supplier->updated_at}}</x-information>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-inputs.switcher :checked="$supplier->open" wire:click="changeOpen({{json_encode($supplier->getKey())}})"/>
-                            </x-table.table-child>
-                        </x-table.table-item>
-                    </a>
-                @endforeach
-            </x-table.table-layout>
-        @else
-            <x-blocks.main-block>
-                <x-information>Сейчас у вас нет поставщиков</x-information>
-            </x-blocks.main-block>
-        @endif
+                    <flux:rows>
+                        @foreach ($this->suppliers as $supplier)
+                            <flux:row :key="$supplier->getKey()">
+                                <flux:cell class="flex items-center gap-3">
+                                    {{ $supplier->name }}
+                                </flux:cell>
+
+                                <flux:cell variant="strong">{{ $supplier->updated_at }}</flux:cell>
+
+                                <flux:cell align="right">
+                                    <flux:switch wire:model.live="dirtySuppliers.{{ $supplier->getKey() }}.open"/>
+                                </flux:cell>
+
+                                <flux:cell align="right">
+                                    <flux:link href="{{ route('supplier.edit', ['supplier' => $supplier->getKey()]) }}">
+                                        <flux:icon.pencil-square class="cursor-pointer hover:text-gray-800"/>
+                                    </flux:link>
+                                </flux:cell>
+
+                                <flux:cell align="right">
+                                    <flux:icon.trash wire:click="destroy({{ json_encode($supplier->getKey()) }})"
+                                                     wire:loading.remove
+                                                     wire:target="destroy({{ json_encode($supplier->getKey()) }})"
+                                                     class="cursor-pointer hover:text-red-400"/>
+                                    <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($supplier->getKey()) }})"/>
+                                </flux:cell>
+
+                            </flux:row>
+                        @endforeach
+                    </flux:rows>
+                </flux:table>
+            @else
+                <flux:subheading>Сейчас у вас нет поставщиков</flux:subheading>
+            @endif
+        </x-blocks.main-block>
     </x-layouts.main-container>
 </div>

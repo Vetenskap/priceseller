@@ -6,9 +6,9 @@
             <flux:heading size="lg">Создание почты</flux:heading>
         </div>
 
-        <flux:input wire:model="form.name" label="Наименование" required/>
-        <flux:input wire:model="form.address" label="Адрес" type="email" required/>
-        <flux:input wire:model="form.password" label="Адрес" type="password" required/>
+        <flux:input wire:model="form.name" label="Наименование" badge="обязательное" required/>
+        <flux:input wire:model="form.address" label="Адрес" badge="обязательное" type="email" required/>
+        <flux:input wire:model="form.password" label="Адрес" badge="обязательное" type="password" required/>
 
         <div class="flex">
             <flux:spacer/>
@@ -33,7 +33,9 @@
                     <flux:columns>
                         <flux:column>Почта</flux:column>
                         <flux:column>Адрес</flux:column>
-                        <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection" wire:click="sort('updated_at')">Последнее обновление</flux:column>
+                        <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
+                                     wire:click="sort('updated_at')">Последнее обновление
+                        </flux:column>
                     </flux:columns>
 
                     <flux:rows>
@@ -52,23 +54,25 @@
                                 </flux:cell>
 
                                 <flux:cell align="right">
-                                    <flux:dropdown>
-                                        <flux:button variant="ghost" size="sm" icon="ellipsis-horizontal" inset="top bottom"></flux:button>
-
-                                        <flux:menu>
-                                            <flux:menu.item icon="pencil-square" kbd="⌘S" wire:click="edit({{ json_encode($email->id) }})">Редактировать</flux:menu.item>
-                                            <flux:menu.item icon="trash" variant="danger" kbd="⌘⌫" wire:click="destroy({{ json_encode($email->id) }})">Удалить</flux:menu.item>
-                                        </flux:menu>
-                                    </flux:dropdown>
+                                    <flux:link href="{{ route('email.edit', ['email' => $email->getKey()]) }}">
+                                        <flux:icon.pencil-square class="cursor-pointer hover:text-gray-800"/>
+                                    </flux:link>
                                 </flux:cell>
+
+                                <flux:cell align="right">
+                                    <flux:icon.trash wire:click="destroy({{ json_encode($email->getKey()) }})"
+                                                     wire:loading.remove
+                                                     wire:target="destroy({{ json_encode($email->getKey()) }})"
+                                                     class="cursor-pointer hover:text-red-400"/>
+                                    <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($email->getKey()) }})"/>
+                                </flux:cell>
+
                             </flux:row>
                         @endforeach
                     </flux:rows>
                 </flux:table>
             @else
-                <x-blocks.main-block>
-                    <x-information>Сейчас у вас нет почты</x-information>
-                </x-blocks.main-block>
+                <flux:subheading>Сейчас у вас нет почты</flux:subheading>
             @endif
         </x-blocks.main-block>
     </x-layouts.main-container>

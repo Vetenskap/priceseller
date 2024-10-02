@@ -4,6 +4,7 @@ namespace App\Livewire\Email;
 
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Email\EmailPostForm;
+use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Email;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -15,7 +16,7 @@ use Livewire\WithPagination;
 #[Title('Почта')]
 class EmailIndex extends BaseComponent
 {
-    use WithPagination;
+    use WithPagination, WithJsNotifications;
 
     public EmailPostForm $form;
 
@@ -56,6 +57,8 @@ class EmailIndex extends BaseComponent
     {
         $this->form->setEmail(Email::findOrFail($id));
         $this->form->destroy();
+
+        $this->addSuccessDeleteNotification();
     }
 
     #[Computed]

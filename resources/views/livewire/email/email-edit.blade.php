@@ -34,7 +34,7 @@
         <x-blocks.main-block>
             <flux:heading size="xl">Основная информация</flux:heading>
         </x-blocks.main-block>
-        <x-blocks.main-block>
+        <x-blocks.main-block class="max-w-fit">
             <flux:switch wire:model="form.open" label="Включен" />
         </x-blocks.main-block>
         <div class="flex p-6 gap-6">

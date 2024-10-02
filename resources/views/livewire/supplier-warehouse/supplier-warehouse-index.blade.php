@@ -1,37 +1,32 @@
 <div>
-    <x-blocks.main-block>
-        <x-layouts.title name="Склады"/>
-        <x-information>Вы можете добавить склады поставщика</x-information>
+    <x-blocks.main-block class="w-[365px]">
+        <flux:input.group>
+            <flux:input placeholder="Введите наименование" wire:model="form.name"/>
+
+            <flux:button icon="plus" wire:click="store">Создать</flux:button>
+        </flux:input.group>
     </x-blocks.main-block>
-    <div x-data="{ open: false }">
-        <x-blocks.main-block>
-            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-        </x-blocks.main-block>
-        <div x-show="open">
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="name"
-                                           field="form.name">
-                    Наименование
-                </x-inputs.input-with-label>
-                <div class="self-center">
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </div>
-            </x-blocks.flex-block>
-        </div>
-    </div>
     <x-blocks.main-block>
-        <x-layouts.title name="Все склады"/>
+        <flux:table :paginate="$this->warehouses">
+
+            <flux:columns>
+                <flux:column>Наименование</flux:column>
+            </flux:columns>
+
+            <flux:rows>
+                @foreach($this->warehouses as $warehouse)
+                    <flux:row :key="$warehouse->getKey()">
+                        <flux:cell>{{$warehouse->name}}</flux:cell>
+                        <flux:cell>
+                            <flux:icon.trash wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
+                                             wire:loading.remove
+                                             wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
+                                             class="hover:text-red-400 cursor-pointer"/>
+                            <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($warehouse->getKey()) }})"/>
+                        </flux:cell>
+                    </flux:row>
+                @endforeach
+            </flux:rows>
+        </flux:table>
     </x-blocks.main-block>
-    @if($supplier->warehouses->isNotEmpty())
-        <x-blocks.main-block>
-            <x-success-button wire:click="update">Сохранить</x-success-button>
-        </x-blocks.main-block>
-        @foreach($supplier->warehouses as $warehouse)
-            <livewire:supplier-warehouse.supplier-warehouse-edit :supplier="$supplier" :warehouse="$warehouse" wire:key="{{$warehouse->getKey()}}"/>
-        @endforeach
-    @else
-        <x-blocks.main-block>
-            <x-information>Вы пока ещё не добавляли склады</x-information>
-        </x-blocks.main-block>
-    @endif
 </div>

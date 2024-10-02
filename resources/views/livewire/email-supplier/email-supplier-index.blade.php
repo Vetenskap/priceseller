@@ -23,7 +23,7 @@
                     @endforeach
                 </flux:select>
 
-                <flux:input wire:model="form.email" label="Почта" required/>
+                <flux:input wire:model="form.email" label="Почта" type="email" required/>
                 <flux:input wire:model="form.filename" label="Наименование файла" required/>
             </div>
             <div class="space-y-6">

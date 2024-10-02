@@ -1,17 +1,9 @@
 <div>
-    <x-blocks.flex-block>
-        <x-inputs.input-with-label name="name"
-                                   field="form.name"
-                                   type="text"
-        >Значение в прайсе
-        </x-inputs.input-with-label>
-        <x-inputs.input-with-label name="value"
-                                   field="form.value"
-                                   type="number"
-        >Какой остаток ставить
-        </x-inputs.input-with-label>
-        <div class="self-center">
-            <x-danger-button wire:click="destroy">Удалить</x-danger-button>
+    <div class="flex gap-6">
+        <flux:input wire:model="form.name" label="Значение в прайсе" required/>
+        <flux:input wire:model="form.value" label="Какой остаток ставить" required/>
+        <div class="self-end">
+            <flux:button variant="danger" wire:click="destroy">Удалить</flux:button>
         </div>
-    </x-blocks.flex-block>
+    </div>
 </div>

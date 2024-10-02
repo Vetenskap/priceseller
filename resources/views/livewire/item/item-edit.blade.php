@@ -1,169 +1,148 @@
 <div>
     <x-layouts.header :name="$item->name . ' (' . $item->code . ')'"/>
     <x-layouts.actions>
-        {{--        <a href="{{url()->previous()}}" wire:navigate.hover>--}}
-        <x-primary-button wire:click="redirectBack">Закрыть</x-primary-button>
-        {{--        </a>--}}
-        <x-success-button wire:click="save">Сохранить</x-success-button>
-        <x-danger-button wire:click="destroy">Удалить</x-danger-button>
+        <flux:button variant="primary" wire:click="redirectBack">Закрыть</flux:button>
+        <flux:button wire:click="save">Сохранить</flux:button>
+        <flux:button variant="danger" wire:click="destroy">Удалить</flux:button>
     </x-layouts.actions>
     <x-layouts.main-container>
         <x-blocks.main-block>
-            <x-layouts.title name="Основная информация"/>
+            <flux:card class="space-y-6">
+                <div class="flex gap-12">
+                    <div class="space-y-6">
+                        <flux:heading size="xl">Основная информация</flux:heading>
+                        <flux:input wire:model="form.name" label="Наименование"/>
+                        <flux:input wire:model="form.code" label="Код" required/>
+                        <flux:input wire:model="form.ms_uuid" label="МС UUID"/>
+                        <flux:input wire:model="form.article" label="Артикул поставщик" required/>
+                        <flux:input wire:model="form.brand" label="Бренд поставщик"/>
+                        <flux:input wire:model="form.multiplicity" label="Кратность отгрузки" type="number" required/>
+                        <flux:select variant="listbox" searchable placeholder="Выберите поставщика..."
+                                     wire:model="form.supplier_id" label="Поставщик">
+                            <x-slot name="search">
+                                <flux:select.search placeholder="Поиск..."/>
+                            </x-slot>
+                            @foreach(auth()->user()->suppliers as $supplier)
+                                <flux:option value="{{ $supplier->id }}">{{$supplier->name}}</flux:option>
+                            @endforeach
+                        </flux:select>
+                        <flux:switch wire:model="form.unload_wb" label="Выгружать на ВБ"/>
+                        <flux:switch wire:model="form.unload_ozon" label="Выгружать на ОЗОН"/>
+                    </div>
+                    <div class="space-y-6">
+                        <flux:heading size="xl">Дополнительные поля</flux:heading>
+                        @foreach(auth()->user()->itemAttributes()->whereNotIn('id', $item->attributesValues->pluck('item_attribute_id'))->get() as $mainAttribute)
+                            @switch($mainAttribute->type)
+                                @case('boolean')
+                                    <div class="flex justify-between items-center">
+                                        <flux:switch wire:model="form.attributes.{{$mainAttribute->id}}" :label="$mainAttribute->name" />
+                                        <flux:button wire:click="deleteAttribute({{$mainAttribute}})" variant="danger" icon="x-mark">Удалить</flux:button>
+                                    </div>
+                                    @break
+                                @case('textarea')
+                                    <div class="flex justify-between items-end">
+                                        <flux:textarea wire:model="form.attributes.{{$mainAttribute->id}}" label="{{$mainAttribute->name}}" />
+                                        <flux:button wire:click="deleteAttribute({{$mainAttribute}})" variant="danger" icon="x-mark">Удалить</flux:button>
+                                    </div>
+                                    @break
+                                @default
+                                    <flux:input.group class="items-end">
+                                        <flux:input wire:model="form.attributes.{{$mainAttribute->id}}"
+                                                    label="{{$mainAttribute->name}}" type="{{$mainAttribute->type}}"/>
+
+                                        <flux:button wire:click="deleteAttribute({{$mainAttribute}})" variant="danger" icon="x-mark">Удалить</flux:button>
+                                    </flux:input.group>
+                                    @break
+                            @endswitch
+                        @endforeach
+                        @foreach($item->attributesValues as $attribute)
+                            @switch($attribute->attribute->type)
+                                @case('boolean')
+                                    <div class="flex justify-between items-center">
+                                        <flux:switch wire:model="form.attributes.{{$attribute->item_attribute_id}}" :label="$attribute->attribute->name" />
+                                        <flux:button wire:click="deleteAttribute({{$attribute->attribute}})" variant="danger" icon="x-mark">Удалить</flux:button>
+                                    </div>
+                                    @break
+                                @case('textarea')
+                                    <div class="flex justify-between items-end">
+                                        <flux:textarea wire:model="form.attributes.{{$attribute->item_attribute_id}}" label="{{$attribute->attribute->name}}" />
+                                        <flux:button wire:click="deleteAttribute({{$attribute->attribute}})" variant="danger" icon="x-mark">Удалить</flux:button>
+                                    </div>
+                                    @break
+                                @default
+                                    <flux:input.group class="items-end">
+                                        <flux:input wire:model="form.attributes.{{$attribute->item_attribute_id}}"
+                                                    label="{{$attribute->attribute->name}}"
+                                                    type="{{$attribute->attribute->type}}"/>
+
+                                        <flux:button variant="danger" icon="x-mark" wire:click="deleteAttribute({{$attribute->attribute}})">Удалить</flux:button>
+                                    </flux:input.group>
+                                    @break
+                            @endswitch
+                        @endforeach
+                        <livewire:item.item-attribute-dialog-form />
+                    </div>
+                </div>
+            </flux:card>
         </x-blocks.main-block>
-        <x-blocks.flex-block>
-            <x-inputs.input-with-label name="name"
-                                       type="text"
-                                       field="form.name"
-            >Наименование
-            </x-inputs.input-with-label>
-            <x-inputs.input-with-label name="code"
-                                       type="text"
-                                       field="form.code"
-            >Код
-            </x-inputs.input-with-label>
-            @if(auth()->user()->isMsSub())
-                <x-inputs.input-with-label name="ms_uuid"
-                                           type="text"
-                                           field="form.ms_uuid"
-                >МС UUID
-                </x-inputs.input-with-label>
-            @endif
-            <x-inputs.input-with-label name="article"
-                                       type="text"
-                                       field="form.article"
-            >Артикул поставщик
-            </x-inputs.input-with-label>
-            <x-inputs.input-with-label name="brand"
-                                       type="text"
-                                       field="form.brand"
-            >Бренд поставщик
-            </x-inputs.input-with-label>
-            <x-inputs.input-with-label name="multiplicity"
-                                       type="number"
-                                       field="form.multiplicity"
-            >Кратность отгрузки
-            </x-inputs.input-with-label>
-            <x-dropdown-select name="supplier"
-                               field="form.supplier_id"
-                               :options="auth()->user()->suppliers">
-                Поставщики
-            </x-dropdown-select>
-        </x-blocks.flex-block>
-        <x-blocks.flex-block>
-            <x-inputs.switcher :checked="$form->unload_wb" wire:model="form.unload_wb"/>
-            <x-layouts.simple-text name="Выгружать на ВБ"/>
-        </x-blocks.flex-block>
-        <x-blocks.flex-block>
-            <x-inputs.switcher :checked="$form->unload_ozon" wire:model="form.unload_ozon"/>
-            <x-layouts.simple-text name="Выгружать на ОЗОН"/>
-        </x-blocks.flex-block>
         <x-blocks.main-block>
-            <x-layouts.title name="Дополнительные поля"/>
+            <flux:card class="space-y-6">
+                <div class="flex gap-12">
+                    <div class="space-y-6">
+                        <flux:heading size="xl">Прочая информация</flux:heading>
+                        <flux:input.group>
+                            <flux:input :value="$item->price" readonly/>
+
+                            <flux:input.group.suffix>₽</flux:input.group.suffix>
+                        </flux:input.group>
+                        <div class="flex items-center gap-4">
+                            <flux:subheading>Был обновлён: </flux:subheading>
+                            <flux:badge :color="$item->updated ? 'lime' : 'danger'">{{$item->updated ? 'Да' : 'Нет'}}</flux:badge>
+                        </div>
+                    </div>
+                    <div class="space-y-6">
+                        <flux:heading size="xl">Остатки</flux:heading>
+                        @foreach($item->supplierWarehouseStocks as $stock)
+                            <div class="flex gap-6">
+                                <flux:input :value="$stock->warehouse->name" readonly/>
+                                <flux:input.group>
+                                    <flux:input :value="$stock->stock" readonly/>
+
+                                    <flux:input.group.suffix>шт</flux:input.group.suffix>
+                                </flux:input.group>
+                            </div>
+                        @endforeach
+                    </div>
+                </div>
+            </flux:card>
         </x-blocks.main-block>
 
-        @foreach(auth()->user()->itemAttributes()->whereNotIn('id', $item->attributesValues->pluck('item_attribute_id'))->get() as $mainAttribute)
-            @switch($mainAttribute->type)
-                @case('boolean')
-                    <div class="flex items-center p-0 gap-2">
-                        <x-blocks.flex-block>
-                            <x-inputs.switcher :checked="false"
-                                               wire:model="form.attributes.{{$mainAttribute->id}}"/>
-                            <x-layouts.simple-text :name="$mainAttribute->name"/>
-                        </x-blocks.flex-block>
-                        <div class="cursor-pointer" wire:click="deleteAttribute({{$mainAttribute}})">&#10006;</div>
-                    </div>
-                    @break
-                @case('textarea')
-                    <div class="flex items-center p-0 gap-1">
-                        <x-blocks.flex-block>
-                            <x-textarea name="{{$mainAttribute->name}}" wire:model="form.attributes.{{$mainAttribute->id}}"/>
-                            <div class="cursor-pointer" wire:click="deleteAttribute({{$mainAttribute}})">&#10006;</div>
-                        </x-blocks.flex-block>
-                    </div>
-                    @break
-                @default
-                    <x-blocks.flex-block class="p-0 gap-1">
-                        <x-inputs.input-with-label name="{{$mainAttribute->name}}"
-                                                   type="{{$mainAttribute->type}}"
-                                                   field="form.attributes.{{$mainAttribute->id}}"
-                                                   wire:key="{{$mainAttribute->id}}"
-                        >{{$mainAttribute->name}}
-                        </x-inputs.input-with-label>
-                        <div class="cursor-pointer" wire:click="deleteAttribute({{$mainAttribute}})">&#10006;</div>
-                    </x-blocks.flex-block>
-                    @break
-            @endswitch
-        @endforeach
-        @foreach($item->attributesValues as $attribute)
-            @switch($attribute->attribute->type)
-                @case('boolean')
-                    <x-blocks.flex-block class="p-0 gap-2">
-                        <x-blocks.flex-block class="p-0">
-                            <x-inputs.switcher :checked="$attribute->value"
-                                               wire:model="form.attributes.{{$attribute->item_attribute_id}}"/>
-                            <x-layouts.simple-text :name="$attribute->attribute->name"/>
-                        </x-blocks.flex-block>
-                        <div class="cursor-pointer" wire:click="deleteAttribute({{$attribute->attribute}})">
-                            &#10006;
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
+                <div class="flex">
+                    <div class="space-y-6">
+                        <flux:heading size="xl">Информация из прайса</flux:heading>
+                        <div class="flex items-center gap-4">
+                            <flux:subheading>Статус: </flux:subheading>
+                            <flux:badge :color="$item->fromPrice ? 'lime' : 'red'">{{$item->fromPrice ? $item->fromPrice->message : "Товар не найден"}}</flux:badge>
                         </div>
-                    </x-blocks.flex-block>
-                    @break
-                @case('textarea')
-                    <div class="flex items-center p-0 gap-1">
-                        <x-blocks.flex-block>
-                            <x-textarea name="{{$attribute->attribute->name}}" wire:model="form.attributes.{{$attribute->item_attribute_id}}"/>
-                            <div class="cursor-pointer" wire:click="deleteAttribute({{$attribute->attribute}})">&#10006;</div>
-                        </x-blocks.flex-block>
+                        @if($item->fromPrice)
+                            <flux:input label="Артикул" :value="$item->fromPrice->article" readonly/>
+                            <flux:input label="Бренд" :value="$item->fromPrice->brand" readonly/>
+                            <flux:input.group>
+                                <flux:input :value="$item->fromPrice->price" readonly/>
+
+                                <flux:input.group.suffix>₽</flux:input.group.suffix>
+                            </flux:input.group>
+                            <flux:input.group>
+                                <flux:input :value="$item->fromPrice->stock" readonly/>
+
+                                <flux:input.group.suffix>шт</flux:input.group.suffix>
+                            </flux:input.group>
+                        @endif
                     </div>
-                    @break
-                @default
-                    <x-blocks.flex-block-end class="p-0 gap-1">
-                        <x-inputs.input-with-label name="{{$attribute->attribute->name}}"
-                                                   type="{{$attribute->attribute->type}}"
-                                                   field="form.attributes.{{$attribute->item_attribute_id}}"
-                                                   wire:key="{{$attribute->id}}"
-                        >{{$attribute->attribute->name}}
-                        </x-inputs.input-with-label>
-                        <div class="cursor-pointer" wire:click="deleteAttribute({{$attribute->attribute}})">
-                            &#10006;
-                        </div>
-                    </x-blocks.flex-block-end>
-                    @break
-            @endswitch
-        @endforeach
-        <livewire:item.item-attribute-dialog-form></livewire:item.item-attribute-dialog-form>
-        <x-blocks.main-block>
-            <x-layouts.title name="Прочая информация"/>
-            <x-titles.sub-title name="Основная" />
+                </div>
+            </flux:card>
         </x-blocks.main-block>
-        <x-blocks.flex-block>
-            <x-layouts.simple-text :name="'Цена: ' . $item->price"/>
-            <x-layouts.simple-text :name="'Был обновлен: ' . ($item->updated ? 'Да' : 'Нет')"/>
-        </x-blocks.flex-block>
-        <x-blocks.main-block>
-            <x-titles.sub-title name="Остатки" />
-        </x-blocks.main-block>
-        @foreach($item->supplierWarehouseStocks as $stock)
-            <x-blocks.flex-block>
-                <x-layouts.title :name="$stock->warehouse->name" />
-                <x-information>{{$stock->stock}}</x-information>
-            </x-blocks.flex-block>
-        @endforeach
-        <x-blocks.main-block>
-            <x-layouts.title name="Из прайса"/>
-        </x-blocks.main-block>
-        @if($item->fromPrice)
-            <x-blocks.flex-block>
-                <x-layouts.simple-text :name="'Статус: ' . $item->fromPrice->message"/>
-                <x-layouts.simple-text :name="'Артикул: ' . $item->fromPrice->article"/>
-                <x-layouts.simple-text :name="'Бренд: ' . $item->fromPrice->brand"/>
-                <x-layouts.simple-text :name="'Цена: ' . $item->fromPrice->price"/>
-                <x-layouts.simple-text :name="'Остаток: ' . $item->fromPrice->stock"/>
-            </x-blocks.flex-block>
-        @endif
     </x-layouts.main-container>
-    <div wire:loading wire:target="deleteAttribute">
-        <x-loader/>
-    </div>
 </div>

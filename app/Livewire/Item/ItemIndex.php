@@ -7,7 +7,7 @@ use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithFilters;
-use App\Livewire\Traits\WithJsNotifications;
+use App\Models\Item;
 use App\Models\User;
 use App\Services\Item\ItemService;
 use Illuminate\Contracts\View\Factory;
@@ -15,27 +15,67 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[Title('Товары')]
 class ItemIndex extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters;
+    use WithFileUploads, WithFilters, WithPagination;
 
     /** @var TemporaryUploadedFile $file */
     public $file;
 
     public User $user;
 
-    public $page;
+    public $sortBy = 'updated_at';
+    public $sortDirection = 'desc';
 
-    public function mount($page = 'list'): void
+    public function sort($column): void
+    {
+        if ($this->sortBy === $column) {
+            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+        } else {
+            $this->sortBy = $column;
+            $this->sortDirection = 'asc';
+        }
+    }
+
+    public function edit($id): void
+    {
+        $this->redirect(route('item-edit', ['item' => $id]));
+    }
+
+    public function destroy($id): void
+    {
+        $item = Item::find($id);
+
+        $this->authorize('delete', $item);
+
+        $item->delete();
+
+        $this->addSuccessDeleteNotification();
+    }
+
+    #[Computed]
+    public function items()
+    {
+        return auth()->user()
+            ->items()
+            ->with('supplier')
+            ->filters()
+            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
+            ->paginate();
+
+    }
+
+    public function mount(): void
     {
         $this->user = auth()->user();
-        $this->page = $page;
     }
 
     public function downloadTemplate(): BinaryFileResponse
@@ -52,6 +92,8 @@ class ItemIndex extends BaseComponent
 
     public function import(): void
     {
+        sleep(10);
+
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
         $path = $this->file->storeAs(ItemService::PATH, $uuid . '.' . $ext);
@@ -68,24 +110,6 @@ class ItemIndex extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        if ($this->page === 'list') {
-
-            $items = auth()
-                ->user()
-                ->items()
-                ->orderByDesc('updated_at')
-                ->with('supplier')
-                ->filters()
-                ->paginate(10);
-
-            return view('livewire.item.pages.item-list-page', [
-                'items' => $items
-            ]);
-
-        } else if ($this->page === 'manage') {
-            return view('livewire.item.pages.items-manage-page');
-        }
-
         return view('livewire.item.item-index');
     }
 }

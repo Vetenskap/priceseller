@@ -48,6 +48,11 @@ trait WithJsNotifications
         \Flux::toast('Сохранено');
     }
 
+    public function addSuccessDeleteNotification()
+    {
+        \Flux::toast('Удалено');
+    }
+
     public function addSuccessTestPriceNotification()
     {
         $this->js((new Toast('Успех', 'Все цены перерасчитаны'))->success());

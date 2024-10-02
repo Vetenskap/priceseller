@@ -31,6 +31,8 @@ class EmailSupplierIndex extends BaseComponent
         $this->authorize('create', EmailSupplier::class);
 
         $this->form->store();
+
+        \Flux::modal('create-email-supplier')->close();
     }
 
     public function delete(string $id): void

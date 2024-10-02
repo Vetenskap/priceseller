@@ -44,9 +44,7 @@
                         wire:key="{{$warehouse->getKey()}}"/>
                 @endforeach
             @else
-                <x-blocks.main-block>
-                    <x-information>Вы пока ещё не добавляли склады</x-information>
-                </x-blocks.main-block>
+                <flux:subheading>Вы пока ещё не добавляли склады</flux:subheading>
             @endif
         </flux:card>
 

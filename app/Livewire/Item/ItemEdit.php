@@ -22,7 +22,7 @@ class ItemEdit extends BaseComponent
 
     public Item $item;
 
-    public $backRoute;
+    public $backRoute = 'items';
 
     public function redirectBack(): void
     {

@@ -6,7 +6,6 @@ use Livewire\Component;
 
 class ItemAttributeDialogForm extends Component
 {
-    public $showDialog = false;
     public $name;
     public $type;
 
@@ -14,16 +13,6 @@ class ItemAttributeDialogForm extends Component
         'name' => 'required|string',
         'type' => 'required|string',
     ];
-
-    public function openDialog(): void
-    {
-        $this->showDialog = true;
-    }
-
-    public function closeDialog(): void
-    {
-        $this->showDialog = false;
-    }
 
     public function submit(): void
     {
@@ -36,9 +25,11 @@ class ItemAttributeDialogForm extends Component
             'type' => $this->type
         ]);
 
-        $this->reset(['name', 'type', 'showDialog']);
+        $this->reset(['name', 'type']);
 
         $this->dispatch('create_item_attribute')->component(ItemEdit::class);
+
+        \Flux::modal('create-item-attribute')->close();
 
     }
 

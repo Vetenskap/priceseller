@@ -23,10 +23,7 @@
         </x-blocks.center-block>
 
         <x-blocks.center-block x-show="$wire.file">
-            <x-success-button>Загрузить</x-success-button>
+            <flux:button type="submit">Загрузить</flux:button>
         </x-blocks.center-block>
-    </div>
-    <div wire:loading wire:target="{{$action}}">
-        <x-loader />
     </div>
 </form>

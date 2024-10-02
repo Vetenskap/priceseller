@@ -1,58 +1,69 @@
 <div>
     <x-layouts.header :name="$supplier->name"/>
     <x-layouts.actions>
-        <x-primary-button wire:click="back">Закрыть</x-primary-button>
-        <x-success-button wire:click="update">Сохранить</x-success-button>
-        <x-danger-button wire:click="destroy"
-                         wire:confirm="Вы действительно хотите удалить поставщика? Так же будут удалены все связанные с ним товары.">
-            Удалить
-        </x-danger-button>
+        <flux:button variant="primary" wire:click="back">Закрыть</flux:button>
+        <flux:button wire:click="update">Сохранить</flux:button>
+        <flux:modal.trigger name="delete-supplier">
+            <flux:button variant="danger">Удалить</flux:button>
+        </flux:modal.trigger>
+
+        <flux:modal name="delete-supplier" class="min-w-[22rem] space-y-6">
+            <div>
+                <flux:heading size="lg">Удалить поставщика?</flux:heading>
+
+                <flux:subheading>
+                    <p>Вы действительно хотите удалить этого поставщика?</p>
+                    <p>Это действие нельзя будет отменить. Так же удалятся все связанные товары, их связи т.д.</p>
+                </flux:subheading>
+            </div>
+
+            <div class="flex gap-2">
+                <flux:spacer/>
+
+                <flux:modal.close>
+                    <flux:button variant="ghost">Отменить</flux:button>
+                </flux:modal.close>
+
+                <flux:button wire:click="destroy" variant="danger">Удалить</flux:button>
+            </div>
+        </flux:modal>
+
     </x-layouts.actions>
     <x-layouts.main-container>
-        <x-navigate-pages>
-            <x-links.tab-link href="{{route('supplier.edit', ['supplier' => $supplier->id, 'page' => 'main'])}}"
-                              name="Основное" :active="$page === 'main'"/>
-            <x-links.tab-link href="{{route('supplier.edit', ['supplier' => $supplier->id, 'page' => 'warehouses'])}}"
-                              name="Склады" :active="$page === 'warehouses'"/>
-            <x-links.tab-link href="{{route('supplier.edit', ['supplier' => $supplier->id, 'page' => 'price'])}}"
-                              name="Прайс" :active="$page === 'price'"/>
-        </x-navigate-pages>
-        @if($page === 'main')
-            <x-blocks.main-block>
-                <x-layouts.title name="Основное" />
-            </x-blocks.main-block>
-            <x-blocks.flex-block>
-                <x-inputs.switcher :checked="$supplier->open" wire:model="form.open"/>
-                <x-layouts.simple-text name="Включен" />
-            </x-blocks.flex-block>
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="name"
-                                           type="text"
-                                           field="form.name"
-                >Наименование
-                </x-inputs.input-with-label>
-            </x-blocks.flex-block>
-            <x-blocks.flex-block>
-                <x-inputs.switcher :checked="$supplier->use_brand" wire:model="form.use_brand"/>
-                <x-layouts.simple-text name="Использовать бренд"/>
-            </x-blocks.flex-block>
-            <x-blocks.flex-block class="p-0 px-6 pt-6">
-                <x-inputs.switcher :checked="$supplier->unload_without_price" wire:model="form.unload_without_price"/>
-                <x-layouts.simple-text name="Выгружать без прайса"/>
-            </x-blocks.flex-block>
-            <div class="px-6 pb-6">
-                <x-information>При установке этого параметра поставщик больше не будет выгружаться с почты, будут использоваться резервная цена и остатки с ваших складов для выгрузки в кабинеты каждый час</x-information>
-            </div>
-            <livewire:supplier-report.supplier-report-index :supplier="$supplier"/>
-        @endif
-        @if($page === 'price')
-            <livewire:supplier.pages.supplier-edit-price-page :supplier="$supplier" />
-        @endif
-        @if($page === 'warehouses')
-            <livewire:supplier-warehouse.supplier-warehouse-index :supplier="$supplier" />
-        @endif
+        <flux:tab.group>
+            <flux:tabs>
+                <flux:tab name="general" icon="home">Основное</flux:tab>
+                <flux:tab name="warehouses" icon="truck">Склады</flux:tab>
+                <flux:tab name="price" icon="document-currency-dollar">Прайс</flux:tab>
+            </flux:tabs>
+
+            <flux:tab.panel name="general">
+                <x-blocks.main-block>
+                    <flux:card class="space-y-6">
+                        <flux:input wire:model="form.name" label="Наименование" required/>
+                        <div class="max-w-fit">
+                            <flux:switch wire:model="form.open" label="Включен" />
+                        </div>
+                        <div class="max-w-md">
+                            <flux:switch wire:model="form.use_brand" label="Использовать бренд"
+                            description="При установке этого параметра поиск товаров в базе будет производится с брендом"/>
+                        </div>
+                        <div class="max-w-md">
+                            <flux:switch wire:model="form.unload_without_price" label="Выгружать без прайса"
+                            description="При установке этого параметра поставщик больше не будет выгружаться с почты, будут использоваться резервная цена и остатки с ваших складов для выгрузки в кабинеты каждый час"/>
+                        </div>
+                    </flux:card>
+                </x-blocks.main-block>
+                <livewire:supplier-report.supplier-report-index :supplier="$supplier"/>
+            </flux:tab.panel>
+            <flux:tab.panel name="warehouses">
+                <livewire:supplier-warehouse.supplier-warehouse-index :supplier="$supplier" />
+            </flux:tab.panel>
+            <flux:tab.panel name="price">
+                <x-blocks.main-block>
+                    <flux:button wire:click="download">Скачать</flux:button>
+                </x-blocks.main-block>
+            </flux:tab.panel>
+        </flux:tab-group>
     </x-layouts.main-container>
-    <div wire:loading wire:target="destroy">
-        <x-loader/>
-    </div>
 </div>
