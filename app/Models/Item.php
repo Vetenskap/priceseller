@@ -94,6 +94,9 @@ class Item extends MainModel
             })
             ->when(!is_null(request('filters.unload_ozon')), function (Builder $query) {
                 $query->where('unload_ozon',  request('filters.unload_ozon'));
+            })
+            ->when(!is_null(request('filters.updated')), function (Builder $query) {
+                $query->where('updated',  request('filters.updated'));
             });
     }
 

@@ -16,6 +16,11 @@
                             <flux:input wire:model.live.debounce.2s="filters.code" label="Код"/>
                             <flux:input wire:model.live.debounce.2s="filters.article" label="Артикул"/>
                             <flux:select variant="listbox" placeholder="Выберите опцию..."
+                                         wire:model.live.debounce.2s="filters.updated" label="Товар был обновлён">
+                                <flux:option value="1">Да</flux:option>
+                                <flux:option value="0">Нет</flux:option>
+                            </flux:select>
+                            <flux:select variant="listbox" placeholder="Выберите опцию..."
                                          wire:model.live.debounce.2s="filters.unload_wb" label="Выгружать на ВБ">
                                 <flux:option value="1">Да</flux:option>
                                 <flux:option value="0">Нет</flux:option>
@@ -71,7 +76,7 @@
                                         <flux:cell class="whitespace-nowrap">{{ $item->supplier->name }}</flux:cell>
 
                                         <flux:cell>
-                                            <flux:badge size="sm" :color="$item->updated ? 'lime' : 'danger'" inset="top bottom">{{$item->updated ? 'Да' : 'Нет'}}</flux:badge>
+                                            <flux:badge size="sm" :color="$item->updated ? 'lime' : 'red'" inset="top bottom">{{$item->updated ? 'Да' : 'Нет'}}</flux:badge>
                                         </flux:cell>
 
                                         <flux:cell variant="strong">{{ $item->updated_at }}</flux:cell>
