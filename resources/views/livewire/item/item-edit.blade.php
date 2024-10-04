@@ -98,7 +98,7 @@
                         </flux:input.group>
                         <div class="flex items-center gap-4">
                             <flux:subheading>Был обновлён: </flux:subheading>
-                            <flux:badge :color="$item->updated ? 'lime' : 'danger'">{{$item->updated ? 'Да' : 'Нет'}}</flux:badge>
+                            <flux:badge :color="$item->updated ? 'lime' : 'red'">{{$item->updated ? 'Да' : 'Нет'}}</flux:badge>
                         </div>
                     </div>
                     <div class="space-y-6">
