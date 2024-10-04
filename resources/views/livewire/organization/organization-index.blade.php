@@ -1,56 +1,69 @@
 <div>
     <x-layouts.header name="Организации"/>
-    <div x-data="{ open: false }">
-        <x-layouts.actions>
-            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-        </x-layouts.actions>
-        <x-layouts.main-container x-show="open">
-            <x-blocks.main-block>
-                <x-layouts.title name="Добавление новой организации" />
-            </x-blocks.main-block>
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="name"
-                                           type="text"
-                                           field="form.name"
-                >Наименование
-                </x-inputs.input-with-label>
-                <div class="self-center">
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </div>
-            </x-blocks.flex-block>
-        </x-layouts.main-container>
-    </div>
+    <flux:modal name="create-organization" class="md:w-96 space-y-6">
+        <div>
+            <flux:heading size="lg">Создание организации</flux:heading>
+        </div>
+
+        <flux:input wire:model="form.name" label="Наименование" badge="обязательное" required/>
+
+        <div class="flex">
+            <flux:spacer/>
+
+            <flux:button variant="primary" wire:click="store">Создать</flux:button>
+        </div>
+    </flux:modal>
+
+    <x-layouts.actions>
+        <flux:modal.trigger name="create-organization">
+            <flux:button>Добавить</flux:button>
+        </flux:modal.trigger>
+    </x-layouts.actions>
     <x-layouts.main-container>
         <x-blocks.main-block>
-            <x-layouts.title name="Список" />
+            <flux:heading size="xl">Список</flux:heading>
         </x-blocks.main-block>
-        @if($organizations->count() > 0)
-            <x-table.table-layout>
-                <x-table.table-header>
-                    <x-table.table-child>
-                        <x-layouts.simple-text name="Наименование"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
-                        <x-layouts.simple-text name="Последнее обновление"/>
-                    </x-table.table-child>
-                </x-table.table-header>
-                @foreach($organizations as $organization)
-                    <a href="{{route('organizations.edit', ['organization' => $organization->getKey()])}}" wire:key="{{$organization->getKey()}}">
-                        <x-table.table-item>
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$organization->name"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-information>{{$organization->updated_at}}</x-information>
-                            </x-table.table-child>
-                        </x-table.table-item>
-                    </a>
-                @endforeach
-            </x-table.table-layout>
-        @else
-            <x-blocks.main-block>
-                <x-information>Сейчас у вас нет организаций</x-information>
-            </x-blocks.main-block>
-        @endif
+        <x-blocks.main-block>
+            @if($this->organizations->count() > 0)
+                <flux:table :paginate="$this->organizations">
+                    <flux:columns>
+                        <flux:column sortable :sorted="$sortBy === 'name'" :direction="$sortDirection"
+                                     wire:click="sort('name')">Организация</flux:column>
+                        <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
+                                     wire:click="sort('updated_at')">Последнее обновление
+                        </flux:column>
+                    </flux:columns>
+
+                    <flux:rows>
+                        @foreach ($this->organizations as $organization)
+                            <flux:row :key="$organization->id">
+                                <flux:cell class="flex items-center gap-3">
+                                    {{ $organization->name }}
+                                </flux:cell>
+
+                                <flux:cell variant="strong">{{ $organization->updated_at }}</flux:cell>
+
+                                <flux:cell align="right">
+                                    <flux:link href="{{ route('organizations.edit', ['organization' => $organization->getKey()]) }}">
+                                        <flux:icon.pencil-square class="cursor-pointer hover:text-gray-800"/>
+                                    </flux:link>
+                                </flux:cell>
+
+                                <flux:cell align="right">
+                                    <flux:icon.trash wire:click="destroy({{ json_encode($organization->getKey()) }})"
+                                                     wire:loading.remove
+                                                     wire:target="destroy({{ json_encode($organization->getKey()) }})"
+                                                     class="cursor-pointer hover:text-red-400"/>
+                                    <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($organization->getKey()) }})"/>
+                                </flux:cell>
+
+                            </flux:row>
+                        @endforeach
+                    </flux:rows>
+                </flux:table>
+            @else
+                <flux:subheading>Сейчас у вас нет организаций</flux:subheading>
+            @endif
+        </x-blocks.main-block>
     </x-layouts.main-container>
 </div>

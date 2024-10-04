@@ -1,42 +1,29 @@
-@props(['market' => null, 'apiWarehouses' => null])
+@props(['market' => null])
 
 <div>
-    <x-blocks.main-block>
-        <x-layouts.title name="Остатки"/>
-    </x-blocks.main-block>
     @if(!$market?->warehouses()->count())
-        <x-blocks.center-block class="w-full bg-yellow-200 p-6 dark:text-yellow-400">
-            <x-layouts.simple-text class="dark:text-gray-900"
-                                   name="Ни один склад не добавлен. Остатки не будут выгружаться"/>
-        </x-blocks.center-block>
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
+
+                <x-blocks.center-block class="w-full bg-yellow-200 p-6 dark:text-yellow-200 rounded">
+                    <flux:subheading>Ни один склад не добавлен. Остатки не будут выгружаться</flux:subheading>
+                </x-blocks.center-block>
+            </flux:card>
+        </x-blocks.main-block>
     @endif
-    <x-blocks.flex-block>
-        <x-inputs.input-with-label name="minus_stock"
-                                   type="number"
-                                   field="form.minus_stock"
-        >Вычесть
-        </x-inputs.input-with-label>
-    </x-blocks.flex-block>
     <x-blocks.main-block>
-        <x-layouts.simple-text name="Ставить остаток 1 если"/>
+        <flux:card class="space-y-6">
+            <div class="flex">
+                <div class="space-y-6">
+                    <flux:input type="number" wire:model="form.minus_stock" label="Вычесть" />
+                    <flux:heading size="lg">Ставить остаток 1 если</flux:heading>
+                    <div class="flex gap-12">
+                        <flux:input type="number" wire:model="form.min" label="Остаток от" />
+                        <flux:input type="number" wire:model="form.max" label="Остаток до" />
+                    </div>
+                    <flux:input type="number" wire:model="form.max_count" label="Максимальный остаток" />
+                </div>
+            </div>
+        </flux:card>
     </x-blocks.main-block>
-    <x-blocks.flex-block>
-        <x-inputs.input-with-label name="min"
-                                   type="number"
-                                   field="form.min"
-        >Остаток от
-        </x-inputs.input-with-label>
-        <x-inputs.input-with-label name="max"
-                                   type="number"
-                                   field="form.max"
-        >Остаток до
-        </x-inputs.input-with-label>
-    </x-blocks.flex-block>
-    <x-blocks.flex-block>
-        <x-inputs.input-with-label name="max_count"
-                                   type="number"
-                                   field="form.max_count"
-        >Максимальный остаток
-        </x-inputs.input-with-label>
-    </x-blocks.flex-block>
 </div>

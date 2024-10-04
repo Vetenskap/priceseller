@@ -4,7 +4,7 @@ namespace App\Livewire\Supplier;
 
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Supplier\SupplierPostForm;
-use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSort;
 use App\Models\Supplier;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -16,12 +16,9 @@ use Livewire\WithPagination;
 #[Title('Поставщики')]
 class SupplierIndex extends BaseComponent
 {
-    use WithJsNotifications, WithPagination;
+    use WithPagination, WithSort;
 
     public SupplierPostForm $form;
-
-    public $sortBy = 'name';
-    public $sortDirection = 'desc';
 
     public $dirtySuppliers = [];
 
@@ -36,16 +33,6 @@ class SupplierIndex extends BaseComponent
             $supplierModel = Supplier::findOrFail($key);
             $supplierModel->update($supplier);
         });
-    }
-
-    public function sort($column): void
-    {
-        if ($this->sortBy === $column) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $column;
-            $this->sortDirection = 'asc';
-        }
     }
 
     public function edit($id): void

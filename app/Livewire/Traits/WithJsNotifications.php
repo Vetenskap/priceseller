@@ -15,7 +15,7 @@ trait WithJsNotifications
 
     public function addJobNotification()
     {
-        $this->js((new Toast('Уведомление', 'Задача добавлена, пожалуйста, ожидайте..'))->info());
+        \Flux::toast('Задача добавлена, пожалуйста, ожидайте..');
     }
 
     public function addJobFailedNotification()

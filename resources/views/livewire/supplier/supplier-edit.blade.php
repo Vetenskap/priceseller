@@ -31,11 +31,13 @@
     </x-layouts.actions>
     <x-layouts.main-container>
         <flux:tab.group>
-            <flux:tabs>
-                <flux:tab name="general" icon="home">Основное</flux:tab>
-                <flux:tab name="warehouses" icon="truck">Склады</flux:tab>
-                <flux:tab name="price" icon="document-currency-dollar">Прайс</flux:tab>
-            </flux:tabs>
+            <x-blocks.main-block>
+                <flux:tabs>
+                    <flux:tab name="general" icon="home">Основное</flux:tab>
+                    <flux:tab name="warehouses" icon="truck">Склады</flux:tab>
+                    <flux:tab name="price" icon="document-currency-dollar">Прайс</flux:tab>
+                </flux:tabs>
+            </x-blocks.main-block>
 
             <flux:tab.panel name="general">
                 <x-blocks.main-block>

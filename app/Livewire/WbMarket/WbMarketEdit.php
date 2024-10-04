@@ -10,10 +10,12 @@ use App\Livewire\BaseComponent;
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSort;
 use App\Models\Supplier;
 use App\Models\WbMarket;
 use App\Services\WbItemPriceService;
 use App\Services\WbMarketService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -22,24 +24,24 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Session;
 use Livewire\Attributes\Title;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[Title('ВБ')]
 class WbMarketEdit extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters;
+    use WithFileUploads, WithFilters, WithSort, WithPagination;
 
     public $backRoute = 'wb';
 
     public WbMarketPostForm $form;
 
     public WbMarket $market;
-
-    public $page;
 
     /** @var TemporaryUploadedFile $file */
     public $file;
@@ -58,23 +60,20 @@ class WbMarketEdit extends BaseComponent
 
     public $directLink = false;
 
-    public $apiWarehouses = [];
-
-    public array $statusFilters = [
-        [
-            'status' => 1,
-            'name' => 'Связь не создана'
-        ],
-        [
-            'status' => 0,
-            'name' => 'Связь создана'
-        ],
-    ];
-
-
-    public function mount($page = 'main'): void
+    #[Computed]
+    public function items(): LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator|array
     {
-        $this->page = $page;
+        return $this->market
+            ->items()
+            ->filters()
+            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
+            ->paginate();
+
+    }
+
+
+    public function mount(): void
+    {
         $this->form->setMarket($this->market);
     }
 
@@ -161,6 +160,12 @@ class WbMarketEdit extends BaseComponent
         }
     }
 
+    #[Computed]
+    public function apiWarehouses(): Collection
+    {
+        return $this->getWarehouses();
+    }
+
     public function clearRelationships(): void
     {
         $service = new WbMarketService($this->market);
@@ -173,27 +178,7 @@ class WbMarketEdit extends BaseComponent
     {
         $this->authorize('view', $this->market);
 
-        switch ($this->page) {
-            case 'main':
-                return view('livewire.wb-market.pages.wb-market-main-page');
-            case 'prices':
-                return view('livewire.wb-market.pages.wb-market-prices-page');
-            case 'stocks_warehouses':
-                return view('livewire.wb-market.pages.wb-market-stocks_warehouses-page', [
-                    'apiWarehouses2' => $this->getWarehouses()
-                ]);
-            case 'relationships_commissions':
-                $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
-                return view('livewire.wb-market.pages.wb-market-relationships_commissions-page', [
-                    'items' => $items
-                ]);
-            case 'export':
-                return view('livewire.wb-market.pages.wb-market-export-page');
-            case 'actions':
-                return view('livewire.wb-market.pages.wb-market-actions-page');
-            default:
-                return view('livewire.wb-market.wb-market-edit');
-        }
+        return view('livewire.wb-market.wb-market-edit');
     }
 
     public function testPrice()

@@ -4,7 +4,7 @@ namespace App\Livewire\Email;
 
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Email\EmailPostForm;
-use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSort;
 use App\Models\Email;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -16,12 +16,9 @@ use Livewire\WithPagination;
 #[Title('Почта')]
 class EmailIndex extends BaseComponent
 {
-    use WithPagination, WithJsNotifications;
+    use WithPagination, WithSort;
 
     public EmailPostForm $form;
-
-    public $sortBy = 'updated_at';
-    public $sortDirection = 'desc';
 
     public $dirtyEmails = [];
 
@@ -36,21 +33,6 @@ class EmailIndex extends BaseComponent
             $emailModel = Email::findOrFail($key);
             $emailModel->update($email);
         });
-    }
-
-    public function sort($column): void
-    {
-        if ($this->sortBy === $column) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $column;
-            $this->sortDirection = 'asc';
-        }
-    }
-
-    public function edit($id): void
-    {
-        $this->redirect(route('email.edit', ['email' => $id]));
     }
 
     public function destroy($id): void

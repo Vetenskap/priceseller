@@ -1,99 +1,87 @@
-@props(['market' => null, 'items' => null, 'statusFilters' => null, 'file' => null, 'directLink' => false])
+@props(['market' => null, 'file' => null, 'directLink' => false, 'sortBy' => null, 'sortDirection' => null])
 
 <div>
-    <x-blocks.main-block>
-        <x-layouts.title name="Создание/Обновление/Удаление связей и комиссий"/>
-    </x-blocks.main-block>
-    <x-blocks.center-block>
-        <x-success-button wire:click="downloadTemplate">Скачать шаблон</x-success-button>
-    </x-blocks.center-block>
-    <x-file-block action="import" />
-
     @isset($slot)
         <x-blocks.main-block>
-            <x-layouts.title name="Комиссии"/>
+            <flux:card class="space-y-6">
+                <flux:heading size="xl">Комиссии</flux:heading>
+                <flux:subheading>Комиссии по умолчанию</flux:subheading>
+                <div class="flex gap-6 items-end">
+                    {{$slot}}
+                    <flux:button>Обновить сейчас</flux:button>
+                </div>
+            </flux:card>
         </x-blocks.main-block>
-        <x-blocks.main-block>
-            <x-titles.sub-title name="Комиссии по умолчанию"/>
-        </x-blocks.main-block>
-        <x-blocks.flex-block>
-            {{$slot}}
-        </x-blocks.flex-block>
     @endisset
-    <x-blocks.flex-block>
-        <div class="self-center">
-            <x-secondary-button wire:click="relationshipsAndCommissions">Загрузить связи и комиссии
-            </x-secondary-button>
-        </div>
-        <x-blocks.flex-block>
-            <x-inputs.switcher :checked="$directLink" wire:model="directLink" />
-            <x-layouts.simple-text name="Прямая связь" />
-        </x-blocks.flex-block>
-    </x-blocks.flex-block>
     <x-blocks.main-block>
-        <x-danger-button wire:click="clearRelationships">Очистить связи</x-danger-button>
-    </x-blocks.main-block>
-    <livewire:items-import-report.items-import-report-index :model="$market"/>
-    <x-blocks.main-block>
-        <x-layouts.title name="Все связи"/>
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Создание/Обновление/Удаление связей и комиссий вручную</flux:heading>
+            <x-blocks.center-block>
+                <flux:button wire:click="downloadTemplate">Скачать шаблон</flux:button>
+            </x-blocks.center-block>
+            <x-file-block action="import"/>
+        </flux:card>
     </x-blocks.main-block>
     <x-blocks.main-block>
-        <x-titles.sub-title name="Фильтры"/>
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Загрузка по апи</flux:heading>
+            <div class="flex gap-6 items-center">
+                <flux:button wire:click="relationshipsAndCommissions">Загрузить/обновить связи и комиссии</flux:button>
+                <flux:switch wire:model="directLink" label="Прямая связь"/>
+            </div>
+            <flux:button>Обновить комиссии</flux:button>
+        </flux:card>
     </x-blocks.main-block>
-    <x-blocks.flex-block>
-        <x-inputs.input-with-label name="external_code"
-                                   type="text"
-                                   field="filters.external_code"
-        >Внешний код
-        </x-inputs.input-with-label>
-        <x-inputs.input-with-label name="code"
-                                   type="text"
-                                   field="filters.code"
-        >Ваш код
-        </x-inputs.input-with-label>
-        <x-dropdown-select name="status"
-                           field="filters.status"
-                           :options="$statusFilters"
-                           value="status">
-            Статус
-        </x-dropdown-select>
-    </x-blocks.flex-block>
-    @if($items->count() > 0)
-        <x-table.table-layout>
-            <x-table.table-header>
-                <x-table.table-child>
-                    <x-layouts.simple-text name="Внешний код"/>
-                </x-table.table-child>
-                <x-table.table-child>
-                    <x-layouts.simple-text name="Ваш код"/>
-                </x-table.table-child>
-                <x-table.table-child>
-                    <x-layouts.simple-text name="Статус"/>
-                </x-table.table-child>
-                <x-table.table-child>
-                    <x-layouts.simple-text name="Последнее изменение"/>
-                </x-table.table-child>
-            </x-table.table-header>
-            @foreach($items as $item)
-                <x-table.table-item wire:key="{{$item->getKey()}}">
-                    <x-table.table-child>
-                        <x-layouts.simple-text :name="$item->external_code"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
-                        <x-layouts.simple-text :name="$item->code"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
-                        <x-layouts.simple-text :name="$item->message"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
-                        <x-layouts.simple-text :name="$item->updated_at->diffForHumans()"/>
-                    </x-table.table-child>
-                </x-table.table-item>
-            @endforeach
-        </x-table.table-layout>
-    @else
-        <x-blocks.main-block>
-            <x-titles.sub-title name="Нет связей"/>
-        </x-blocks.main-block>
-    @endif
+    <x-blocks.main-block>
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">История загрузок</flux:heading>
+            <livewire:items-import-report.items-import-report-index :model="$market"/>
+        </flux:card>
+    </x-blocks.main-block>
+    <x-blocks.main-block>
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Все связи</flux:heading>
+            <flux:button variant="danger" wire:click="clearRelationships">Очистить связи</flux:button>
+            <flux:card class="space-y-6">
+                <flux:heading size="lg">Фильтры</flux:heading>
+                <div class="flex gap-6 flex-wrap">
+                    <flux:input wire:model.live.debounce.5s="filters.market_id" label="Идентификатор товара"/>
+                    <flux:input wire:model.live.debounce.5s="filters.market_client_code" label="Код клиента"/>
+                </div>
+            </flux:card>
+            @if($this->items->count() > 0)
+                <flux:table :paginate="$this->items">
+                    <flux:columns>
+                        <flux:column>Идентификатор товара</flux:column>
+                        <flux:column>Код клиента</flux:column>
+                        <flux:column sortable :sorted="$sortBy === 'price'" :direction="$sortDirection"
+                                     wire:click="sort('price')">Цена</flux:column>
+                        <flux:column>Товар/Комплект</flux:column>
+                        <flux:column sortable :sorted="$sortBy === 'created_at'" :direction="$sortDirection"
+                                     wire:click="sort('created_at')">Дата создания</flux:column>
+                        <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
+                                     wire:click="sort('updated_at')">Дата обновления</flux:column>
+                    </flux:columns>
+                    <flux:rows>
+                        @foreach($this->items as $item)
+                            <flux:row :key="$item->getKey()">
+                                <flux:cell>{{$item->product_id ?? $item->nm_id}}</flux:cell>
+                                <flux:cell>{{$item->offer_id ?? $item->vendor_code}}</flux:cell>
+                                <flux:cell>{{$item->price}}</flux:cell>
+                                <flux:cell>
+                                    <flux:link :href="$item->ozonitemable ? ($item->ozonitemable instanceof App\Models\Item ? route('item-edit', ['item' => $item->ozonitemable->getKey()]) : route('bundles.edit', ['bundle' => $item->ozonitemable->getKey()])) : ($item->wbitemable instanceof App\Models\Item ? route('item-edit', ['item' => $item->wbitemable->getKey()]) : route('bundles.edit', ['bundle' => $item->wbitemable->getKey()]))">
+                                        {{$item->ozonitemable ? $item->ozonitemable->code : $item->wbitemable->code}}
+                                    </flux:link>
+                                </flux:cell>
+                                <flux:cell>{{$item->created_at}}</flux:cell>
+                                <flux:cell>{{$item->updated_at}}</flux:cell>
+                            </flux:row>
+                        @endforeach
+                    </flux:rows>
+                </flux:table>
+            @else
+                <flux:subheading>Нет связей</flux:subheading>
+            @endif
+        </flux:card>
+    </x-blocks.main-block>
 </div>

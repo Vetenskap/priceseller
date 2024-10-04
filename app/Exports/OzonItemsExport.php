@@ -60,6 +60,7 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
                         'price_market' => $item->price_market,
                         'count' => $item->count,
                         'item_price' => $item->ozonitemable->getMorphClass() === 'App\Models\Item' ? $item->ozonitemable->price : $item->ozonitemable->items()->sum('price'),
+                        'item_buy_price_reserv' => $item->ozonitemable->getMorphClass() === 'App\Models\Item' ? $item->ozonitemable->buy_price_reserve : $item->ozonitemable->items()->sum('buy_price_reserve'),
                         'multiplicity' => $item->ozonitemable->getMorphClass() === 'App\Models\Item' ? $item->ozonitemable->multiplicity : $item->ozonitemable->items()->min('bundle_items.multiplicity'),
                         'updated_at' => $item->updated_at,
                         'created_at' => $item->created_at,

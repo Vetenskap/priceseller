@@ -1,92 +1,57 @@
 <div>
-    <x-blocks.main-block>
-        <x-layouts.title :name="$name"/>
-    </x-blocks.main-block>
-    @if(!$warehouse->suppliers()->count())
-        <x-blocks.center-block class="w-full bg-yellow-200 p-6 dark:bg-yellow-400">
-            <x-layouts.simple-text class="dark:text-gray-900"
-                                   name="Ни один поставщик не добавлен. Остатки не будут выгружаться"/>
-        </x-blocks.center-block>
-    @endif
-    <x-layouts.actions>
-        <x-success-button wire:click="save">Сохранить</x-success-button>
-        <x-danger-button wire:click="$parent.destroy({{$warehouse}})">Удалить</x-danger-button>
-    </x-layouts.actions>
-    <x-layouts.main-container class="border-4">
-        <x-navigate-pages>
-            <x-links.tab-link name="Основное" :active="$selectedTab === 'main'"
-                              wire:click="$set('selectedTab', 'main')"/>
-            <x-links.tab-link name="Поставщики" :active="$selectedTab === 'suppliers'"
-                              wire:click="$set('selectedTab', 'suppliers')"/>
-            <x-links.tab-link name="Мои склады" :active="$selectedTab === 'warehouses'"
-                              wire:click="$set('selectedTab', 'warehouses')"/>
-        </x-navigate-pages>
-        @if($selectedTab === 'main')
-            <x-blocks.flex-block>
-                <x-inputs.input-with-label name="name"
-                                           field="name"
-                >
-                    Наименование
-                </x-inputs.input-with-label>
-                <x-inputs.input-with-label name="warehouse_id"
-                                           field="warehouse_id"
-                                           disabled
-                >
-                    Идентификатор
-                </x-inputs.input-with-label>
-            </x-blocks.flex-block>
-        @endif
-        @if($selectedTab === 'suppliers')
-            <x-blocks.flex-block>
-                <x-dropdown-select name="supplier" field="selectedSupplier" :options="auth()->user()->suppliers">
-                    Выберите поставщика
-                </x-dropdown-select>
-                <div class="self-center">
-                    <x-success-button wire:click="addSupplier">Добавить</x-success-button>
-                </div>
-            </x-blocks.flex-block>
-            @foreach($warehouse->suppliers as $supplier)
-                <x-blocks.flex-block wire:key="{{$supplier->getKey()}}">
-                    <x-layouts.simple-text :name="$supplier->supplier->name"/>
-                    <div class="self-center">
-                        <x-danger-button wire:click="deleteSupplier({{$supplier}})">Удалить</x-danger-button>
-                    </div>
-                </x-blocks.flex-block>
-                <livewire:ozon-warehouse-supplier-warehouse.ozon-warehouse-supplier-warehouse-index :supplier="$supplier"/>
-            @endforeach
-        @endif
-        @if($selectedTab === 'warehouses')
-            <x-blocks.flex-block>
-                <x-dropdown-select name="warehouse" field="selectedWarehouse" :options="auth()->user()->warehouses">
-                    Выберите склад
-                </x-dropdown-select>
-                <div class="self-center">
-                    <x-success-button wire:click="addWarehouse">Добавить</x-success-button>
-                </div>
-            </x-blocks.flex-block>
-            @if($warehouse->userWarehouses()->count())
-                <x-table.table-layout>
-                    <x-table.table-header>
-                        <x-table.table-child>
-                            <x-layouts.simple-text name="Наименование"/>
-                        </x-table.table-child>
-                        <x-table.table-child>
+    <flux:card class="space-y-6">
 
-                        </x-table.table-child>
-                    </x-table.table-header>
-                    @foreach($warehouse->userWarehouses as $userWarehouse)
-                        <x-table.table-item wire:key="{{$userWarehouse->getKey()}}">
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$userWarehouse->warehouse->name"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-danger-button wire:click="deleteWarehouse({{$userWarehouse}})">Удалить
-                                </x-danger-button>
-                            </x-table.table-child>
-                        </x-table.table-item>
-                    @endforeach
-                </x-table.table-layout>
-            @endif
-        @endif
-    </x-layouts.main-container>
+        <flux:heading size="xl">{{$name}}</flux:heading>
+
+        <div x-data="{ open: false }">
+
+            <flux:button @click="open = ! open">Редактировать</flux:button>
+
+            <div x-show="open" class="mt-6 space-y-6">
+                <div class="flex justify-between">
+                    <flux:button wire:click="update">Сохранить</flux:button>
+                    <flux:button variant="danger" wire:click="destroy">Удалить</flux:button>
+                </div>
+
+                <flux:card>
+                    <flux:tab.group>
+                        <flux:tabs>
+                            <flux:tab name="general" icon="home">Основное</flux:tab>
+                            <flux:tab name="suppliers" icon="truck">Поставщики</flux:tab>
+                            <flux:tab name="warehouses" icon="archive-box">Мои склады</flux:tab>
+                        </flux:tabs>
+
+                        <div class="mt-6">
+                            @if(!$warehouse->suppliers()->count())
+                                <flux:card>
+                                    <x-blocks.center-block class="w-full bg-yellow-200 p-6 dark:bg-yellow-200 rounded">
+                                        <flux:subheading>Ни один поставщик не добавлен. Остатки не будут выгружаться
+                                        </flux:subheading>
+                                    </x-blocks.center-block>
+                                </flux:card>
+                            @endif
+                        </div>
+
+                        <flux:tab.panel name="general">
+                            <flux:card>
+                                <div class="flex gap-12">
+                                    <flux:input wire:model="name" label="Наименование" required/>
+                                    <flux:input wire:model="warehouse_id" label="Идентификатор" readonly/>
+                                </div>
+                            </flux:card>
+                        </flux:tab.panel>
+                        <flux:tab.panel name="suppliers">
+                            <livewire:ozon-warehouse-supplier.ozon-warehouse-supplier-index :warehouse="$warehouse"/>
+                        </flux:tab.panel>
+                        <flux:tab.panel name="warehouses">
+                            <livewire:ozon-warehouse-user-warehouse.ozon-warehouse-user-warehouse-index
+                                :warehouse="$warehouse"/>
+                        </flux:tab.panel>
+                    </flux:tab.group>
+                </flux:card>
+
+            </div>
+        </div>
+
+    </flux:card>
 </div>

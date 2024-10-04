@@ -17,6 +17,7 @@
                         <flux:input wire:model="form.article" label="Артикул поставщик" required/>
                         <flux:input wire:model="form.brand" label="Бренд поставщик"/>
                         <flux:input wire:model="form.multiplicity" label="Кратность отгрузки" type="number" required/>
+                        <flux:input wire:model="form.buy_price_reserve" label="Резервная закупочная цена" type="number"/>
                         <flux:select variant="listbox" searchable placeholder="Выберите поставщика..."
                                      wire:model="form.supplier_id" label="Поставщик">
                             <x-slot name="search">

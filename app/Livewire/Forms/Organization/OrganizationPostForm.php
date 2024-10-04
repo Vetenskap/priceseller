@@ -26,7 +26,7 @@ class OrganizationPostForm extends Form
                 'min:3',
                 Rule::unique('organizations', 'name')
                     ->where('user_id', \auth()->user()->id)
-                    ->when($this->organization, fn (Unique $unique) => $unique->ignore($this->organization->id, 'id'))
+                    ->when($this->organization, fn(Unique $unique) => $unique->ignore($this->organization->id, 'id'))
             ]
         ];
     }
@@ -52,5 +52,10 @@ class OrganizationPostForm extends Form
         $this->validate();
 
         $this->organization->update($this->except('organization'));
+    }
+
+    public function destroy(): void
+    {
+        $this->organization->delete();
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,6 +28,16 @@ class WbItem extends MainModel
         'wbitemable_id',
         'wbitemable_type'
     ];
+
+    public function scopeFilters(Builder $query)
+    {
+        return $query->when(request('filters.market_id'), function (Builder $query) {
+            $query->where('nm_id', 'like', '%' . request('filters.market_id') . '%');
+        })
+            ->when(request('filters.market_client_code'), function (Builder $query) {
+                $query->where('vendor_code', 'like', '%' . request('filters.market_client_code') . '%');
+            });
+    }
 
     public function orders()
     {

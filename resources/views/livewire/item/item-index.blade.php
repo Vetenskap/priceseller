@@ -2,10 +2,12 @@
     <x-layouts.header name="Товары"/>
     <x-layouts.main-container>
         <flux:tab.group>
-            <flux:tabs>
-                <flux:tab name="list" icon="list-bullet">Список</flux:tab>
-                <flux:tab name="manage" icon="cog-6-tooth">Управление</flux:tab>
-            </flux:tabs>
+            <x-blocks.main-block>
+                <flux:tabs>
+                    <flux:tab name="list" icon="list-bullet">Список</flux:tab>
+                    <flux:tab name="manage" icon="cog-6-tooth">Управление</flux:tab>
+                </flux:tabs>
+            </x-blocks.main-block>
 
             <flux:tab.panel name="list">
                 <x-blocks.main-block>

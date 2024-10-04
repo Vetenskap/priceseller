@@ -1,109 +1,85 @@
 <div>
     <x-layouts.header name="Склады"/>
-    <div x-data="{ open: false }">
-        <x-layouts.actions>
-            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-        </x-layouts.actions>
-        <x-layouts.main-container x-show="open">
-            <x-blocks.flex-block-end>
-                <x-inputs.input-with-label name="name"
-                                           type="text"
-                                           field="form.name"
-                >Наименование
-                </x-inputs.input-with-label>
-                <div class="self-center">
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </div>
-            </x-blocks.flex-block-end>
-        </x-layouts.main-container>
-    </div>
+    <flux:modal name="create-warehouse" class="md:w-96 space-y-6">
+        <div>
+            <flux:heading size="lg">Создание поставщика</flux:heading>
+        </div>
+
+        <flux:input wire:model="form.name" label="Наименование" required badge="обязательное"/>
+
+        <div class="flex">
+            <flux:spacer/>
+
+            <flux:button variant="primary" wire:click="store">Создать</flux:button>
+        </div>
+    </flux:modal>
+
+    <x-layouts.actions>
+        <flux:modal.trigger name="create-warehouse">
+            <flux:button>Добавить</flux:button>
+        </flux:modal.trigger>
+    </x-layouts.actions>
     <x-layouts.main-container>
-        <x-navigate-pages>
-            <x-links.tab-link :href="route('warehouses.index', ['page' => 'list'])" name="Список"
-                              :active="$page === 'list'" wire:navigate.hover/>
-            <x-links.tab-link :href="route('warehouses.index', ['page' => 'stocks'])" name="Управление остатками"
-                              :active="$page === 'stocks'" wire:navigate.hover/>
-        </x-navigate-pages>
-        @switch($page)
-            @case('list')
-                @if($warehouses->count() > 0)
-                    <x-table.table-layout>
-                        <x-table.table-header>
-                            <x-table.table-child>
-                                <x-layouts.simple-text name="Наименование"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-
-                            </x-table.table-child>
-                        </x-table.table-header>
-                        @foreach($warehouses as $warehouse)
-                            <x-table.table-item wire:key="{{$warehouse->getKey()}}">
-                                <x-table.table-child>
-                                    <a href="{{route('warehouses.edit', ['warehouse' => $warehouse->getKey()])}}">
-                                        <x-layouts.simple-text :name="$warehouse->name"/>
-                                    </a>
-                                </x-table.table-child>
-                                <x-table.table-child>
-                                    <x-danger-button wire:click="destroy({{$warehouse}})">Удалить</x-danger-button>
-                                </x-table.table-child>
-                            </x-table.table-item>
-                        @endforeach
-                    </x-table.table-layout>
-                @else
-                    <x-blocks.main-block>
-                        <x-layouts.simple-text name="Сейчас у вас нет складов"/>
-                    </x-blocks.main-block>
-                @endif
-                @break
-            @case('stocks')
-                <x-blocks.main-block>
-                    <x-layouts.title name="Экспорт"/>
-                </x-blocks.main-block>
-                <x-blocks.main-block>
-                    <x-secondary-button wire:click="export">Экспортировать</x-secondary-button>
-                </x-blocks.main-block>
-                <x-blocks.main-block>
-                    <livewire:warehouses-items-export.warehouses-items-export-index :model="auth()->user()"/>
-                </x-blocks.main-block>
-                @break
-        @endswitch
-    </x-layouts.main-container>
-    @if($page === 'stocks')
-        <x-layouts.main-container>
+        <flux:tab.group>
             <x-blocks.main-block>
-                <x-layouts.title name="Загрузить новые остатки"/>
+                <flux:tabs>
+                    <flux:tab name="list" icon="user">Список</flux:tab>
+                    <flux:tab name="manage" icon="cog-6-tooth">Управление остатками</flux:tab>
+                </flux:tabs>
             </x-blocks.main-block>
-            <x-blocks.flex-block class="justify-center">
-                <x-success-button wire:click="downloadTemplate">Скачать шаблон</x-success-button>
-            </x-blocks.flex-block>
-            <form wire:submit="import">
-                <div
-                    x-data="{ uploading: false, progress: 0 }"
-                    x-on:livewire-upload-start="uploading = true"
-                    x-on:livewire-upload-finish="uploading = false"
-                    x-on:livewire-upload-cancel="uploading = false"
-                    x-on:livewire-upload-error="uploading = false"
-                    x-on:livewire-upload-progress="progress = $event.detail.progress"
-                >
-                    <x-blocks.main-block>
-                        <x-file-input wire:model="file"/>
-                    </x-blocks.main-block>
 
-                    <x-blocks.main-block x-show="uploading">
-                        <x-file-progress x-bind:style="{ width: progress + '%' }"/>
-                    </x-blocks.main-block>
+            <flux:tab.panel name="list">
+                <x-blocks.main-block>
+                    @if($this->warehouses->count() > 0)
+                        <flux:table :paginate="$this->warehouses">
+                            <flux:columns>
+                                <flux:column sortable :sorted="$sortBy === 'name'" :direction="$sortDirection"
+                                             wire:click="sort('name')">Склад
+                                </flux:column>
+                                <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
+                                             wire:click="sort('updated_at')">Последнее обновление
+                                </flux:column>
+                            </flux:columns>
 
-                    @if($file)
-                        <x-blocks.main-block class="text-center">
-                            <x-success-button wire:click="import">Загрузить</x-success-button>
-                        </x-blocks.main-block>
+                            <flux:rows>
+                                @foreach ($this->warehouses as $warehouse)
+                                    <flux:row :key="$warehouse->id">
+                                        <flux:cell class="flex items-center gap-3">
+                                            {{ $warehouse->name }}
+                                        </flux:cell>
+
+                                        <flux:cell variant="strong">{{ $warehouse->updated_at }}</flux:cell>
+
+                                        <flux:cell align="right">
+                                            <flux:link
+                                                href="{{ route('warehouses.edit', ['warehouse' => $warehouse->getKey()]) }}">
+                                                <flux:icon.pencil-square class="cursor-pointer hover:text-gray-800"/>
+                                            </flux:link>
+                                        </flux:cell>
+
+                                        <flux:cell align="right">
+                                            <flux:icon.trash
+                                                wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                wire:loading.remove
+                                                wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                class="cursor-pointer hover:text-red-400"/>
+                                            <flux:icon.loading wire:loading
+                                                               wire:target="destroy({{ json_encode($warehouse->getKey()) }})"/>
+                                        </flux:cell>
+
+                                    </flux:row>
+                                @endforeach
+                            </flux:rows>
+                        </flux:table>
+                    @else
+                        <flux:subheading>Сейчас у вас нет складов</flux:subheading>
                     @endif
-                </div>
-            </form>
-            <livewire:warehouses-items-import.warehouses-items-import-index :model="auth()->user()"/>
-        </x-layouts.main-container>
-    @endif
-    <div wire:loading wire:target="export, import">
-        <x-loader/>
-    </div>
+                </x-blocks.main-block>
+            </flux:tab.panel>
+            <flux:tab.panel name="manage">
+                <livewire:warehouses-items-export.warehouses-items-export-index :model="auth()->user()"/>
+                <livewire:warehouses-items-import.warehouses-items-import-index :model="auth()->user()"/>
+            </flux:tab.panel>
+        </flux:tab-group>
+    </x-layouts.main-container>
 </div>

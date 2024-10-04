@@ -3,9 +3,11 @@
 namespace App\Livewire\OzonWarehouse;
 
 use App\Livewire\BaseComponent;
-use App\Livewire\Components\Toast;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 
 class OzonWarehouseIndex extends BaseComponent
 {
@@ -14,10 +16,10 @@ class OzonWarehouseIndex extends BaseComponent
 
     public $selectedWarehouse = null;
 
-    public function addWarehouse()
+    public function store(): void
     {
         if (!$this->selectedWarehouse) {
-            $this->js((new Toast('Ошибка', "Не выбран склад"))->danger());
+            \Flux::toast('Не выбран склад', 'Ошибка');
             return;
         }
 
@@ -33,16 +35,7 @@ class OzonWarehouseIndex extends BaseComponent
         ]);
     }
 
-    public function destroy(array $warehouse)
-    {
-        $warehouse = OzonWarehouse::findOrFail($warehouse['id']);
-
-        $this->authorize('delete', $warehouse);
-
-        $warehouse->delete();
-    }
-
-    public function render()
+    public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('livewire.ozon-warehouse.ozon-warehouse-index');
     }

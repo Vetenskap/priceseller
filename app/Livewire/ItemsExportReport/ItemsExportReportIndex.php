@@ -4,6 +4,7 @@ namespace App\Livewire\ItemsExportReport;
 
 use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSort;
 use App\Models\ItemsExportReport;
 use App\Models\OzonMarket;
 use App\Models\User;
@@ -19,7 +20,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ItemsExportReportIndex extends BaseComponent
 {
-    use WithPagination;
+    use WithPagination, WithSort;
 
     public User|WbMarket|OzonMarket|Warehouse $model;
 

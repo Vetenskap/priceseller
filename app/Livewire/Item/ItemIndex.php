@@ -7,6 +7,7 @@ use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithFilters;
+use App\Livewire\Traits\WithSort;
 use App\Models\Item;
 use App\Models\User;
 use App\Services\Item\ItemService;
@@ -25,25 +26,12 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 #[Title('Товары')]
 class ItemIndex extends BaseComponent
 {
-    use WithFileUploads, WithFilters, WithPagination;
+    use WithFileUploads, WithFilters, WithPagination, WithSort;
 
     /** @var TemporaryUploadedFile $file */
     public $file;
 
     public User $user;
-
-    public $sortBy = 'updated_at';
-    public $sortDirection = 'desc';
-
-    public function sort($column): void
-    {
-        if ($this->sortBy === $column) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $column;
-            $this->sortDirection = 'asc';
-        }
-    }
 
     public function edit($id): void
     {

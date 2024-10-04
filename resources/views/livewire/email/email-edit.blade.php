@@ -19,7 +19,7 @@
             </div>
 
             <div class="flex gap-2">
-                <flux:spacer />
+                <flux:spacer/>
 
                 <flux:modal.close>
                     <flux:button variant="ghost">Отменить</flux:button>
@@ -31,18 +31,28 @@
     </x-layouts.actions>
 
     <x-layouts.main-container>
-        <x-blocks.main-block>
-            <flux:heading size="xl">Основная информация</flux:heading>
-        </x-blocks.main-block>
-        <x-blocks.main-block class="max-w-fit">
-            <flux:switch wire:model="form.open" label="Включен" />
-        </x-blocks.main-block>
-        <div class="flex p-6 gap-6">
-            <flux:input wire:model="form.name" label="Наименование" required />
-            <flux:input wire:model="form.address" label="Адрес" type="email" required />
-            <flux:input wire:model="form.password" label="Пароль" type="password" required />
-        </div>
+        <flux:tab.group>
+            <x-blocks.main-block>
+                <flux:tabs>
+                    <flux:tab name="general" icon="home">Основное</flux:tab>
+                    <flux:tab name="suppliers" icon="truck">Поставщики</flux:tab>
+                </flux:tabs>
+            </x-blocks.main-block>
+
+            <flux:tab.panel name="general">
+                <x-blocks.main-block class="max-w-fit">
+                    <flux:switch wire:model="form.open" label="Включен"/>
+                </x-blocks.main-block>
+                <div class="flex p-6 gap-6">
+                    <flux:input wire:model="form.name" label="Наименование" required/>
+                    <flux:input wire:model="form.address" label="Адрес" type="email" required/>
+                    <flux:input wire:model="form.password" label="Пароль" type="password" required/>
+                </div>
+            </flux:tab.panel>
+            <flux:tab.panel name="suppliers">
+                <livewire:email-supplier.email-supplier-index :email="$email"/>
+            </flux:tab.panel>
+        </flux:tab-group>
     </x-layouts.main-container>
-    <livewire:email-supplier.email-supplier-index :email="$email"/>
 </div>
 

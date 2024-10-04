@@ -40,6 +40,7 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
         'Цена из маркета',
         'Остаток',
         'Закупочная цена',
+        'Закупочная цена резерв',
         'Кратность отгрузки',
         'Обновлено',
         'Загружено',

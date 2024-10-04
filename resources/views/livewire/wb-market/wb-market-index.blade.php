@@ -6,8 +6,8 @@
             <flux:heading size="lg">Создание кабинета</flux:heading>
         </div>
 
-        <flux:input wire:model="form.name" label="Наименование" required/>
-        <flux:input wire:model="form.api_key" label="АПИ ключ" required/>
+        <flux:input wire:model="form.name" label="Наименование" required badge="обязательное"/>
+        <flux:input wire:model="form.api_key" label="АПИ ключ" required badge="обязательное"/>
 
         <div class="flex">
             <flux:spacer/>
@@ -24,43 +24,53 @@
 
     <x-layouts.main-container>
         <x-blocks.main-block>
-            <x-layouts.title name="Список"/>
+            <flux:heading size="xl">Список</flux:heading>
         </x-blocks.main-block>
-        @if($markets->count() > 0)
-            <x-table.table-layout>
-                <x-table.table-header>
-                    <x-table.table-child>
-                        <x-layouts.simple-text name="Наименование"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
-                        <x-layouts.simple-text name="Последнее обновление"/>
-                    </x-table.table-child>
-                    <x-table.table-child>
-                        <x-layouts.simple-text name="Включен"/>
-                    </x-table.table-child>
-                </x-table.table-header>
-                @foreach($markets as $market)
-                    <a href="{{route('wb-market-edit', ['market' => $market->getKey()])}}"
-                       wire:key="{{$market->getKey()}}">
-                        <x-table.table-item>
-                            <x-table.table-child>
-                                <x-layouts.simple-text :name="$market->name"/>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-information>{{$market->updated_at}}</x-information>
-                            </x-table.table-child>
-                            <x-table.table-child>
-                                <x-inputs.switcher :disabled="$market->close" :checked="$market->open"
-                                                   wire:click="changeOpen({{json_encode($market->id)}})"/>
-                            </x-table.table-child>
-                        </x-table.table-item>
-                    </a>
-                @endforeach
-            </x-table.table-layout>
-        @else
-            <x-blocks.main-block>
-                <x-information>Сейчас у вас нет кабинетов ВБ</x-information>
-            </x-blocks.main-block>
-        @endif
+        <x-blocks.main-block>
+            @if($this->markets->count() > 0)
+                <flux:table :paginate="$this->markets">
+                    <flux:columns>
+                        <flux:column sortable :sorted="$sortBy === 'name'" :direction="$sortDirection"
+                                     wire:click="sort('name')">Кабинет</flux:column>
+                        <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
+                                     wire:click="sort('updated_at')">Последнее обновление
+                        </flux:column>
+                    </flux:columns>
+
+                    <flux:rows>
+                        @foreach ($this->markets as $market)
+                            <flux:row :key="$market->id">
+                                <flux:cell class="flex items-center gap-3">
+                                    {{ $market->name }}
+                                </flux:cell>
+
+                                <flux:cell variant="strong">{{ $market->updated_at }}</flux:cell>
+
+                                <flux:cell align="right">
+                                    <flux:switch wire:model.live="dirtyMarkets.{{ $market->getKey() }}.open"/>
+                                </flux:cell>
+
+                                <flux:cell align="right">
+                                    <flux:link href="{{ route('wb-market-edit', ['market' => $market->getKey()]) }}">
+                                        <flux:icon.pencil-square class="cursor-pointer hover:text-gray-800"/>
+                                    </flux:link>
+                                </flux:cell>
+
+                                <flux:cell align="right">
+                                    <flux:icon.trash wire:click="destroy({{ json_encode($market->getKey()) }})"
+                                                     wire:loading.remove
+                                                     wire:target="destroy({{ json_encode($market->getKey()) }})"
+                                                     class="cursor-pointer hover:text-red-400"/>
+                                    <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($market->getKey()) }})"/>
+                                </flux:cell>
+
+                            </flux:row>
+                        @endforeach
+                    </flux:rows>
+                </flux:table>
+            @else
+                <flux:subheading>Сейчас у вас нет кабинетов ВБ</flux:subheading>
+            @endif
+        </x-blocks.main-block>
     </x-layouts.main-container>
 </div>

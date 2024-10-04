@@ -10,11 +10,13 @@ use App\Livewire\BaseComponent;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSort;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
 use App\Models\Supplier;
 use App\Services\OzonItemPriceService;
 use App\Services\OzonMarketService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -23,16 +25,19 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\MessageBag;
 use Illuminate\Support\Str;
+use LaravelIdea\Helper\App\Models\_IH_OzonItem_C;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Session;
 use Livewire\Attributes\Title;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
+use Livewire\WithPagination;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 #[Title('ОЗОН')]
 class OzonMarketEdit extends BaseComponent
 {
-    use WithFileUploads, WithJsNotifications, WithFilters;
+    use WithFileUploads, WithFilters, WithSort, WithPagination;
 
     public $backRoute = 'ozon';
 
@@ -41,8 +46,6 @@ class OzonMarketEdit extends BaseComponent
     public OzonMarket $market;
 
     public int $selectedWarehouse;
-
-    public $page;
 
     /** @var TemporaryUploadedFile $file */
     public $file;
@@ -58,16 +61,16 @@ class OzonMarketEdit extends BaseComponent
 
     public $directLink = false;
 
-    public array $statusFilters = [
-        [
-            'status' => 1,
-            'name' => 'Связь не создана'
-        ],
-        [
-            'status' => 0,
-            'name' => 'Связь создана'
-        ],
-    ];
+    #[Computed]
+    public function items(): _IH_OzonItem_C|LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator|array
+    {
+        return $this->market
+            ->items()
+            ->filters()
+            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
+            ->paginate();
+
+    }
 
     public function export(): void
     {
@@ -119,12 +122,9 @@ class OzonMarketEdit extends BaseComponent
         $this->addSuccessClearRelationshipsNotification($deleted);
     }
 
-    public function mount($page = 'main'): void
+    public function mount(): void
     {
-        $this->page = $page;
         $this->form->setMarket($this->market);
-
-        if ($this->page === 'stocks_warehouses') $this->getWarehouses();
 
     }
 
@@ -149,6 +149,12 @@ class OzonMarketEdit extends BaseComponent
         }
     }
 
+    #[Computed]
+    public function apiWarehouses(): Collection
+    {
+        return $this->getWarehouses();
+    }
+
     public function update(): void
     {
         $this->authorize('update', $this->market);
@@ -171,52 +177,10 @@ class OzonMarketEdit extends BaseComponent
     {
         $this->authorize('view', $this->market);
 
-        switch ($this->page) {
-            case 'main':
-                return view('livewire.ozon-market.pages.ozon-market-main-page');
-            case 'prices':
-                return view('livewire.ozon-market.pages.ozon-market-prices-page');
-            case 'stocks_warehouses':
-                return view('livewire.ozon-market.pages.ozon-market-stocks_warehouses-page', [
-                    'apiWarehouses' => $this->getWarehouses()
-                ]);
-            case 'relationships_commissions':
-                $items = $this->market->relationships()->orderByDesc('updated_at')->filters()->paginate(100);
-                return view('livewire.ozon-market.pages.ozon-market-relationships_commissions-page', [
-                    'items' => $items
-                ]);
-            case 'export':
-                return view('livewire.ozon-market.pages.ozon-market-export-page');
-            case 'actions':
-                return view('livewire.ozon-market.pages.ozon-market-actions-page');
-            default:
-                return view('livewire.ozon-market.ozon-market-edit');
-        }
+        return view('livewire.ozon-market.ozon-market-edit');
     }
 
-    public function addWarehouse()
-    {
-
-        $this->authorize('create', OzonWarehouse::class);
-
-        $name = collect($this->apiWarehouses)->firstWhere('warehouse_id', $this->selectedWarehouse)['name'];
-
-        $this->market->warehouses()->updateOrCreate([
-            'id' => $this->selectedWarehouse,
-        ], [
-            'id' => $this->selectedWarehouse,
-            'name' => $name
-        ]);
-    }
-
-    public function deleteWarehouse(OzonWarehouse $warehouse)
-    {
-        $this->authorize('delete', $warehouse);
-
-        $warehouse->delete();
-    }
-
-    public function testPrice()
+    public function testPrice(): void
     {
         auth()->user()->suppliers->each(function (Supplier $supplier) {
             $service = new OzonItemPriceService($supplier, $this->market);
@@ -226,7 +190,7 @@ class OzonMarketEdit extends BaseComponent
         $this->addSuccessTestPriceNotification();
     }
 
-    public function nullStocks()
+    public function nullStocks(): void
     {
         auth()->user()->suppliers->each(function (Supplier $supplier) {
             $service = new OzonItemPriceService($supplier, $this->market);

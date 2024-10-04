@@ -25,7 +25,7 @@ class BaseComponent extends Component
         $ttl = Redis::ttl('laravel_unique_job:'.$class.':'.$lockKey);
 
         if ($ttl > 0) {
-            $this->js((new Toast('Уведомление', 'Задание уже выполняется. Осталось секунд до окончания блокировки: ' . $ttl))->warning());
+            \Flux::toast('Задание уже выполняется. Осталось секунд до окончания блокировки: ' . $ttl);
             return false;
         } else {
             $this->addJobNotification();
@@ -37,13 +37,13 @@ class BaseComponent extends Component
     {
         switch ($event['status']) {
             case 0:
-                $this->js((new Toast($event['title'], $event['message']))->success());
+                \Flux::toast($event['message'], $event['title']);
                 break;
             case 1:
-                $this->js((new Toast($event['title'], $event['message']))->danger());
+                \Flux::toast($event['message'], $event['title']);
                 break;
             case 2:
-                $this->js((new Toast($event['title'], $event['message']))->info());
+                \Flux::toast($event['message'], $event['title']);
                 break;
         }
     }

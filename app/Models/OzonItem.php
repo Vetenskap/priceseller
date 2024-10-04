@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -32,6 +33,16 @@ class OzonItem extends MainModel
         'ozonitemable_id',
         'ozonitemable_type'
     ];
+
+    public function scopeFilters(Builder $query)
+    {
+        return $query->when(request('filters.market_id'), function (Builder $query) {
+            $query->where('product_id', 'like', '%' . request('filters.market_id') . '%');
+        })
+            ->when(request('filters.market_client_code'), function (Builder $query) {
+                $query->where('offer_id', 'like', '%' . request('filters.market_client_code') . '%');
+            });
+    }
 
     public function orders()
     {

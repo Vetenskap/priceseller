@@ -26,18 +26,16 @@
 
         <flux:card class="space-y-6">
             <flux:heading size="xl">Все значения остатков</flux:heading>
-            @if($emailSupplier->warehouses->isNotEmpty())
-                <flux:button wire:click="update">Сохранить</flux:button>
 
-                @if($emailSupplier->stockValues->isNotEmpty())
-                    @foreach($emailSupplier->stockValues as $stockValue)
-                        <livewire:email-supplier-stock-value.email-supplier-stock-value-edit :stock-value="$stockValue"
-                                                                                             :email-supplier="$emailSupplier"
-                                                                                             wire:key="{{$stockValue->getKey()}}"/>
-                    @endforeach
-                @else
-                    <flux:subheading>Вы пока ещё не добавляли значения остатков</flux:subheading>
-                @endif
+            @if($emailSupplier->stockValues->isNotEmpty())
+                <flux:button wire:click="update">Сохранить</flux:button>
+                @foreach($emailSupplier->stockValues as $stockValue)
+                    <livewire:email-supplier-stock-value.email-supplier-stock-value-edit :stock-value="$stockValue"
+                                                                                         :email-supplier="$emailSupplier"
+                                                                                         wire:key="{{$stockValue->getKey()}}"/>
+                @endforeach
+            @else
+                <flux:subheading>Вы пока ещё не добавляли значения остатков</flux:subheading>
             @endif
         </flux:card>
 

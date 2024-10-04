@@ -3,21 +3,23 @@
 namespace App\Livewire\WbWarehouse;
 
 use App\Livewire\BaseComponent;
-use App\Livewire\Components\Toast;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
+use Illuminate\Contracts\View\Factory;
+use Illuminate\Contracts\View\View;
+use Illuminate\Foundation\Application;
 
 class WbWarehouseIndex extends BaseComponent
 {
     public WbMarket $market;
     public $apiWarehouses;
 
-    public $selectedWarehouse;
+    public $selectedWarehouse = null;
 
-    public function addWarehouse()
+    public function store(): void
     {
         if (!$this->selectedWarehouse) {
-            $this->js((new Toast('Ошибка', "Не выбран склад"))->danger());
+            \Flux::toast('Не выбран склад', 'Ошибка');
             return;
         }
 
@@ -33,16 +35,8 @@ class WbWarehouseIndex extends BaseComponent
         ]);
     }
 
-    public function destroy(array $warehouse)
-    {
-        $warehouse = WbWarehouse::findOrFail($warehouse['id']);
 
-        $this->authorize('delete', $warehouse);
-
-        $warehouse->delete();
-    }
-
-    public function render()
+    public function render(): Factory|Application|View|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('livewire.wb-warehouse.wb-warehouse-index');
     }

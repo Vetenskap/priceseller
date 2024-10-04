@@ -32,6 +32,8 @@ class ItemPostForm extends Form
 
     public $attributes;
 
+    public $buy_price_reserve = 0;
+
     public function setItem(Item $item)
     {
         $this->item = $item;
@@ -45,6 +47,7 @@ class ItemPostForm extends Form
         $this->unload_ozon = $item->unload_ozon;
         $this->unload_wb = $item->unload_wb;
         $this->attributes = $item->attributesValues->pluck('value', 'item_attribute_id')->toArray();
+        $this->buy_price_reserve = $item->buy_price_reserve;
     }
 
     public function update(): Collection

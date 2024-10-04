@@ -52,4 +52,9 @@ class WarehousePostForm extends Form
 
         $this->warehouse->update($this->except('warehouse'));
     }
+
+    public function destroy(): void
+    {
+        $this->warehouse->delete();
+    }
 }

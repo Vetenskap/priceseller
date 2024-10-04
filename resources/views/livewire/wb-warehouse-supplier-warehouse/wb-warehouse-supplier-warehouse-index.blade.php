@@ -1,39 +1,50 @@
-<div>
-    <x-blocks.main-block>
-        <x-layouts.title name="Склады"/>
-        <x-titles.sub-title name="Привязка складов"/>
-        <x-information>Склады поставщика с которых нужно выгружать остатки. Если добавить несколько складов, то они будут складываться</x-information>
-    </x-blocks.main-block>
-    <div x-data="{ open: false }">
-        <x-blocks.main-block>
-            <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-        </x-blocks.main-block>
-        <div x-show="open">
-            <x-blocks.flex-block>
-                <x-dropdown-select name="supplier_warehouse_id" field="supplier_warehouse_id" :options="$supplier->supplier->warehouses->all()">
-                    Выберите склад
-                </x-dropdown-select>
-                <div class="self-center">
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </div>
-            </x-blocks.flex-block>
-        </div>
-    </div>
-    <x-blocks.main-block>
-        <x-layouts.title name="Все склады"/>
-    </x-blocks.main-block>
-    @if($supplier->warehouses->isNotEmpty())
-        @foreach($supplier->warehouses as $warehouse)
-            <x-blocks.flex-block>
-                <x-layouts.title :name="$warehouse->supplierWarehouse->name"/>
-                <div class="self-center">
-                    <x-danger-button wire:click="destroy({{$warehouse->id}})">Удалить</x-danger-button>
-                </div>
-            </x-blocks.flex-block>
-        @endforeach
+<flux:card class="space-y-6">
+    <flux:heading size="xl">Склады</flux:heading>
+    <flux:subheading>Склады поставщика с которых нужно выгружать остатки. Если добавить несколько складов, то они
+        будут складываться
+    </flux:subheading>
+    <flux:input.group>
+        <flux:select variant="listbox" searchable placeholder="Выберите склад..." wire:model="supplier_warehouse_id">
+            <x-slot name="search">
+                <flux:select.search placeholder="Поиск..."/>
+            </x-slot>
+
+            @foreach($supplier->supplier->warehouses->all() as $warehouse)
+                <flux:option :value="$warehouse->id">{{$warehouse->name}}</flux:option>
+            @endforeach
+        </flux:select>
+
+        <flux:button icon="plus" wire:click="store">Добавить</flux:button>
+    </flux:input.group>
+
+    <flux:heading size="xl">Список</flux:heading>
+    @if($this->warehouses->isNotEmpty())
+        <flux:table :paginate="$this->warehouses">
+            <flux:columns>
+                <flux:column>Склад</flux:column>
+            </flux:columns>
+
+            <flux:rows>
+                @foreach ($this->warehouses as $warehouse)
+                    <flux:row :key="$warehouse->id">
+                        <flux:cell class="flex items-center gap-3">
+                            {{ $warehouse->supplierWarehouse->name }}
+                        </flux:cell>
+
+                        <flux:cell align="right">
+                            <flux:icon.trash wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
+                                             wire:loading.remove
+                                             wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
+                                             class="cursor-pointer hover:text-red-400"/>
+                            <flux:icon.loading wire:loading
+                                               wire:target="destroy({{ json_encode($warehouse->getKey()) }})"/>
+                        </flux:cell>
+
+                    </flux:row>
+                @endforeach
+            </flux:rows>
+        </flux:table>
     @else
-        <x-blocks.main-block>
-            <x-information>Вы пока ещё не добавляли склады</x-information>
-        </x-blocks.main-block>
+        <flux:subheading>Вы пока ещё не добавляли склады</flux:subheading>
     @endif
-</div>
+</flux:card>

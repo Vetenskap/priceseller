@@ -2,21 +2,38 @@
 
 namespace App\Livewire\OzonWarehouseSupplierWarehouse;
 
+use App\Livewire\BaseComponent;
+use App\Livewire\Traits\WithSort;
 use App\Models\OzonWarehouseSupplier;
 use App\Models\OzonWarehouseSupplierWarehouse;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Validation\Rule;
+use LaravelIdea\Helper\App\Models\_IH_OzonWarehouseSupplierWarehouse_C;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\Validate;
-use Livewire\Component;
+use Livewire\WithPagination;
 
-class OzonWarehouseSupplierWarehouseIndex extends Component
+class OzonWarehouseSupplierWarehouseIndex extends BaseComponent
 {
+    use WithSort, WithPagination;
+
     public OzonWarehouseSupplier $supplier;
 
     #[Validate]
     public $supplier_warehouse_id;
+
+    #[Computed]
+    public function warehouses(): array|LengthAwarePaginator|_IH_OzonWarehouseSupplierWarehouse_C|\Illuminate\Pagination\LengthAwarePaginator
+    {
+        return $this->supplier
+            ->warehouses()
+            ->with('supplierWarehouse')
+            ->tap(fn ($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
+            ->paginate();
+    }
 
     public function store(): void
     {
@@ -25,7 +42,7 @@ class OzonWarehouseSupplierWarehouseIndex extends Component
         $this->supplier->warehouses()->create($this->except(['supplier']));
     }
 
-    public function destroy(int $id): void
+    public function destroy($id): void
     {
         OzonWarehouseSupplierWarehouse::findOrFail($id)->delete();
     }
