@@ -8,7 +8,7 @@
                 <flux:subheading>Комиссии по умолчанию</flux:subheading>
                 <div class="flex gap-6 items-end">
                     {{$slot}}
-                    <flux:button>Обновить сейчас</flux:button>
+                    <flux:button wire:click="updateUserCommissions">Обновить сейчас</flux:button>
                 </div>
             </flux:card>
         </x-blocks.main-block>
@@ -29,7 +29,7 @@
                 <flux:button wire:click="relationshipsAndCommissions">Загрузить/обновить связи и комиссии</flux:button>
                 <flux:switch wire:model="directLink" label="Прямая связь"/>
             </div>
-            <flux:button>Обновить комиссии</flux:button>
+            <flux:button wire:click="updateApiCommissions">Обновить комиссии</flux:button>
         </flux:card>
     </x-blocks.main-block>
     <x-blocks.main-block>

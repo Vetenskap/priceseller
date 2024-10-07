@@ -17,25 +17,39 @@
     @if($page === 'main')
         <x-layouts.main-container>
             <x-blocks.main-block>
-                <x-layouts.title name="Основное"/>
+                <flux:card class="space-y-6">
+                    <div class="flex">
+                        <div class="space-y-6">
+                            <flux:button wire:click="store">Сохранить</flux:button>
+                            <div>
+                                <flux:select variant="listbox" searchable placeholder="Выберите поставщика..." wire:model.live.debounce.1s="form.supplier_id" label="Поставщик">
+                                    <x-slot name="search">
+                                        <flux:select.search placeholder="Поиск..." />
+                                    </x-slot>
+
+                                    @foreach(auth()->user()->suppliers as $supplier)
+                                        <flux:option :value="$supplier->getKey()">{{$supplier->name}}</flux:option>
+                                    @endforeach
+                                </flux:select>
+                            </div>
+                            @if($form->supplier_id)
+                                <div>
+                                    <flux:select variant="listbox" searchable placeholder="Выберите склад поставщика..." wire:model="form.supplier_warehouse_id" label="Склад поставщика">
+                                        <x-slot name="search">
+                                            <flux:select.search placeholder="Поиск..." />
+                                        </x-slot>
+
+                                        @foreach(\App\Models\SupplierWarehouse::where('supplier_id', $form->supplier_id)->get() as $warehouse)
+                                            <flux:option :value="$warehouse->getKey()">{{$warehouse->name}}</flux:option>
+                                        @endforeach
+                                    </flux:select>
+                                </div>
+                            @endif
+                            <flux:input label="Апи ключ" wire:model="form.api_key" required/>
+                        </div>
+                    </div>
+                </flux:card>
             </x-blocks.main-block>
-            <x-blocks.main-block>
-                <x-success-button wire:click="store">Сохранить</x-success-button>
-            </x-blocks.main-block>
-            <x-blocks.flex-block>
-                <x-dropdowns.dropdown-select
-                    :items="auth()->user()->suppliers->toArray()"
-                    :current-id="$form->supplier_id"
-                    name="supplier"
-                    field="form.supplier_id"
-                >Выберите Поставщика
-                </x-dropdowns.dropdown-select>
-                <x-inputs.input-with-label name="api_key"
-                                           type="text"
-                                           field="form.api_key"
-                >Апи ключ
-                </x-inputs.input-with-label>
-            </x-blocks.flex-block>
         </x-layouts.main-container>
     @elseif($page === 'times')
         <livewire:samsonapi::samson-api-time.samson-api-time-index :samson-api="$form->samsonApi"/>

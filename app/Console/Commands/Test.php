@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\HttpClient\OzonClient\Resources\DescriptionCategory;
 use App\HttpClient\OzonClient\Resources\DescriptionCategoryAttribute;
 use App\HttpClient\OzonClient\Resources\DescriptionCategoryTree;
+use App\HttpClient\OzonClient\Resources\ProductInfoPrices;
 use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\OzonItem;
@@ -16,7 +17,9 @@ use App\Services\OzonItemPriceService;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Modules\EditorContent\Services\EditorContentService;
+use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 use Modules\Moysklad\Models\Moysklad;
+use Modules\Moysklad\Models\MoyskladQuarantine;
 use Modules\Moysklad\Services\MoyskladItemOrderService;
 use Modules\Moysklad\Services\MoyskladService;
 
@@ -41,11 +44,11 @@ class Test extends Command
      */
     public function handle()
     {
-        $ozonItem = OzonItem::find('9d07c247-d70d-4514-b69f-54ad83d75a69');
-
-        /** @var Item $item */
-        $item = $ozonItem->ozonitemable;
-//        $ozonItem->ozonitemable->moyskladOrders()->where('new', true)->get()
-        dd((($ozonItem->ozonitemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($ozonItem->ozonitemable)->sum('orders') : 0) * $ozonItem->ozonitemable->multiplicity));
+        $item = Item::find('9cd5c120-59b0-4045-bc5d-3d1490053fdf');
+        $moysklad = Moysklad::find(2);
+        $product = new Product();
+        $product->setId($item->ms_uuid);
+        $product->fetch($moysklad->api_key);
+        dd($product->getBuyPrice()->getValue());
     }
 }

@@ -6,6 +6,7 @@ use App\Exports\WbItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Jobs\MarketRelationshipsAndCommissions;
+use App\Jobs\MarketUpdateApiCommissions;
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
 use App\Livewire\Traits\WithFilters;
@@ -69,6 +70,33 @@ class WbMarketEdit extends BaseComponent
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();
 
+    }
+
+    public function updateUserCommissions(): void
+    {
+        $this->validate([
+            'sales_percent' => 'nullable|numeric|min:0|max:100',
+            'min_price' => 'nullable|numeric|min:0',
+            'retail_markup_percent' => 'nullable|numeric|min:0',
+            'package' => 'nullable|numeric|min:0',
+        ]);
+
+        collect($this->only('sales_percent', 'min_price', 'retail_markup_percent', 'package'))
+            ->filter()
+            ->each(fn($value, $key) => $this->market->items()->update([$key => $value]));
+
+        \Flux::toast('Все комиссии обновлены', 'Успех');
+    }
+
+    public function updateApiCommissions(): void
+    {
+        MarketUpdateApiCommissions::dispatch(
+            defaultFields: collect($this->only('sales_percent', 'min_price', 'retail_markup_percent', 'package')),
+            model: $this->market,
+            service: WbMarketService::class,
+        );
+
+        $this->addJobNotification();
     }
 
 

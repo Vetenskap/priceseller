@@ -5,6 +5,7 @@ namespace Modules\Moysklad\Models;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Modules\Moysklad\Database\Factories\MoyskladFactory;
 
 class Moysklad extends Model
@@ -18,7 +19,9 @@ class Moysklad extends Model
         'api_key',
         'user_id',
         'clear_order_time',
-        'enabled_orders'
+        'enabled_orders',
+        'diff_price',
+        'enabled_diff_price'
     ];
 
     public function warehouses()
@@ -69,6 +72,11 @@ class Moysklad extends Model
     public function orders()
     {
         return $this->hasMany(MoyskladItemOrder::class);
+    }
+
+    public function quarantine(): HasMany
+    {
+        return $this->hasMany(MoyskladQuarantine::class);
     }
 
 }

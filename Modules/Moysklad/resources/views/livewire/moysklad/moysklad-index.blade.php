@@ -20,6 +20,8 @@
                 </x-links.tab-link>
                 <x-links.tab-link href="{{route('moysklad.index', ['page' => 'change_warehouse'])}}" :active="$page === 'change_warehouse'">Задача изменения склада
                 </x-links.tab-link>
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'quarantine'])}}" :active="$page === 'quarantine'">Карантин
+                </x-links.tab-link>
             @endif
         </x-navigate-pages>
     </x-layouts.main-container>
@@ -59,5 +61,61 @@
     @endif
     @if($page === 'change_warehouse')
         <livewire:moysklad::moysklad-change-warehouse.moysklad-change-warehouse-index :moysklad="$form->moysklad"/>
+    @endif
+    @if($page === 'quarantine')
+        <x-layouts.main-container>
+            <x-blocks.main-block>
+                <flux:card>
+                    <flux:button wire:click="store">Сохранить</flux:button>
+                </flux:card>
+            </x-blocks.main-block>
+            <x-blocks.main-block>
+                <flux:card class="space-y-6">
+                    <div class="flex">
+                        <div class="space-y-6">
+                            <flux:switch label="Включить карантин" wire:model="form.enabled_diff_price" />
+                            <flux:input label="Разница между ценами, %" wire:model="form.diff_price"/>
+                        </div>
+                    </div>
+                </flux:card>
+            </x-blocks.main-block>
+            <x-blocks.main-block>
+                <flux:card class="space-y-6">
+                    <flux:heading size="xl">Карантин</flux:heading>
+                    <flux:table :paginate="$this->quarantine">
+                        <flux:columns>
+                            <flux:column>Товар</flux:column>
+                            <flux:column>Цена поставщика</flux:column>
+                            <flux:column>Ваша цена</flux:column>
+                            <flux:column>Дата создания</flux:column>
+                            <flux:column>Дата обновления</flux:column>
+                        </flux:columns>
+                        <flux:rows>
+                            @foreach($this->quarantine as $item)
+                                <flux:row :key="$item->getKey()">
+                                    <flux:cell>
+                                        <flux:link href="{{ route('item-edit', ['item' => $item->item->getKey()]) }}">
+                                            {{$item->item->code}}
+                                        </flux:link>
+                                    </flux:cell>
+                                    <flux:cell>{{$item->supplier_buy_price}}</flux:cell>
+                                    <flux:cell>{{$item->item->buy_price_reserve}}</flux:cell>
+                                    <flux:cell>{{$item->created_at}}</flux:cell>
+                                    <flux:cell>{{$item->updated_at}}</flux:cell>
+                                    <flux:cell>
+                                        <flux:icon.arrow-up-tray class="cursor-pointer hover:text-gray-800"
+                                                                 wire:click="setBuyPriceFromQuarantine({{$item->getKey()}})"
+                                                                 wire:loading.remove
+                                                                 wire:target="setBuyPriceFromQuarantine({{$item->getKey()}})"
+                                        />
+                                        <flux:icon.loading wire:loading wire:target="setBuyPriceFromQuarantine({{$item->getKey()}})"/>
+                                    </flux:cell>
+                                </flux:row>
+                            @endforeach
+                        </flux:rows>
+                    </flux:table>
+                </flux:card>
+            </x-blocks.main-block>
+        </x-layouts.main-container>
     @endif
 </x-layouts.module-index-layout>

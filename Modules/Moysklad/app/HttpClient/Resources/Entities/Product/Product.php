@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\HttpClient\Resources\Entities\Product;
 
 use Illuminate\Support\Collection;
+use Modules\Moysklad\HttpClient\MoyskladClient;
 use Modules\Moysklad\HttpClient\Resources\Entities\Counterparty;
 use Modules\Moysklad\HttpClient\Resources\Entities\Employee;
 use Modules\Moysklad\HttpClient\Resources\Entities\Entity;
@@ -14,6 +15,7 @@ use Modules\Moysklad\HttpClient\Resources\Entities\Uom;
 use Modules\Moysklad\HttpClient\Resources\Objects\Alcoholic;
 use Modules\Moysklad\HttpClient\Resources\Objects\BuyPrice;
 use Modules\Moysklad\HttpClient\Resources\Objects\MinPrice;
+use Modules\Moysklad\Models\Moysklad;
 
 class Product extends Entity
 {
@@ -237,6 +239,16 @@ class Product extends Entity
         if ($product->has('things')) {
 
         }
+    }
+
+    public function update(Moysklad $moysklad, array $fields = []): bool
+    {
+        if (in_array('buyPrice', $fields)) {
+            $data = $this->buyPrice->getFieldProduct();
+            return $this->put($moysklad->api_key, $data);
+        }
+
+        return false;
     }
 
     public function getAccountId(): string

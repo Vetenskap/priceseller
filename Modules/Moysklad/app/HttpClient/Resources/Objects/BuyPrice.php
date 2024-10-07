@@ -12,7 +12,7 @@ class BuyPrice
 
     public function __construct(Collection $buyPrice)
     {
-        $this->value = $buyPrice->get('value')/100;
+        $this->value = $buyPrice->get('value') / 100;
 
         $currency = new Currency();
         $currency->setId(collect($buyPrice->get('currency'))->toCollectionSpread()->get('meta')->get('href'));
@@ -27,6 +27,20 @@ class BuyPrice
     public function getCurrency(): Currency
     {
         return $this->currency;
+    }
+
+    public function setValue(float $value): void
+    {
+        $this->value = $value;
+    }
+
+    public function getFieldProduct(): array
+    {
+        return [
+            "buyPrice" => [
+                "value" => $this->value * 100,
+            ],
+        ];
     }
 
 }

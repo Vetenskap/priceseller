@@ -19,6 +19,11 @@
                         </flux:cell>
                         <flux:cell variant="strong">{{$report->created_at}}</flux:cell>
                         <flux:cell variant="strong">{{$report->updated_at}}</flux:cell>
+                        <flux:cell align="right">
+                            <flux:link href="{{ route('supplier.report.edit', ['report' => $report->getKey(), 'supplier' => $supplier]) }}">
+                                <flux:icon.eye class="cursor-pointer hover:text-gray-800"/>
+                            </flux:link>
+                        </flux:cell>
                     </flux:row>
                 @endforeach
             </flux:rows>

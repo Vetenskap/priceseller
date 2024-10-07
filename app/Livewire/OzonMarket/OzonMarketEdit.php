@@ -6,6 +6,7 @@ use App\Exports\OzonItemsExport;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Jobs\MarketRelationshipsAndCommissions;
+use App\Jobs\MarketUpdateApiCommissions;
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
 use App\Livewire\Traits\WithFilters;
@@ -72,6 +73,21 @@ class OzonMarketEdit extends BaseComponent
 
     }
 
+    public function updateUserCommissions(): void
+    {
+        $this->validate([
+            'min_price_percent' => 'nullable|numeric|min:0|max:100',
+            'min_price' => 'nullable|numeric|min:0',
+            'shipping_processing' => 'nullable|numeric|min:0',
+        ]);
+
+        collect($this->only('min_price_percent', 'min_price', 'shipping_processing'))
+            ->filter()
+            ->each(fn($value, $key) => $this->market->items()->update([$key => $value]));
+
+        \Flux::toast('Все комиссии обновлены', 'Успех');
+    }
+
     public function export(): void
     {
         $status = $this->checkTtlJob(Export::getUniqueId($this->market), Export::class);
@@ -100,6 +116,17 @@ class OzonMarketEdit extends BaseComponent
         $status = $this->checkTtlJob(Import::getUniqueId($this->market), Import::class);
 
         if ($status) Import::dispatch($uuid, $ext, $this->market, OzonMarketService::class);
+    }
+
+    public function updateApiCommissions(): void
+    {
+        MarketUpdateApiCommissions::dispatch(
+            defaultFields: collect($this->only(['shipping_processing', 'min_price', 'min_price_percent'])),
+            model: $this->market,
+            service: OzonMarketService::class,
+        );
+
+        $this->addJobNotification();
     }
 
     public function relationshipsAndCommissions(): void

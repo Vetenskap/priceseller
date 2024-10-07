@@ -2,20 +2,40 @@
 
 namespace Modules\BergApi\Livewire\BergApiWarehouse;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Validation\Rule;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Modules\BergApi\Models\BergApi;
 
 class BergApiWarehouseIndex extends Component
 {
+    use WithPagination;
+
     public BergApi $bergApi;
 
     public $name;
     public $warehouse_id;
+    public $supplier_warehouse_id;
+
+    #[Computed]
+    public function warehouses(): array|LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator
+    {
+        return $this->bergApi
+            ->warehouses()
+            ->paginate();
+    }
+
+    public function destroy($id): void
+    {
+        $warehouse = $this->bergApi->warehouses()->find($id);
+        $warehouse->delete();
+    }
 
     public function rules(): array
     {
@@ -31,6 +51,13 @@ class BergApiWarehouseIndex extends Component
                 'integer',
                 Rule::unique('berg_api_warehouses', 'warehouse_id')
                     ->where('berg_api_id', $this->bergApi->id)
+            ],
+            'supplier_warehouse_id' => [
+                'required',
+                'uuid',
+                'exists:supplier_warehouses,id',
+                Rule::unique('berg_api_warehouses', 'supplier_warehouse_id')
+                    ->where('berg_api_id', $this->bergApi->id)
             ]
         ];
     }
@@ -41,7 +68,8 @@ class BergApiWarehouseIndex extends Component
 
         $this->bergApi->warehouses()->create([
             'name' => $this->name,
-            'warehouse_id' => $this->warehouse_id
+            'warehouse_id' => $this->warehouse_id,
+            'supplier_warehouse_id' => $this->supplier_warehouse_id
         ]);
     }
 

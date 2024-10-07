@@ -48,8 +48,8 @@ class BaseComponent extends Component
         }
     }
 
-    public function back(): void
+    public function back()
     {
-        $this->redirectRoute($this->backRoute);
+        return redirect()->to(url()->previous());
     }
 }

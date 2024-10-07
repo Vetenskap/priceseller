@@ -11,6 +11,7 @@ use Box\Spout\Common\Exception\IOException;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
+use Modules\Moysklad\Models\MoyskladQuarantine;
 
 class EmailSupplierService
 {
@@ -112,6 +113,20 @@ class EmailSupplierService
                 if (!is_null($price)) {
                     $price = $this->preparePrice($price);
                     $item->price = $price;
+
+                    $user = $this->supplier->supplier->user;
+                    $moysklad = $user->moysklad;
+                    if (ModuleService::moduleIsEnabled('Moyklad', $user) && $moysklad->enabled_diff_price) {
+                        if (($price + ($price / 100 * $moysklad->diff_price)) < $item->buy_price_reserve || ($price - ($price / 100 * $moysklad->diff_price)) > $item->buy_price_reserve) {
+                            $moysklad->quarantine()->updateOrCreate([
+                                'item_id' => $item->id
+                            ], [
+                                'item_id' => $item->id,
+                                'supplier_buy_price' => $price
+                            ]);
+                        }
+                    }
+
                 }
 
                 $item->updated = true;

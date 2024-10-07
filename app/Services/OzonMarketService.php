@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Exports\OzonItemsExport;
 use App\HttpClient\OzonClient\OzonClient;
+use App\HttpClient\OzonClient\Resources\ProductInfoPrices;
 use App\Imports\OzonItemsImport;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
@@ -52,6 +53,44 @@ class OzonMarketService
         } while ($deleted > 0);
 
         return $totalDeleted;
+
+    }
+
+    public function updateApiCommissions(Collection $defaultFields): Collection
+    {
+        $defaultFields->filter()->each(fn($value, $key) => $this->market->items()->update([$key => $value]));;
+
+        $updated = 0;
+
+        $this->market->items()->chunk(1000, function (Collection $items) use (&$updated) {
+
+            $productIdToOzonItem = $items->pluck(null, 'product_id');
+
+            $productsInfoPrices = ProductInfoPrices::fetchAll($this->market, $productIdToOzonItem->keys()->toArray());
+
+            $productsInfoPrices->each(function (ProductInfoPrices $productInfoPrices) use ($productIdToOzonItem, &$updated) {
+                $ozonItem = $productIdToOzonItem->get($productInfoPrices->getProductId());
+                if ($ozonItem) {
+                    $ozonItem->update([
+                        'direct_flow_trans' => (float)$productInfoPrices->getCommissions()->get('fbs_direct_flow_trans_max_amount'),
+                        'deliv_to_customer' => (float)$productInfoPrices->getCommissions()->get('fbs_deliv_to_customer_amount'),
+                        'sales_percent' => (int)$productInfoPrices->getCommissions()->get('sales_percent_fbs'),
+                        'price_market' => (int)$productInfoPrices->getPrice()->get('price'),
+                        'price_seller' => (int)$productInfoPrices->getPriceIndexes()->get('ozon_index_data')->get('minimal_price'),
+                    ]);
+                    $updated++;
+                }
+            });
+
+            ItemsImportReportService::flush($this->market, 0, 0, $updated);
+
+        });
+
+        return collect([
+            'correct' => 0,
+            'error' => 0,
+            'updated' => $updated,
+        ]);
 
     }
 
@@ -114,8 +153,6 @@ class OzonMarketService
 
                 }
 
-
-
                 MarketItemRelationshipService::handleFoundItem($ozonItem['offer_id'], $item->code, $this->market->id, 'App\Models\OzonMarket');
 
                 if (OzonItem::where('offer_id', $ozonItem['offer_id'])->where('ozon_market_id', $this->market->id)->exists()) {
@@ -145,6 +182,7 @@ class OzonMarketService
                 });
 
                 $newOzonItem->save();
+
             });
 
             ItemsImportReportService::flush($this->market, $correct, $error, $updated);

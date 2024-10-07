@@ -49,8 +49,15 @@ class SamsonUnloadService
                     /** @var Item $item */
                     foreach ($items as $item) {
 
+                        $item->supplierWarehouseStocks()->updateOrCreate([
+                            'supplier_warehouse_id' => $this->samsonApi->supplier_warehouse_id,
+                            'item_id' => $item->id
+                        ], [
+                            'supplier_warehouse_id' => $this->samsonApi->supplier_warehouse_id,
+                            'stock' => $count
+                        ]);
+
                         $item->price = $price;
-                        $item->count = $count;
                         $item->updated = true;
                         $item->save();
 

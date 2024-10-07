@@ -63,6 +63,7 @@
                                     <flux:icon.trash wire:click="destroy({{ json_encode($email->getKey()) }})"
                                                      wire:loading.remove
                                                      wire:target="destroy({{ json_encode($email->getKey()) }})"
+                                                     wire:confirm="Вы действительно хотите удалить эту почту? Это действие нельзя будет отменить."
                                                      class="cursor-pointer hover:text-red-400"/>
                                     <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($email->getKey()) }})"/>
                                 </flux:cell>

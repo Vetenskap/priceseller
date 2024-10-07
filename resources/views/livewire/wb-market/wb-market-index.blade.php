@@ -60,6 +60,7 @@
                                     <flux:icon.trash wire:click="destroy({{ json_encode($market->getKey()) }})"
                                                      wire:loading.remove
                                                      wire:target="destroy({{ json_encode($market->getKey()) }})"
+                                                     wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены."
                                                      class="cursor-pointer hover:text-red-400"/>
                                     <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($market->getKey()) }})"/>
                                 </flux:cell>

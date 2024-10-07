@@ -16,6 +16,8 @@ class SamsonApiPostForm extends Form
     public $api_key = null;
     #[Validate]
     public $supplier_id = null;
+    #[Validate]
+    public $supplier_warehouse_id = null;
 
     public function rules(): array
     {
@@ -30,6 +32,11 @@ class SamsonApiPostForm extends Form
                 'required',
                 'uuid',
                 'exists:suppliers,id'
+            ],
+            'supplier_warehouse_id' => [
+                'required',
+                'uuid',
+                'exists:supplier_warehouses,id'
             ]
         ];
     }
@@ -40,6 +47,7 @@ class SamsonApiPostForm extends Form
         if ($samsonApi) {
             $this->api_key = $samsonApi->api_key;
             $this->supplier_id = $samsonApi->supplier_id;
+            $this->supplier_warehouse_id = $samsonApi->supplier_warehouse_id;
         }
     }
 

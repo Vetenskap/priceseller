@@ -21,6 +21,7 @@ use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Models\MoyskladBundleMainAttributeLink;
 use Modules\Moysklad\Models\MoyskladItemAdditionalAttributeLink;
 use Modules\Moysklad\Models\MoyskladItemMainAttributeLink;
+use Modules\Moysklad\Models\MoyskladQuarantine;
 use Modules\Moysklad\Models\MoyskladWarehouseWarehouse;
 use Modules\Moysklad\Models\MoyskladWebhook;
 
@@ -476,5 +477,16 @@ class MoyskladService
             return $allOrganizations;
 
         });
+    }
+
+    public function setBuyPriceFromQuarantine(MoyskladQuarantine $item): bool
+    {
+        $productEntity = new Product();
+        $productEntity->setId($item->item->ms_uuid);
+        $productEntity->fetch($this->moysklad->api_key);
+        $productEntity->getBuyPrice()->setValue($item->supplier_buy_price);
+        $status = $productEntity->update($this->moysklad, ['buyPrice']);
+        if ($status) $item->delete();
+        return $status;
     }
 }

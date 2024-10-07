@@ -45,11 +45,6 @@ class VoshodUnloadService
                 $price = $voshodItem->getPrice();
                 $article = $voshodItem->getMog();
                 $brand = $voshodItem->getOemBrand();
-                $count = 0;
-
-                $this->voshodApi->warehouses->each(function (VoshodApiWarehouse $warehouse) use ($voshodItem, &$count) {
-                    $count += $voshodItem->{'get' . Str::apa($warehouse->name)}();
-                });
 
                 $itemService = new ItemPriceService($article, $this->voshodApi->supplier_id);
                 $items = $this->voshodApi->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
@@ -59,8 +54,20 @@ class VoshodUnloadService
                     /** @var Item $item */
                     foreach ($items as $item) {
 
+                        foreach ($this->voshodApi->warehouses as $warehouse) {
+
+                            $stock = $voshodItem->{'get' . Str::apa($warehouse->name)}();
+
+                            $item->supplierWarehouseStocks()->updateOrCreate([
+                                'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
+                                'item_id' => $item->id
+                            ], [
+                                'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
+                                'stock' => $stock
+                            ]);
+                        }
+
                         $item->price = $price;
-                        $item->count = $count;
                         $item->updated = true;
                         $item->save();
 

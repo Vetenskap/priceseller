@@ -12,6 +12,7 @@ use Modules\BergApi\HttpClient\Resources\Offer;
 use Modules\BergApi\HttpClient\Resources\Resource;
 use Modules\BergApi\Models\BergApi;
 use Modules\BergApi\Models\BergApiItemAdditionalAttributeLink;
+use Modules\BergApi\Models\BergApiWarehouse;
 
 class BergUnloadService
 {
@@ -51,17 +52,31 @@ class BergUnloadService
 
                 $itemService = new ItemPriceService($resource->getArticle(), $this->bergApi->supplier_id);
                 $items = $this->bergApi->supplier->use_brand ? $itemService->withBrand($resource->getBrandName())->find() : $itemService->find();
-
-                $count = $resource->getOffers()->where(fn (Offer $offer) => in_array($offer->getWarehouseId(), $this->bergApi->warehouses->pluck('warehouse_id')->toArray()))->sum(fn (Offer $offer) => $offer->getQuantity());
                 $price = $resource->getOffers()->firstWhere(fn (Offer $offer) => in_array($offer->getWarehouseId(), $this->bergApi->warehouses->pluck('warehouse_id')->toArray()))?->getPrice();
 
-                if ($items && $count & $price) {
+                if ($items && $price) {
 
                     /** @var Item $item */
                     foreach ($items as $item) {
 
+                        $this->bergApi->warehouses()->each(function (BergApiWarehouse $warehouse) use ($resource, $item) {
+                            /** @var Offer $offer */
+                            $offer = $resource->getOffers()->firstWhere(fn (Offer $offer) => $offer->getWarehouseId() == $warehouse->warehouse_id);
+
+                            if ($offer) {
+                                $stock = $offer->getQuantity();
+
+                                $item->supplierWarehouseStocks()->updateOrCreate([
+                                    'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
+                                    'item_id' => $item->id
+                                ], [
+                                    'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
+                                    'stock' => $stock
+                                ]);
+                            }
+                        });
+
                         $item->price = $price;
-                        $item->count = $count;
                         $item->updated = true;
                         $item->save();
 
