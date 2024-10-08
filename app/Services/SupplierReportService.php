@@ -18,14 +18,14 @@ class SupplierReportService
         return $supplier->reports()->where('status', 2)->first();
     }
 
-    public static function new(Supplier $supplier, string $path = null): bool
+    public static function new(Supplier $supplier, string $path = null, string $message = null): bool
     {
         if (static::get($supplier)) {
             return false;
         } else {
             $supplier->reports()->create([
                 'status' => 2,
-                'message' => 'Начало выгрузки',
+                'message' => 'Начало выгрузки' . $message ? ': ' . $message : '',
                 'path' => $path
             ]);
 
@@ -68,13 +68,13 @@ class SupplierReportService
         return false;
     }
 
-    public static function success(Supplier $supplier): bool
+    public static function success(Supplier $supplier, string $message = null): bool
     {
         if ($report = static::get($supplier)) {
 
-            static::addLog($supplier, 'Поставщик успешно выгружен');
+            static::addLog($supplier, 'Поставщик успешно выгружен' . $message ? ': ' . $message : '');
 
-            $report->message = 'Поставщик успешно выгружен';
+            $report->message = 'Поставщик успешно выгружен' . $message ? ': ' . $message : '';
             $report->status = 0;
             $report->save();
 
@@ -84,13 +84,13 @@ class SupplierReportService
         return false;
     }
 
-    public static function error(Supplier $supplier): bool
+    public static function error(Supplier $supplier, string $message = null): bool
     {
         if ($report = static::get($supplier)) {
 
-            static::addLog($supplier, 'Ошибка в выгрузке');
+            static::addLog($supplier, 'Ошибка в выгрузке' . $message ? ': ' . $message : '');
 
-            $report->message = 'Ошибка в выгрузке';
+            $report->message = 'Ошибка в выгрузке' . $message ? ': ' . $message : '';
             $report->status = 1;
             $report->save();
 

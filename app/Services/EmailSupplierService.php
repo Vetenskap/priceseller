@@ -133,7 +133,7 @@ class EmailSupplierService
 
                 $itemService->save($item);
 
-                if (!is_null($stock)) {
+                if (!is_null($stock) && $stock >= 0) {
 
                     $stock = $this->prepareStock($stock);
 

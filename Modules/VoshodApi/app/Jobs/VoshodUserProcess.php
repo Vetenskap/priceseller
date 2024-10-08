@@ -32,7 +32,7 @@ class VoshodUserProcess implements ShouldQueue
         if (SupplierReportService::get($this->voshodApi->supplier)) {
             return;
         } else {
-            SupplierReportService::new($this->voshodApi->supplier);
+            SupplierReportService::new($this->voshodApi->supplier, message: 'по АПИ');
         }
 
         $service = new VoshodUnloadService($this->voshodApi);
@@ -41,11 +41,11 @@ class VoshodUserProcess implements ShouldQueue
         $user = $this->voshodApi->user;
         $supplier = $this->voshodApi->supplier;
 
-        MarketsUnload::dispatch($user, $supplier);
+        MarketsUnload::dispatch($user, $supplier, 'по АПИ');
     }
 
     public function failed(\Throwable $th)
     {
-        SupplierReportService::error($this->voshodApi->supplier);
+        SupplierReportService::error($this->voshodApi->supplier, message: 'по АПИ');
     }
 }

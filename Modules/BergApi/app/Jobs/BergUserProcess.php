@@ -36,7 +36,7 @@ class BergUserProcess implements ShouldQueue
         if (SupplierReportService::get($this->bergApi->supplier)) {
             return;
         } else {
-            SupplierReportService::new($this->bergApi->supplier);
+            SupplierReportService::new($this->bergApi->supplier, message: 'по АПИ');
         }
 
         $service = new BergUnloadService($this->bergApi);
@@ -45,12 +45,12 @@ class BergUserProcess implements ShouldQueue
         $user = $this->bergApi->user;
         $supplier = $this->bergApi->supplier;
 
-        MarketsUnload::dispatch($user, $supplier);
+        MarketsUnload::dispatch($user, $supplier, 'по АПИ');
 
     }
 
     public function failed(\Throwable $th)
     {
-        SupplierReportService::error($this->bergApi->supplier);
+        SupplierReportService::error($this->bergApi->supplier, message: 'по АПИ');
     }
 }

@@ -25,7 +25,7 @@ class MarketsUnload implements ShouldQueue, ShouldBeUnique
     /**
      * Create a new job instance.
      */
-    public function __construct(public User $user, public Supplier $supplier)
+    public function __construct(public User $user, public Supplier $supplier, public ?string $message = null)
     {
         //
     }
@@ -83,12 +83,12 @@ class MarketsUnload implements ShouldQueue, ShouldBeUnique
             $service->unloadAllPrices();
         }
 
-        SupplierReportService::success($this->supplier);
+        SupplierReportService::success($this->supplier, message: $this->message);
     }
 
     public function failed(\Throwable $th): void
     {
-        SupplierReportService::error($this->supplier);
+        SupplierReportService::error($this->supplier, message: $this->message);
     }
 
     public function uniqueId(): string

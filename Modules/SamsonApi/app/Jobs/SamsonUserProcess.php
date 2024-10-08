@@ -36,7 +36,7 @@ class SamsonUserProcess implements ShouldQueue
         if (SupplierReportService::get($this->samsonApi->supplier)) {
             return;
         } else {
-            SupplierReportService::new($this->samsonApi->supplier);
+            SupplierReportService::new($this->samsonApi->supplier, message: 'по АПИ');
         }
 
         $service = new SamsonUnloadService($this->samsonApi);
@@ -45,11 +45,11 @@ class SamsonUserProcess implements ShouldQueue
         $user = $this->samsonApi->user;
         $supplier = $this->samsonApi->supplier;
 
-        MarketsUnload::dispatch($user, $supplier);
+        MarketsUnload::dispatch($user, $supplier, 'по АПИ');
     }
 
     public function failed(\Throwable $th)
     {
-        SupplierReportService::error($this->samsonApi->supplier);
+        SupplierReportService::error($this->samsonApi->supplier, message: 'по АПИ');
     }
 }
