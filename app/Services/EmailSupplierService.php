@@ -116,7 +116,7 @@ class EmailSupplierService
 
                     $user = $this->supplier->supplier->user;
                     $moysklad = $user->moysklad;
-                    if (ModuleService::moduleIsEnabled('Moyklad', $user) && $moysklad->enabled_diff_price) {
+                    if (ModuleService::moduleIsEnabled('Moysklad', $user) && $moysklad->enabled_diff_price) {
                         if (($price + ($price / 100 * $moysklad->diff_price)) < $item->buy_price_reserve || ($price - ($price / 100 * $moysklad->diff_price)) > $item->buy_price_reserve) {
                             $moysklad->quarantine()->updateOrCreate([
                                 'item_id' => $item->id

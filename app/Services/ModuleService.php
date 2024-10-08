@@ -27,7 +27,7 @@ class ModuleService
 
     public static function moduleIsVisible(string $name, User $user): bool
     {
-        if (\Module::find($name)->isEnabled() && ($user->isSub() || $user->isAdmin() || App::isLocal())) {
+        if (\Module::find($name)?->isEnabled() && ($user->isSub() || $user->isAdmin() || App::isLocal())) {
             return true;
         }
 
