@@ -9,6 +9,7 @@ use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Illuminate\Support\Collection;
 use LaravelIdea\Helper\Modules\Moysklad\Models\_IH_MoyskladQuarantine_C;
 use Livewire\Attributes\Computed;
 use Livewire\WithFileUploads;
@@ -36,6 +37,17 @@ class MoyskladIndex extends ModuleComponent
             ->with('item')
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();
+    }
+
+    public function unloadQuarantine(): void
+    {
+        $service = new MoyskladService($this->form->moysklad);
+        $this->form->moysklad->quarantine()->chunk(1000, function (Collection $items) use ($service) {
+            $items->each(function (MoyskladQuarantine $quarantine) use ($service) {
+                $service->setBuyPriceFromQuarantine($quarantine);
+            });
+        });
+        \Flux::toast('Все цены установлены');
     }
 
     public function setBuyPriceFromQuarantine($id): void

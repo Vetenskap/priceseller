@@ -25,7 +25,7 @@ class SupplierReportService
         } else {
             $supplier->reports()->create([
                 'status' => 2,
-                'message' => 'Начало выгрузки' . $message ? ': ' . $message : '',
+                'message' => 'Начало выгрузки' . ($message ? ': ' . $message : ''),
                 'path' => $path
             ]);
 
@@ -72,9 +72,9 @@ class SupplierReportService
     {
         if ($report = static::get($supplier)) {
 
-            static::addLog($supplier, 'Поставщик успешно выгружен' . $message ? ': ' . $message : '');
+            static::addLog($supplier, 'Поставщик успешно выгружен' . ($message ? ': ' . $message : ''));
 
-            $report->message = 'Поставщик успешно выгружен' . $message ? ': ' . $message : '';
+            $report->message = 'Поставщик успешно выгружен' . ($message ? ': ' . $message : '');
             $report->status = 0;
             $report->save();
 
@@ -88,9 +88,9 @@ class SupplierReportService
     {
         if ($report = static::get($supplier)) {
 
-            static::addLog($supplier, 'Ошибка в выгрузке' . $message ? ': ' . $message : '');
+            static::addLog($supplier, 'Ошибка в выгрузке' . ($message ? ': ' . $message : ''));
 
-            $report->message = 'Ошибка в выгрузке' . $message ? ': ' . $message : '';
+            $report->message = 'Ошибка в выгрузке' . ($message ? ': ' . $message : '');
             $report->status = 1;
             $report->save();
 

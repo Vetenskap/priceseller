@@ -81,7 +81,10 @@
             </x-blocks.main-block>
             <x-blocks.main-block>
                 <flux:card class="space-y-6">
-                    <flux:heading size="xl">Карантин</flux:heading>
+                    <div class="flex justify-between">
+                        <flux:heading size="xl">Карантин</flux:heading>
+                        <flux:button wire:click="unloadQuarantine">Выгрузить всё</flux:button>
+                    </div>
                     <flux:table :paginate="$this->quarantine">
                         <flux:columns>
                             <flux:column>Товар</flux:column>
@@ -106,9 +109,9 @@
                                         <flux:icon.arrow-up-tray class="cursor-pointer hover:text-gray-800"
                                                                  wire:click="setBuyPriceFromQuarantine({{$item->getKey()}})"
                                                                  wire:loading.remove
-                                                                 wire:target="setBuyPriceFromQuarantine({{$item->getKey()}})"
+                                                                 wire:target="setBuyPriceFromQuarantine({{$item->getKey()}}),unloadQuarantine"
                                         />
-                                        <flux:icon.loading wire:loading wire:target="setBuyPriceFromQuarantine({{$item->getKey()}})"/>
+                                        <flux:icon.loading wire:loading wire:target="setBuyPriceFromQuarantine({{$item->getKey()}}),unloadQuarantine"/>
                                     </flux:cell>
                                 </flux:row>
                             @endforeach
