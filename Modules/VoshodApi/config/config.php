@@ -33,13 +33,5 @@ return [
             'name' => 'count_surgut',
             'label' => 'Склад Сургут'
         ],
-        [
-            'name' => 'count_tmn',
-            'label' => 'Склад Тюмень'
-        ],
-        [
-            'name' => 'count_omsk',
-            'label' => 'Склад Омск'
-        ],
     ],
 ];

@@ -66,13 +66,15 @@ class BergUnloadService
                             if ($offer) {
                                 $stock = $offer->getQuantity();
 
-                                $item->supplierWarehouseStocks()->updateOrCreate([
-                                    'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
-                                    'item_id' => $item->id
-                                ], [
-                                    'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
-                                    'stock' => $stock
-                                ]);
+                                if ($stock >= 0) {
+                                    $item->supplierWarehouseStocks()->updateOrCreate([
+                                        'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
+                                        'item_id' => $item->id
+                                    ], [
+                                        'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
+                                        'stock' => $stock
+                                    ]);
+                                }
                             }
                         });
 

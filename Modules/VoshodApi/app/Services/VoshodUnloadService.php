@@ -56,15 +56,18 @@ class VoshodUnloadService
 
                         foreach ($this->voshodApi->warehouses as $warehouse) {
 
-                            $stock = $voshodItem->{'get' . Str::apa($warehouse->name)}();
+                            $stock = $voshodItem->{Str::camel('get' . Str::apa($warehouse->name))}();
 
-                            $item->supplierWarehouseStocks()->updateOrCreate([
-                                'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
-                                'item_id' => $item->id
-                            ], [
-                                'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
-                                'stock' => $stock
-                            ]);
+                            if ($stock >= 0) {
+                                $item->supplierWarehouseStocks()->updateOrCreate([
+                                    'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
+                                    'item_id' => $item->id
+                                ], [
+                                    'supplier_warehouse_id' => $warehouse->supplier_warehouse_id,
+                                    'stock' => $stock
+                                ]);
+                            }
+
                         }
 
                         $item->price = $price;

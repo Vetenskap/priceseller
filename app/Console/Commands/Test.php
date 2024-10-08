@@ -16,12 +16,15 @@ use App\Models\WbItem;
 use App\Services\OzonItemPriceService;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Str;
 use Modules\EditorContent\Services\EditorContentService;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Models\MoyskladQuarantine;
 use Modules\Moysklad\Services\MoyskladItemOrderService;
 use Modules\Moysklad\Services\MoyskladService;
+use Modules\VoshodApi\Jobs\VoshodUserProcess;
+use Modules\VoshodApi\Models\VoshodApi;
 
 class Test extends Command
 {
@@ -44,11 +47,6 @@ class Test extends Command
      */
     public function handle()
     {
-        $item = Item::find('9cd5c120-59b0-4045-bc5d-3d1490053fdf');
-        $moysklad = Moysklad::find(2);
-        $product = new Product();
-        $product->setId($item->ms_uuid);
-        $product->fetch($moysklad->api_key);
-        dd($product->getBuyPrice()->getValue());
+        dd(Str::camel('getCount_chel_st'));
     }
 }
