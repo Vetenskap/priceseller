@@ -54,11 +54,11 @@
                 <x-blocks.main-block>
                     <flux:card class="space-y-12">
                         <div class="flex gap-6 flex-wrap">
-                            <flux:input wire:model="form.form.coefficient" label="Коэффициент" type="number"/>
-                            <flux:input wire:model="form.form.basic_logistics" label="Базовая цена логистики"
+                            <flux:input wire:model="form.coefficient" label="Коэффициент" type="number"/>
+                            <flux:input wire:model="form.basic_logistics" label="Базовая цена логистики"
                                         type="number"/>
-                            <flux:input wire:model="form.form.price_one_liter" label="Цена за литр" type="number"/>
-                            <flux:input wire:model="form.form.volume" label="Объем (л)" type="number"/>
+                            <flux:input wire:model="form.price_one_liter" label="Цена за литр" type="number"/>
+                            <flux:input wire:model="form.volume" label="Объем (л)" type="number"/>
                         </div>
                     </flux:card>
                 </x-blocks.main-block>
