@@ -496,6 +496,10 @@ class MoyskladService
                 if ($item) {
                     $quarantine = $item->msQuarantine;
                     if ($quarantine) {
+                        $quarantine->item()->update([
+                            'buy_price_reserve' => $quarantine->supplier_buy_price
+                        ]);
+                        $item->buy_price_reserve = $quarantine->supplier_buy_price;
                         $quarantine->delete();
                     }
                 }
@@ -504,13 +508,18 @@ class MoyskladService
         });
     }
 
-    public function setBuyPriceFromQuarantine(MoyskladQuarantine $item): bool
+    public function setBuyPriceFromQuarantine(MoyskladQuarantine $quarantine): bool
     {
         $productEntity = new Product();
-        $productEntity->setId($item->item->ms_uuid);
-        $productEntity->getBuyPrice()->setValue($item->supplier_buy_price);
+        $productEntity->setId($quarantine->item->ms_uuid);
+        $productEntity->getBuyPrice()->setValue($quarantine->supplier_buy_price);
         $status = $productEntity->update($this->moysklad, ['buyPrice']);
-        if ($status) $item->delete();
+        if ($status) {
+            $quarantine->item()->update([
+                'buy_price_reserve' => $quarantine->supplier_buy_price
+            ]);
+            $quarantine->delete();
+        }
         return $status;
     }
 }

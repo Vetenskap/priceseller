@@ -9,11 +9,12 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
+use Livewire\WithPagination;
 
 #[Title('Комплекты')]
 class BundleIndex extends BaseComponent
 {
-    use WithFilters;
+    use WithFilters, WithPagination;
 
     #[Computed]
     public function bundles()
