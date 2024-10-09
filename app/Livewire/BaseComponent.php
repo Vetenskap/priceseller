@@ -16,7 +16,7 @@ class BaseComponent extends Component
     {
         return [
             'echo:notification.' . auth()->user()->id . ',.notify' => 'notification',
-            'echo:report.' . auth()->user()->id . ',.event' => '$refresh'
+//            'echo:report.' . auth()->user()->id . ',.event' => '$refresh'
         ];
     }
 
