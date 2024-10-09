@@ -4,23 +4,32 @@
             <x-links.tab-link href="{{route('moysklad.index', ['page' => 'main'])}}" :active="$page === 'main'">Основное
             </x-links.tab-link>
             @if($form->moysklad)
-                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'warehouses'])}}" :active="$page === 'warehouses'">Склады
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'warehouses'])}}"
+                                  :active="$page === 'warehouses'">Склады
                 </x-links.tab-link>
-                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'items'])}}" :active="$page === 'items'">Товары
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'items'])}}" :active="$page === 'items'">
+                    Товары
                 </x-links.tab-link>
-                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'bundles'])}}" :active="$page === 'bundles'">Комплекты
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'bundles'])}}"
+                                  :active="$page === 'bundles'">Комплекты
                 </x-links.tab-link>
-                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'suppliers'])}}" :active="$page === 'suppliers'">Поставщики
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'suppliers'])}}"
+                                  :active="$page === 'suppliers'">Поставщики
                 </x-links.tab-link>
-                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'organizations'])}}" :active="$page === 'organizations'">Организации
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'organizations'])}}"
+                                  :active="$page === 'organizations'">Организации
                 </x-links.tab-link>
-                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'webhooks'])}}" :active="$page === 'webhooks'">Вебхуки
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'webhooks'])}}"
+                                  :active="$page === 'webhooks'">Вебхуки
                 </x-links.tab-link>
-                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'orders'])}}" :active="$page === 'orders'">Заказы
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'orders'])}}" :active="$page === 'orders'">
+                    Заказы
                 </x-links.tab-link>
-                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'change_warehouse'])}}" :active="$page === 'change_warehouse'">Задача изменения склада
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'change_warehouse'])}}"
+                                  :active="$page === 'change_warehouse'">Задача изменения склада
                 </x-links.tab-link>
-                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'quarantine'])}}" :active="$page === 'quarantine'">Карантин
+                <x-links.tab-link href="{{route('moysklad.index', ['page' => 'quarantine'])}}"
+                                  :active="$page === 'quarantine'">Карантин
                 </x-links.tab-link>
             @endif
         </x-navigate-pages>
@@ -28,13 +37,14 @@
     @if($page === 'main')
         <x-layouts.main-container>
             <x-blocks.main-block>
-                <x-layouts.title name="Основное" />
+                <x-layouts.title name="Основное"/>
             </x-blocks.main-block>
             <x-blocks.main-block>
                 <x-success-button wire:click="store">Сохранить</x-success-button>
             </x-blocks.main-block>
             <x-blocks.main-block>
-                <x-inputs.input-with-label name="api_key" field="form.api_key" type="text">АПИ ключ</x-inputs.input-with-label>
+                <x-inputs.input-with-label name="api_key" field="form.api_key" type="text">АПИ ключ
+                </x-inputs.input-with-label>
             </x-blocks.main-block>
         </x-layouts.main-container>
     @endif
@@ -73,7 +83,7 @@
                 <flux:card class="space-y-6">
                     <div class="flex">
                         <div class="space-y-6">
-                            <flux:switch label="Включить карантин" wire:model="form.enabled_diff_price" />
+                            <flux:switch label="Включить карантин" wire:model="form.enabled_diff_price"/>
                             <flux:input label="Разница между ценами, %" wire:model="form.diff_price"/>
                         </div>
                     </div>
@@ -85,11 +95,26 @@
                         <flux:heading size="xl">Карантин</flux:heading>
                         <flux:button wire:click="unloadQuarantine">Выгрузить всё</flux:button>
                     </div>
+                    <flux:card class="space-y-6">
+                        <flux:heading size="lg">Фильтры</flux:heading>
+                        <div class="flex flex-wrap gap-6">
+                            <flux:input wire:model.live.debounce.2s="filters.price_difference_from" label="Разница в % от"/>
+                            <flux:input wire:model.live.debounce.2s="filters.price_difference_to" label="Разница в % до"/>
+                        </div>
+                    </flux:card>
                     <flux:table :paginate="$this->quarantine">
                         <flux:columns>
                             <flux:column>Товар</flux:column>
-                            <flux:column>Цена поставщика</flux:column>
-                            <flux:column>Ваша цена</flux:column>
+                            <flux:column sortable :sorted="$sortBy === 'supplier_buy_price'" :direction="$sortDirection"
+                                         wire:click="sort('supplier_buy_price')">Цена поставщика
+                            </flux:column>
+                            <flux:column sortable :sorted="$sortBy === 'items.buy_price_reserve'"
+                                         :direction="$sortDirection"
+                                         wire:click="sort('items.buy_price_reserve')">Ваша цена
+                            </flux:column>
+                            <flux:column sortable :sorted="$sortBy === 'price_difference'" :direction="$sortDirection"
+                                         wire:click="sort('price_difference')">Разница в %
+                            </flux:column>
                             <flux:column>Дата создания</flux:column>
                             <flux:column>Дата обновления</flux:column>
                         </flux:columns>
@@ -103,6 +128,7 @@
                                     </flux:cell>
                                     <flux:cell>{{$item->supplier_buy_price}}</flux:cell>
                                     <flux:cell>{{$item->item->buy_price_reserve}}</flux:cell>
+                                    <flux:cell>{{intval($item->price_difference)}}</flux:cell>
                                     <flux:cell>{{$item->created_at}}</flux:cell>
                                     <flux:cell>{{$item->updated_at}}</flux:cell>
                                     <flux:cell>
@@ -111,7 +137,8 @@
                                                                  wire:loading.remove
                                                                  wire:target="setBuyPriceFromQuarantine({{$item->getKey()}}),unloadQuarantine"
                                         />
-                                        <flux:icon.loading wire:loading wire:target="setBuyPriceFromQuarantine({{$item->getKey()}}),unloadQuarantine"/>
+                                        <flux:icon.loading wire:loading
+                                                           wire:target="setBuyPriceFromQuarantine({{$item->getKey()}}),unloadQuarantine"/>
                                     </flux:cell>
                                 </flux:row>
                             @endforeach

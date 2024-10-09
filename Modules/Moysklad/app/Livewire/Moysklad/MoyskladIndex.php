@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\Livewire\Moysklad;
 
 use App\Livewire\ModuleComponent;
+use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Livewire\Traits\WithSort;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -21,7 +22,7 @@ use Modules\Moysklad\Services\MoyskladService;
 
 class MoyskladIndex extends ModuleComponent
 {
-    use WithFileUploads, WithSort, WithPagination;
+    use WithFileUploads, WithSort, WithPagination, WithFilters;
 
     public MoyskladPostForm $form;
 
@@ -34,19 +35,27 @@ class MoyskladIndex extends ModuleComponent
     {
         return $this->form->moysklad
             ->quarantine()
-            ->with('item')
+            ->join('items', 'moysklad_quarantines.item_id', '=', 'items.id') // Присоединяем таблицу items
+            ->selectRaw('moysklad_quarantines.*, items.buy_price_reserve,
+            ((items.buy_price_reserve - moysklad_quarantines.supplier_buy_price)
+            / ((items.buy_price_reserve + moysklad_quarantines.supplier_buy_price) / 2) * 100) AS price_difference')
+            ->filters()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();
     }
 
     public function unloadQuarantine(): void
     {
+        $query = $this->form->moysklad
+            ->quarantine()
+            ->join('items', 'moysklad_quarantines.item_id', '=', 'items.id') // Присоединяем таблицу items
+            ->selectRaw('moysklad_quarantines.*, items.buy_price_reserve,
+            ((items.buy_price_reserve - moysklad_quarantines.supplier_buy_price)
+            / ((items.buy_price_reserve + moysklad_quarantines.supplier_buy_price) / 2) * 100) AS price_difference')
+            ->filters($this->filters['price_difference_from'] ?? null, $this->filters['price_difference_to'] ?? null);
+
         $service = new MoyskladService($this->form->moysklad);
-        $this->form->moysklad->quarantine()->chunk(1000, function (Collection $items) use ($service) {
-            $items->each(function (MoyskladQuarantine $quarantine) use ($service) {
-                $service->setBuyPriceFromQuarantine($quarantine);
-            });
-        });
+        $service->setBuyPriceAllQuarantine($query);
         \Flux::toast('Все цены установлены');
     }
 

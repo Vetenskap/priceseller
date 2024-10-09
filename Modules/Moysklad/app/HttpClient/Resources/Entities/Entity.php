@@ -46,4 +46,10 @@ abstract class Entity
         $client = new MoyskladClient($apiKey);
         return $client->put(static::ENDPOINT . $this->id, $data);
     }
+
+    public static function post(string $apiKey, array $data): Collection
+    {
+        $client = new MoyskladClient($apiKey);
+        return $client->post(static::ENDPOINT, $data);
+    }
 }

@@ -116,6 +116,8 @@ class Product extends Entity
 
             $this->set($product);
 
+        } else {
+            $this->buyPrice = new BuyPrice();
         }
     }
 
@@ -249,6 +251,33 @@ class Product extends Entity
         }
 
         return false;
+    }
+
+    public function getField(): array
+    {
+        return [
+            "meta" => [
+                "href" => "https://api.moysklad.ru/api/remap/1.2/entity/product/{$this->id}",
+                "metadataHref" => "https://api.moysklad.ru/api/remap/1.2/entity/product/metadata",
+                "type" => "product",
+                "mediaType" => "application/json"
+            ],
+        ];
+    }
+
+    public static function updateMassive(Moysklad $moysklad, array $data): Collection
+    {
+        return static::post($moysklad->api_key, $data);
+
+    }
+
+    public function arrayToMassive(array $fields = []): array
+    {
+        if (in_array('buyPrice', $fields)) {
+            return array_merge($this->getField(), $this->buyPrice->getFieldProduct());
+        }
+
+        return [];
     }
 
     public function getAccountId(): string
@@ -445,7 +474,6 @@ class Product extends Entity
     {
         return $this->packs;
     }
-
 
 
 }

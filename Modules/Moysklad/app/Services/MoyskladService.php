@@ -4,11 +4,10 @@ namespace Modules\Moysklad\Services;
 
 use App\Models\Item;
 use App\Services\Item\ItemService;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
-use Modules\Moysklad\HttpClient\MoyskladClient;
-use Modules\Moysklad\HttpClient\MoyskladClientActions;
 use Modules\Moysklad\HttpClient\Resources\Entities\Bundle\Bundle;
 use Modules\Moysklad\HttpClient\Resources\Entities\Bundle\MetaArrays\Component;
 use Modules\Moysklad\HttpClient\Resources\Entities\Counterparty;
@@ -22,8 +21,6 @@ use Modules\Moysklad\Models\MoyskladBundleMainAttributeLink;
 use Modules\Moysklad\Models\MoyskladItemAdditionalAttributeLink;
 use Modules\Moysklad\Models\MoyskladItemMainAttributeLink;
 use Modules\Moysklad\Models\MoyskladQuarantine;
-use Modules\Moysklad\Models\MoyskladWarehouseWarehouse;
-use Modules\Moysklad\Models\MoyskladWebhook;
 
 class MoyskladService
 {
@@ -479,11 +476,38 @@ class MoyskladService
         });
     }
 
+    public function setBuyPriceAllQuarantine(HasMany $query): void
+    {
+        $query->chunk(1000, function (Collection $items) {
+
+            $updateMassive = [];
+
+            $items->each(function (MoyskladQuarantine $item) use (&$updateMassive) {
+                $productEntity = new Product();
+                $productEntity->setId($item->item->ms_uuid);
+                $productEntity->getBuyPrice()->setValue($item->supplier_buy_price);
+                $updateMassive[] = $productEntity->arrayToMassive(['buyPrice']);
+            });
+
+            $result = Product::updateMassive($this->moysklad, $updateMassive)->toCollectionSpread();
+
+            $result->each(function (Collection $item) {
+                $item = Item::where('ms_uuid', $item->get('id'))->first();
+                if ($item) {
+                    $quarantine = $item->msQuarantine;
+                    if ($quarantine) {
+                        $quarantine->delete();
+                    }
+                }
+            });
+
+        });
+    }
+
     public function setBuyPriceFromQuarantine(MoyskladQuarantine $item): bool
     {
         $productEntity = new Product();
         $productEntity->setId($item->item->ms_uuid);
-        $productEntity->fetch($this->moysklad->api_key);
         $productEntity->getBuyPrice()->setValue($item->supplier_buy_price);
         $status = $productEntity->update($this->moysklad, ['buyPrice']);
         if ($status) $item->delete();

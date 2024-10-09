@@ -9,9 +9,11 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Modules\Moysklad\Models\MoyskladItemOrder;
+use Modules\Moysklad\Models\MoyskladQuarantine;
 
 class Item extends MainModel
 {
@@ -138,5 +140,10 @@ class Item extends MainModel
     public function supplierWarehouseStocks(): HasMany
     {
         return $this->hasMany(ItemSupplierWarehouseStock::class);
+    }
+
+    public function msQuarantine(): HasOne
+    {
+        return $this->hasOne(MoyskladQuarantine::class, 'item_id', 'id');
     }
 }
