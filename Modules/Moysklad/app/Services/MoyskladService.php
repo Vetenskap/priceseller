@@ -345,7 +345,7 @@ class MoyskladService
         $bundle->getComponents()->each(function (Component $component) use ($userBundle) {
 
             /** @var BundleItem $bundleItem */
-            if ($bundleItem = $userBundle->items()->where('ms_uuid', $component->getAssortment())->first()?->pivot) {
+            if ($bundleItem = $userBundle->items()->where('ms_uuid', $component->getAssortment()?->id)->first()?->pivot) {
 
                 $bundleItem->update([
                     'multiplicity' => $component->getQuantity(),
