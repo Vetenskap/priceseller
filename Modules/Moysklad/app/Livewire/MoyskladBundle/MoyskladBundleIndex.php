@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Modules\Moysklad\Jobs\MoyskladBundlesApiImport;
 use Modules\Moysklad\Models\Moysklad;
+use Modules\Moysklad\Models\MoyskladBundleMainAttributeLink;
 
 class MoyskladBundleIndex extends BaseComponent
 {
@@ -22,6 +23,7 @@ class MoyskladBundleIndex extends BaseComponent
 
         if ($status) MoyskladBundlesApiImport::dispatch($this->moysklad);
     }
+
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {

@@ -2,6 +2,7 @@
 
 namespace Modules\Moysklad\Services;
 
+use App\Models\BundleItem;
 use App\Models\Item;
 use App\Services\Item\ItemService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -343,23 +344,18 @@ class MoyskladService
 
         $bundle->getComponents()->each(function (Component $component) use ($userBundle) {
 
-            $supplierBundle = $userBundle->items()->first()?->supplier;
+            /** @var BundleItem $bundleItem */
+            if ($bundleItem = $userBundle->items()->where('ms_uuid', $component->getAssortment())->first()?->pivot) {
 
-            if ($item = $this->moysklad->user->items()->where('ms_uuid', $component->getAssortment()->id)->first()) {
-
-                if ($supplierBundle && $supplierBundle->id !== $item->supplier->id) {
-                    // TODO: supplier bundle moysklad
-                    return;
-                }
-
-                $userBundle->items()->attach($item->id, [
+                $bundleItem->update([
                     'multiplicity' => $component->getQuantity(),
-                    'created_at' => now(),
-                    'updated_at' => now()
                 ]);
+
             } else {
-                $component->getAssortment()->fetch($this->moysklad->api_key);
-                if ($item = $this->createItemFromProduct($component->getAssortment())) {
+
+                $supplierBundle = $userBundle->items()->first()?->supplier;
+
+                if ($item = $this->moysklad->user->items()->where('ms_uuid', $component->getAssortment()->id)->first()) {
 
                     if ($supplierBundle && $supplierBundle->id !== $item->supplier->id) {
                         // TODO: supplier bundle moysklad
@@ -371,8 +367,27 @@ class MoyskladService
                         'created_at' => now(),
                         'updated_at' => now()
                     ]);
+                } else {
+
+                    $component->getAssortment()->fetch($this->moysklad->api_key);
+
+                    if ($item = $this->createItemFromProduct($component->getAssortment())) {
+
+                        if ($supplierBundle && $supplierBundle->id !== $item->supplier->id) {
+                            // TODO: supplier bundle moysklad
+                            return;
+                        }
+
+                        $userBundle->items()->attach($item->id, [
+                            'multiplicity' => $component->getQuantity(),
+                            'created_at' => now(),
+                            'updated_at' => now()
+                        ]);
+                    }
                 }
+
             }
+
         });
     }
 

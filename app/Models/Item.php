@@ -124,7 +124,7 @@ class Item extends MainModel
 
     public function bundles(): BelongsToMany
     {
-        return $this->belongsToMany(Bundle::class, 'bundle_items')->withPivot('multiplicity');
+        return $this->belongsToMany(Bundle::class, 'bundle_items')->withPivot(['multiplicity', 'id']);
     }
 
     public function ozonItems()

@@ -1,64 +1,88 @@
 <div>
-    <x-layouts.main-container>
-        <x-blocks.main-block>
-            <x-layouts.title name="Атрибуты"/>
-            <x-titles.sub-title name="Привязка дополнительных атрибутов"/>
-        </x-blocks.main-block>
-        <div x-data="{ open: false }">
-            <x-blocks.main-block>
-                <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-            </x-blocks.main-block>
-            <div x-show="open">
-                <x-blocks.flex-block>
-                    <x-dropdowns.dropdown-select name="item_attribute_id"
-                                                 :items="auth()->user()->itemAttributes"
-                                                 field="form.item_attribute_id"
-                                                 :current-id="$form->item_attribute_id"
-                                                 :current-items="$moysklad->itemAdditionalAttributeLinks"
-                                                 current-items-option-value="item_attribute_id"
-                    >Атрибут priceseller
-                    </x-dropdowns.dropdown-select>
-                    <x-dropdowns.dropdown-select name="link"
-                                                 :items="$assortmentAttributes"
-                                                 option-name="label"
-                                                 option-value="name"
-                                                 field="form.link"
-                                                 :current-id="$form->link"
-                    >Атрибут Мой склад
-                    </x-dropdowns.dropdown-select>
-                    <x-dropdown-select name="user_type" field="form.user_type"
-                                       :options="config('app.attributes_types')" option-name="label" value="name">Тип
-                    </x-dropdown-select>
-                    @if($form->user_type === 'boolean')
-                        <x-blocks.flex-block>
-                            <x-inputs.switcher :checked="$form->invert" wire:model="form.invert"/>
-                            <x-layouts.simple-text name="Инвертировать" />
-                        </x-blocks.flex-block>
-                    @endif
-                </x-blocks.flex-block>
-                <x-blocks.main-block>
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </x-blocks.main-block>
-            </div>
+    <flux:modal name="create-moysklad-item-additional-attribute-link" class="md:w-96 space-y-6">
+        <div>
+            <flux:heading size="lg">Привязка дополнительного атрибута</flux:heading>
         </div>
-    </x-layouts.main-container>
-    <x-layouts.main-container>
-        <x-blocks.main-block>
-            <x-layouts.title name="Все атрибуты"/>
-            <x-titles.sub-title name="Дополнительные" />
-        </x-blocks.main-block>
-        @if($moysklad->itemAdditionalAttributeLinks->isNotEmpty())
-            <x-blocks.main-block>
-                <x-success-button wire:click="update">Сохранить</x-success-button>
-            </x-blocks.main-block>
-            @foreach($moysklad->itemAdditionalAttributeLinks as $attribute)
-                <livewire:moysklad::moysklad-item-additional-attribute-link.moysklad-item-additional-attribute-link-edit
-                    :moysklad="$moysklad" wire:key="{{$attribute->id}}" :moysklad-item-link="$attribute"/>
+
+        <flux:select variant="listbox" searchable placeholder="Выберите атрибут..." label="Дополнительный атрибут" wire:model="form.item_attribute_id">
+            <x-slot name="search">
+                <flux:select.search placeholder="Search..." />
+            </x-slot>
+
+            @foreach(auth()->user()->itemAttributes as $attribute)
+                <flux:option :value="$attribute->id">{{$attribute->name}}</flux:option>
             @endforeach
-        @else
-            <x-blocks.main-block>
-                <x-information>Вы пока ещё не добавляли атрибуты</x-information>
-            </x-blocks.main-block>
+        </flux:select>
+
+        <flux:select variant="listbox" searchable placeholder="Выберите атрибут..." label="Атрибут мой склад" wire:model="form.link">
+            <x-slot name="search">
+                <flux:select.search placeholder="Search..." />
+            </x-slot>
+
+            @foreach($assortmentAttributes as $assortmentAttribute)
+                <flux:option :value="$assortmentAttribute['name']">{{$assortmentAttribute['label']}}</flux:option>
+            @endforeach
+        </flux:select>
+
+        <flux:select wire:model.live="form.user_type" placeholder="Выберите тип..." label="Тип">
+            @foreach(config('app.attributes_types') as $type)
+                <flux:option :value="$type['name']">{{$type['label']}}</flux:option>
+            @endforeach
+        </flux:select>
+
+        @if($form->user_type === 'boolean')
+            <flux:switch wire:model="form.invert" label="Инвертировать"/>
         @endif
-    </x-layouts.main-container>
+
+        <div class="flex">
+            <flux:spacer/>
+
+            <flux:button variant="primary" wire:click="store">Создать</flux:button>
+        </div>
+    </flux:modal>
+
+    <x-blocks.main-block>
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Дополнительные атрибуты</flux:heading>
+            <flux:subheading>Привязка дополнительных атрибутов</flux:subheading>
+            <div>
+                <flux:modal.trigger name="create-moysklad-item-additional-attribute-link">
+                    <flux:button>Добавить</flux:button>
+                </flux:modal.trigger>
+            </div>
+            <flux:card class="space-y-6">
+                <flux:heading size="xl">Список</flux:heading>
+                @if($moysklad->itemAdditionalAttributeLinks->isNotEmpty())
+                    <flux:table>
+                        <flux:columns>
+                            <flux:column>Дополнительный атрибут</flux:column>
+                            <flux:column>Атрибут мой склад</flux:column>
+                            <flux:column>Тип</flux:column>
+                            <flux:column>Инвертировать</flux:column>
+                        </flux:columns>
+                        <flux:rows>
+                            @foreach($moysklad->itemAdditionalAttributeLinks as $itemAdditionalAttributeLink)
+                                <flux:row :key="$itemAdditionalAttributeLink->getKey()">
+                                    <flux:cell>{{$itemAdditionalAttributeLink->itemAttribute->name}}</flux:cell>
+                                    <flux:cell>{{collect($assortmentAttributes)->firstWhere('name', $itemAdditionalAttributeLink->link)['label']}}</flux:cell>
+                                    <flux:cell>{{collect(config('app.attributes_types'))->firstWhere('name', $itemAdditionalAttributeLink->user_type)['label']}}</flux:cell>
+                                    <flux:cell>
+                                        <flux:switch :checked="boolval($itemAdditionalAttributeLink->invert)" disabled/>
+                                    </flux:cell>
+                                    <flux:cell align="right">
+                                        <flux:icon.trash wire:click="destroy({{ json_encode($itemAdditionalAttributeLink->getKey()) }})"
+                                                         wire:loading.remove
+                                                         wire:target="destroy({{ json_encode($itemAdditionalAttributeLink->getKey()) }})"
+                                                         class="cursor-pointer hover:text-red-400"/>
+                                        <flux:icon.loading wire:loading
+                                                           wire:target="destroy({{ json_encode($itemAdditionalAttributeLink->getKey()) }})"/>
+                                    </flux:cell>
+                                </flux:row>
+                            @endforeach
+                        </flux:rows>
+                    </flux:table>
+                @endif
+            </flux:card>
+        </flux:card>
+    </x-blocks.main-block>
 </div>

@@ -1,53 +1,42 @@
 <div>
     <livewire:moysklad::moysklad-item-main-attribute-link.moysklad-item-main-attribute-link-index :moysklad="$moysklad"/>
     <livewire:moysklad::moysklad-item-additional-attribute-link.moysklad-item-additional-attribute-link-index :moysklad="$moysklad"/>
-    <x-layouts.main-container>
-        <x-blocks.main-block>
-            <x-layouts.title name="Выгрузка товаров с Моего склада" />
-        </x-blocks.main-block>
-        <x-blocks.main-block>
-            <x-success-button wire:click="importApi">Выгрузить по АПИ</x-success-button>
-        </x-blocks.main-block>
-    </x-layouts.main-container>
-    <x-layouts.main-container>
-        <x-blocks.main-block>
-            <x-layouts.title name="Вебхуки" />
-        </x-blocks.main-block>
-        <x-blocks.main-block>
-            <x-titles.sub-title name="Вебхук на создание товара"/>
-        </x-blocks.main-block>
-        <x-blocks.main-block>
-            @if($webhook = $moysklad->webhooks()->where(['action' => 'CREATE', 'type' => 'product'])->first())
-                <x-information>Дата создания: {{$webhook->created_at}}</x-information>
-                <x-danger-button wire:click="deleteWebhook({{$webhook}})">Удалить</x-danger-button>
-            @else
-                <x-success-button wire:click="addCreateWebhook">Добавить</x-success-button>
-            @endif
-        </x-blocks.main-block>
-        <x-blocks.main-block>
-            <x-titles.sub-title name="Вебхук на изменение товара"/>
-        </x-blocks.main-block>
-        <x-blocks.main-block>
-            @if($webhook = $moysklad->webhooks()->where(['action' => 'UPDATE', 'type' => 'product'])->first())
-                <x-information>Дата создания: {{$webhook->created_at}}</x-information>
-                <x-danger-button wire:click="deleteWebhook({{$webhook}})">Удалить</x-danger-button>
-            @else
-                <x-success-button wire:click="addUpdateWebhook">Добавить</x-success-button>
-            @endif
-        </x-blocks.main-block>
-        <x-blocks.main-block>
-            <x-titles.sub-title name="Вебхук на удаление товара"/>
-        </x-blocks.main-block>
-        <x-blocks.main-block>
-            @if($webhook = $moysklad->webhooks()->where(['action' => 'DELETE', 'type' => 'product'])->first())
-                <x-information>Дата создания: {{$webhook->created_at}}</x-information>
-                <x-danger-button wire:click="deleteWebhook({{$webhook}})">Удалить</x-danger-button>
-            @else
-                <x-success-button wire:click="addDeleteWebhook">Добавить</x-success-button>
-            @endif
-        </x-blocks.main-block>
-        <div wire:loading wire:target="import, deleteWebhook, addUpdateWebhook, addCreateWebhook, importApi, addDeleteWebhook">
-            <x-loader/>
-        </div>
-    </x-layouts.main-container>
+    <x-blocks.main-block>
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Выгрузка товаров с Моего склада</flux:heading>
+            <flux:button wire:click="importApi">Выгрузить по АПИ</flux:button>
+        </flux:card>
+    </x-blocks.main-block>
+    <x-blocks.main-block>
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Вебхуки</flux:heading>
+            <flux:card class="space-y-6">
+                <flux:heading size="lg">Вебхук на создание товара</flux:heading>
+                @if($webhook = $moysklad->webhooks()->where(['action' => 'CREATE', 'type' => 'product'])->first())
+                    <flux:subheading>Дата создания: {{$webhook->created_at}}</flux:subheading>
+                    <flux:button wire:click="deleteWebhook({{$webhook}})">Удалить</flux:button>
+                @else
+                    <flux:button wire:click="addCreateWebhook">Добавить</flux:button>
+                @endif
+            </flux:card>
+            <flux:card class="space-y-6">
+                <flux:heading size="lg">Вебхук на изменение товара</flux:heading>
+                @if($webhook = $moysklad->webhooks()->where(['action' => 'UPDATE', 'type' => 'product'])->first())
+                    <flux:subheading>Дата создания: {{$webhook->created_at}}</flux:subheading>
+                    <flux:button variant="danger" wire:click="deleteWebhook({{$webhook}})">Удалить</flux:button>
+                @else
+                    <flux:button wire:click="addUpdateWebhook">Добавить</flux:button>
+                @endif
+            </flux:card>
+            <flux:card class="space-y-6">
+                <flux:heading size="lg">Вебхук на удаление товара</flux:heading>
+                @if($webhook = $moysklad->webhooks()->where(['action' => 'DELETE', 'type' => 'product'])->first())
+                    <flux:subheading>Дата создания: {{$webhook->created_at}}</flux:subheading>
+                    <flux:button variant="danger" wire:click="deleteWebhook({{$webhook}})">Удалить</flux:button>
+                @else
+                    <flux:button wire:click="addDeleteWebhook">Добавить</flux:button>
+                @endif
+            </flux:card>
+        </flux:card>
+    </x-blocks.main-block>
 </div>

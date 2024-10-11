@@ -10,6 +10,7 @@ use Livewire\Attributes\On;
 use Livewire\Component;
 use Modules\Moysklad\Livewire\Forms\MoyskladItemAdditionalAttributeLink\MoyskladItemAdditionalAttributeLinkPostForm;
 use Modules\Moysklad\Models\Moysklad;
+use Modules\Moysklad\Models\MoyskladItemAdditionalAttributeLink;
 use Modules\Moysklad\Services\MoyskladService;
 
 class MoyskladItemAdditionalAttributeLinkIndex extends Component
@@ -20,7 +21,6 @@ class MoyskladItemAdditionalAttributeLinkIndex extends Component
     public Moysklad $moysklad;
     public $assortmentAttributes;
 
-    #[On('delete-link')]
     public function mount(): void
     {
         $this->form->setMoysklad($this->moysklad);
@@ -31,12 +31,18 @@ class MoyskladItemAdditionalAttributeLinkIndex extends Component
     public function store(): void
     {
         $this->form->store();
+
+        \Flux::modal('create-moysklad-item-additional-attribute-link')->close();
     }
 
-    public function update(): void
+    public function destroy($id): void
     {
-        $this->dispatch('update-link')->component(MoyskladItemAdditionalAttributeLinkEdit::class);
-        $this->addSuccessSaveNotification();
+        $link = MoyskladItemAdditionalAttributeLink::find($id);
+
+        // TODO: add authorize delete
+//        $this->authorize('delete', $link);
+
+        $link->delete();
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BundleItem extends Model
 {
@@ -11,4 +12,9 @@ class BundleItem extends Model
         'item_id',
         'multiplicity'
     ];
+
+    public function item(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'item_id', 'id');
+    }
 }

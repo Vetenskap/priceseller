@@ -47,6 +47,8 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(Str::camel('getCount_chel_st'));
+        $bundle = Bundle::find('9d078d27-2ae4-43ae-8c8c-75716d9bc91c');
+
+        dd($bundle->items()->where('ms_uuid', 'ec499525-8dc1-11ec-0a80-08a5003abf32')->first()->pivot);
     }
 }

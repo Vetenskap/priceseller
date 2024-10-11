@@ -1,67 +1,95 @@
 <div>
-    <x-layouts.main-container>
-        <x-blocks.main-block>
-            <x-layouts.title name="Добавление нового склада" />
-            <x-information>
-                Вы можете привязать свои склады с Моего Склада к своим существующим.
-            </x-information>
-        </x-blocks.main-block>
-        <div x-data="{ open: false }">
-            <x-blocks.main-block>
-                <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-            </x-blocks.main-block>
-            <div x-show="open">
-                <x-blocks.flex-block>
-                    <x-dropdowns.dropdown-select name="warehouse_id"
-                                                 :items="auth()->user()->warehouses"
-                                                 :current-id="$form->warehouse_id"
-                                                 field="form.warehouse_id"
-                    >
-                        Ваши склады (priceseller)
-                    </x-dropdowns.dropdown-select>
-                    <x-dropdowns.dropdown-select name="moysklad_warehouse_id"
-                                                 :items="$moyskladWarehouses"
-                                                 :current-id="$form->moysklad_warehouse_uuid"
-                                                 field="form.moysklad_warehouse_uuid"
-                    >
-                        Ваши склады (Мой склад)
-                    </x-dropdowns.dropdown-select>
-                </x-blocks.flex-block>
-                <x-blocks.main-block>
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </x-blocks.main-block>
-            </div>
+    <flux:modal name="create-moysklad-warehouse" class="md:w-96 space-y-6">
+        <div>
+            <flux:heading size="lg">Добавление склада</flux:heading>
         </div>
-    </x-layouts.main-container>
-    @if($moysklad->warehouses->isNotEmpty())
-        <x-layouts.main-container>
-            <x-blocks.main-block>
-                <x-layouts.title name="Список" />
-            </x-blocks.main-block>
-            <x-blocks.main-block>
-                <x-success-button wire:click="update">Сохранить</x-success-button>
-            </x-blocks.main-block>
-            @foreach($moysklad->warehouses as $warehouse)
-                <livewire:moysklad::moysklad-warehouse.moysklad-warehouse-edit :warehouse="$warehouse"
-                                                                               wire:key="{{$warehouse->id}}"
-                                                                               :moysklad="$moysklad"/>
+
+        <flux:select variant="listbox" searchable placeholder="Выберите склад..." label="Ваши склады (priceseller)"
+                     wire:model="form.warehouse_id">
+            <x-slot name="search">
+                <flux:select.search placeholder="Поиск..."/>
+            </x-slot>
+
+            @foreach(auth()->user()->warehouses as $warehouse)
+                <flux:option :value="$warehouse->getKey()">{{$warehouse->name}}</flux:option>
             @endforeach
-        </x-layouts.main-container>
-    @endif
-    <x-layouts.main-container>
-        <x-blocks.main-block>
-            <x-layouts.title name="Вебхук"/>
-        </x-blocks.main-block>
-        <x-blocks.main-block>
-            @if($webhook = $moysklad->webhooks()->where(['action' => 'UPDATE', 'type' => 'warehouses'])->first())
-                <x-information>Дата создания: {{$webhook->created_at}}</x-information>
-                <x-danger-button wire:click="deleteWebhook">Удалить</x-danger-button>
-            @else
-                <x-success-button wire:click="addWebhook">Добавить</x-success-button>
+        </flux:select>
+
+        <flux:select variant="listbox" searchable placeholder="Выберите склад..." label="Ваши склады (Мой склад)"
+                     wire:model="form.moysklad_warehouse_uuid">
+            <x-slot name="search">
+                <flux:select.search placeholder="Поиск..."/>
+            </x-slot>
+
+            @foreach($moyskladWarehouses as $warehouse)
+                <flux:option :value="$warehouse['id']">{{$warehouse['name']}}</flux:option>
+            @endforeach
+        </flux:select>
+
+        <div class="flex">
+            <flux:spacer/>
+
+            <flux:button variant="primary" wire:click="store">Создать</flux:button>
+        </div>
+    </flux:modal>
+
+    <x-blocks.main-block>
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Добавление нового склада</flux:heading>
+            <flux:subheading>Вы можете привязать свои склады с Моего Склада к своим существующим.</flux:subheading>
+            <div>
+                <flux:modal.trigger name="create-moysklad-warehouse">
+                    <flux:button>Добавить</flux:button>
+                </flux:modal.trigger>
+            </div>
+        </flux:card>
+    </x-blocks.main-block>
+    <x-blocks.main-block>
+
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Список</flux:heading>
+            @if($this->warehouses->isNotEmpty())
+                <flux:table :paginate="$this->warehouses">
+                    <flux:columns>
+                        <flux:column>Склад priceseller</flux:column>
+                        <flux:column>Склад мой склад</flux:column>
+                    </flux:columns>
+                    <flux:rows>
+                        @foreach($this->warehouses as $warehouse)
+                            <flux:row :key="$warehouse->getKey()">
+                                <flux:cell>{{collect($moyskladWarehouses)->firstWhere('id', $warehouse->moysklad_warehouse_uuid)['name']}}</flux:cell>
+                                <flux:cell>{{$warehouse->warehouse->name}}</flux:cell>
+                                <flux:cell align="right">
+                                    <flux:icon.trash wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                     wire:loading.remove
+                                                     wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                     class="cursor-pointer hover:text-red-400"/>
+                                    <flux:icon.loading wire:loading
+                                                       wire:target="destroy({{ json_encode($warehouse->getKey()) }})"/>
+                                </flux:cell>
+                                <flux:cell align="right">
+                                    <flux:tooltip content="Выгрузить все остатки">
+                                        <flux:button icon="arrow-up-tray"
+                                                     wire:click="updateStocks({{ json_encode($warehouse->getKey()) }})"/>
+                                    </flux:tooltip>
+                                </flux:cell>
+                            </flux:row>
+                        @endforeach
+                    </flux:rows>
+                </flux:table>
             @endif
-        </x-blocks.main-block>
-    </x-layouts.main-container>
-    <div wire:loading wire:target="deleteWebhook, addWebhook">
-        <x-loader/>
-    </div>
+        </flux:card>
+    </x-blocks.main-block>
+    <x-blocks.main-block>
+
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Вебхук</flux:heading>
+            @if($webhook = $moysklad->webhooks()->where(['action' => 'UPDATE', 'type' => 'warehouses'])->first())
+                <flux:subheading>Дата создания: {{$webhook->created_at}}</flux:subheading>
+                <flux:button variant="danger" wire:click="deleteWebhook">Удалить</flux:button>
+            @else
+                <flux:button wire:click="addWebhook">Добавить</flux:button>
+            @endif
+        </flux:card>
+    </x-blocks.main-block>
 </div>
