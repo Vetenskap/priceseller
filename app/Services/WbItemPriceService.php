@@ -34,7 +34,8 @@ class WbItemPriceService
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт цен");
 
-        WbItem::query()
+        $this->market
+            ->items()
             ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
                 if ($type === Item::class) {
                     $query
@@ -65,9 +66,9 @@ class WbItemPriceService
 
     public function updatePriceTest(): void
     {
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт цен");
 
-        WbItem::query()
+        $this->market
+            ->items()
             ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
                 if ($type === Item::class) {
                     $query
@@ -152,7 +153,8 @@ class WbItemPriceService
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт остатков");
 
-        WbItem::query()
+        $this->market
+            ->items()
             ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
                 if ($type === Item::class) {
                     $query
@@ -376,7 +378,8 @@ class WbItemPriceService
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: выгрузка цен в кабинет");
 
-        WbItem::query()
+        $this->market
+            ->items()
             ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
                 if ($type === Item::class) {
                     $query

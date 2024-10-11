@@ -13,7 +13,9 @@ use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbItem;
+use App\Models\WbMarket;
 use App\Services\OzonItemPriceService;
+use App\Services\WbItemPriceService;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Str;
@@ -47,8 +49,37 @@ class Test extends Command
      */
     public function handle()
     {
-        $bundle = Bundle::find('9d078d27-2ae4-43ae-8c8c-75716d9bc91c');
+        $user = User::find(10);
+        $supplier = Supplier::find('9cd53316-34f9-4197-906b-19f6f426fac6');
 
-        dd($bundle->items()->where('ms_uuid', 'ec499525-8dc1-11ec-0a80-08a5003abf32')->first()->pivot);
+        $wbItems = WbItem::query()
+            ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) use ($supplier, $user) {
+                if ($type === Item::class) {
+                    $query
+                        ->where('supplier_id', $supplier->id)
+                        ->when(!$user->baseSettings()->exists() || !$user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                            $query->where('updated', true);
+                        });
+                } elseif ($type === Bundle::class) {
+                    $query
+                        ->whereHas('items', function (Builder $query) use ($supplier, $user) {
+                            $query->where('supplier_id', $supplier->id);
+                        })
+                        ->whereDoesntHave('items', function (Builder $query) use ($user) {
+                            $query
+                                ->when(!$user->baseSettings()->exists() || !$user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                                    $query->where('updated', false);
+                                });
+                        });
+                }
+            })->get();
+        dd($wbItems);
+//        $supplier = Supplier::find('9cd53316-34f9-4197-906b-19f6f426fac6');
+//        $wbItem = WbItem::find('00671b8c-c7f4-45a9-a88a-28e6cadeb44c');
+//        $market = WbMarket::find('9d31b409-0bbf-4ac6-a353-289d2e71df11');
+//        dd($wbItem->wbitemable->items->first());
+//        $service = new WbItemPriceService($supplier, $market);
+//        $wbItem = $service->recountPriceWbItem($wbItem);
+//        $wbItem->save();
     }
 }
