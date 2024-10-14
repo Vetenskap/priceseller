@@ -95,10 +95,7 @@ class WbItemPriceService
 
         WbItem::query()
             ->whereHas('item', function (Builder $query) {
-                $query
-                    ->where('updated', true)
-                    ->where('unload_wb', true)
-                    ->where('supplier_id', $this->supplier->id);
+                $query->where('supplier_id', $this->supplier->id);
             })
             ->chunk(1000, function ($items) {
                 $items->each(function (WbItem $wbItem) {
