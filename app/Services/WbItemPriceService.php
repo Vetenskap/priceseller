@@ -36,31 +36,40 @@ class WbItemPriceService
 
         $this->market
             ->items()
-            ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
-                if ($type === Item::class) {
-                    $query
-                        ->where('supplier_id', $this->supplier->id)
-                        ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                            $query->where('updated', true);
-                        });
-                } elseif ($type === Bundle::class) {
-                    $query
-                        ->whereHas('items', function (Builder $query) {
-                            $query->where('supplier_id', $this->supplier->id);
-                        })
-                        ->whereDoesntHave('items', function (Builder $query) {
-                            $query
-                                ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                                    $query->where('updated', false);
-                                });
-                        });
-                }
-            })
-            ->chunk(1000, function ($items) {
-                $items->each(function (WbItem $wbItem) {
+            ->with('wbitemable')
+            ->chunk(1000, function (Collection $items) {
+
+                $items->filter(function (WbItem $wbItem) {
+
+                    if ($wbItem->wbitemable_type === Item::class) {
+                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                            if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
+                                if ($wbItem->wbitemable->updated) {
+                                    return true;
+                                }
+                            } else {
+                                return true;
+                            }
+                        }
+                    } else {
+                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                            if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
+                                if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->updated)) {
+                                    return true;
+                                }
+                            } else {
+                                return true;
+                            }
+                        }
+                    }
+
+                    return false;
+
+                })->each(function (WbItem $wbItem) {
                     $wbItem = $this->recountPriceWbItem($wbItem);
                     $wbItem->save();
                 });
+
             });
     }
 
@@ -69,33 +78,36 @@ class WbItemPriceService
 
         $this->market
             ->items()
-            ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
-                if ($type === Item::class) {
-                    $query
-                        ->where('supplier_id', $this->supplier->id)
-                        ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                            $query->where('updated', true);
-                        });
-                } elseif ($type === Bundle::class) {
-                    $query
-                        ->whereHas('items', function (Builder $query) {
-                            $query->where('supplier_id', $this->supplier->id);
-                        })
-                        ->whereDoesntHave('items', function (Builder $query) {
-                            $query
-                                ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                                    $query->where('updated', false);
-                                });
-                        });
-                }
-            })
+            ->with('wbitemable')
             ->chunk(1000, function ($items) {
-                $items->each(function (WbItem $wbItem) {
+
+                $items->filter(function (WbItem $wbItem) {
+
+                    if ($wbItem->wbitemable_type === Item::class) {
+                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                            if ($wbItem->wbitemable->updated) {
+                                return true;
+                            }
+                        }
+                    } else {
+                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                            if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->updated)) {
+                                return true;
+                            }
+                        }
+                    }
+
+                    return false;
+
+                })->each(function (WbItem $wbItem) {
                     $wbItem = $this->recountPriceWbItem($wbItem);
                     $wbItem = $this->recountStockWbItem($wbItem);
                     $wbItem->save();
                 });
+
             });
+
+        $this->nullNotUpdatedStocks();
     }
 
     public function recountPriceWbItem(WbItem $wbItem): WbItem
@@ -155,26 +167,25 @@ class WbItemPriceService
 
         $this->market
             ->items()
-            ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
-                if ($type === Item::class) {
-                    $query
-                        ->where('supplier_id', $this->supplier->id)
-                        ->where('unload_wb', true)
-                        ->where('updated', true);
-                } elseif ($type === Bundle::class) {
-                    $query
-                        ->whereHas('items', function (Builder $query) {
-                            $query->where('supplier_id', $this->supplier->id);
-                        })
-                        ->whereDoesntHave('items', function (Builder $query) {
-                            $query
-                                ->where('unload_wb', false)
-                                ->where('updated', false);
-                        });
-                }
-            })
+            ->with('wbitemable')
             ->chunk(1000, function ($items) {
-                $items->each(function (WbItem $wbItem) {
+                $items->filter(function (WbItem $wbItem) {
+
+                    if ($wbItem->wbitemable_type === Item::class) {
+                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                            if ($wbItem->wbitemable->updated && $wbItem->wbitemable->unload_wb) {
+                                return true;
+                            }
+                        }
+                    } else {
+                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id && $item->updated && $item->unload_wb)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+
+                })->each(function (WbItem $wbItem) {
                     $wbItem = $this->recountStockWbItem($wbItem);
                     $wbItem->save();
                 });
@@ -266,43 +277,69 @@ class WbItemPriceService
     public function nullNotUpdatedStocks(): void
     {
         WbWarehouseStock::query()
+            ->with('wbItem')
             ->whereHas('wbItem', function (Builder $query) {
-                $query->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
-                    if ($type === Item::class) {
-                        $query
-                            ->where('supplier_id', $this->supplier->id)
-                            ->where('updated', false)
-                            ->orWhere('unload_wb', false);
-                    } elseif ($type === Bundle::class) {
-                        $query
-                            ->whereHas('items', function (Builder $query) {
-                                $query
-                                    ->where('supplier_id', $this->supplier->id)
-                                    ->where('updated', false)
-                                    ->orWhere('unload_wb', false);
-                            });
-                    }
-                });
+                $query->where('wb_market_id', $this->market->id);
             })
-            ->update(['stock' => 0]);
+            ->chunk(1000, function (Collection $stocks) {
+
+                $stocks->filter(function (WbWarehouseStock $stock) {
+
+                    $wbItem = $stock->wbItem;
+
+                    if ($wbItem->wbitemable_type === Item::class) {
+                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                            if (!$wbItem->wbitemable->updated || !$wbItem->wbitemable->unload_wb) {
+                                return true;
+                            }
+                        }
+                    } else {
+                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                            if ($wbItem->wbitemable->items->first(fn(Item $item) => !$item->updated || !$item->unload_wb)) {
+                                return true;
+                            }
+                        }
+                    }
+
+                    return false;
+
+                })->each(function (WbWarehouseStock $stock) {
+                    $stock->update(['stock' => 0]);
+                });
+
+            });
     }
 
     public function nullAllStocks(): void
     {
         WbWarehouseStock::query()
+            ->with('wbItem')
             ->whereHas('wbItem', function (Builder $query) {
-                $query->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
-                    if ($type === Item::class) {
-                        $query->where('supplier_id', $this->supplier->id);
-                    } elseif ($type === Bundle::class) {
-                        $query
-                            ->whereHas('items', function (Builder $query) {
-                                $query->where('supplier_id', $this->supplier->id);
-                            });
-                    }
-                });
+                $query->where('wb_market_id', $this->market->id);
             })
-            ->update(['stock' => 0]);
+            ->chunk(1000, function (Collection $stocks) {
+
+                $stocks->filter(function (WbWarehouseStock $stock) {
+
+                    $wbItem = $stock->wbItem;
+
+                    if ($wbItem->wbitemable_type === Item::class) {
+                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                            return true;
+                        }
+                    } else {
+                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+
+                })->each(function (WbWarehouseStock $stock) {
+                    $stock->update(['stock' => 0]);
+                });
+
+            });
     }
 
 //    public function unloadWbItemStocks(WbItem $wbItem): void
@@ -347,19 +384,26 @@ class WbItemPriceService
 
                 SupplierReportService::addLog($this->supplier, "Склад {$warehouse->name}: выгрузка остатков");
 
-                WbItem::query()
-                    ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
-                        if ($type === Item::class) {
-                            $query->where('supplier_id', $this->supplier->id);
-                        } elseif ($type === Bundle::class) {
-                            $query->whereHas('items', function (Builder $query) {
-                                $query->where('supplier_id', $this->supplier->id);
-                            });
-                        }
-                    })
+                $this->market
+                    ->items()
+                    ->with('wbitemable')
                     ->chunk(1000, function (Collection $items) use ($warehouse) {
 
-                        $data = $items->map(function (WbItem $item) use ($warehouse) {
+                        $data = $items->filter(function (WbItem $wbItem) {
+
+                            if ($wbItem->wbitemable_type === Item::class) {
+                                if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                                    return true;
+                                }
+                            } else {
+                                if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                                    return true;
+                                }
+                            }
+
+                            return false;
+
+                        })->map(function (WbItem $item) use ($warehouse) {
                             return [
                                 "sku" => (string)$item->sku,
                                 "amount" => (int)($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
@@ -380,26 +424,7 @@ class WbItemPriceService
 
         $this->market
             ->items()
-            ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) {
-                if ($type === Item::class) {
-                    $query
-                        ->where('supplier_id', $this->supplier->id)
-                        ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                            $query->where('updated', true);
-                        });
-                } elseif ($type === Bundle::class) {
-                    $query
-                        ->whereHas('items', function (Builder $query) {
-                            $query->where('supplier_id', $this->supplier->id);
-                        })
-                        ->whereDoesntHave('items', function (Builder $query) {
-                            $query
-                                ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                                    $query->where('updated', false);
-                                });
-                        });
-                }
-            })
+            ->with('wbitemable')
             ->whereNotNull('volume')
             ->whereNotNull('retail_markup_percent')
             ->whereNotNull('package')
@@ -410,7 +435,33 @@ class WbItemPriceService
             ->whereNotNull('nm_id')
             ->chunk(1000, function (Collection $items) {
 
-                $data = $items->map(function (WbItem $item) {
+                $data = $items->filter(function (WbItem $wbItem) {
+
+                    if ($wbItem->wbitemable_type === Item::class) {
+                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                            if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
+                                if ($wbItem->wbitemable->updated) {
+                                    return true;
+                                }
+                            } else {
+                                return true;
+                            }
+                        }
+                    } else {
+                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                            if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
+                                if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->updated)) {
+                                    return true;
+                                }
+                            } else {
+                                return true;
+                            }
+                        }
+                    }
+
+                    return false;
+
+                })->map(function (WbItem $item) {
 
                     return [
                         "nmId" => (int)$item->nm_id,

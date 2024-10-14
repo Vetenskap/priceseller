@@ -19,4 +19,5 @@ class WbWarehouseStock extends MainModel
     {
         return $this->belongsTo(WbItem::class);
     }
+
 }

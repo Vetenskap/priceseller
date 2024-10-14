@@ -51,8 +51,10 @@ class Test extends Command
     {
         $user = User::find(10);
         $supplier = Supplier::find('9cd53316-34f9-4197-906b-19f6f426fac6');
+        $market = WbMarket::find('9c28a4ad-0153-4984-8ade-26067194793c');
 
-        $wbItems = WbItem::query()
+        $wbItems = $market
+            ->items()
             ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) use ($supplier, $user) {
                 if ($type === Item::class) {
                     $query
@@ -61,19 +63,11 @@ class Test extends Command
                             $query->where('updated', true);
                         });
                 } elseif ($type === Bundle::class) {
-                    $query
-                        ->whereHas('items', function (Builder $query) use ($supplier, $user) {
-                            $query->where('supplier_id', $supplier->id);
-                        })
-                        ->whereDoesntHave('items', function (Builder $query) use ($user) {
-                            $query
-                                ->when(!$user->baseSettings()->exists() || !$user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                                    $query->where('updated', false);
-                                });
-                        });
+
                 }
             })->get();
-        dd($wbItems);
+        $first = $wbItems->first(fn (WbItem $item) => $item->wbitemable->items->isNotEmpty());
+        dd($first);
 //        $supplier = Supplier::find('9cd53316-34f9-4197-906b-19f6f426fac6');
 //        $wbItem = WbItem::find('00671b8c-c7f4-45a9-a88a-28e6cadeb44c');
 //        $market = WbMarket::find('9d31b409-0bbf-4ac6-a353-289d2e71df11');
