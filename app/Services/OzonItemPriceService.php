@@ -164,11 +164,11 @@ class OzonItemPriceService
                 $items->filter(function (OzonItem $ozonItem) {
 
                     if ($ozonItem->ozonitemable_type === Item::class) {
-                        if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id && $ozonItem->ozonitemable->updated && $ozonItem->ozonitemable->unload_ozon) {
+                        if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
                             return true;
                         }
                     } else {
-                        if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id && $item->updated && $item->unload_ozon)) {
+                        if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                             return true;
                         }
                     }

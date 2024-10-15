@@ -136,12 +136,10 @@ class WbItemPriceService
 
                     if ($wbItem->wbitemable_type === Item::class) {
                         if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
-                            if ($wbItem->wbitemable->updated && $wbItem->wbitemable->unload_wb) {
-                                return true;
-                            }
+                            return true;
                         }
                     } else {
-                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id && $item->updated && $item->unload_wb)) {
+                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                             return true;
                         }
                     }
