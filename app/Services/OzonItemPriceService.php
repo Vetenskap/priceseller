@@ -408,7 +408,14 @@ class OzonItemPriceService
                     ->with('ozonitemable')
                     ->chunk(100, function (Collection $items) use ($warehouse) {
 
-                        $data = $items->filter(function (OzonItem $ozonItem) {
+                        $test = true;
+
+                        $data = $items->filter(function (OzonItem $ozonItem) use (&$test) {
+
+                            if ($test) {
+                                $test = false;
+                                return false;
+                            }
 
                             if ($ozonItem->ozonitemable_type === Item::class) {
                                 if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
@@ -432,7 +439,7 @@ class OzonItemPriceService
                         });
 
                         if (App::isProduction()) {
-                            $this->ozonClient->putStocks($data->all(), $this->supplier);
+                            $this->ozonClient->putStocks($data->values()->all(), $this->supplier);
                         }
 
                     });
@@ -504,7 +511,7 @@ class OzonItemPriceService
                 });
 
                 if (App::isProduction()) {
-                    $this->ozonClient->putPrices($data->all());
+                    $this->ozonClient->putPrices($data->values()->all());
                 }
             });
     }

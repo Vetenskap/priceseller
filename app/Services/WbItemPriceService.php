@@ -411,7 +411,7 @@ class WbItemPriceService
                         });
 
                         if (App::isProduction()) {
-                            $this->wbClient->putStocks($data, $warehouse->warehouse_id, $this->supplier);
+                            $this->wbClient->putStocks($data->values()->all(), $warehouse->warehouse_id, $this->supplier);
                         }
 
                     });
@@ -470,7 +470,7 @@ class WbItemPriceService
                 });
 
                 if (App::isProduction()) {
-                    $this->wbClient->putPrices($data, $this->supplier);
+                    $this->wbClient->putPrices($data->values()->all(), $this->supplier);
                 }
 
             });

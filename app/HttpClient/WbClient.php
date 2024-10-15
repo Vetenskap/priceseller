@@ -71,7 +71,7 @@ class WbClient
         return $this->request->get('/api/v3/warehouses')->throw()->collect();
     }
 
-    public function putStocks(Collection $data, int $warehouseId, Supplier $supplier): void
+    public function putStocks(array $data, int $warehouseId, Supplier $supplier): void
     {
         $limits = 5;
 
@@ -91,7 +91,7 @@ class WbClient
                 RateLimiter::attempt(
                     'wb_put_stocks',
                     300,
-                    fn() => $this->request->put("/api/v3/stocks/{$warehouseId}", ['stocks' => $data->values()->all()])->throw()
+                    fn() => $this->request->put("/api/v3/stocks/{$warehouseId}", ['stocks' => $data])->throw()
                 );
 
                 return;
@@ -131,7 +131,7 @@ class WbClient
 
     }
 
-    public function putPrices(Collection $data, Supplier $supplier): void
+    public function putPrices(array $data, Supplier $supplier): void
     {
 
         while (RateLimiter::attempts('wb_get_cards_list') >= 10) {
@@ -144,7 +144,7 @@ class WbClient
             RateLimiter::attempt(
                 'wb_put_prices',
                 10,
-                fn() => $this->request->baseUrl('https://discounts-prices-api.wb.ru')->post("/api/v2/upload/task", ['data' => $data->values()->all()])->throw(),
+                fn() => $this->request->baseUrl('https://discounts-prices-api.wb.ru')->post("/api/v2/upload/task", ['data' => $data])->throw(),
                 6
             );
 

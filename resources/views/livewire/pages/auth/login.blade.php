@@ -22,57 +22,123 @@ new #[Layout('layouts.guest')] class extends Component
 
         $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
     }
+
+    public function loginEmployee(): void
+    {
+        $this->validate();
+
+        $this->form->authenticateEmployee();
+
+        Session::regenerate();
+
+        $this->redirectIntended(default: route('dashboard', absolute: false), navigate: true);
+    }
+
 }; ?>
 
 <div>
     <!-- Session Status -->
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
-    <form wire:submit="login">
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Почта')" />
-            <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
-            <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
-        </div>
+    <flux:tab.group>
+        <flux:tabs variant="segmented">
+            <flux:tab name="user">Пользователь</flux:tab>
+            <flux:tab name="employee">Сотрудник</flux:tab>
+        </flux:tabs>
 
-        <!-- Password -->
-        <div class="mt-4">
-            <x-input-label for="password" :value="__('Пароль')" />
+        <flux:tab.panel name="user">
+            <form wire:submit="login">
+                <!-- Email Address -->
+                <div>
+                    <x-input-label for="email" :value="__('Почта')" />
+                    <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
+                    <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
+                </div>
 
-            <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
-                            type="password"
-                            name="password"
-                            required autocomplete="current-password" />
+                <!-- Password -->
+                <div class="mt-4">
+                    <x-input-label for="password" :value="__('Пароль')" />
 
-            <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
-        </div>
+                    <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
+                                  type="password"
+                                  name="password"
+                                  required autocomplete="current-password" />
 
-        <!-- Remember Me -->
-        <div class="block mt-4">
-            <label for="remember" class="inline-flex items-center">
-                <input wire:model="form.remember" id="remember" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
-                <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Запомнить меня') }}</span>
-            </label>
-        </div>
+                    <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
+                </div>
 
-        <div class="flex items-center justify-end mt-4">
+                <!-- Remember Me -->
+                <div class="block mt-4">
+                    <label for="remember" class="inline-flex items-center">
+                        <input wire:model="form.remember" id="remember" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
+                        <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Запомнить меня') }}</span>
+                    </label>
+                </div>
 
-            @if (Route::has('register'))
-                <a class="mr-3 underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('register') }}" wire:navigate>
-                    {{ __('Создать новый аккаунт') }}
-                </a>
-            @endif
+                <div class="flex items-center justify-end mt-4">
 
-            @if (Route::has('password.request'))
-                <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}" wire:navigate>
-                    {{ __('Забыли пароль?') }}
-                </a>
-            @endif
+                    @if (Route::has('register'))
+                        <a class="mr-3 underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('register') }}" wire:navigate>
+                            {{ __('Создать новый аккаунт') }}
+                        </a>
+                    @endif
 
-            <x-primary-button class="ms-3">
-                {{ __('Войти') }}
-            </x-primary-button>
-        </div>
-    </form>
+                    @if (Route::has('password.request'))
+                        <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}" wire:navigate>
+                            {{ __('Забыли пароль?') }}
+                        </a>
+                    @endif
+
+                    <x-primary-button class="ms-3">
+                        {{ __('Войти') }}
+                    </x-primary-button>
+                </div>
+            </form>
+        </flux:tab.panel>
+        <flux:tab.panel name="employee">
+            <form wire:submit="loginEmployee">
+                <!-- Email Address -->
+                <div>
+                    <x-input-label for="email" :value="__('Почта')" />
+                    <x-text-input wire:model="form.email" id="email" class="block mt-1 w-full" type="email" name="email" required autofocus autocomplete="username" />
+                    <x-input-error :messages="$errors->get('form.email')" class="mt-2" />
+                </div>
+
+                <!-- Password -->
+                <div class="mt-4">
+                    <x-input-label for="password" :value="__('Пароль')" />
+
+                    <x-text-input wire:model="form.password" id="password" class="block mt-1 w-full"
+                                  type="password"
+                                  name="password"
+                                  required autocomplete="current-password" />
+
+                    <x-input-error :messages="$errors->get('form.password')" class="mt-2" />
+                </div>
+
+                <!-- Remember Me -->
+                <div class="block mt-4">
+                    <label for="remember" class="inline-flex items-center">
+                        <input wire:model="form.remember" id="remember" type="checkbox" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800" name="remember">
+                        <span class="ms-2 text-sm text-gray-600 dark:text-gray-400">{{ __('Запомнить меня') }}</span>
+                    </label>
+                </div>
+
+                <div class="flex items-center justify-end mt-4">
+
+                    @if (Route::has('password.request'))
+                        <a class="underline text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-800" href="{{ route('password.request') }}" wire:navigate>
+                            {{ __('Забыли пароль?') }}
+                        </a>
+                    @endif
+
+                    <x-primary-button class="ms-3">
+                        {{ __('Войти') }}
+                    </x-primary-button>
+                </div>
+            </form>
+        </flux:tab.panel>
+    </flux:tab.group>
+    @fluxScripts
+    @fluxStyles
 </div>

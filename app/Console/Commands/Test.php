@@ -49,31 +49,10 @@ class Test extends Command
      */
     public function handle()
     {
-        $user = User::find(10);
-        $supplier = Supplier::find('9cd53316-34f9-4197-906b-19f6f426fac6');
-        $market = WbMarket::find('9c28a4ad-0153-4984-8ade-26067194793c');
+        $supplier = Supplier::find('9cd532e5-7327-4714-ae9e-810b3d241421');
+        $market = OzonMarket::find('9cd55507-b41b-422e-9333-9f7837f52d28');
+        $service = new OzonItemPriceService($supplier, $market);
+        $service->unloadAllStocks();
 
-        $wbItems = $market
-            ->items()
-            ->whereHasMorph('wbitemable', [Item::class, Bundle::class], function (Builder $query, $type) use ($supplier, $user) {
-                if ($type === Item::class) {
-                    $query
-                        ->where('supplier_id', $supplier->id)
-                        ->when(!$user->baseSettings()->exists() || !$user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
-                            $query->where('updated', true);
-                        });
-                } elseif ($type === Bundle::class) {
-
-                }
-            })->get();
-        $first = $wbItems->first(fn (WbItem $item) => $item->wbitemable->items->isNotEmpty());
-        dd($first);
-//        $supplier = Supplier::find('9cd53316-34f9-4197-906b-19f6f426fac6');
-//        $wbItem = WbItem::find('00671b8c-c7f4-45a9-a88a-28e6cadeb44c');
-//        $market = WbMarket::find('9d31b409-0bbf-4ac6-a353-289d2e71df11');
-//        dd($wbItem->wbitemable->items->first());
-//        $service = new WbItemPriceService($supplier, $market);
-//        $wbItem = $service->recountPriceWbItem($wbItem);
-//        $wbItem->save();
     }
 }

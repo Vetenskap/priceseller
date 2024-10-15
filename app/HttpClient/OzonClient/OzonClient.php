@@ -101,7 +101,7 @@ class OzonClient
     public function putStocks(array $data, Supplier $supplier)
     {
         while (RateLimiter::attempts('ozon_put_stocks') >= 80) {
-            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 2 сек.');
+            SupplierReportService::addLog($supplier, 'Превышен лимит запросов, ожидаем 2 сек.');
             sleep(2);
         }
 
