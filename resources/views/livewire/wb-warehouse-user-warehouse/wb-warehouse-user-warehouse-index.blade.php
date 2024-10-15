@@ -1,10 +1,7 @@
 <div>
     <flux:card class="space-y-6">
         <flux:input.group>
-            <flux:select variant="listbox" searchable placeholder="Выберите склад..." wire:model="user_warehouse_id">
-                <x-slot name="search">
-                    <flux:select.search placeholder="Поиск..."/>
-                </x-slot>
+            <flux:select variant="combobox" placeholder="Выберите склад..." wire:model="user_warehouse_id">
 
                 @foreach(auth()->user()->warehouses as $warehouse)
                     <flux:option :value="$warehouse->getKey()">{{$warehouse->name}}</flux:option>

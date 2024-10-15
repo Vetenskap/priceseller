@@ -11,10 +11,7 @@
 
         <flux:input label="Наименование" placeholder="Введите наименование поля" wire:model="name"/>
 
-        <flux:select variant="listbox" searchable label="Тип" wire:model="type">
-            <x-slot name="search">
-                <flux:select.search placeholder="Поиск..."/>
-            </x-slot>
+        <flux:select variant="combobox" label="Тип" wire:model="type">
 
             @foreach(config('app.item_attribute_types') as $type)
                 <flux:option value="{{ $type['name'] }}">{{ $type['label'] }}</flux:option>

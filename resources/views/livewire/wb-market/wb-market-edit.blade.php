@@ -34,11 +34,8 @@
                         <div class="flex gap-12">
                             <flux:input wire:model="form.name" label="Наименование" required/>
                             <flux:input wire:model="form.api_key" label="АПИ ключ" required/>
-                            <flux:select variant="listbox" searchable placeholder="Выберите опцию..."
+                            <flux:select variant="combobox" placeholder="Выберите опцию..."
                                          label="Организация" wire:model="form.organization_id">
-                                <x-slot name="search">
-                                    <flux:select.search placeholder="Поиск..."/>
-                                </x-slot>
 
                                 @foreach(auth()->user()->organizations as $organization)
                                     <flux:option

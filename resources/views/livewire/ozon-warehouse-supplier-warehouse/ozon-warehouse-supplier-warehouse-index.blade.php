@@ -4,10 +4,7 @@
         будут складываться
     </flux:subheading>
     <flux:input.group>
-        <flux:select variant="listbox" searchable placeholder="Выберите склад..." wire:model="supplier_warehouse_id">
-            <x-slot name="search">
-                <flux:select.search placeholder="Поиск..."/>
-            </x-slot>
+        <flux:select variant="combobox" placeholder="Выберите склад..." wire:model="supplier_warehouse_id">
 
             @foreach($supplier->supplier->warehouses->all() as $warehouse)
                 <flux:option :value="$warehouse->id">{{$warehouse->name}}</flux:option>

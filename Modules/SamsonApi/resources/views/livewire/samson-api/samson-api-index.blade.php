@@ -22,10 +22,7 @@
                         <div class="space-y-6">
                             <flux:button wire:click="store">Сохранить</flux:button>
                             <div>
-                                <flux:select variant="listbox" searchable placeholder="Выберите поставщика..." wire:model.live.debounce.1s="form.supplier_id" label="Поставщик">
-                                    <x-slot name="search">
-                                        <flux:select.search placeholder="Поиск..." />
-                                    </x-slot>
+                                <flux:select variant="combobox" placeholder="Выберите поставщика..." wire:model.live.debounce.1s="form.supplier_id" label="Поставщик">
 
                                     @foreach(auth()->user()->suppliers as $supplier)
                                         <flux:option :value="$supplier->getKey()">{{$supplier->name}}</flux:option>
@@ -34,10 +31,7 @@
                             </div>
                             @if($form->supplier_id)
                                 <div>
-                                    <flux:select variant="listbox" searchable placeholder="Выберите склад поставщика..." wire:model="form.supplier_warehouse_id" label="Склад поставщика">
-                                        <x-slot name="search">
-                                            <flux:select.search placeholder="Поиск..." />
-                                        </x-slot>
+                                    <flux:select variant="combobox" placeholder="Выберите склад поставщика..." wire:model="form.supplier_warehouse_id" label="Склад поставщика">
 
                                         @foreach(\App\Models\SupplierWarehouse::where('supplier_id', $form->supplier_id)->get() as $warehouse)
                                             <flux:option :value="$warehouse->getKey()">{{$warehouse->name}}</flux:option>

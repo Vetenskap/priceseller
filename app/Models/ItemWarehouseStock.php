@@ -16,6 +16,11 @@ class ItemWarehouseStock extends MainModel
         'warehouse_id',
     ];
 
+    public function item()
+    {
+        return $this->belongsTo(Item::class, 'item_id', 'id');
+    }
+
     public function writeOffStock()
     {
         return $this->hasOne(WriteOffItemWarehouseStock::class);

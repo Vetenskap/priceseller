@@ -29,11 +29,8 @@
                                         <flux:heading size="xl">Основная информация</flux:heading>
                                     </div>
 
-                                    <flux:select variant="listbox" searchable placeholder="Выберите поставщика..."
+                                    <flux:select variant="combobox" placeholder="Выберите поставщика..."
                                                  wire:model="form.supplier_id" label="Поставщик">
-                                        <x-slot name="search">
-                                            <flux:select.search placeholder="Поиск..."/>
-                                        </x-slot>
 
                                         @foreach(auth()->user()->suppliers as $supplier)
                                             <flux:option value="{{ $supplier->id }}">{{$supplier->name}}</flux:option>

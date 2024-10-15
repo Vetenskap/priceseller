@@ -4,21 +4,15 @@
             <flux:card class="space-y-6">
                 <flux:heading size="xl">Добавление нового склада</flux:heading>
                 <div class="flex gap-6 w-1/4">
-                    <flux:select variant="listbox" searchable placeholder="Выберите склад поставщика..."
+                    <flux:select variant="combobox" placeholder="Выберите склад поставщика..."
                                  wire:model="name">
-                        <x-slot name="search">
-                            <flux:select.search placeholder="Поиск..."/>
-                        </x-slot>
 
                         @foreach($configWarehouses as $configWarehouse)
                             <flux:option :value="$configWarehouse['name']">{{$configWarehouse['label']}}</flux:option>
                         @endforeach
                     </flux:select>
-                    <flux:select variant="listbox" searchable placeholder="Выберите ваш склад поставщика..."
+                    <flux:select variant="combobox" placeholder="Выберите ваш склад поставщика..."
                                  wire:model="supplier_warehouse_id">
-                        <x-slot name="search">
-                            <flux:select.search placeholder="Поиск..."/>
-                        </x-slot>
 
                         @foreach($voshodApi->supplier->warehouses as $warehouse)
                             <flux:option :value="$warehouse->getKey()">{{$warehouse->name}}</flux:option>

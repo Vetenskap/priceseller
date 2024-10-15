@@ -32,11 +32,8 @@
                                 <flux:option value="1">Да</flux:option>
                                 <flux:option value="0">Нет</flux:option>
                             </flux:select>
-                            <flux:select variant="listbox" searchable placeholder="Выберите опцию..." label="Поставщик"
+                            <flux:select variant="combobox" placeholder="Выберите опцию..." label="Поставщик"
                                          wire:model.live.debounce.2s="filters.supplier_id">
-                                <x-slot name="search">
-                                    <flux:select.search placeholder="Поиск..."/>
-                                </x-slot>
 
                                 @foreach($user->suppliers as $supplier)
                                     <flux:option :value="$supplier->getKey()">{{$supplier->name}}</flux:option>

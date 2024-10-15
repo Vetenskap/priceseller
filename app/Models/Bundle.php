@@ -12,7 +12,7 @@ class Bundle extends Model
 
     public function items(): BelongsToMany
     {
-        return $this->belongsToMany(Item::class, 'bundle_items')->withPivot('multiplicity');
+        return $this->belongsToMany(Item::class, 'bundle_items')->withPivot(['multiplicity', 'updated_at', 'created_at']);
     }
 
     protected $fillable = [

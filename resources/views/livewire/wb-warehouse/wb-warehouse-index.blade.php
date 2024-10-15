@@ -3,12 +3,8 @@
         <flux:card class="space-y-6">
             <flux:heading size="xl">Склады</flux:heading>
             <flux:input.group>
-                <flux:select variant="listbox" searchable placeholder="Выберите склад..."
+                <flux:select variant="combobox" placeholder="Выберите склад..."
                              wire:model="selectedWarehouse">
-                    <x-slot name="search">
-                        <flux:select.search placeholder="Поиск..."/>
-                    </x-slot>
-
                     @foreach($apiWarehouses as $apiWarehouse)
                         <flux:option :value="$apiWarehouse['id']">{{$apiWarehouse['name']}}</flux:option>
                     @endforeach

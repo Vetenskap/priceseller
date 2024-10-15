@@ -4,22 +4,16 @@
             <flux:heading size="lg">Добавление склада</flux:heading>
         </div>
 
-        <flux:select variant="listbox" searchable placeholder="Выберите склад..." label="Ваши склады (priceseller)"
+        <flux:select variant="combobox" placeholder="Выберите склад..." label="Ваши склады (priceseller)"
                      wire:model="form.warehouse_id">
-            <x-slot name="search">
-                <flux:select.search placeholder="Поиск..."/>
-            </x-slot>
 
             @foreach(auth()->user()->warehouses as $warehouse)
                 <flux:option :value="$warehouse->getKey()">{{$warehouse->name}}</flux:option>
             @endforeach
         </flux:select>
 
-        <flux:select variant="listbox" searchable placeholder="Выберите склад..." label="Ваши склады (Мой склад)"
+        <flux:select variant="combobox" placeholder="Выберите склад..." label="Ваши склады (Мой склад)"
                      wire:model="form.moysklad_warehouse_uuid">
-            <x-slot name="search">
-                <flux:select.search placeholder="Поиск..."/>
-            </x-slot>
 
             @foreach($moyskladWarehouses as $warehouse)
                 <flux:option :value="$warehouse['id']">{{$warehouse['name']}}</flux:option>

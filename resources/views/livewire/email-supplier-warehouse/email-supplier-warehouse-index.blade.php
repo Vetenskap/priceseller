@@ -9,11 +9,8 @@
             </div>
 
             <flux:input wire:model="form.value" label="Название в прайсе" required/>
-            <flux:select variant="listbox" searchable placeholder="Выберите склад..."
+            <flux:select variant="combobox" placeholder="Выберите склад..."
                          wire:model="form.supplier_warehouse_id" label="Склад">
-                <x-slot name="search">
-                    <flux:select.search placeholder="Поиск..."/>
-                </x-slot>
 
                 @foreach($emailSupplier->supplier->warehouses as $warehouse)
                     <flux:option value="{{ $warehouse->id }}">{{$warehouse->name}}</flux:option>

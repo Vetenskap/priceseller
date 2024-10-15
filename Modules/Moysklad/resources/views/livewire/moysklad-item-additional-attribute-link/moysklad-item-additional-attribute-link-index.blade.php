@@ -4,20 +4,14 @@
             <flux:heading size="lg">Привязка дополнительного атрибута</flux:heading>
         </div>
 
-        <flux:select variant="listbox" searchable placeholder="Выберите атрибут..." label="Дополнительный атрибут" wire:model="form.item_attribute_id">
-            <x-slot name="search">
-                <flux:select.search placeholder="Search..." />
-            </x-slot>
+        <flux:select variant="combobox" placeholder="Выберите атрибут..." label="Дополнительный атрибут" wire:model="form.item_attribute_id">
 
             @foreach(auth()->user()->itemAttributes as $attribute)
                 <flux:option :value="$attribute->id">{{$attribute->name}}</flux:option>
             @endforeach
         </flux:select>
 
-        <flux:select variant="listbox" searchable placeholder="Выберите атрибут..." label="Атрибут мой склад" wire:model="form.link">
-            <x-slot name="search">
-                <flux:select.search placeholder="Search..." />
-            </x-slot>
+        <flux:select variant="combobox" placeholder="Выберите атрибут..." label="Атрибут мой склад" wire:model="form.link">
 
             @foreach($assortmentAttributes as $assortmentAttribute)
                 <flux:option :value="$assortmentAttribute['name']">{{$assortmentAttribute['label']}}</flux:option>

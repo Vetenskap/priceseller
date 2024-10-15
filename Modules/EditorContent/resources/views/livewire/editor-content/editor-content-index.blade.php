@@ -49,11 +49,8 @@
                         <flux:heading size="lg">Категории</flux:heading>
                         <div class="flex gap-6 flex-wrap">
                             @foreach($selectedCategories as $index => $selectedCategory)
-                                <flux:select variant="listbox" class="max-w-64" placeholder="Выберите категорию..."
+                                <flux:select variant="combobox" class="max-w-64" placeholder="Выберите категорию..."
                                              wire:model.live.debounce.1s="selectedCategories.{{ $index }}" searchable>
-                                    <x-slot name="search">
-                                        <flux:select.search placeholder="Поиск..."/>
-                                    </x-slot>
 
                                     @foreach($currentAvailableCategories[$index] as $category)
                                         <flux:option
@@ -122,11 +119,8 @@
                                                     <flux:input wire:model="categoryAttributesValues.{{$attribute['id']}}" type="{{$attribute['type']}}" label="{{$attribute['name']}}" />
                                                 </div>
                                             @endif
-                                            <flux:select variant="listbox" class="max-w-64" placeholder="Выберите {{$attribute['name']}}..."
+                                            <flux:select variant="combobox" class="max-w-64" placeholder="Выберите {{$attribute['name']}}..."
                                                          wire:model="categoryAttributesValuesSelected.{{$attribute['id']}}" searchable>
-                                                <x-slot name="search">
-                                                    <flux:select.search placeholder="Поиск..."/>
-                                                </x-slot>
 
                                                 @if(isset($categoryAttributesDictionary[$attribute['id']]))
                                                     @foreach($categoryAttributesDictionary[$attribute['id']] as $value)

@@ -6,11 +6,8 @@
                 <div class="flex gap-6 items-end">
                     <flux:input wire:model="name" label="Наименование" required/>
                     <flux:input wire:model="warehouse_id" label="Идентификатор" type="number" required/>
-                    <flux:select variant="listbox" searchable placeholder="Выберите ваш склад поставщика..." label="Склад"
+                    <flux:select variant="combobox" placeholder="Выберите ваш склад поставщика..." label="Склад"
                                  wire:model="supplier_warehouse_id">
-                        <x-slot name="search">
-                            <flux:select.search placeholder="Поиск..."/>
-                        </x-slot>
 
                         @foreach($bergApi->supplier->warehouses as $warehouse)
                             <flux:option :value="$warehouse->getKey()">{{$warehouse->name}}</flux:option>

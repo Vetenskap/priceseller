@@ -39,6 +39,13 @@ class WarehouseEdit extends BaseComponent
         $this->addSuccessSaveNotification();
     }
 
+    public function destroy(): void
+    {
+        $this->authorize('delete', $this->warehouse);
+
+        $this->form->destroy();
+    }
+
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         $this->authorize('view', $this->warehouse);

@@ -32,6 +32,15 @@
                                         <flux:cell variant="strong">
                                             {{$bundle->updated_at}}
                                         </flux:cell>
+                                        <flux:cell>
+                                            <flux:button icon="pencil-square" size="sm"
+                                                         :href="route('bundles.edit', ['bundle' => $bundle->getKey()])"/>
+                                        </flux:cell>
+                                        <flux:cell>
+                                            <flux:button icon="trash" variant="danger" size="sm"
+                                                         wire:click="destroy({{$bundle->getKey()}})"
+                                                         wire:target="destroy({{$bundle->getKey()}})"/>
+                                        </flux:cell>
                                     </flux:row>
                                 @endforeach
                             </flux:rows>
@@ -42,12 +51,12 @@
                 </x-blocks.main-block>
             </flux:tab.panel>
             <flux:tab.panel name="manage">
-                <livewire:bundles-export-report.bundles-export-report-index />
-                <livewire:bundles-import-report.bundles-import-report-index />
+                <livewire:bundles-export-report.bundles-export-report-index/>
+                <livewire:bundles-import-report.bundles-import-report-index/>
             </flux:tab.panel>
             <flux:tab.panel name="plural">
-                <livewire:bundle-items-export-report.bundle-items-export-report-index />
-                <livewire:bundle-items-import-report.bundle-items-import-report-index />
+                <livewire:bundle-items-export-report.bundle-items-export-report-index/>
+                <livewire:bundle-items-import-report.bundle-items-import-report-index/>
             </flux:tab.panel>
         </flux:tab-group>
     </x-layouts.main-container>

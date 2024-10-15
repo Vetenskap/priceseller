@@ -4,20 +4,14 @@
             <flux:heading size="lg">Привязка основного атрибута</flux:heading>
         </div>
 
-        <flux:select variant="listbox" searchable placeholder="Выберите атрибут..." label="Атрибут priceseller" wire:model="form.attribute_name">
-            <x-slot name="search">
-                <flux:select.search placeholder="Search..." />
-            </x-slot>
+        <flux:select variant="combobox" placeholder="Выберите атрибут..." label="Атрибут priceseller" wire:model="form.attribute_name">
 
             @foreach(\App\Models\Bundle::MAINATTRIBUTES as $mainAttribute)
                 <flux:option :value="$mainAttribute['name']">{{$mainAttribute['label']}}</flux:option>
             @endforeach
         </flux:select>
 
-        <flux:select variant="listbox" searchable placeholder="Выберите атрибут..." label="Атрибут мой склад" wire:model="form.link">
-            <x-slot name="search">
-                <flux:select.search placeholder="Search..." />
-            </x-slot>
+        <flux:select variant="combobox" placeholder="Выберите атрибут..." label="Атрибут мой склад" wire:model="form.link">
 
             @foreach($bundleAttributes as $bundleAttribute)
                 <flux:option :value="$bundleAttribute['name']">{{$bundleAttribute['label']}}</flux:option>
