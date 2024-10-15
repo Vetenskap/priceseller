@@ -51,20 +51,14 @@
                                         <flux:cell variant="strong">{{ $warehouse->updated_at }}</flux:cell>
 
                                         <flux:cell align="right">
-                                            <flux:link
-                                                href="{{ route('warehouses.edit', ['warehouse' => $warehouse->getKey()]) }}">
-                                                <flux:icon.pencil-square class="cursor-pointer hover:text-gray-800"/>
-                                            </flux:link>
+                                            <flux:button icon="pencil-square" size="sm"
+                                                         href="{{ route('warehouses.edit', ['warehouse' => $warehouse->getKey()]) }}" />
                                         </flux:cell>
 
                                         <flux:cell align="right">
-                                            <flux:icon.trash
-                                                wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
-                                                wire:loading.remove
-                                                wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
-                                                class="cursor-pointer hover:text-red-400"/>
-                                            <flux:icon.loading wire:loading
-                                                               wire:target="destroy({{ json_encode($warehouse->getKey()) }})"/>
+                                            <flux:button icon="trash" variant="danger" size="sm"
+                                                         wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                         ire:target="destroy({{ json_encode($warehouse->getKey()) }})" />
                                         </flux:cell>
 
                                     </flux:row>

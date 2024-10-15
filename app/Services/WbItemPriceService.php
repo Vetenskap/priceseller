@@ -73,43 +73,6 @@ class WbItemPriceService
             });
     }
 
-    public function updatePriceTest(): void
-    {
-
-        $this->market
-            ->items()
-            ->with('wbitemable')
-            ->chunk(1000, function ($items) {
-
-                $items->filter(function (WbItem $wbItem) {
-
-                    if ($wbItem->wbitemable_type === Item::class) {
-                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
-                            if ($wbItem->wbitemable->updated) {
-                                return true;
-                            }
-                        }
-                    } else {
-                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                            if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->updated)) {
-                                return true;
-                            }
-                        }
-                    }
-
-                    return false;
-
-                })->each(function (WbItem $wbItem) {
-                    $wbItem = $this->recountPriceWbItem($wbItem);
-                    $wbItem = $this->recountStockWbItem($wbItem);
-                    $wbItem->save();
-                });
-
-            });
-
-        $this->nullNotUpdatedStocks();
-    }
-
     public function recountPriceWbItem(WbItem $wbItem): WbItem
     {
         if ($wbItem->wbitemable_type === 'App\Models\Item') {

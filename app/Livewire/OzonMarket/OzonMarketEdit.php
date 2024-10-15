@@ -211,10 +211,20 @@ class OzonMarketEdit extends BaseComponent
     {
         auth()->user()->suppliers->each(function (Supplier $supplier) {
             $service = new OzonItemPriceService($supplier, $this->market);
-            $service->updatePriceTest();
+            $service->updatePrice();
         });
 
         $this->addSuccessTestPriceNotification();
+    }
+
+    public function testStocks(): void
+    {
+        auth()->user()->suppliers->each(function (Supplier $supplier) {
+            $service = new OzonItemPriceService($supplier, $this->market);
+            $service->updateStock();
+        });
+
+        $this->addSuccessTestStocksPriceNotification();
     }
 
     public function nullStocks(): void

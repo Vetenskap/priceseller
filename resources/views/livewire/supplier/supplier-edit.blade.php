@@ -1,7 +1,6 @@
 <div>
     <x-layouts.header :name="$supplier->name"/>
     <x-layouts.actions>
-        <flux:button variant="primary" wire:click="back">Закрыть</flux:button>
         <flux:button wire:click="update">Сохранить</flux:button>
         <flux:modal.trigger name="delete-supplier">
             <flux:button variant="danger">Удалить</flux:button>

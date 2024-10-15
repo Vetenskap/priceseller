@@ -209,17 +209,27 @@ class WbMarketEdit extends BaseComponent
         return view('livewire.wb-market.wb-market-edit');
     }
 
-    public function testPrice()
+    public function testPrice(): void
     {
         auth()->user()->suppliers->each(function (Supplier $supplier) {
             $service = new WbItemPriceService($supplier, $this->market);
-            $service->updatePriceTest();
+            $service->updatePrice();
         });
 
         $this->addSuccessTestPriceNotification();
     }
 
-    public function nullStocks()
+    public function testStocks(): void
+    {
+        auth()->user()->suppliers->each(function (Supplier $supplier) {
+            $service = new WbItemPriceService($supplier, $this->market);
+            $service->updateStock();
+        });
+
+        $this->addSuccessTestStocksPriceNotification();
+    }
+
+    public function nullStocks(): void
     {
         auth()->user()->suppliers->each(function (Supplier $supplier) {
             $service = new WbItemPriceService($supplier, $this->market);

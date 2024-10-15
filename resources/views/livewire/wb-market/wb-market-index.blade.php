@@ -51,18 +51,14 @@
                                 </flux:cell>
 
                                 <flux:cell align="right">
-                                    <flux:link href="{{ route('wb-market-edit', ['market' => $market->getKey()]) }}">
-                                        <flux:icon.pencil-square class="cursor-pointer hover:text-gray-800"/>
-                                    </flux:link>
+                                    <flux:button icon="pencil-square" size="sm" :href="route('wb-market-edit', ['market' => $market->getKey()])" />
                                 </flux:cell>
 
                                 <flux:cell align="right">
-                                    <flux:icon.trash wire:click="destroy({{ json_encode($market->getKey()) }})"
-                                                     wire:loading.remove
-                                                     wire:target="destroy({{ json_encode($market->getKey()) }})"
-                                                     wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены."
-                                                     class="cursor-pointer hover:text-red-400"/>
-                                    <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($market->getKey()) }})"/>
+                                    <flux:button icon="trash" variant="danger" size="sm"
+                                                 wire:click="destroy({{ json_encode($market->getKey()) }})"
+                                                 wire:target="destroy({{ json_encode($market->getKey()) }})"
+                                                 wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены." />
                                 </flux:cell>
 
                             </flux:row>

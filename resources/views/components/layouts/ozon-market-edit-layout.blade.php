@@ -10,7 +10,6 @@
     </x-notify-top>
     @enderror
     <x-layouts.actions>
-        <x-primary-button wire:click="back">Закрыть</x-primary-button>
         <x-success-button wire:click="update">Сохранить</x-success-button>
         <x-danger-button wire:click="destroy"
                          wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить

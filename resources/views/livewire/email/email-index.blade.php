@@ -54,18 +54,14 @@
                                 </flux:cell>
 
                                 <flux:cell align="right">
-                                    <flux:link href="{{ route('email.edit', ['email' => $email->getKey()]) }}">
-                                        <flux:icon.pencil-square class="cursor-pointer hover:text-gray-800"/>
-                                    </flux:link>
+                                    <flux:button :href="route('email.edit', ['email' => $email->getKey()])" icon="pencil-square" size="sm" />
                                 </flux:cell>
 
                                 <flux:cell align="right">
-                                    <flux:icon.trash wire:click="destroy({{ json_encode($email->getKey()) }})"
-                                                     wire:loading.remove
-                                                     wire:target="destroy({{ json_encode($email->getKey()) }})"
-                                                     wire:confirm="Вы действительно хотите удалить эту почту? Это действие нельзя будет отменить."
-                                                     class="cursor-pointer hover:text-red-400"/>
-                                    <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($email->getKey()) }})"/>
+                                    <flux:button icon="trash" variant="danger" size="sm"
+                                                 wire:click="destroy({{ json_encode($email->getKey()) }})"
+                                                 wire:target="destroy({{ json_encode($email->getKey()) }})"
+                                                 wire:confirm="Вы действительно хотите удалить эту почту? Это действие нельзя будет отменить."/>
                                 </flux:cell>
 
                             </flux:row>

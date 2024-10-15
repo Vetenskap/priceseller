@@ -84,17 +84,13 @@
                                         <flux:cell variant="strong">{{ $item->updated_at }}</flux:cell>
 
                                         <flux:cell align="right">
-                                            <flux:link href="{{ route('item-edit', ['item' => $item->getKey()]) }}">
-                                                <flux:icon.pencil-square class="cursor-pointer hover:text-gray-800"/>
-                                            </flux:link>
+                                            <flux:button :href="route('item-edit', ['item' => $item->getKey()])" icon="pencil-square" size="sm"/>
                                         </flux:cell>
 
                                         <flux:cell align="right">
-                                            <flux:icon.trash wire:click="destroy({{ json_encode($item->getKey()) }})"
-                                                             wire:loading.remove
-                                                             wire:target="destroy({{ json_encode($item->getKey()) }})"
-                                                             class="cursor-pointer hover:text-red-400"/>
-                                            <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($item->getKey()) }})"/>
+                                            <flux:button icon="trash" variant="danger" size="sm"
+                                                         wire:click="destroy({{ json_encode($item->getKey()) }})"
+                                                         wire:target="destroy({{ json_encode($item->getKey()) }})"/>
                                         </flux:cell>
 
                                     </flux:row>

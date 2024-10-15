@@ -55,11 +55,16 @@ trait WithJsNotifications
 
     public function addSuccessTestPriceNotification()
     {
-        $this->js((new Toast('Успех', 'Все цены перерасчитаны'))->success());
+        \Flux::toast('Все цены перерасчитаны');
+    }
+
+    public function addSuccessTestStocksPriceNotification()
+    {
+        \Flux::toast('Все остатки перерасчитаны');
     }
 
     public function addSuccessNullStocksNotification()
     {
-        $this->js((new Toast('Успех', 'Все остатки занулены'))->success());
+        \Flux::toast('Все остатки занулены');
     }
 }

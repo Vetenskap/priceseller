@@ -8,7 +8,6 @@
     </x-notify-top>
     @enderror
     <x-layouts.actions>
-        <flux:button variant="primary" wire:click="back">Закрыть</flux:button>
         <flux:button wire:click="update">Сохранить</flux:button>
         <flux:button variant="danger" wire:click="destroy"
                      wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить

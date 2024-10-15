@@ -1,7 +1,6 @@
 <div>
     <x-layouts.header :name="$item->name . ' (' . $item->code . ')'"/>
     <x-layouts.actions>
-        <flux:button variant="primary" wire:click="redirectBack">Закрыть</flux:button>
         <flux:button wire:click="save">Сохранить</flux:button>
         <flux:button variant="danger" wire:click="destroy">Удалить</flux:button>
     </x-layouts.actions>

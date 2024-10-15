@@ -71,40 +71,6 @@ class OzonItemPriceService
             });
     }
 
-    public function updatePriceTest()
-    {
-        $this->market
-            ->items()
-            ->with('ozonitemable')
-            ->chunk(1000, function ($items) {
-                $items->filter(function (OzonItem $ozonItem) {
-
-                    if ($ozonItem->ozonitemable_type === Item::class) {
-                        if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
-                            if ($ozonItem->ozonitemable->updated) {
-                                return true;
-                            }
-                        }
-                    } else {
-                        if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                            if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->updated)) {
-                                return true;
-                            }
-                        }
-                    }
-
-                    return false;
-
-                })->each(function (OzonItem $ozonItem) {
-                    $ozonItem = $this->recountPriceOzonItem($ozonItem);
-                    $ozonItem = $this->recountStockOzonItem($ozonItem);
-                    $ozonItem->save();
-                });
-            });
-
-        $this->nullNotUpdatedStocks();
-    }
-
     public function recountPriceOzonItem(OzonItem $ozonItem): OzonItem
     {
         if ($ozonItem->ozonitemable_type === 'App\Models\Item') {

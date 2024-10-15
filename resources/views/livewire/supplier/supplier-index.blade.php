@@ -51,18 +51,14 @@
                                 </flux:cell>
 
                                 <flux:cell align="right">
-                                    <flux:link href="{{ route('supplier.edit', ['supplier' => $supplier->getKey()]) }}">
-                                        <flux:icon.pencil-square class="cursor-pointer hover:text-gray-800"/>
-                                    </flux:link>
+                                    <flux:button :href="route('supplier.edit', ['supplier' => $supplier->getKey()])" icon="pencil-square" size="sm"/>
                                 </flux:cell>
 
                                 <flux:cell align="right">
-                                    <flux:icon.trash wire:click="destroy({{ json_encode($supplier->getKey()) }})"
-                                                     wire:loading.remove
-                                                     wire:target="destroy({{ json_encode($supplier->getKey()) }})"
-                                                     wire:confirm="Вы действительно хотите удалить этого поставщика? Это действие нельзя будет отменить. Так же удалятся все связанные товары, их связи т.д."
-                                                     class="cursor-pointer hover:text-red-400"/>
-                                    <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($supplier->getKey()) }})"/>
+                                    <flux:button icon="trash" variant="danger" size="sm"
+                                                 wire:click="destroy({{ json_encode($supplier->getKey()) }})"
+                                                 wire:target="destroy({{ json_encode($supplier->getKey()) }})"
+                                                 wire:confirm="Вы действительно хотите удалить этого поставщика? Это действие нельзя будет отменить. Так же удалятся все связанные товары, их связи т.д."/>
                                 </flux:cell>
 
                             </flux:row>

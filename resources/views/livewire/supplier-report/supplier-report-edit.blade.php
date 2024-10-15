@@ -1,7 +1,6 @@
 <div>
     <x-layouts.header :name="'Отчёт по выгрузке за ' . $report->created_at"/>
     <x-layouts.actions>
-        <flux:button variant="primary" wire:click="back">Назад</flux:button>
         <flux:button variant="danger" wire:click="destroy">Удалить</flux:button>
     </x-layouts.actions>
     <x-layouts.main-container>
