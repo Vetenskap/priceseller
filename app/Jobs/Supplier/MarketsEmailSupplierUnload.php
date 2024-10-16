@@ -2,10 +2,8 @@
 
 namespace App\Jobs\Supplier;
 
-use App\Models\Bundle;
-use App\Models\Item;
+use App\Models\EmailSupplier;
 use App\Models\OzonMarket;
-use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbMarket;
 use App\Services\OzonItemPriceService;
@@ -14,22 +12,22 @@ use App\Services\WbItemPriceService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class MarketsUnload implements ShouldQueue, ShouldBeUnique
+class MarketsEmailSupplierUnload implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $uniqueFor = 600;
+
     /**
      * Create a new job instance.
      */
-    public function __construct(public User $user, public Supplier $supplier, public ?string $message = null)
+    public function __construct(public User $user, public EmailSupplier $emailSupplier)
     {
-        //
+
     }
 
     /**
@@ -41,16 +39,16 @@ class MarketsUnload implements ShouldQueue, ShouldBeUnique
             ->where('open', true)
             ->where('close', false)
             ->get()
-            ->filter(fn (OzonMarket $market) => $market->suppliers()->where('id', $this->supplier->id)->first());
+            ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $this->emailSupplier->supplier->id)->first());
 
         $wbMarkets = $this->user->wbMarkets()
             ->where('open', true)
             ->where('close', false)
             ->get()
-            ->filter(fn (WbMarket $market) => $market->suppliers()->where('id', $this->supplier->id)->first());
+            ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $this->emailSupplier->supplier->id)->first());
 
         foreach ($ozonMarkets as $market) {
-            $service = new OzonItemPriceService($this->supplier, $market, $this->supplier->warehouses->pluck('id')->values()->toArray());
+            $service = new OzonItemPriceService($this->emailSupplier->supplier, $market, $this->emailSupplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray());
             $service->updateStock();
             $service->updatePrice();
             $service->unloadAllStocks();
@@ -58,28 +56,28 @@ class MarketsUnload implements ShouldQueue, ShouldBeUnique
         }
 
         foreach ($wbMarkets as $market) {
-            $service = new WbItemPriceService($this->supplier, $market, $this->supplier->warehouses->pluck('id')->values()->toArray());
+            $service = new WbItemPriceService($this->emailSupplier->supplier, $market, $this->emailSupplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray());
             $service->updateStock();
             $service->updatePrice();
             $service->unloadAllStocks();
             $service->unloadAllPrices();
         }
 
-        SupplierReportService::success($this->supplier, message: $this->message);
+        SupplierReportService::success($this->emailSupplier->supplier);
     }
 
     public function failed(\Throwable $th): void
     {
-        SupplierReportService::error($this->supplier, message: $this->message);
+        SupplierReportService::error($this->emailSupplier->supplier);
     }
 
     public function uniqueId(): string
     {
-        return $this->supplier->id . 'markets_unload';
+        return $this->emailSupplier->id . 'markets_unload';
     }
 
-    public static function getUniqueId(Supplier $supplier): string
+    public static function getUniqueId(EmailSupplier $emailSupplier): string
     {
-        return $supplier->id . 'markets_unload';
+        return $emailSupplier->id . 'markets_unload';
     }
 }

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WbWarehouseStock extends MainModel
 {
@@ -15,9 +16,14 @@ class WbWarehouseStock extends MainModel
         'wb_item_id',
     ];
 
-    public function wbItem()
+    public function wbItem(): BelongsTo
     {
         return $this->belongsTo(WbItem::class);
+    }
+
+    public function warehouse(): BelongsTo
+    {
+        return $this->belongsTo(WbWarehouse::class, 'wb_warehouse_id', 'id');
     }
 
 }

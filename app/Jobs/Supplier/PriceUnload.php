@@ -51,16 +51,13 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
         $service = new EmailSupplierService($emailSupplier, Storage::disk('public')->path($this->path));
         $service->unload();
 
-        $supplier = $emailSupplier->supplier;
-        $user = User::findOrFail($supplier->user_id);
-
-        $ttl = Redis::ttl('laravel_unique_job:'.MarketsUnload::class.':'.MarketsUnload::getUniqueId($supplier));
+        $ttl = Redis::ttl('laravel_unique_job:'.MarketsEmailSupplierUnload::class.':'.MarketsEmailSupplierUnload::getUniqueId($emailSupplier));
 
         if ($ttl > 0) {
-            SupplierReportService::addLog($supplier, 'Кабинеты этого поставщика уже выгружаются или не прошло 10 минут с первой выгрузки. Оставшееся время: ' . $ttl . ' секунд');
-            SupplierReportService::error($supplier);
+            SupplierReportService::addLog($emailSupplier->supplier, 'Кабинеты этого поставщика уже выгружаются или не прошло 10 минут с первой выгрузки. Оставшееся время: ' . $ttl . ' секунд');
+            SupplierReportService::error($emailSupplier->supplier);
         } else {
-            MarketsUnload::dispatch($user, $supplier);
+            MarketsEmailSupplierUnload::dispatch($emailSupplier->supplier->user, $emailSupplier);
         }
 
     }

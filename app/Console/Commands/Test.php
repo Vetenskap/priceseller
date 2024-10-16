@@ -49,10 +49,7 @@ class Test extends Command
      */
     public function handle()
     {
-        $supplier = Supplier::find('9cd532e5-7327-4714-ae9e-810b3d241421');
         $market = OzonMarket::find('9cd55507-b41b-422e-9333-9f7837f52d28');
-        $service = new OzonItemPriceService($supplier, $market);
-        $service->unloadAllStocks();
-
+        dd($market->suppliers());
     }
 }

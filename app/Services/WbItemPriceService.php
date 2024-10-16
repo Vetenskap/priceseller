@@ -24,7 +24,7 @@ class WbItemPriceService
     protected WbClient $wbClient;
     protected User $user;
 
-    public function __construct(public ?Supplier $supplier = null, public WbMarket $market)
+    public function __construct(public ?Supplier $supplier = null, public WbMarket $market, public array $supplierWarehousesIds)
     {
         $this->wbClient = new WbClient($this->market->api_key);
         $this->user = $this->market->user;
@@ -242,6 +242,15 @@ class WbItemPriceService
             ->whereHas('wbItem', function (Builder $query) {
                 $query->where('wb_market_id', $this->market->id);
             })
+            ->whereHas('warehouse', function (Builder $query) {
+                $query->whereHas('suppliers', function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->whereHas('warehouses', function (Builder $query) {
+                            $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+                        });
+                });
+            })
             ->chunk(1000, function (Collection $stocks) {
 
                 $stocks->filter(function (WbWarehouseStock $stock) {
@@ -338,7 +347,11 @@ class WbItemPriceService
 
         $this->market->warehouses()
             ->whereHas('suppliers', function (Builder $query) {
-                $query->where('supplier_id', $this->supplier->id);
+                $query
+                    ->where('supplier_id', $this->supplier->id)
+                    ->whereHas('warehouses', function (Builder $query) {
+                        $query->where('supplier_warehouse_id', $this->supplierWarehousesIds);
+                    });
             })
             ->get()
             ->map(function (WbWarehouse $warehouse) {

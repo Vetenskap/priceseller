@@ -43,9 +43,11 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/ozon', \App\Livewire\OzonMarket\OzonMarketIndex::class)->name('ozon');
     Route::get('/ozon/{market}', \App\Livewire\OzonMarket\OzonMarketEdit::class)->name('ozon-market-edit')->whereUuid('market');
+    Route::get('/ozon/items/{item}', \App\Livewire\OzonItem\OzonItemEdit::class)->name('ozon.item.edit')->whereUuid('item');
 
     Route::get('/wb', \App\Livewire\WbMarket\WbMarketIndex::class)->name('wb');
     Route::get('/wb/{market}', \App\Livewire\WbMarket\WbMarketEdit::class)->name('wb-market-edit')->whereUuid('market');
+    Route::get('/wb/items/{item}', \App\Livewire\WbItem\WbItemEdit::class)->name('wb.item.edit')->whereUuid('item');
 
     Route::get('/import/report/{report}', ItemsImportReportShow::class)->name('items-import-report-edit');
 

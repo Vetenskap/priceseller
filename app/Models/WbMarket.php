@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use Opcodes\LogViewer\Facades\Cache;
 
 class WbMarket extends MainModel
 {
@@ -56,5 +58,16 @@ class WbMarket extends MainModel
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function suppliers(): Collection
+    {
+        return Cache::tags(['wb', 'market', 'suppliers'])->remember($this->id, now()->addDay(), function () {
+            return Supplier::whereHas('items', function ($query) {
+                $query->whereHas('wbItems', function ($query) {
+                    $query->whereIn('wb_items.id', $this->items()->pluck('id')->toArray());
+                });
+            })->distinct()->get();
+        });
     }
 }

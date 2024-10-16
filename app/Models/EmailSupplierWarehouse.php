@@ -14,4 +14,5 @@ class EmailSupplierWarehouse extends Model
         'email_supplier_id',
         'supplier_warehouse_id',
     ];
+
 }

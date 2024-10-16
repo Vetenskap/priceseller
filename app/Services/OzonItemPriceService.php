@@ -24,7 +24,7 @@ class OzonItemPriceService
     protected OzonClient $ozonClient;
     protected User $user;
 
-    public function __construct(public ?Supplier $supplier = null, public OzonMarket $market)
+    public function __construct(public ?Supplier $supplier = null, public OzonMarket $market, public array $supplierWarehousesIds)
     {
         $this->ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
         $this->user = $this->market->user;
@@ -267,9 +267,18 @@ class OzonItemPriceService
     public function nullNotUpdatedStocks(): void
     {
         OzonWarehouseStock::query()
-            ->with('ozonItem')
+            ->with(['ozonItem'])
             ->whereHas('ozonItem', function (Builder $query) {
                 $query->where('ozon_market_id', $this->market->id);
+            })
+            ->whereHas('warehouse', function (Builder $query) {
+                $query->whereHas('suppliers', function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->whereHas('warehouses', function (Builder $query) {
+                            $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+                        });
+                });
             })
             ->chunk(1000, function (Collection $stocks) {
                 $stocks->filter(function (OzonWarehouseStock $stock) {
@@ -362,7 +371,10 @@ class OzonItemPriceService
         $this->market->warehouses()
             ->whereHas('suppliers', function (Builder $query) {
                 $query
-                    ->where('supplier_id', $this->supplier->id);
+                    ->where('supplier_id', $this->supplier->id)
+                    ->whereHas('warehouses', function (Builder $query) {
+                        $query->where('supplier_warehouse_id', $this->supplierWarehousesIds);
+                    });
             })
             ->get()
             ->map(function (OzonWarehouse $warehouse) {

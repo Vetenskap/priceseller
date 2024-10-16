@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use Opcodes\LogViewer\Facades\Cache;
 
 class OzonMarket extends MainModel
 {
@@ -61,5 +64,16 @@ class OzonMarket extends MainModel
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function suppliers(): Collection
+    {
+        return Cache::tags(['ozon', 'market', 'suppliers'])->remember($this->id, now()->addDay(), function () {
+            return Supplier::whereHas('items', function ($query) {
+                $query->whereHas('ozonItems', function ($query) {
+                    $query->whereIn('ozon_items.id', $this->items()->pluck('id')->toArray());
+                });
+            })->distinct()->get();
+        });
     }
 }

@@ -54,9 +54,9 @@
                     <flux:columns>
                         <flux:column>Идентификатор товара</flux:column>
                         <flux:column>Код клиента</flux:column>
+                        <flux:column>Товар/Комплект</flux:column>
                         <flux:column sortable :sorted="$sortBy === 'price'" :direction="$sortDirection"
                                      wire:click="sort('price')">Цена</flux:column>
-                        <flux:column>Товар/Комплект</flux:column>
                         <flux:column sortable :sorted="$sortBy === 'created_at'" :direction="$sortDirection"
                                      wire:click="sort('created_at')">Дата создания</flux:column>
                         <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
@@ -67,14 +67,17 @@
                             <flux:row :key="$item->getKey()">
                                 <flux:cell>{{$item->product_id ?? $item->nm_id}}</flux:cell>
                                 <flux:cell>{{$item->offer_id ?? $item->vendor_code}}</flux:cell>
-                                <flux:cell>{{$item->price}}</flux:cell>
                                 <flux:cell>
                                     <flux:link :href="$item->ozonitemable ? ($item->ozonitemable instanceof App\Models\Item ? route('item-edit', ['item' => $item->ozonitemable->getKey()]) : route('bundles.edit', ['bundle' => $item->ozonitemable->getKey()])) : ($item->wbitemable instanceof App\Models\Item ? route('item-edit', ['item' => $item->wbitemable->getKey()]) : route('bundles.edit', ['bundle' => $item->wbitemable->getKey()]))">
                                         {{$item->ozonitemable ? $item->ozonitemable->code : $item->wbitemable->code}}
                                     </flux:link>
                                 </flux:cell>
+                                <flux:cell>{{$item->price}}</flux:cell>
                                 <flux:cell>{{$item->created_at}}</flux:cell>
                                 <flux:cell>{{$item->updated_at}}</flux:cell>
+                                <flux:cell>
+                                    <flux:button icon="pencil-square" :href="$item->ozonitemable ? route('ozon.item.edit', ['item' => $item->getKey()]) : route('wb.item.edit', ['item' => $item->getKey()])" />
+                                </flux:cell>
                             </flux:row>
                         @endforeach
                     </flux:rows>
