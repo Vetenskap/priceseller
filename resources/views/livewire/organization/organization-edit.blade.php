@@ -2,7 +2,11 @@
     <x-layouts.header :name="$organization->name" />
     <x-layouts.actions>
         <flux:button wire:click="update">Сохранить</flux:button>
-        <flux:button variant="danger" wire:click="destroy">Удалить</flux:button>
+        <flux:button
+            variant="danger"
+            wire:click="destroy"
+            wire:confirm="Вы действительно хотите удалить эту организацию?"
+        >Удалить</flux:button>
     </x-layouts.actions>
     <x-layouts.main-container>
         <x-blocks.main-block>

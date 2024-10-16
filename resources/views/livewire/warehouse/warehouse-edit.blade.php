@@ -2,7 +2,11 @@
     <x-layouts.header :name="$warehouse->name"/>
     <x-layouts.actions>
         <flux:button wire:click="update">Сохранить</flux:button>
-        <flux:button variant="danger" wire:click="destroy">Удалить</flux:button>
+        <flux:button
+            variant="danger"
+            wire:click="destroy"
+            wire:confirm="Вы действительно хотите удалить этот склад?"
+        >Удалить</flux:button>
     </x-layouts.actions>
     <x-layouts.main-container>
         <flux:tab.group>

@@ -44,7 +44,14 @@
                                 <flux:cell>{{$stock->created_at}}</flux:cell>
                                 <flux:cell>{{$stock->updated_at}}</flux:cell>
                                 <flux:cell>
-                                    <flux:button icon="trash" variant="danger" wire:click="destroy({{$stock->getKey()}})" size="sm" wire:target="destroy({{$stock->getKey()}})"/>
+                                    <flux:button
+                                        icon="trash"
+                                        variant="danger"
+                                        wire:click="destroy({{$stock->getKey()}})"
+                                        size="sm"
+                                        wire:target="destroy({{$stock->getKey()}})"
+                                        wire:confirm="Вы действительно хотите удалить этот остаток?"
+                                    />
                                 </flux:cell>
                             </flux:row>
                         @endforeach

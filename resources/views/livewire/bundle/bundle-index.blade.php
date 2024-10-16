@@ -39,7 +39,9 @@
                                         <flux:cell>
                                             <flux:button icon="trash" variant="danger" size="sm"
                                                          wire:click="destroy({{$bundle->getKey()}})"
-                                                         wire:target="destroy({{$bundle->getKey()}})"/>
+                                                         wire:target="destroy({{$bundle->getKey()}})"
+                                                         wire:confirm="Вы действительно хотите удалить этот комплект?"
+                                            />
                                         </flux:cell>
                                     </flux:row>
                                 @endforeach

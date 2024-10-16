@@ -41,7 +41,14 @@
                                 <flux:cell>{{$item->pivot->created_at}}</flux:cell>
                                 <flux:cell>{{$item->pivot->updated_at}}</flux:cell>
                                 <flux:cell>
-                                    <flux:button icon="trash" variant="danger" size="sm" wire:click="destroy({{json_encode($item->getKey())}})" wire:target="destroy({{json_encode($item->getKey())}})"/>
+                                    <flux:button
+                                        icon="trash"
+                                        variant="danger"
+                                        size="sm"
+                                        wire:click="destroy({{json_encode($item->getKey())}})"
+                                        wire:target="destroy({{json_encode($item->getKey())}})"
+                                        wire:confirm="Вы действительно хотите удалить эту связь?"
+                                    />
                                 </flux:cell>
                             </flux:row>
                         @endforeach

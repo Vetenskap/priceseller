@@ -9,7 +9,11 @@
             @endforeach
         </flux:select>
         <div class="self-end">
-            <flux:button variant="danger" wire:click="destroy">Удалить</flux:button>
+            <flux:button
+                variant="danger"
+                wire:click="destroy"
+                wire:confirm="Вы действительно хотите удалить этот склад?"
+            >Удалить</flux:button>
         </div>
     </div>
 </div>

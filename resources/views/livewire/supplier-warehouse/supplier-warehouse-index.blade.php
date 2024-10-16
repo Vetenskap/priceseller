@@ -21,6 +21,7 @@
                             <flux:icon.trash wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
                                              wire:loading.remove
                                              wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
+                                             wire:confirm="Вы действительно хотите удалить этот склад?"
                                              class="hover:text-red-400 cursor-pointer"/>
                             <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($warehouse->getKey()) }})"/>
                         </flux:cell>

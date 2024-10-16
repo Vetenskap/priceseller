@@ -47,6 +47,7 @@
                                     <flux:icon.trash wire:click="destroy({{ json_encode($report->getKey()) }})"
                                                      wire:loading.remove
                                                      wire:target="destroy({{ json_encode($report->getKey()) }})"
+                                                     wire:confirm="Вы действительно хотите удалить этот отчет?"
                                                      class="cursor-pointer hover:text-red-400"/>
                                     <flux:icon.loading wire:loading wire:target="destroy({{ json_encode($report->getKey()) }})"/>
                                 </flux:cell>

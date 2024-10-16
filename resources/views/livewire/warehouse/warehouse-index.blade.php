@@ -58,7 +58,9 @@
                                         <flux:cell align="right">
                                             <flux:button icon="trash" variant="danger" size="sm"
                                                          wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
-                                                         ire:target="destroy({{ json_encode($warehouse->getKey()) }})" />
+                                                         wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                         wire:confirm="Вы действительно хотите удалить этот склад?"
+                                            />
                                         </flux:cell>
 
                                     </flux:row>
