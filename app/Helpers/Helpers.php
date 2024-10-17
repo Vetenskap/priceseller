@@ -34,7 +34,7 @@ class Helpers {
         return Auth::user(); // Обычный пользователь
     }
 
-    static public function user(): User
+    static public function user(): User|null
     {
         if (Auth::guard('employee')->check()) {
             // Если авторизован сотрудник
