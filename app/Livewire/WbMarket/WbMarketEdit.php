@@ -61,6 +61,7 @@ class WbMarketEdit extends BaseComponent
 
     public $directLink = false;
 
+    #[Session('WbMarketEdit.testWarehouses.{market.id}')]
     public $testWarehouses = [];
 
     #[Computed]

@@ -62,6 +62,7 @@ class OzonMarketEdit extends BaseComponent
 
     public $directLink = false;
 
+    #[Session('OzonMarketEdit.testWarehouses.{market.id}')]
     public $testWarehouses = [];
 
     #[Computed]

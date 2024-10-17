@@ -16,7 +16,7 @@
                         @foreach($market->suppliers() as $supplier)
                             <flux:menu.group :heading="$supplier->name">
                                 @foreach($supplier->warehouses as $warehouse)
-                                    <flux:menu.checkbox wire:model="testWarehouses.{{$supplier->getKey()}}.{{$warehouse->getKey()}}">{{$warehouse->name}}</flux:menu.checkbox>
+                                    <flux:menu.checkbox wire:model.live="testWarehouses.{{$supplier->getKey()}}.{{$warehouse->getKey()}}">{{$warehouse->name}}</flux:menu.checkbox>
                                 @endforeach
                             </flux:menu.group>
                         @endforeach
