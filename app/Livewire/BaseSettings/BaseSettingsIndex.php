@@ -19,7 +19,7 @@ class BaseSettingsIndex extends BaseComponent
 
     public function mount()
     {
-        $this->user = auth()->user();
+        $this->user = $this->currentUser();
 
         $this->baseSettings = $this->user->baseSettings;
         $this->enabled_use_buy_price_reserve = $this->baseSettings->enabled_use_buy_price_reserve ?? false;

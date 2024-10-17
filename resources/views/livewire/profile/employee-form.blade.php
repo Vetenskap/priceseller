@@ -26,7 +26,7 @@ new class extends Component {
 
         $validated['password'] = Hash::make($validated['password']);
 
-        $employee = \auth()->user()->employees()->create($validated);
+        $employee = \$this->currentUser()->employees()->create($validated);
 
     }
 
@@ -106,7 +106,7 @@ new class extends Component {
                         <flux:column>Почта</flux:column>
                     </flux:columns>
                     <flux:rows>
-                        @foreach(\auth()->user()->employees as $employee)
+                        @foreach(\$this->currentUser()->employees as $employee)
                             <flux:row :key="$employee->getKey()">
                                 <flux:cell>{{$employee->name}}</flux:cell>
                                 <flux:cell>{{$employee->email}}</flux:cell>

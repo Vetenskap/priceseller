@@ -36,8 +36,8 @@ class WarehousesItemsExportIndex extends BaseComponent
 
     public function export(): void
     {
-        $status = $this->checkTtlJob(Export::getUniqueId(auth()->user()), Export::class);
-        if ($status) Export::dispatch(auth()->user());
+        $status = $this->checkTtlJob(Export::getUniqueId($this->currentUser()), Export::class);
+        if ($status) Export::dispatch($this->currentUser());
     }
 
     public function destroy($id): void
@@ -53,8 +53,7 @@ class WarehousesItemsExportIndex extends BaseComponent
     #[Computed]
     public function warehousesItemsExportReports()
     {
-        return auth()
-            ->user()
+        return $this->currentUser()
             ->warehousesItemsExportReports()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();

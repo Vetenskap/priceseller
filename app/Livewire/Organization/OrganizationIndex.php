@@ -31,7 +31,7 @@ class OrganizationIndex extends BaseComponent
     #[Computed]
     public function organizations()
     {
-        return auth()->user()
+        return $this->currentUser()
             ->organizations()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();

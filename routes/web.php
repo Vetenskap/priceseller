@@ -6,7 +6,10 @@ use App\Livewire\Warehouse\WarehouseEdit;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth'])->group(function () {
+Route::middleware(['dynamic.auth:web,employee'])->group(function () {
+
+    Route::view('dashboard', 'dashboard')
+        ->name('dashboard');
 
     Route::get('/settings', \App\Livewire\BaseSettings\BaseSettingsIndex::class)->name('base-settings.index');
 
@@ -15,9 +18,6 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/warehouses/{page?}', \App\Livewire\Warehouse\WarehouseIndex::class)->name('warehouses.index');
     Route::get('/warehouses/list/{warehouse}', WarehouseEdit::class)->name('warehouses.edit')->whereUuid('warehouse');
-
-    Route::view('dashboard', 'dashboard')
-        ->name('dashboard');
 
     Route::get('/emails', \App\Livewire\Email\EmailIndex::class)->name('emails.index');
     Route::get('/emails/{email}', \App\Livewire\Email\EmailEdit::class)->name('email.edit')->whereUuid('email');

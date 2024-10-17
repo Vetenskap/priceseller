@@ -2,12 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 
-class Employee extends Model implements Authenticatable
+class Employee extends Authenticatable
 {
     use HasFactory;
 
@@ -48,38 +47,4 @@ class Employee extends Model implements Authenticatable
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
 
-    public function getAuthIdentifierName(): string
-    {
-        return 'id';
-    }
-
-    public function getAuthIdentifier(): int
-    {
-        return $this->getKey();
-    }
-
-    public function getAuthPasswordName(): string
-    {
-        return 'password';
-    }
-
-    public function getAuthPassword()
-    {
-        return $this->password;
-    }
-
-    public function getRememberToken()
-    {
-        // TODO: Implement getRememberToken() method.
-    }
-
-    public function setRememberToken($value)
-    {
-        // TODO: Implement setRememberToken() method.
-    }
-
-    public function getRememberTokenName()
-    {
-        // TODO: Implement getRememberTokenName() method.
-    }
 }

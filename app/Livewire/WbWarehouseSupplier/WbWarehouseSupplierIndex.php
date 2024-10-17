@@ -15,6 +15,15 @@ class WbWarehouseSupplierIndex extends BaseComponent
 
     public $supplier_id;
 
+    public function placeholder(): string
+    {
+        return <<<'HTML'
+        <div>
+            <flux:icon.loading />
+        </div>
+        HTML;
+    }
+
     public function store(): void
     {
         $this->validate();

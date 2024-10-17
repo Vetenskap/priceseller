@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms\Email;
 
+use App\Helpers\Helpers;
 use App\Models\Email;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -41,7 +42,7 @@ class EmailPostForm extends Form
                 'min:5',
                 'string',
                 Rule::unique('emails', 'name')
-                    ->where('user_id', auth()->user()->id)
+                    ->where('user_id', Helpers::user()->id)
                     ->when($this->email, fn (Unique $unique) => $unique->ignore($this->email->id, 'id'))
             ],
             'address' => [
@@ -59,7 +60,7 @@ class EmailPostForm extends Form
     {
         $this->validate();
 
-        auth()->user()->emails()->create($this->except('email'));
+        Helpers::user()->emails()->create($this->except('email'));
 
         $this->reset();
 

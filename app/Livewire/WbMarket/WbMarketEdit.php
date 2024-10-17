@@ -211,7 +211,7 @@ class WbMarketEdit extends BaseComponent
 
     public function testPrice(): void
     {
-        auth()->user()->suppliers->each(function (Supplier $supplier) {
+        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
             $service = new WbItemPriceService($supplier, $this->market);
             $service->updatePrice();
         });
@@ -221,7 +221,7 @@ class WbMarketEdit extends BaseComponent
 
     public function testStocks(): void
     {
-        auth()->user()->suppliers->each(function (Supplier $supplier) {
+        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
             $service = new WbItemPriceService($supplier, $this->market);
             $service->updateStock();
         });
@@ -231,7 +231,7 @@ class WbMarketEdit extends BaseComponent
 
     public function nullStocks(): void
     {
-        auth()->user()->suppliers->each(function (Supplier $supplier) {
+        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
             $service = new WbItemPriceService($supplier, $this->market);
             $service->nullAllStocks();
             $service->unloadAllStocks();

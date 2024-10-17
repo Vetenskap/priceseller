@@ -19,16 +19,15 @@ class BundlesExportReportIndex extends BaseComponent
 
     public function export(): void
     {
-        $status = $this->checkTtlJob(\App\Jobs\Bundle\BundlesExport::getUniqueId(auth()->user()), \App\Jobs\Bundle\BundlesExport::class);
+        $status = $this->checkTtlJob(\App\Jobs\Bundle\BundlesExport::getUniqueId($this->currentUser()), \App\Jobs\Bundle\BundlesExport::class);
 
-        if ($status) \App\Jobs\Bundle\BundlesExport::dispatch(auth()->user());
+        if ($status) \App\Jobs\Bundle\BundlesExport::dispatch($this->currentUser());
     }
 
     #[Computed]
     public function bundlesExportReports()
     {
-        return auth()
-            ->user()
+        return $this->currentUser()
             ->bundlesExportReports()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();

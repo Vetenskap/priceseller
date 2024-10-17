@@ -42,7 +42,7 @@ class WarehouseIndex extends BaseComponent
     #[Computed]
     public function warehouses()
     {
-        return auth()->user()
+        return $this->currentUser()
             ->warehouses()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();

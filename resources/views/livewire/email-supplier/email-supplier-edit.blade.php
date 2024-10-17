@@ -36,7 +36,7 @@
                                     <flux:select variant="combobox" placeholder="Выберите поставщика..."
                                                  wire:model="form.supplier_id" label="Поставщик">
 
-                                        @foreach(auth()->user()->suppliers as $supplier)
+                                        @foreach($this->currentUser()->suppliers as $supplier)
                                             <flux:option value="{{ $supplier->id }}">{{$supplier->name}}</flux:option>
                                         @endforeach
                                     </flux:select>

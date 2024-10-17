@@ -26,7 +26,7 @@ class WbMarketIndex extends BaseComponent
 
     public function mount(): void
     {
-        $this->dirtyMarkets = auth()->user()->wbMarkets->pluck(null, 'id')->toArray();
+        $this->dirtyMarkets = $this->currentUser()->wbMarkets->pluck(null, 'id')->toArray();
     }
 
     public function updatedDirtyMarkets(): void
@@ -48,7 +48,7 @@ class WbMarketIndex extends BaseComponent
     #[Computed]
     public function markets()
     {
-        return auth()->user()
+        return $this->currentUser()
             ->wbMarkets()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();
@@ -59,7 +59,7 @@ class WbMarketIndex extends BaseComponent
     {
         $this->authorize('create', WbMarket::class);
 
-        if (!UsersPermissionsService::checkWbPremission(auth()->user())) {
+        if (!UsersPermissionsService::checkWbPremission($this->currentUser())) {
             $this->js((new Toast('Не разрешено', 'Ваша подписка не позволяет добавлять ещё кабинеты'))->warning());
             return;
         }

@@ -37,7 +37,7 @@
                             <flux:select variant="combobox" placeholder="Выберите опцию..."
                                          label="Организация" wire:model="form.organization_id">
 
-                                @foreach(auth()->user()->organizations as $organization)
+                                @foreach($this->currentUser()->organizations as $organization)
                                     <flux:option
                                         :value="$organization->getKey()">{{$organization->name}}</flux:option>
                                 @endforeach

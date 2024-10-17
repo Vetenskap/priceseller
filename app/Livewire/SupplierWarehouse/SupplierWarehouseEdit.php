@@ -2,6 +2,7 @@
 
 namespace App\Livewire\SupplierWarehouse;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\SupplierWarehouse\SupplierWarehousePostForm;
 use App\Models\Supplier;
 use App\Models\SupplierWarehouse;
@@ -9,9 +10,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\On;
-use Livewire\Component;
 
-class SupplierWarehouseEdit extends Component
+class SupplierWarehouseEdit extends BaseComponent
 {
     public SupplierWarehousePostForm $form;
 

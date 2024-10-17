@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms\Bundle;
 
+use App\Helpers\Helpers;
 use App\Models\Bundle;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Unique;
@@ -34,7 +35,7 @@ class BundlePostForm extends Form
                 'required',
                 'string',
                 Rule::unique('bundles', 'code')
-                    ->where('user_id', auth()->user()->id)
+                    ->where('user_id', Helpers::user()->id)
                     ->when($this->bundle, fn (Unique $unique) => $unique->ignore($this->bundle->getKey(), 'id')),
             ],
             'name' => ['nullable', 'string']
@@ -53,7 +54,7 @@ class BundlePostForm extends Form
     {
         $this->validate();
 
-        auth()->user()->bundles()->create($this->except('bundle'));
+        Helpers::user()->bundles()->create($this->except('bundle'));
     }
 
     public function update(): void

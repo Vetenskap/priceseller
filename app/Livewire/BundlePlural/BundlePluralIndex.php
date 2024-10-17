@@ -2,6 +2,7 @@
 
 namespace App\Livewire\BundlePlural;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithItemsFind;
 use App\Models\Bundle;
 use Illuminate\Contracts\View\Factory;
@@ -9,9 +10,8 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Illuminate\Validation\Rule;
 use Livewire\Attributes\Validate;
-use Livewire\Component;
 
-class BundlePluralIndex extends Component
+class BundlePluralIndex extends BaseComponent
 {
     use WithItemsFind;
 

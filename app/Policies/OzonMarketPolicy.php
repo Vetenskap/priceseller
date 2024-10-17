@@ -2,47 +2,67 @@
 
 namespace App\Policies;
 
+use App\Models\Employee;
 use App\Models\OzonMarket;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Support\Facades\App;
 
 class OzonMarketPolicy
 {
     use HandlesAuthorization;
 
-    public function viewAny(User $user): bool
+    public function viewAny(User|Employee $user): bool
     {
         return true;
     }
 
-    public function view(User $user, OzonMarket $ozonMarket): bool
+    public function view(User|Employee $user, OzonMarket $ozonMarket): bool
     {
-        return $user->id === $ozonMarket->user_id;
+        if (get_class($user) === Employee::class) {
+            return $user->user->id === $ozonMarket->user_id;
+        } else {
+            return $user->id === $ozonMarket->user_id;
+        }
     }
 
-    public function create(User $user): bool
+    public function create(User|Employee $user): bool
     {
         return true;
     }
 
-    public function update(User $user, OzonMarket $ozonMarket): bool
+    public function update(User|Employee $user, OzonMarket $ozonMarket): bool
     {
-        return $user->id === $ozonMarket->user_id;
+        if (get_class($user) === Employee::class) {
+            return $user->user->id === $ozonMarket->user_id;
+        } else {
+            return $user->id === $ozonMarket->user_id;
+        }
     }
 
-    public function delete(User $user, OzonMarket $ozonMarket): bool
+    public function delete(User|Employee $user, OzonMarket $ozonMarket): bool
     {
-        return $user->id === $ozonMarket->user_id;
+        if (get_class($user) === Employee::class) {
+            return $user->user->id === $ozonMarket->user_id;
+        } else {
+            return $user->id === $ozonMarket->user_id;
+        }
     }
 
-    public function restore(User $user, OzonMarket $ozonMarket): bool
+    public function restore(User|Employee $user, OzonMarket $ozonMarket): bool
     {
-        return $user->id === $ozonMarket->user_id;
+        if (get_class($user) === Employee::class) {
+            return $user->user->id === $ozonMarket->user_id;
+        } else {
+            return $user->id === $ozonMarket->user_id;
+        }
     }
 
-    public function forceDelete(User $user, OzonMarket $ozonMarket): bool
+    public function forceDelete(User|Employee $user, OzonMarket $ozonMarket): bool
     {
-        return $user->id === $ozonMarket->user_id;
+        if (get_class($user) === Employee::class) {
+            return $user->user->id === $ozonMarket->user_id;
+        } else {
+            return $user->id === $ozonMarket->user_id;
+        }
     }
 }

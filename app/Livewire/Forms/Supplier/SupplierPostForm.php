@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms\Supplier;
 
+use App\Helpers\Helpers;
 use App\Models\Supplier;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
@@ -39,7 +40,7 @@ class SupplierPostForm extends Form
                 'min:3',
                 'string',
                 Rule::unique('suppliers', 'name')
-                    ->where('user_id', auth()->user()->id)
+                    ->where('user_id', Helpers::user()->id)
                 ->when($this->supplier, fn (Unique $unique) => $unique->ignore($this->supplier->id, 'id'))
             ],
             'open' => ['nullable', 'boolean'],
@@ -52,7 +53,7 @@ class SupplierPostForm extends Form
     {
         $this->validate();
 
-        auth()->user()->suppliers()->create($this->except('supplier'));
+        Helpers::user()->suppliers()->create($this->except('supplier'));
 
         $this->reset();
     }

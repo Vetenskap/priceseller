@@ -2,9 +2,9 @@
 
 namespace App\Livewire\WbWarehouseUserWarehouse;
 
-use Livewire\Component;
+use App\Livewire\BaseComponent;
 
-class WbWarehouseUserWarehouseEdit extends Component
+class WbWarehouseUserWarehouseEdit extends BaseComponent
 {
     public function render()
     {

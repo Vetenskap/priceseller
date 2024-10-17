@@ -7,6 +7,7 @@ use App\HttpClient\OzonClient\Resources\DescriptionCategoryAttribute;
 use App\HttpClient\OzonClient\Resources\DescriptionCategoryTree;
 use App\HttpClient\OzonClient\Resources\ProductInfoPrices;
 use App\Models\Bundle;
+use App\Models\EmailSupplier;
 use App\Models\Item;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
@@ -49,7 +50,12 @@ class Test extends Command
      */
     public function handle()
     {
-        $market = OzonMarket::find('9cd55507-b41b-422e-9333-9f7837f52d28');
-        dd($market->suppliers());
+        $supplier = EmailSupplier::find(17);
+
+        $wbMarkets = $supplier->supplier->user->wbMarkets()
+            ->get()
+            ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $supplier->supplier->id)->first());
+
+        dd($wbMarkets);
     }
 }

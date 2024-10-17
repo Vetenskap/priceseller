@@ -184,7 +184,7 @@ class OzonMarketEdit extends BaseComponent
 
     public function update(): void
     {
-        $this->authorize('update', $this->market);
+        $this->authorizeForUser($this->user(), 'update', $this->market);
 
         $this->form->update();
 
@@ -193,7 +193,7 @@ class OzonMarketEdit extends BaseComponent
 
     public function destroy(): void
     {
-        $this->authorize('delete', $this->market);
+        $this->authorizeForUser($this->user(), 'delete', $this->market);
 
         $this->form->destroy();
 
@@ -202,14 +202,14 @@ class OzonMarketEdit extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $this->authorize('view', $this->market);
+        $this->authorizeForUser($this->user(), 'view', $this->market);
 
         return view('livewire.ozon-market.ozon-market-edit');
     }
 
     public function testPrice(): void
     {
-        auth()->user()->suppliers->each(function (Supplier $supplier) {
+        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
             $service = new OzonItemPriceService($supplier, $this->market);
             $service->updatePrice();
         });
@@ -219,7 +219,7 @@ class OzonMarketEdit extends BaseComponent
 
     public function testStocks(): void
     {
-        auth()->user()->suppliers->each(function (Supplier $supplier) {
+        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
             $service = new OzonItemPriceService($supplier, $this->market);
             $service->updateStock();
         });
@@ -229,7 +229,7 @@ class OzonMarketEdit extends BaseComponent
 
     public function nullStocks(): void
     {
-        auth()->user()->suppliers->each(function (Supplier $supplier) {
+        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
             $service = new OzonItemPriceService($supplier, $this->market);
             $service->nullAllStocks();
             $service->unloadAllStocks();

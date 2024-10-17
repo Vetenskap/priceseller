@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms\WbMarket;
 
+use App\Helpers\Helpers;
 use App\Models\WbMarket;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -58,7 +59,7 @@ class WbMarketPostForm extends Form
                 'string',
                 'min:3',
                 Rule::unique('wb_markets', 'name')
-                    ->where('user_id', auth()->user()->id)
+                    ->where('user_id', Helpers::user()->id)
                     ->when($this->market, fn(Unique $unique) => $unique->ignore($this->market->id, 'id'))
             ],
             'api_key' => ['required', 'string'],
@@ -96,7 +97,7 @@ class WbMarketPostForm extends Form
     {
         $this->validate();
 
-        auth()->user()->wbMarkets()->create($this->except('market'));
+        Helpers::user()->wbMarkets()->create($this->except('market'));
 
         $this->reset();
 

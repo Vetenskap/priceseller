@@ -28,7 +28,7 @@ class WarehousesItemsImportIndex extends BaseComponent
 
     public function downloadTemplate(): BinaryFileResponse
     {
-        return \Excel::download(new WarehousesStocksExport(auth()->user(), true), 'Склады_шаблон.xlsx');
+        return \Excel::download(new WarehousesStocksExport($this->currentUser(), true), 'Склады_шаблон.xlsx');
     }
 
     public function import(): void
@@ -47,9 +47,9 @@ class WarehousesItemsImportIndex extends BaseComponent
             return;
         }
 
-        $status = $this->checkTtlJob(Import::getUniqueId(auth()->user()), Import::class);
+        $status = $this->checkTtlJob(Import::getUniqueId($this->currentUser()), Import::class);
 
-        if ($status) Import::dispatch(auth()->user(), $uuid);
+        if ($status) Import::dispatch($this->currentUser(), $uuid);
     }
 
     public function destroy($report): void
@@ -65,8 +65,7 @@ class WarehousesItemsImportIndex extends BaseComponent
     #[Computed]
     public function warehousesItemsImportReports()
     {
-        return auth()
-            ->user()
+        return $this->currentUser()
             ->warehousesItemsImportReports()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();

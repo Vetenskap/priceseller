@@ -4,9 +4,8 @@ namespace App\Livewire;
 
 use App\Livewire\Forms\EmailSupplierStockValuePostForm;
 use App\Livewire\Traits\WithJsNotifications;
-use Livewire\Component;
 
-class EmailSupplierStockValue extends Component
+class EmailSupplierStockValue extends BaseComponent
 {
     use WithJsNotifications;
 

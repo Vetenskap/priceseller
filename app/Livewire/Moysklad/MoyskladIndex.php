@@ -15,7 +15,7 @@ class MoyskladIndex extends Component
 
     public function mount()
     {
-        $this->moysklad = Moysklad::where('user_id', auth()->user()->id)->first();
+        $this->moysklad = Moysklad::where('user_id', $this->currentUser()->id)->first();
         $this->api_key = $this->moysklad->api_key;
         $this->name = $this->moysklad->name;
     }

@@ -26,7 +26,7 @@ class OzonMarketIndex extends BaseComponent
 
     public function mount(): void
     {
-        $this->dirtyMarkets = auth()->user()->ozonMarkets->pluck(null, 'id')->toArray();
+        $this->dirtyMarkets = $this->currentUser()->ozonMarkets->pluck(null, 'id')->toArray();
     }
 
     public function updatedDirtyMarkets(): void
@@ -48,7 +48,7 @@ class OzonMarketIndex extends BaseComponent
     #[Computed]
     public function markets()
     {
-        return auth()->user()
+        return $this->currentUser()
             ->ozonMarkets()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();
@@ -59,7 +59,7 @@ class OzonMarketIndex extends BaseComponent
     {
         $this->authorize('create', OzonMarket::class);
 
-        if (!UsersPermissionsService::checkOzonPermission(auth()->user())) {
+        if (!UsersPermissionsService::checkOzonPermission($this->currentUser())) {
             $this->js((new Toast('Не разрешено', 'Ваша подписка не позволяет добавлять ещё кабинеты'))->warning());
             return;
         }

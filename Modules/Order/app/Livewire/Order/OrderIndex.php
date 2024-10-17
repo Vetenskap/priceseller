@@ -70,7 +70,7 @@ class OrderIndex extends ModuleComponent
 
     public function import(): void
     {
-        \Excel::import(new NotChangeOzonStatesImport(\auth()->user()), $this->file);
+        \Excel::import(new NotChangeOzonStatesImport($this->currentUser()), $this->file);
     }
 
     public function mount($page = 'main'): void
@@ -78,7 +78,7 @@ class OrderIndex extends ModuleComponent
         $this->page = $page;
 
         if ($this->organizationId) {
-            $this->organization = auth()->user()->organizations()->findOrFail($this->organizationId);
+            $this->organization = $this->currentUser()->organizations()->findOrFail($this->organizationId);
             $this->orders = $this->organization->orders()->whereHas('orderable')->with('orderable.item')->where('state', 'new')->get();
             $this->selectedWarehouses = $this->organization->selectedOrdersWarehouses->pluck('id')->toArray();
             $this->automatic = $this->organization->automaticUnloadOrder ? $this->organization->automaticUnloadOrder->automatic : false;

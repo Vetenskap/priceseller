@@ -19,8 +19,7 @@ class BundleIndex extends BaseComponent
     #[Computed]
     public function bundles()
     {
-        return auth()
-            ->user()
+        return $this->currentUser()
             ->bundles()
             ->with('items')
             ->paginate();

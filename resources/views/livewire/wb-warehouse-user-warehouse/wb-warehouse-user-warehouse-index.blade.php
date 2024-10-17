@@ -3,7 +3,7 @@
         <flux:input.group>
             <flux:select variant="combobox" placeholder="Выберите склад..." wire:model="user_warehouse_id">
 
-                @foreach(auth()->user()->warehouses as $warehouse)
+                @foreach($this->currentUser()->warehouses as $warehouse)
                     <flux:option :value="$warehouse->getKey()">{{$warehouse->name}}</flux:option>
                 @endforeach
             </flux:select>

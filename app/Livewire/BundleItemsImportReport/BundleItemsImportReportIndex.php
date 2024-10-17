@@ -33,7 +33,7 @@ class BundleItemsImportReportIndex extends BaseComponent
 
     public function downloadTemplate(): BinaryFileResponse
     {
-        return \Excel::download(new \App\Exports\BundleItemsExport(auth()->user(), true), "priceseller_bundles_plural_шаблон.xlsx");
+        return \Excel::download(new \App\Exports\BundleItemsExport($this->currentUser(), true), "priceseller_bundles_plural_шаблон.xlsx");
     }
 
     public function import(): void
@@ -47,16 +47,15 @@ class BundleItemsImportReportIndex extends BaseComponent
             return;
         }
 
-        $status = $this->checkTtlJob(BundleItemsImport::getUniqueId(auth()->user()), BundleItemsImport::class);
+        $status = $this->checkTtlJob(BundleItemsImport::getUniqueId($this->currentUser()), BundleItemsImport::class);
 
-        if ($status) BundleItemsImport::dispatch($uuid, $ext, auth()->user());
+        if ($status) BundleItemsImport::dispatch($uuid, $ext, $this->currentUser());
     }
 
     #[Computed]
     public function bundleItemsImportReports()
     {
-        return auth()
-            ->user()
+        return $this->currentUser()
             ->bundleItemsImportReports()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();

@@ -2,6 +2,7 @@
 
 namespace App\Livewire\EmailSupplierStockValue;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\EmailSupplierStockValuePostForm;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\EmailSupplier;
@@ -9,9 +10,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\On;
-use Livewire\Component;
 
-class EmailSupplierStockValueIndex extends Component
+class EmailSupplierStockValueIndex extends BaseComponent
 {
     use WithJsNotifications;
 

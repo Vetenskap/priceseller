@@ -45,7 +45,7 @@
                             </flux:card>
                         </flux:tab.panel>
                         <flux:tab.panel name="suppliers">
-                            <livewire:ozon-warehouse-supplier.ozon-warehouse-supplier-index :warehouse="$warehouse"/>
+                            <livewire:ozon-warehouse-supplier.ozon-warehouse-supplier-index :warehouse="$warehouse" lazy/>
                         </flux:tab.panel>
                         <flux:tab.panel name="warehouses">
                             <livewire:ozon-warehouse-user-warehouse.ozon-warehouse-user-warehouse-index

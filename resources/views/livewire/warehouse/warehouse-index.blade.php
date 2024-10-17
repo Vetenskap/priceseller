@@ -73,8 +73,8 @@
                 </x-blocks.main-block>
             </flux:tab.panel>
             <flux:tab.panel name="manage">
-                <livewire:warehouses-items-export.warehouses-items-export-index :model="auth()->user()"/>
-                <livewire:warehouses-items-import.warehouses-items-import-index :model="auth()->user()"/>
+                <livewire:warehouses-items-export.warehouses-items-export-index :model="$this->currentUser()"/>
+                <livewire:warehouses-items-import.warehouses-items-import-index :model="$this->currentUser()"/>
             </flux:tab.panel>
         </flux:tab-group>
     </x-layouts.main-container>

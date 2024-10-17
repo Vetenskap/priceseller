@@ -23,7 +23,7 @@ class OzonItemEdit extends BaseComponent
 
     public function updatedSearchItems(): void
     {
-        $query = $this->form->ozonitemable_type === Bundle::class ? auth()->user()->bundles() : auth()->user()->items();
+        $query = $this->form->ozonitemable_type === Bundle::class ? $this->currentUser()->bundles() : $this->currentUser()->items();
 
         $this->items = $query
             ->when($this->searchItems, function ($query) {
@@ -33,10 +33,10 @@ class OzonItemEdit extends BaseComponent
             ->get();
 
         if ($this->form->ozonitemable_type === Bundle::class) {
-            $item = auth()->user()->bundles()->find($this->item->ozonitemable_id);
+            $item = $this->currentUser()->bundles()->find($this->item->ozonitemable_id);
             if ($item) $this->items->prepend($item);
         } else {
-            $item = auth()->user()->items()->find($this->item->ozonitemable_id);
+            $item = $this->currentUser()->items()->find($this->item->ozonitemable_id);
             if ($item) $this->items->prepend($item);
         }
 

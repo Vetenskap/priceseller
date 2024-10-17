@@ -20,9 +20,9 @@ class BundleItemsExportReportIndex extends BaseComponent
 
     public function export(): void
     {
-        $status = $this->checkTtlJob(BundleItemsExport::getUniqueId(auth()->user()), BundleItemsExport::class);
+        $status = $this->checkTtlJob(BundleItemsExport::getUniqueId($this->currentUser()), BundleItemsExport::class);
 
-        if ($status) BundleItemsExport::dispatch(auth()->user());
+        if ($status) BundleItemsExport::dispatch($this->currentUser());
     }
 
     public function download($id): BinaryFileResponse
@@ -42,8 +42,7 @@ class BundleItemsExportReportIndex extends BaseComponent
     #[Computed]
     public function bundleItemsExportReports()
     {
-        return auth()
-            ->user()
+        return $this->currentUser()
             ->bundleItemsExportReports()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();

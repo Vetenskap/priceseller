@@ -2,9 +2,9 @@
 
 namespace App\Livewire\OzonWarehouseUserWarehouse;
 
-use Livewire\Component;
+use App\Livewire\BaseComponent;
 
-class OzonWarehouseUserWarehouseEdit extends Component
+class OzonWarehouseUserWarehouseEdit extends BaseComponent
 {
     public function render()
     {

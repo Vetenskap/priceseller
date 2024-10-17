@@ -27,8 +27,7 @@ class LoginForm extends Form
     {
         $this->ensureIsNotRateLimited();
 
-
-        if (Auth::guard('employee')->attempt($this->only(['email', 'password']))) {
+        if (!Auth::guard('employee')->attempt($this->only(['email', 'password']))) {
 
             RateLimiter::hit($this->throttleKey());
 
@@ -48,6 +47,7 @@ class LoginForm extends Form
      */
     public function authenticate(): void
     {
+
         $this->ensureIsNotRateLimited();
 
         if (!Auth::attempt($this->only(['email', 'password']), $this->remember)) {

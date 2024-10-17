@@ -27,6 +27,15 @@ class OzonWarehouseSupplierIndex extends BaseComponent
         ]);
     }
 
+    public function placeholder(): string
+    {
+        return <<<'HTML'
+        <div>
+            <flux:icon.loading />
+        </div>
+        HTML;
+    }
+
     public function rules(): array
     {
         return [

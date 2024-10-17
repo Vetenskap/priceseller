@@ -29,7 +29,7 @@
                                             type="number"/>
                                 <flux:select variant="combobox" placeholder="Выберите поставщика..."
                                              wire:model="form.supplier_id" label="Поставщик">
-                                    @foreach(auth()->user()->suppliers as $supplier)
+                                    @foreach($this->currentUser()->suppliers as $supplier)
                                         <flux:option value="{{ $supplier->id }}">{{$supplier->name}}</flux:option>
                                     @endforeach
                                 </flux:select>
@@ -38,7 +38,7 @@
                             </div>
                             <div class="space-y-6">
                                 <flux:heading size="xl">Дополнительные поля</flux:heading>
-                                @foreach(auth()->user()->itemAttributes()->whereNotIn('id', $item->attributesValues->pluck('item_attribute_id'))->get() as $mainAttribute)
+                                @foreach($this->currentUser()->itemAttributes()->whereNotIn('id', $item->attributesValues->pluck('item_attribute_id'))->get() as $mainAttribute)
                                     @switch($mainAttribute->type)
                                         @case('boolean')
                                             <div class="flex justify-between items-center">

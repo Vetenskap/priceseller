@@ -2,9 +2,9 @@
 
 namespace App\Livewire\Item;
 
-use Livewire\Component;
+use App\Livewire\BaseComponent;
 
-class ItemAttributeDialogForm extends Component
+class ItemAttributeDialogForm extends BaseComponent
 {
     public $name;
     public $type;
@@ -18,7 +18,7 @@ class ItemAttributeDialogForm extends Component
     {
         $this->validate();
 
-        auth()->user()->itemAttributes()->updateOrCreate([
+        $this->currentUser()->itemAttributes()->updateOrCreate([
             'name' => $this->name
         ], [
             'name' => $this->name,

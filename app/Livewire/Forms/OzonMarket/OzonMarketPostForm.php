@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms\OzonMarket;
 
+use App\Helpers\Helpers;
 use App\Models\OzonMarket;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Cache;
@@ -57,7 +58,7 @@ class OzonMarketPostForm extends Form
                 'string',
                 'min:3',
                 Rule::unique('ozon_markets', 'name')
-                    ->where('user_id', auth()->user()->id)
+                    ->where('user_id', Helpers::user()->id)
                     ->when($this->market, fn(Unique $unique) => $unique->ignore($this->market->id, 'id'))
             ],
             'client_id' => ['required', 'integer'],
@@ -104,7 +105,7 @@ class OzonMarketPostForm extends Form
     {
         $this->validate();
 
-        auth()->user()->ozonMarkets()->create($this->except('market'));
+        Helpers::user()->ozonMarkets()->create($this->except('market'));
 
         $this->reset();
 

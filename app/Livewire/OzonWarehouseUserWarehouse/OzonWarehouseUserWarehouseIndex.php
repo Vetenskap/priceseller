@@ -2,6 +2,7 @@
 
 namespace App\Livewire\OzonWarehouseUserWarehouse;
 
+use App\Livewire\BaseComponent;
 use App\Models\OzonWarehouse;
 use App\Models\OzonWarehouseUserWarehouse;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -11,9 +12,8 @@ use Illuminate\Foundation\Application;
 use Illuminate\Validation\Rule;
 use LaravelIdea\Helper\App\Models\_IH_OzonWarehouseUserWarehouse_C;
 use Livewire\Attributes\Computed;
-use Livewire\Component;
 
-class OzonWarehouseUserWarehouseIndex extends Component
+class OzonWarehouseUserWarehouseIndex extends BaseComponent
 {
     public OzonWarehouse $warehouse;
 

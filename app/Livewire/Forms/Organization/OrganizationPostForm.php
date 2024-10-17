@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms\Organization;
 
+use App\Helpers\Helpers;
 use App\Models\Organization;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -25,7 +26,7 @@ class OrganizationPostForm extends Form
                 'string',
                 'min:3',
                 Rule::unique('organizations', 'name')
-                    ->where('user_id', \auth()->user()->id)
+                    ->where('user_id', Helpers::currentUser()->id)
                     ->when($this->organization, fn(Unique $unique) => $unique->ignore($this->organization->id, 'id'))
             ]
         ];
@@ -41,7 +42,7 @@ class OrganizationPostForm extends Form
     {
         $this->validate();
 
-        auth()->user()->organizations()->create($this->except('organization'));
+        Helpers::user()->organizations()->create($this->except('organization'));
 
         $this->reset();
 

@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'user_avito_sub' => \App\Http\Middleware\UserAvitoSubPermission::class,
             'user_ozon_sub' => \App\Http\Middleware\UserOzonSubPermission::class,
             'user_wb_sub' => \App\Http\Middleware\UserWbSubPermission::class,
+            'dynamic.auth' => \App\Http\Middleware\DynamicAuthGuard::class
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

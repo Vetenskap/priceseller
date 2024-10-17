@@ -62,7 +62,7 @@ class ItemEdit extends BaseComponent
 
     public function deleteAttribute(array $mainAttribute): void
     {
-        $attribute = auth()->user()->itemAttributes()->where('id', $mainAttribute['id'])->first();
+        $attribute = $this->currentUser()->itemAttributes()->where('id', $mainAttribute['id'])->first();
         $attribute->delete();
     }
 

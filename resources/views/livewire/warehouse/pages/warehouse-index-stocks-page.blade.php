@@ -14,7 +14,7 @@
             <x-secondary-button wire:click="export">Экспортировать</x-secondary-button>
         </x-blocks.center-block>
         <x-blocks.main-block>
-            <livewire:warehouses-items-export.warehouses-items-export-index :model="auth()->user()"/>
+            <livewire:warehouses-items-export.warehouses-items-export-index :model="$this->currentUser()"/>
         </x-blocks.main-block>
     </x-layouts.main-container>
     <x-layouts.main-container>
@@ -25,7 +25,7 @@
             <x-success-button wire:click="downloadTemplate">Скачать шаблон</x-success-button>
         </x-blocks.flex-block>
         <x-file-block action="import" />
-        <livewire:warehouses-items-import.warehouses-items-import-index :model="auth()->user()"/>
+        <livewire:warehouses-items-import.warehouses-items-import-index :model="$this->currentUser()"/>
     </x-layouts.main-container>
     <div wire:loading wire:target="export, import">
         <x-loader/>

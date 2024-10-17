@@ -13,9 +13,9 @@ class ModuleIndex extends BaseComponent
 {
     public function changeOpen(array $module): void
     {
-        $userModule = auth()->user()->modules()->where('module_id', $module['id'])->first();
+        $userModule = $this->currentUser()->modules()->where('module_id', $module['id'])->first();
 
-        if (!ModuleService::moduleIsVisible($module['name'], auth()->user())) {
+        if (!ModuleService::moduleIsVisible($module['name'], $this->currentUser())) {
             return;
         }
 
@@ -23,7 +23,7 @@ class ModuleIndex extends BaseComponent
             $userModule->enabled = !$userModule->enabled;
             $userModule->save();
         } else {
-            auth()->user()->modules()->create([
+            $this->currentUser()->modules()->create([
                 'module_id' => $module['id'],
                 'enabled' => true
             ]);

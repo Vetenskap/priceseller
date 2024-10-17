@@ -5,9 +5,8 @@ namespace App\Livewire;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
-use Livewire\Component;
 
-class Cookies extends Component
+class Cookies extends BaseComponent
 {
     public function acceptCookies(): void
     {

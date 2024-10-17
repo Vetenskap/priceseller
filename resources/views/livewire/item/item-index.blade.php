@@ -110,7 +110,7 @@
                         <x-blocks.center-block>
                             <flux:button wire:click="export">Экспортировать</flux:button>
                         </x-blocks.center-block>
-                        <livewire:items-export-report.items-export-report-index :model="auth()->user()"/>
+                        <livewire:items-export-report.items-export-report-index :model="$this->currentUser()"/>
                     </flux:card>
                 </x-blocks.main-block>
                 <x-blocks.main-block>
@@ -122,7 +122,7 @@
                             <flux:button wire:click="downloadTemplate">Скачать шаблон</flux:button>
                         </x-blocks.center-block>
                         <x-file-block action="import"/>
-                        <livewire:items-import-report.items-import-report-index :model="auth()->user()"/>
+                        <livewire:items-import-report.items-import-report-index :model="$this->currentUser()"/>
                     </flux:card>
                 </x-blocks.main-block>
             </flux:tab.panel>

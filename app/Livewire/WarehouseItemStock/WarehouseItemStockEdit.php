@@ -2,14 +2,14 @@
 
 namespace App\Livewire\WarehouseItemStock;
 
+use App\Livewire\BaseComponent;
 use App\Models\ItemWarehouseStock;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\Validate;
-use Livewire\Component;
 
-class WarehouseItemStockEdit extends Component
+class WarehouseItemStockEdit extends BaseComponent
 {
     public ItemWarehouseStock $stock;
 

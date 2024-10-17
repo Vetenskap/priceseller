@@ -1,7 +1,7 @@
 <div class="bg-red-300 text-center flex">
-    @if(\App\Services\UsersPermissionsService::getExpiringSubscribes(auth()->user())->isNotEmpty() && !session('notification.div'))
+    @if(\App\Services\UsersPermissionsService::getExpiringSubscribes(\App\Helpers\Helpers::user())->isNotEmpty() && !session('notification.div'))
         <div class="w-11/12">
-            @foreach(\App\Services\UsersPermissionsService::getExpiringSubscribes(auth()->user()) as $permission)
+            @foreach(\App\Services\UsersPermissionsService::getExpiringSubscribes(\App\Helpers\Helpers::user()) as $permission)
                 <x-titles.sub-title
                     :name="'Ваша подписка '  . $permission->name . ' истекает ' . $permission->pivot->expires"/>
             @endforeach

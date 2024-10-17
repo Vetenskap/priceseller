@@ -2,9 +2,7 @@
 
 namespace App\Livewire;
 
-use Livewire\Component;
-
-class NotificationDiv extends Component
+class NotificationDiv extends BaseComponent
 {
     public function mount()
     {

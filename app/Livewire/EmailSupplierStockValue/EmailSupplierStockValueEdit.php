@@ -2,6 +2,7 @@
 
 namespace App\Livewire\EmailSupplierStockValue;
 
+use App\Livewire\BaseComponent;
 use App\Livewire\Forms\EmailSupplierStockValuePostForm;
 use App\Models\EmailSupplier;
 use App\Models\EmailSupplierStockValue;
@@ -9,9 +10,8 @@ use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\On;
-use Livewire\Component;
 
-class EmailSupplierStockValueEdit extends Component
+class EmailSupplierStockValueEdit extends BaseComponent
 {
     public EmailSupplier $emailSupplier;
 

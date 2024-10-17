@@ -24,7 +24,7 @@ class SupplierIndex extends BaseComponent
 
     public function mount(): void
     {
-        $this->dirtySuppliers = auth()->user()->suppliers->pluck(null, 'id')->toArray();
+        $this->dirtySuppliers = $this->currentUser()->suppliers->pluck(null, 'id')->toArray();
     }
 
     public function updatedDirtySuppliers(): void
@@ -51,7 +51,7 @@ class SupplierIndex extends BaseComponent
     #[Computed]
     public function suppliers()
     {
-        return auth()->user()
+        return $this->currentUser()
             ->suppliers()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();

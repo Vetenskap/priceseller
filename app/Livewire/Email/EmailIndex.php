@@ -24,7 +24,7 @@ class EmailIndex extends BaseComponent
 
     public function mount(): void
     {
-        $this->dirtyEmails = auth()->user()->emails->pluck(null, 'id')->toArray();
+        $this->dirtyEmails = $this->currentUser()->emails->pluck(null, 'id')->toArray();
     }
 
     public function updatedDirtyEmails(): void
@@ -46,7 +46,7 @@ class EmailIndex extends BaseComponent
     #[Computed]
     public function emails()
     {
-        return auth()->user()
+        return $this->currentUser()
             ->emails()
             ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();

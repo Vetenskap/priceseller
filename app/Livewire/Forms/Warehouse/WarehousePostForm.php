@@ -2,6 +2,7 @@
 
 namespace App\Livewire\Forms\Warehouse;
 
+use App\Helpers\Helpers;
 use App\Models\Warehouse;
 use Illuminate\Support\Arr;
 use Illuminate\Validation\Rule;
@@ -24,7 +25,7 @@ class WarehousePostForm extends Form
                 'string',
                 'min:3',
                 Rule::unique('warehouses', 'name')
-                    ->where('user_id', auth()->user()->id)
+                    ->where('user_id', Helpers::user()->id)
                     ->when($this->warehouse, fn (Unique $unique) => $unique->ignore($this->warehouse->id, 'id')),
             ],
         ];
@@ -40,7 +41,7 @@ class WarehousePostForm extends Form
     {
         $this->validate();
 
-        auth()->user()->warehouses()->create($this->except('warehouse'));
+        Helpers::user()->warehouses()->create($this->except('warehouse'));
 
         $this->reset();
 

@@ -1,8 +1,9 @@
 <?php
 
 namespace App\Helpers;
+use App\Models\Employee;
 use App\Models\User;
-use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 
 class Helpers {
@@ -20,6 +21,26 @@ class Helpers {
 
     static public function getUserTimeZone(?User $user = null)
     {
-        return optional(auth()->user())->timezone ?? ($user ? $user->timezone : config('app.timezone'));
+        return optional(static::user())->timezone ?? ($user ? $user->timezone : config('app.timezone'));
+    }
+
+    static public function currentUser(): Employee|User
+    {
+        if (Auth::guard('employee')->check()) {
+            // Если авторизован сотрудник
+            return Auth::guard('employee')->user();
+        }
+
+        return Auth::user(); // Обычный пользователь
+    }
+
+    static public function user(): User
+    {
+        if (Auth::guard('employee')->check()) {
+            // Если авторизован сотрудник
+            return Auth::guard('employee')->user()->user;
+        }
+
+        return Auth::user(); // Обычный пользователь
     }
 }

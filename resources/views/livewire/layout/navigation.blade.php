@@ -43,7 +43,8 @@ new class extends Component {
                                 wire:navigate.hover>
                         {{ __('Почта') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('suppliers.index')" :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
+                    <x-nav-link :href="route('suppliers.index')"
+                                :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
                                 wire:navigate.hover>
                         {{ __('Поставщики') }}
                     </x-nav-link>
@@ -51,7 +52,8 @@ new class extends Component {
                                 wire:navigate.hover>
                         {{ __('Товары') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('bundles.index')" :active="request()->routeIs('bundles.index', 'bundles.edit')"
+                    <x-nav-link :href="route('bundles.index')"
+                                :active="request()->routeIs('bundles.index', 'bundles.edit')"
                                 wire:navigate.hover>
                         {{ __('Комплекты') }}
                     </x-nav-link>
@@ -95,7 +97,8 @@ new class extends Component {
                     <x-slot name="trigger">
                         <button
                             class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
-                            <div x-data="{{ json_encode(['name' => session()->has('employee_id') ? \App\Models\Employee::find(session('employee_id'))->name : auth()->user()->name]) }}" x-text="name"
+                            <div x-data="{{ json_encode(['name' => \App\Helpers\Helpers::currentUser()->name]) }}"
+                                 x-text="name"
                                  x-on:profile-updated.window="name = $event.detail.name"></div>
 
                             <div class="ms-1">
@@ -110,7 +113,7 @@ new class extends Component {
                     </x-slot>
 
                     <x-slot name="content">
-                        @if(!session()->has('employee_id'))
+                        @if(get_class(\App\Helpers\Helpers::currentUser()) === \App\Models\User::class)
                             <x-dropdown-link :href="route('profile')" wire:navigate>
                                 {{ __('Профиль') }}
                             </x-dropdown-link>
@@ -148,11 +151,13 @@ new class extends Component {
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Главная') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('emails.index')" :active="request()->routeIs('emails.index', 'email.edit')"
+            <x-responsive-nav-link :href="route('emails.index')"
+                                   :active="request()->routeIs('emails.index', 'email.edit')"
                                    wire:navigate.hover>
                 {{ __('Почта') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('suppliers.index')" :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
+            <x-responsive-nav-link :href="route('suppliers.index')"
+                                   :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
                                    wire:navigate.hover>
                 {{ __('Поставщики') }}
             </x-responsive-nav-link>
@@ -160,7 +165,8 @@ new class extends Component {
                                    wire:navigate.hover>
                 {{ __('Товары') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('bundles.index')" :active="request()->routeIs('bundles.index', 'bundles.edit')"
+            <x-responsive-nav-link :href="route('bundles.index')"
+                                   :active="request()->routeIs('bundles.index', 'bundles.edit')"
                                    wire:navigate.hover>
                 {{ __('Комплекты') }}
             </x-responsive-nav-link>
@@ -185,7 +191,8 @@ new class extends Component {
                                    wire:navigate.hover>
                 {{ __('Модули') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('base-settings.index')" :active="request()->routeIs('base-settings.index')"
+            <x-responsive-nav-link :href="route('base-settings.index')"
+                                   :active="request()->routeIs('base-settings.index')"
                                    wire:navigate.hover>
                 {{ __('Общие настройки') }}
             </x-responsive-nav-link>
@@ -195,15 +202,17 @@ new class extends Component {
         <div class="pt-4 pb-1 border-t border-gray-200 dark:border-gray-600">
             <div class="px-4">
                 <div class="font-medium text-base text-gray-800 dark:text-gray-200"
-                     x-data="{{ json_encode(['name' => auth()->user()->name]) }}" x-text="name"
+                     x-data="{{ json_encode(['name' => \App\Helpers\Helpers::currentUser()->name]) }}" x-text="name"
                      x-on:profile-updated.window="name = $event.detail.name"></div>
-                <div class="font-medium text-sm text-gray-500">{{ auth()->user()->email }}</div>
+                <div class="font-medium text-sm text-gray-500">{{ \App\Helpers\Helpers::currentUser()->email }}</div>
             </div>
 
             <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile')" wire:navigate>
-                    {{ __('Профиль') }}
-                </x-responsive-nav-link>
+                @if(get_class(\App\Helpers\Helpers::currentUser()) === \App\Models\User::class)
+                    <x-responsive-nav-link :href="route('profile')" wire:navigate>
+                        {{ __('Профиль') }}
+                    </x-responsive-nav-link>
+                @endif
 
                 <!-- Authentication -->
                 <button wire:click="logout" class="w-full text-start">

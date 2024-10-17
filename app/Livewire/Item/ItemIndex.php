@@ -52,7 +52,7 @@ class ItemIndex extends BaseComponent
     #[Computed]
     public function items()
     {
-        return auth()->user()
+        return $this->currentUser()
             ->items()
             ->with('supplier')
             ->filters()
@@ -63,7 +63,7 @@ class ItemIndex extends BaseComponent
 
     public function mount(): void
     {
-        $this->user = auth()->user();
+        $this->user = $this->currentUser();
     }
 
     public function downloadTemplate(): BinaryFileResponse
@@ -75,7 +75,7 @@ class ItemIndex extends BaseComponent
     {
         $status = $this->checkTtlJob(Export::getUniqueId($this->user), Export::class);
 
-        if ($status) Export::dispatch(auth()->user(), ItemService::class);
+        if ($status) Export::dispatch($this->currentUser(), ItemService::class);
     }
 
     public function import(): void

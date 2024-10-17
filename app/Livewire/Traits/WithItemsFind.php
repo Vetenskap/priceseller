@@ -10,8 +10,7 @@ trait WithItemsFind
 
     public function updatedSearchItems(): void
     {
-        $this->items = auth()
-            ->user()
+        $this->items = $this->currentUser()
             ->items()
             ->when($this->searchItems, function ($query) {
                 $query->where('code', 'like', '%' . $this->searchItems . '%')->orWhere('name', 'like', '%' . $this->searchItems . '%');
