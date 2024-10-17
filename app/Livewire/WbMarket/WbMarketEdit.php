@@ -7,6 +7,9 @@ use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Jobs\MarketRelationshipsAndCommissions;
 use App\Jobs\MarketUpdateApiCommissions;
+use App\Jobs\Wb\NullStocks;
+use App\Jobs\Wb\TestPrice;
+use App\Jobs\Wb\TestStock;
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
 use App\Livewire\Traits\WithFilters;
@@ -214,45 +217,23 @@ class WbMarketEdit extends BaseComponent
 
     public function testPrice(): void
     {
-        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
-            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
+        TestPrice::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
 
-            if ($warehouses) {
-                $service = new WbItemPriceService($supplier, $this->market, $warehouses);
-                $service->updatePrice();
-            }
-        });
-
-        $this->addSuccessTestPriceNotification();
+        $this->addJobNotification();
     }
 
     public function testStocks(): void
     {
-        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
-            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
+        TestStock::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
 
-            if ($warehouses) {
-                $service = new WbItemPriceService($supplier, $this->market, $warehouses);
-                $service->updateStock();
-            }
-        });
-
-        $this->addSuccessTestStocksPriceNotification();
+        $this->addJobNotification();
     }
 
     public function nullStocks(): void
     {
-        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
-            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
+        NullStocks::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
 
-            if ($warehouses) {
-                $service = new WbItemPriceService($supplier, $this->market, $warehouses);
-                $service->nullAllStocks();
-                $service->unloadAllStocks();
-            }
-        });
-
-        $this->addSuccessNullStocksNotification();
+        $this->addJobNotification();
     }
 
 }

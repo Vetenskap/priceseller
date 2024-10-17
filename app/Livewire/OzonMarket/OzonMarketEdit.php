@@ -7,6 +7,9 @@ use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Jobs\MarketRelationshipsAndCommissions;
 use App\Jobs\MarketUpdateApiCommissions;
+use App\Jobs\Ozon\NullStocks;
+use App\Jobs\Ozon\TestPrice;
+use App\Jobs\Ozon\TestStock;
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
 use App\Livewire\Traits\WithFilters;
@@ -212,47 +215,21 @@ class OzonMarketEdit extends BaseComponent
 
     public function testPrice(): void
     {
-        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
+        TestPrice::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
 
-            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
-
-            if ($warehouses) {
-                $service = new OzonItemPriceService($supplier, $this->market, $warehouses);
-                $service->updatePrice();
-            }
-
-        });
-
-        $this->addSuccessTestPriceNotification();
+        $this->addJobNotification();
     }
 
     public function testStocks(): void
     {
-        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
+        TestStock::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
 
-            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
-
-            if ($warehouses) {
-                $service = new OzonItemPriceService($supplier, $this->market, $warehouses);
-                $service->updateStock();
-            }
-        });
-
-        $this->addSuccessTestStocksPriceNotification();
+        $this->addJobNotification();
     }
 
     public function nullStocks(): void
     {
-        $this->currentUser()->suppliers->each(function (Supplier $supplier) {
-
-            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
-
-            if ($warehouses) {
-                $service = new OzonItemPriceService($supplier, $this->market, $warehouses);
-                $service->nullAllStocks();
-                $service->unloadAllStocks();
-            }
-        });
+        NullStocks::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
 
         $this->addSuccessNullStocksNotification();
     }
