@@ -215,7 +215,7 @@ class WbMarketEdit extends BaseComponent
     public function testPrice(): void
     {
         $this->currentUser()->suppliers->each(function (Supplier $supplier) {
-            $warehouses = array_keys($this->testWarehouses[$supplier->getKey()] ?? []);
+            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
 
             if ($warehouses) {
                 $service = new WbItemPriceService($supplier, $this->market, $warehouses);
@@ -229,7 +229,7 @@ class WbMarketEdit extends BaseComponent
     public function testStocks(): void
     {
         $this->currentUser()->suppliers->each(function (Supplier $supplier) {
-            $warehouses = array_keys($this->testWarehouses[$supplier->getKey()] ?? []);
+            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
 
             if ($warehouses) {
                 $service = new WbItemPriceService($supplier, $this->market, $warehouses);
@@ -243,7 +243,7 @@ class WbMarketEdit extends BaseComponent
     public function nullStocks(): void
     {
         $this->currentUser()->suppliers->each(function (Supplier $supplier) {
-            $warehouses = array_keys($this->testWarehouses[$supplier->getKey()] ?? []);
+            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
 
             if ($warehouses) {
                 $service = new WbItemPriceService($supplier, $this->market, $warehouses);

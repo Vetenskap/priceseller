@@ -214,7 +214,7 @@ class OzonMarketEdit extends BaseComponent
     {
         $this->currentUser()->suppliers->each(function (Supplier $supplier) {
 
-            $warehouses = array_keys($this->testWarehouses[$supplier->getKey()] ?? []);
+            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
 
             if ($warehouses) {
                 $service = new OzonItemPriceService($supplier, $this->market, $warehouses);
@@ -230,7 +230,7 @@ class OzonMarketEdit extends BaseComponent
     {
         $this->currentUser()->suppliers->each(function (Supplier $supplier) {
 
-            $warehouses = array_keys($this->testWarehouses[$supplier->getKey()] ?? []);
+            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
 
             if ($warehouses) {
                 $service = new OzonItemPriceService($supplier, $this->market, $warehouses);
@@ -245,7 +245,7 @@ class OzonMarketEdit extends BaseComponent
     {
         $this->currentUser()->suppliers->each(function (Supplier $supplier) {
 
-            $warehouses = array_keys($this->testWarehouses[$supplier->getKey()] ?? []);
+            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
 
             if ($warehouses) {
                 $service = new OzonItemPriceService($supplier, $this->market, $warehouses);
