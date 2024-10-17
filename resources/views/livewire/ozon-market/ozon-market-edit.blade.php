@@ -107,7 +107,7 @@
                 <x-marketPages.export :market="$market"/>
             </flux:tab.panel>
             <flux:tab.panel name="actions">
-                <x-marketPages.actions/>
+                <x-marketPages.actions :market="$market"/>
             </flux:tab.panel>
         </flux:tab-group>
     </x-layouts.main-container>

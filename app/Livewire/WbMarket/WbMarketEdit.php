@@ -61,6 +61,8 @@ class WbMarketEdit extends BaseComponent
 
     public $directLink = false;
 
+    public $testWarehouses = [];
+
     #[Computed]
     public function items(): LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator|array
     {
@@ -212,8 +214,12 @@ class WbMarketEdit extends BaseComponent
     public function testPrice(): void
     {
         $this->currentUser()->suppliers->each(function (Supplier $supplier) {
-            $service = new WbItemPriceService($supplier, $this->market);
-            $service->updatePrice();
+            $warehouses = array_keys($this->testWarehouses[$supplier->getKey()] ?? []);
+
+            if ($warehouses) {
+                $service = new WbItemPriceService($supplier, $this->market, $warehouses);
+                $service->updatePrice();
+            }
         });
 
         $this->addSuccessTestPriceNotification();
@@ -222,8 +228,12 @@ class WbMarketEdit extends BaseComponent
     public function testStocks(): void
     {
         $this->currentUser()->suppliers->each(function (Supplier $supplier) {
-            $service = new WbItemPriceService($supplier, $this->market);
-            $service->updateStock();
+            $warehouses = array_keys($this->testWarehouses[$supplier->getKey()] ?? []);
+
+            if ($warehouses) {
+                $service = new WbItemPriceService($supplier, $this->market, $warehouses);
+                $service->updateStock();
+            }
         });
 
         $this->addSuccessTestStocksPriceNotification();
@@ -232,9 +242,13 @@ class WbMarketEdit extends BaseComponent
     public function nullStocks(): void
     {
         $this->currentUser()->suppliers->each(function (Supplier $supplier) {
-            $service = new WbItemPriceService($supplier, $this->market);
-            $service->nullAllStocks();
-            $service->unloadAllStocks();
+            $warehouses = array_keys($this->testWarehouses[$supplier->getKey()] ?? []);
+
+            if ($warehouses) {
+                $service = new WbItemPriceService($supplier, $this->market, $warehouses);
+                $service->nullAllStocks();
+                $service->unloadAllStocks();
+            }
         });
 
         $this->addSuccessNullStocksNotification();
