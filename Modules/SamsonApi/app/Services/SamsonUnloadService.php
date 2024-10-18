@@ -24,6 +24,7 @@ class SamsonUnloadService
         $this->samsonApi = $samsonApi;
         $this->user = $samsonApi->user;
         $this->nullUpdated();
+        $this->nullAllStocks();
     }
 
     public function getNewPrice(): void
@@ -88,5 +89,10 @@ class SamsonUnloadService
     protected function nullUpdated(): void
     {
         $this->samsonApi->supplier->items()->update(['updated' => false]);
+    }
+
+    protected function nullAllStocks(): void
+    {
+        $this->samsonApi->supplierWarehouse->stocks()->update(['stock' => 0]);
     }
 }

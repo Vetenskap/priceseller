@@ -27,6 +27,7 @@ class BergUnloadService
         $this->bergApi = $bergApi;
         $this->user = $bergApi->user;
         $this->nullUpdated();
+        $this->nullAllStocks();
     }
 
     public function getNewPrice(): void
@@ -108,5 +109,12 @@ class BergUnloadService
     protected function nullUpdated(): void
     {
         $this->bergApi->supplier->items()->update(['updated' => false]);
+    }
+
+    protected function nullAllStocks(): void
+    {
+        $this->bergApi->warehouses->each(function (BergApiWarehouse $warehouse) {
+            $warehouse->supplierWarehouse->stocks()->update(['stock' => 0]);
+        });
     }
 }

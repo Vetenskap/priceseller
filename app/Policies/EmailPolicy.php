@@ -6,6 +6,7 @@ use App\Models\Email;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
+use Illuminate\Support\Facades\Gate;
 
 class EmailPolicy
 {
@@ -19,7 +20,10 @@ class EmailPolicy
     public function view(User|Employee $user, Email $email): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $email->user_id;
+            if ($user->user_id === $email->user_id) {
+                return Gate::allows('view-email', ['employee' => $user]);
+            }
+            return false;
         } else {
             return $user->id === $email->user_id;
         }

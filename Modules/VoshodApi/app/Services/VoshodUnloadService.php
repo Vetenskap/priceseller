@@ -24,6 +24,7 @@ class VoshodUnloadService
         $this->voshodApi = $voshodApi;
         $this->user = $voshodApi->user;
         $this->nullUpdated();
+        $this->nullAllStocks();
     }
 
     public function getNewPrice(): void
@@ -99,5 +100,12 @@ class VoshodUnloadService
     protected function nullUpdated(): void
     {
         $this->voshodApi->supplier->items()->update(['updated' => false]);
+    }
+
+    protected function nullAllStocks(): void
+    {
+        $this->voshodApi->warehouses->each(function (VoshodApiWarehouse $warehouse) {
+            $warehouse->supplierWarehouse->stocks()->update(['stock' => 0]);
+        });
     }
 }
