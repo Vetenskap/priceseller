@@ -10,6 +10,7 @@ use App\Models\OzonItem;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
 use App\Models\OzonWarehouseStock;
+use App\Models\OzonWarehouseSupplier;
 use App\Models\OzonWarehouseSupplierWarehouse;
 use App\Models\OzonWarehouseUserWarehouse;
 use App\Models\Supplier;
@@ -188,15 +189,19 @@ class OzonItemPriceService
     {
         $this->market->warehouses->each(function (OzonWarehouse $warehouse) use ($ozonItem) {
 
+            /** @var OzonWarehouseSupplier $ozonWarehouseSupplier */
             $ozonWarehouseSupplier = $warehouse->suppliers()
                 ->where('supplier_id', $this->supplier->id)
                 ->first();
 
             if (!$ozonWarehouseSupplier) return;
 
-            $supplierWarehousesIds = $ozonWarehouseSupplier->warehouses->map(function (OzonWarehouseSupplierWarehouse $warehouse) {
-                return $warehouse->supplierWarehouse->id;
-            });
+            $supplierWarehousesIds = $ozonWarehouseSupplier->warehouses()
+                ->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds)
+                ->get()
+                ->map(function (OzonWarehouseSupplierWarehouse $warehouse) {
+                    return $warehouse->supplierWarehouse->id;
+                });
 
             $new_count = 0;
 

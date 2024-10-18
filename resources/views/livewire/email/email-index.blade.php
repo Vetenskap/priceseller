@@ -1,27 +1,29 @@
 <div>
     <x-layouts.header name="Почта"/>
 
-    <flux:modal name="create-email" class="md:w-96 space-y-6">
-        <div>
-            <flux:heading size="lg">Создание почты</flux:heading>
-        </div>
+    @if($this->user()->can('create-emails'))
+        <flux:modal name="create-email" class="md:w-96 space-y-6">
+            <div>
+                <flux:heading size="lg">Создание почты</flux:heading>
+            </div>
 
-        <flux:input wire:model="form.name" label="Наименование" badge="обязательное" required/>
-        <flux:input wire:model="form.address" label="Адрес" badge="обязательное" type="email" required/>
-        <flux:input wire:model="form.password" label="Адрес" badge="обязательное" type="password" required/>
+            <flux:input wire:model="form.name" label="Наименование" badge="обязательное" required/>
+            <flux:input wire:model="form.address" label="Адрес" badge="обязательное" type="email" required/>
+            <flux:input wire:model="form.password" label="Адрес" badge="обязательное" type="password" required/>
 
-        <div class="flex">
-            <flux:spacer/>
+            <div class="flex">
+                <flux:spacer/>
 
-            <flux:button variant="primary" wire:click="store">Создать</flux:button>
-        </div>
-    </flux:modal>
+                <flux:button variant="primary" wire:click="store">Создать</flux:button>
+            </div>
+        </flux:modal>
 
-    <x-layouts.actions>
-        <flux:modal.trigger name="create-email">
-            <flux:button>Добавить</flux:button>
-        </flux:modal.trigger>
-    </x-layouts.actions>
+        <x-layouts.actions>
+            <flux:modal.trigger name="create-email">
+                <flux:button>Добавить</flux:button>
+            </flux:modal.trigger>
+        </x-layouts.actions>
+    @endif
 
     <x-layouts.main-container>
         <x-blocks.main-block>
@@ -49,20 +51,26 @@
 
                                 <flux:cell variant="strong">{{ $email->updated_at }}</flux:cell>
 
-                                <flux:cell align="right">
-                                    <flux:switch wire:model.live="dirtyEmails.{{ $email->id }}.open"/>
-                                </flux:cell>
+                                @if($this->user()->can('update-emails'))
+                                    <flux:cell align="right">
+                                        <flux:switch wire:model.live="dirtyEmails.{{ $email->id }}.open"/>
+                                    </flux:cell>
+                                @endif
 
-                                <flux:cell align="right">
-                                    <flux:button :href="route('email.edit', ['email' => $email->getKey()])" icon="pencil-square" size="sm" />
-                                </flux:cell>
+                                @if($this->user()->can('view-emails'))
+                                    <flux:cell align="right">
+                                        <flux:button :href="route('email.edit', ['email' => $email->getKey()])" icon="pencil-square" size="sm" />
+                                    </flux:cell>
+                                @endif
 
-                                <flux:cell align="right">
-                                    <flux:button icon="trash" variant="danger" size="sm"
-                                                 wire:click="destroy({{ json_encode($email->getKey()) }})"
-                                                 wire:target="destroy({{ json_encode($email->getKey()) }})"
-                                                 wire:confirm="Вы действительно хотите удалить эту почту? Это действие нельзя будет отменить."/>
-                                </flux:cell>
+                                @if($this->user()->can('delete-emails'))
+                                    <flux:cell align="right">
+                                        <flux:button icon="trash" variant="danger" size="sm"
+                                                     wire:click="destroy({{ json_encode($email->getKey()) }})"
+                                                     wire:target="destroy({{ json_encode($email->getKey()) }})"
+                                                     wire:confirm="Вы действительно хотите удалить эту почту? Это действие нельзя будет отменить."/>
+                                    </flux:cell>
+                                @endif
 
                             </flux:row>
                         @endforeach

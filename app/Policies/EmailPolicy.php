@@ -21,7 +21,7 @@ class EmailPolicy
     {
         if ($user instanceof Employee) {
             if ($user->user_id === $email->user_id) {
-                return Gate::allows('view-email', ['employee' => $user]);
+                return $user->can('view-emails');
             }
             return false;
         } else {
@@ -29,15 +29,21 @@ class EmailPolicy
         }
     }
 
-    public function create(User $user): bool
+    public function create(User|Employee $user): bool
     {
+        if ($user instanceof Employee) {
+            return $user->can('create-emails');
+        }
         return true;
     }
 
     public function update(User|Employee $user, Email $email): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $email->user_id;
+            if ($user->user_id === $email->user_id) {
+                return $user->can('update-emails');
+            }
+            return false;
         } else {
             return $user->id === $email->user_id;
         }
@@ -46,7 +52,10 @@ class EmailPolicy
     public function delete(User|Employee $user, Email $email): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $email->user_id;
+            if ($user->user_id === $email->user_id) {
+                return $user->can('delete-emails');
+            }
+            return false;
         } else {
             return $user->id === $email->user_id;
         }

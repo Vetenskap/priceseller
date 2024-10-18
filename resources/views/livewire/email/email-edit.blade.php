@@ -2,31 +2,35 @@
     <x-layouts.header :name="$email->name"/>
 
     <x-layouts.actions>
-        <flux:button wire:click="update">Сохранить</flux:button>
-        <flux:modal.trigger name="delete-email">
-            <flux:button variant="danger">Удалить</flux:button>
-        </flux:modal.trigger>
+        @if($this->user()->can('update-emails'))
+            <flux:button wire:click="update">Сохранить</flux:button>
+        @endif
+        @if($this->user()->can('delete-emails'))
+                <flux:modal.trigger name="delete-email">
+                    <flux:button variant="danger">Удалить</flux:button>
+                </flux:modal.trigger>
 
-        <flux:modal name="delete-email" class="min-w-[22rem] space-y-6">
-            <div>
-                <flux:heading size="lg">Удалить почту?</flux:heading>
+                <flux:modal name="delete-email" class="min-w-[22rem] space-y-6">
+                    <div>
+                        <flux:heading size="lg">Удалить почту?</flux:heading>
 
-                <flux:subheading>
-                    <p>Вы действительно хотите удалить эту почту?</p>
-                    <p>Это действие нельзя будет отменить.</p>
-                </flux:subheading>
-            </div>
+                        <flux:subheading>
+                            <p>Вы действительно хотите удалить эту почту?</p>
+                            <p>Это действие нельзя будет отменить.</p>
+                        </flux:subheading>
+                    </div>
 
-            <div class="flex gap-2">
-                <flux:spacer/>
+                    <div class="flex gap-2">
+                        <flux:spacer/>
 
-                <flux:modal.close>
-                    <flux:button variant="ghost">Отменить</flux:button>
-                </flux:modal.close>
+                        <flux:modal.close>
+                            <flux:button variant="ghost">Отменить</flux:button>
+                        </flux:modal.close>
 
-                <flux:button wire:click="destroy" variant="danger">Удалить</flux:button>
-            </div>
-        </flux:modal>
+                        <flux:button wire:click="destroy" variant="danger">Удалить</flux:button>
+                    </div>
+                </flux:modal>
+        @endif
     </x-layouts.actions>
 
     <x-layouts.main-container>

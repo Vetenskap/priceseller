@@ -19,21 +19,30 @@ class SupplierPolicy
     public function view(User|Employee $user, Supplier $supplier): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $supplier->user_id;
+            if ($user->user_id === $supplier->user_id) {
+                return $user->can('view-suppliers');
+            }
+            return false;
         } else {
             return $user->id === $supplier->user_id;
         }
     }
 
-    public function create(User $user): bool
+    public function create(User|Employee $user): bool
     {
+        if ($user instanceof Employee) {
+            return $user->can('create-suppliers');
+        }
         return true;
     }
 
     public function update(User|Employee $user, Supplier $supplier): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $supplier->user_id;
+            if ($user->user_id === $supplier->user_id) {
+                return $user->can('update-suppliers');
+            }
+            return false;
         } else {
             return $user->id === $supplier->user_id;
         }
@@ -42,7 +51,10 @@ class SupplierPolicy
     public function delete(User|Employee $user, Supplier $supplier): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $supplier->user_id;
+            if ($user->user_id === $supplier->user_id) {
+                return $user->can('delete-suppliers');
+            }
+            return false;
         } else {
             return $user->id === $supplier->user_id;
         }

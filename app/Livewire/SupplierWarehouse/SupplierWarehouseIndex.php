@@ -39,12 +39,16 @@ class SupplierWarehouseIndex extends BaseComponent
     {
         $supplierWarehouse = SupplierWarehouse::find($id);
 
+        $this->authorizeForUser($this->user(), 'update', $this->supplier);
+
         $this->form->setSupplierWarehouse($supplierWarehouse);
         $this->form->destroy();
     }
 
     public function store(): void
     {
+        $this->authorizeForUser($this->user(), 'update', $this->supplier);
+
         $this->form->store();
     }
 

@@ -39,15 +39,20 @@ new class extends Component {
                     {{--                    <x-nav-link :href="route('avito')" :active="request()->routeIs('avito')" wire:navigate.hover>--}}
                     {{--                        {{ __('Авито') }}--}}
                     {{--                    </x-nav-link>--}}
-                    <x-nav-link :href="route('emails.index')" :active="request()->routeIs('emails.index', 'email.edit')"
-                                wire:navigate.hover>
-                        {{ __('Почта') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('suppliers.index')"
-                                :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
-                                wire:navigate.hover>
-                        {{ __('Поставщики') }}
-                    </x-nav-link>
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-emails'))
+                        <x-nav-link :href="route('emails.index')"
+                                    :active="request()->routeIs('emails.index', 'email.edit')"
+                                    wire:navigate.hover>
+                            {{ __('Почта') }}
+                        </x-nav-link>
+                    @endif
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-suppliers'))
+                        <x-nav-link :href="route('suppliers.index')"
+                                    :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
+                                    wire:navigate.hover>
+                            {{ __('Поставщики') }}
+                        </x-nav-link>
+                    @endif
                     <x-nav-link :href="route('items')" :active="request()->routeIs('items', 'item-edit')"
                                 wire:navigate.hover>
                         {{ __('Товары') }}
@@ -151,16 +156,20 @@ new class extends Component {
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Главная') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('emails.index')"
-                                   :active="request()->routeIs('emails.index', 'email.edit')"
-                                   wire:navigate.hover>
-                {{ __('Почта') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('suppliers.index')"
-                                   :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
-                                   wire:navigate.hover>
-                {{ __('Поставщики') }}
-            </x-responsive-nav-link>
+            @if(\App\Helpers\Helpers::currentUser()->can('view-emails'))
+                <x-responsive-nav-link :href="route('emails.index')"
+                                       :active="request()->routeIs('emails.index', 'email.edit')"
+                                       wire:navigate.hover>
+                    {{ __('Почта') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(\App\Helpers\Helpers::currentUser()->can('view-suppliers'))
+                <x-responsive-nav-link :href="route('suppliers.index')"
+                                       :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
+                                       wire:navigate.hover>
+                    {{ __('Поставщики') }}
+                </x-responsive-nav-link>
+            @endif
             <x-responsive-nav-link :href="route('items')" :active="request()->routeIs('items', 'item-edit')"
                                    wire:navigate.hover>
                 {{ __('Товары') }}

@@ -27,11 +27,15 @@ class EmailSupplierWarehouseEdit extends BaseComponent
     #[On('email-supplier-warehouse-update')]
     public function update(): void
     {
+        $this->authorizeForUser($this->user(), 'update', $this->emailSupplier->email);
+
         $this->form->update();
     }
 
     public function destroy(): void
     {
+        $this->authorizeForUser($this->user(), 'update', $this->emailSupplier->email);
+
         $this->form->destroy();
         $this->dispatch('email-supplier-warehouse-delete')->component(EmailSupplierWarehouseIndex::class);
     }

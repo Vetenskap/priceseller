@@ -9,6 +9,7 @@ use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Listeners\ResponseReceivedLogging;
 use App\Models\Employee;
+use App\Models\Permission;
 use App\Models\User;
 use App\Services\Item\ItemPriceWithCacheService;
 use App\Services\Item\ItemPriceServiceInterface;
@@ -78,9 +79,11 @@ class AppServiceProvider extends ServiceProvider
 //            return $request->user() && $request->user()->isAdmin();
         });
 
+        $this->gates();
+
     }
 
-    public function gates()
+    public function gates(): void
     {
         Gate::define('viewPulse', function (User $user) {
 
@@ -89,8 +92,15 @@ class AppServiceProvider extends ServiceProvider
             return $user->isAdmin();
         });
 
-        Gate::define('view-email', function (Employee $employee) {
-             return $employee->permissions()->where('value', 'emails')->first()?->pivot->view;
-        });
+        foreach (Permission::where('type', 'employee')->get() as $permission) {
+            foreach (['view', 'create', 'update', 'delete'] as $action) {
+                Gate::define($action .'-' . $permission->value, function (Employee|User $user) use ($permission, $action) {
+                    if ($user instanceof Employee) {
+                        return $user->permissions()->where('value', $permission->value)->first()?->pivot->{$action};
+                    }
+                    return true;
+                });
+            }
+        }
     }
 }

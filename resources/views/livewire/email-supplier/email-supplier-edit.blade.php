@@ -9,14 +9,16 @@
             <flux:button @click="open = ! open">Редактировать</flux:button>
 
             <div x-show="open" class="mt-6 space-y-6">
-                <div class="flex justify-between">
-                    <flux:button wire:click="update">Сохранить</flux:button>
-                    <flux:button
-                        variant="danger"
-                        wire:click="destroy"
-                        wire:confirm="Вы действительно хотите удалить этого поставщика с почты?"
-                    >Удалить</flux:button>
-                </div>
+                @if($this->user()->can('update-emails'))
+                    <div class="flex justify-between">
+                        <flux:button wire:click="update">Сохранить</flux:button>
+                        <flux:button
+                            variant="danger"
+                            wire:click="destroy"
+                            wire:confirm="Вы действительно хотите удалить этого поставщика с почты?"
+                        >Удалить</flux:button>
+                    </div>
+                @endif
 
                 <flux:card>
                     <flux:tab.group>

@@ -30,7 +30,11 @@ class SupplierIndex extends BaseComponent
     public function updatedDirtySuppliers(): void
     {
         collect($this->dirtySuppliers)->each(function ($supplier, $key) {
+
             $supplierModel = Supplier::findOrFail($key);
+
+            $this->authorizeForUser($this->user(), 'update', $supplierModel);
+
             $supplierModel->update($supplier);
         });
     }
@@ -42,7 +46,11 @@ class SupplierIndex extends BaseComponent
 
     public function destroy($id): void
     {
-        $this->form->setSupplier(Supplier::findOrFail($id));
+        $supplier = Supplier::findOrFail($id);
+
+        $this->authorizeForUser($this->user(), 'delete', $supplier);
+
+        $this->form->setSupplier($supplier);
         $this->form->destroy();
 
         $this->addSuccessDeleteNotification();
@@ -69,6 +77,10 @@ class SupplierIndex extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        if (!$this->user()->can('view-suppliers')) {
+            abort(403);
+        }
+
         return view('livewire.supplier.supplier-index');
     }
 }

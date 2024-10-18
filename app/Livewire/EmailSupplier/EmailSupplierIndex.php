@@ -28,7 +28,7 @@ class EmailSupplierIndex extends BaseComponent
 
     public function store(): void
     {
-        $this->authorizeForUser($this->user(), 'create', EmailSupplier::class);
+        $this->authorizeForUser($this->user(), 'update', $this->email);
 
         $this->form->store();
 
@@ -37,7 +37,7 @@ class EmailSupplierIndex extends BaseComponent
 
     public function delete(string $id): void
     {
-        $this->authorizeForUser($this->user(), 'delete', EmailSupplier::where('supplier_id', $id)->where('email_id', $this->email->id)->first());
+        $this->authorizeForUser($this->user(), 'update', $this->email);
 
         $this->form->destroy($id);
     }

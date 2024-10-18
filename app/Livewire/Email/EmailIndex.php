@@ -31,6 +31,9 @@ class EmailIndex extends BaseComponent
     {
         collect($this->dirtyEmails)->each(function ($email, $key) {
             $emailModel = Email::findOrFail($key);
+
+            $this->authorizeForUser($this->user(), 'update', $emailModel);
+
             $emailModel->update($email);
         });
     }
@@ -64,6 +67,10 @@ class EmailIndex extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        if (!$this->user()->can('view-emails')) {
+            abort(403);
+        }
+
         return view('livewire.email.email-index');
     }
 }

@@ -27,6 +27,8 @@ class EmailSupplierWarehouseIndex extends BaseComponent
 
     public function store(): void
     {
+        $this->authorizeForUser($this->user(), 'update', $this->emailSupplier->email);
+
         $this->form->store();
 
         \Flux::modal('create-email-supplier-warehouse-' . $this->emailSupplier->getKey())->close();

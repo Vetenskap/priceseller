@@ -12,6 +12,7 @@ use App\Models\WbItem;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
 use App\Models\WbWarehouseStock;
+use App\Models\WbWarehouseSupplier;
 use App\Models\WbWarehouseSupplierWarehouse;
 use App\Models\WbWarehouseUserWarehouse;
 use Illuminate\Database\Eloquent\Builder;
@@ -159,13 +160,16 @@ class WbItemPriceService
     {
         $this->market->warehouses->each(function (WbWarehouse $warehouse) use ($wbItem) {
 
+            /** @var WbWarehouseSupplier $wbWarehouseSupplier */
             $wbWarehouseSupplier = $warehouse->suppliers()
                 ->where('supplier_id', $this->supplier->id)
                 ->first();
 
             if (!$wbWarehouseSupplier) return;
 
-            $supplierWarehousesIds = $wbWarehouseSupplier->warehouses
+            $supplierWarehousesIds = $wbWarehouseSupplier->warehouses()
+                ->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds)
+                ->get()
                 ->map(function (WbWarehouseSupplierWarehouse $warehouse) {
                     return $warehouse->supplierWarehouse->id;
                 });

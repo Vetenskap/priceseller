@@ -31,7 +31,7 @@ class EmailEdit extends BaseComponent
 
     public function destroy(): void
     {
-//        $this->authorizeForUser($this->user(), 'delete', $this->email);
+        $this->authorizeForUser($this->user(), 'delete', $this->email);
 
         $this->form->destroy();
 
@@ -41,7 +41,7 @@ class EmailEdit extends BaseComponent
     public function update(): void
     {
 
-//        $this->authorizeForUser($this->user(), 'update', $this->email);
+        $this->authorizeForUser($this->user(), 'update', $this->email);
 
         $this->form->update();
 

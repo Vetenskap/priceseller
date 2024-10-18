@@ -12,6 +12,7 @@ use App\Models\Item;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
 use App\Models\Supplier;
+use App\Models\SupplierWarehouse;
 use App\Models\User;
 use App\Models\WbItem;
 use App\Models\WbMarket;
@@ -50,12 +51,12 @@ class Test extends Command
      */
     public function handle()
     {
-        $supplier = EmailSupplier::find(17);
+        $item = Item::where('code', '1-052002')->first();
+        $wbItem = $item->wbItems()->first();
+        $market = $wbItem->market;
+        $supplier = $item->supplier;
 
-        $wbMarkets = $supplier->supplier->user->wbMarkets()
-            ->get()
-            ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $supplier->supplier->id)->first());
-
-        dd($wbMarkets);
+        $service = new WbItemPriceService($supplier, $market, ['9d0b5d3d-7351-4e51-ae82-7d955360b990']);
+        $service->recountStockWbItem($wbItem);
     }
 }

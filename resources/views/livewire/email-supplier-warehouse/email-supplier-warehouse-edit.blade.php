@@ -8,12 +8,14 @@
                 <flux:option value="{{ $warehouse->id }}">{{$warehouse->name}}</flux:option>
             @endforeach
         </flux:select>
-        <div class="self-end">
-            <flux:button
-                variant="danger"
-                wire:click="destroy"
-                wire:confirm="Вы действительно хотите удалить этот склад?"
-            >Удалить</flux:button>
-        </div>
+        @if($this->user()->can('update-emails'))
+            <div class="self-end">
+                <flux:button
+                    variant="danger"
+                    wire:click="destroy"
+                    wire:confirm="Вы действительно хотите удалить этот склад?"
+                >Удалить</flux:button>
+            </div>
+        @endif
     </div>
 </div>
