@@ -60,7 +60,7 @@ class SupplierIndex extends BaseComponent
 
     public function store(): void
     {
-        $this->authorize('create', Supplier::class);
+        $this->authorizeForUser($this->user(), 'create', Supplier::class);
 
         $this->form->store();
 

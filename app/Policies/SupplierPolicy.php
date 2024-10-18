@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Employee;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
@@ -15,9 +16,13 @@ class SupplierPolicy
         return true;
     }
 
-    public function view(User $user, Supplier $supplier): bool
+    public function view(User|Employee $user, Supplier $supplier): bool
     {
-        return $user->id === $supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $supplier->user_id;
+        } else {
+            return $user->id === $supplier->user_id;
+        }
     }
 
     public function create(User $user): bool
@@ -25,23 +30,39 @@ class SupplierPolicy
         return true;
     }
 
-    public function update(User $user, Supplier $supplier): bool
+    public function update(User|Employee $user, Supplier $supplier): bool
     {
-        return $user->id === $supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $supplier->user_id;
+        } else {
+            return $user->id === $supplier->user_id;
+        }
     }
 
-    public function delete(User $user, Supplier $supplier): bool
+    public function delete(User|Employee $user, Supplier $supplier): bool
     {
-        return $user->id === $supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $supplier->user_id;
+        } else {
+            return $user->id === $supplier->user_id;
+        }
     }
 
-    public function restore(User $user, Supplier $supplier): bool
+    public function restore(User|Employee $user, Supplier $supplier): bool
     {
-        return $user->id === $supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $supplier->user_id;
+        } else {
+            return $user->id === $supplier->user_id;
+        }
     }
 
-    public function forceDelete(User $user, Supplier $supplier): bool
+    public function forceDelete(User|Employee $user, Supplier $supplier): bool
     {
-        return $user->id === $supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $supplier->user_id;
+        } else {
+            return $user->id === $supplier->user_id;
+        }
     }
 }

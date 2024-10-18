@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Employee;
 use App\Models\User;
 use App\Models\WbWarehouse;
 use Illuminate\Auth\Access\Response;
@@ -19,9 +20,13 @@ class WbWarehousePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, WbWarehouse $wbWarehouse): bool
+    public function view(User|Employee $user, WbWarehouse $wbWarehouse): bool
     {
-        return $user->id === $wbWarehouse->market->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $wbWarehouse->market->user_id;
+        } else {
+            return $user->id === $wbWarehouse->market->user_id;
+        }
     }
 
     /**
@@ -35,32 +40,48 @@ class WbWarehousePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, WbWarehouse $wbWarehouse): bool
+    public function update(User|Employee $user, WbWarehouse $wbWarehouse): bool
     {
-        return $user->id === $wbWarehouse->market->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $wbWarehouse->market->user_id;
+        } else {
+            return $user->id === $wbWarehouse->market->user_id;
+        }
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, WbWarehouse $wbWarehouse): bool
+    public function delete(User|Employee $user, WbWarehouse $wbWarehouse): bool
     {
-        return $user->id === $wbWarehouse->market->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $wbWarehouse->market->user_id;
+        } else {
+            return $user->id === $wbWarehouse->market->user_id;
+        }
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, WbWarehouse $wbWarehouse): bool
+    public function restore(User|Employee $user, WbWarehouse $wbWarehouse): bool
     {
-        return $user->id === $wbWarehouse->market->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $wbWarehouse->market->user_id;
+        } else {
+            return $user->id === $wbWarehouse->market->user_id;
+        }
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, WbWarehouse $wbWarehouse): bool
+    public function forceDelete(User|Employee $user, WbWarehouse $wbWarehouse): bool
     {
-        return $user->id === $wbWarehouse->market->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $wbWarehouse->market->user_id;
+        } else {
+            return $user->id === $wbWarehouse->market->user_id;
+        }
     }
 }

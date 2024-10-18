@@ -58,7 +58,7 @@ class ItemsExportReportIndex extends BaseComponent
     {
         $report = ItemsExportReport::find($id);
 
-        $this->authorize('delete', $report);
+        $this->authorizeForUser($this->user(), 'delete', $report);
 
         ItemsExportReportService::destroy($report, $this->model);
 

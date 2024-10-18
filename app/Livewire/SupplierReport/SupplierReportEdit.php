@@ -34,7 +34,7 @@ class SupplierReportEdit extends BaseComponent
 
     public function destroy(): RedirectResponse
     {
-        $this->authorize('delete', $this->report);
+        $this->authorizeForUser($this->user(), 'delete', $this->report);
 
         $this->report->delete();
 
@@ -43,7 +43,7 @@ class SupplierReportEdit extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $this->authorize('view', $this->report);
+        $this->authorizeForUser($this->user(), 'view', $this->report);
 
         return view('livewire.supplier-report.supplier-report-edit');
     }

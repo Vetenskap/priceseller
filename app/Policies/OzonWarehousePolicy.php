@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
+use App\Models\Employee;
 use App\Models\OzonWarehouse;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class OzonWarehousePolicy
 {
@@ -19,9 +19,13 @@ class OzonWarehousePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, OzonWarehouse $ozonWarehouse): bool
+    public function view(User|Employee $user, OzonWarehouse $ozonWarehouse): bool
     {
-        return $user->id === $ozonWarehouse->market->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $ozonWarehouse->market->user_id;
+        } else {
+            return $user->id === $ozonWarehouse->market->user_id;
+        }
     }
 
     /**
@@ -35,32 +39,48 @@ class OzonWarehousePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, OzonWarehouse $ozonWarehouse): bool
+    public function update(User|Employee $user, OzonWarehouse $ozonWarehouse): bool
     {
-        return $user->id === $ozonWarehouse->market->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $ozonWarehouse->market->user_id;
+        } else {
+            return $user->id === $ozonWarehouse->market->user_id;
+        }
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, OzonWarehouse $ozonWarehouse): bool
+    public function delete(User|Employee $user, OzonWarehouse $ozonWarehouse): bool
     {
-        return $user->id === $ozonWarehouse->market->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $ozonWarehouse->market->user_id;
+        } else {
+            return $user->id === $ozonWarehouse->market->user_id;
+        }
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, OzonWarehouse $ozonWarehouse): bool
+    public function restore(User|Employee $user, OzonWarehouse $ozonWarehouse): bool
     {
-        return $user->id === $ozonWarehouse->market->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $ozonWarehouse->market->user_id;
+        } else {
+            return $user->id === $ozonWarehouse->market->user_id;
+        }
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, OzonWarehouse $ozonWarehouse): bool
+    public function forceDelete(User|Employee $user, OzonWarehouse $ozonWarehouse): bool
     {
-        return $user->id === $ozonWarehouse->market->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $ozonWarehouse->market->user_id;
+        } else {
+            return $user->id === $ozonWarehouse->market->user_id;
+        }
     }
 }

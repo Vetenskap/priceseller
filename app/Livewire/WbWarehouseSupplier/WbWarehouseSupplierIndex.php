@@ -29,7 +29,7 @@ class WbWarehouseSupplierIndex extends BaseComponent
         $this->validate();
 
         // TODO: add authorization
-//        $this->authorize('create', OzonWarehouseSupplier::class);
+//        $this->authorizeForUser($this->user(), 'create', OzonWarehouseSupplier::class);
 
         $this->warehouse->suppliers()->create([
             'supplier_id' => $this->supplier_id

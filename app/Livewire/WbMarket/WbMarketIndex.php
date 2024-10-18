@@ -57,7 +57,7 @@ class WbMarketIndex extends BaseComponent
 
     public function store(): void
     {
-        $this->authorize('create', WbMarket::class);
+        $this->authorizeForUser($this->user(), 'create', WbMarket::class);
 
         if (!UsersPermissionsService::checkWbPremission($this->currentUser())) {
             $this->js((new Toast('Не разрешено', 'Ваша подписка не позволяет добавлять ещё кабинеты'))->warning());

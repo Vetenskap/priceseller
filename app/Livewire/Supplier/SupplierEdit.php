@@ -34,7 +34,7 @@ class SupplierEdit extends BaseComponent
 
     public function update(): void
     {
-        $this->authorize('update', $this->supplier);
+        $this->authorizeForUser($this->user(), 'update', $this->supplier);
 
         $this->form->update();
 
@@ -43,7 +43,7 @@ class SupplierEdit extends BaseComponent
 
     public function destroy(): void
     {
-        $this->authorize('delete', $this->supplier);
+        $this->authorizeForUser($this->user(), 'delete', $this->supplier);
 
         $this->form->destroy();
 
@@ -57,7 +57,7 @@ class SupplierEdit extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $this->authorize('view', $this->supplier);
+        $this->authorizeForUser($this->user(), 'view', $this->supplier);
 
         return view('livewire.supplier.supplier-edit');
     }

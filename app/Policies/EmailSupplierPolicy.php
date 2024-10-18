@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\EmailSupplier;
+use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
@@ -19,9 +20,13 @@ class EmailSupplierPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, EmailSupplier $emailSupplier): bool
+    public function view(User|Employee $user, EmailSupplier $emailSupplier): bool
     {
-        return $user->id === $emailSupplier->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $emailSupplier->supplier->user_id;
+        } else {
+            return $user->id === $emailSupplier->supplier->user_id;
+        }
     }
 
     /**
@@ -35,32 +40,48 @@ class EmailSupplierPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, EmailSupplier $emailSupplier): bool
+    public function update(User|Employee $user, EmailSupplier $emailSupplier): bool
     {
-        return $user->id === $emailSupplier->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $emailSupplier->supplier->user_id;
+        } else {
+            return $user->id === $emailSupplier->supplier->user_id;
+        }
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, EmailSupplier $emailSupplier): bool
+    public function delete(User|Employee $user, EmailSupplier $emailSupplier): bool
     {
-        return $user->id === $emailSupplier->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $emailSupplier->supplier->user_id;
+        } else {
+            return $user->id === $emailSupplier->supplier->user_id;
+        }
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, EmailSupplier $emailSupplier): bool
+    public function restore(User|Employee $user, EmailSupplier $emailSupplier): bool
     {
-        return $user->id === $emailSupplier->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $emailSupplier->supplier->user_id;
+        } else {
+            return $user->id === $emailSupplier->supplier->user_id;
+        }
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, EmailSupplier $emailSupplier): bool
+    public function forceDelete(User|Employee $user, EmailSupplier $emailSupplier): bool
     {
-        return $user->id === $emailSupplier->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $emailSupplier->supplier->user_id;
+        } else {
+            return $user->id === $emailSupplier->supplier->user_id;
+        }
     }
 }

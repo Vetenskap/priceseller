@@ -23,7 +23,7 @@ class WbWarehouseIndex extends BaseComponent
             return;
         }
 
-        $this->authorize('create', WbWarehouse::class);
+        $this->authorizeForUser($this->user(), 'create', WbWarehouse::class);
 
         $name = collect($this->apiWarehouses)->firstWhere('id', $this->selectedWarehouse)['name'];
 

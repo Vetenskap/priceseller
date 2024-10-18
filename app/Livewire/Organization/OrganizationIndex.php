@@ -40,7 +40,7 @@ class OrganizationIndex extends BaseComponent
 
     public function store(): void
     {
-        $this->authorize('create', Organization::class);
+        $this->authorizeForUser($this->user(), 'create', Organization::class);
 
         $this->form->store();
 

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 class Employee extends Authenticatable
@@ -45,6 +46,19 @@ class Employee extends Authenticatable
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
+    }
+
+    public function permissions(): BelongsToMany
+    {
+        return $this->belongsToMany(Permission::class, 'employee_permissions')
+            ->where('type', 'employee')
+            ->withTimestamps()
+            ->withPivot([
+                'view',
+                'create',
+                'update',
+                'delete',
+            ]);
     }
 
 }

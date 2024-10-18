@@ -18,7 +18,7 @@ class WbWarehouseEdit extends BaseComponent
 
     public function update(): void
     {
-        $this->authorize('update', $this->warehouse);
+        $this->authorizeForUser($this->user(), 'update', $this->warehouse);
 
         $this->warehouse->update($this->only('name'));
 
@@ -33,14 +33,14 @@ class WbWarehouseEdit extends BaseComponent
 
     public function destroy(): void
     {
-        $this->authorize('delete', $this->warehouse);
+        $this->authorizeForUser($this->user(), 'delete', $this->warehouse);
 
         $this->warehouse->delete();
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $this->authorize('view', $this->warehouse);
+        $this->authorizeForUser($this->user(), 'view', $this->warehouse);
 
         return view('livewire.wb-warehouse.wb-warehouse-edit');
     }

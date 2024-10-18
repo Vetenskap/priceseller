@@ -70,6 +70,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
     public function permissions(): BelongsToMany
     {
         return $this->belongsToMany(Permission::class, 'user_permissions')
+            ->where('type', 'main')
             ->withTimestamps()
             ->withPivot('expires');
     }

@@ -55,7 +55,7 @@ class EmailIndex extends BaseComponent
 
     public function store(): void
     {
-        $this->authorize('create', Email::class);
+        $this->authorizeForUser($this->user(), 'create', Email::class);
 
         $this->form->store();
 

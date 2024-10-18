@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
+use App\Models\Employee;
 use App\Models\SupplierReport;
 use App\Models\User;
-use Illuminate\Auth\Access\Response;
 
 class SupplierReportPolicy
 {
@@ -19,9 +19,13 @@ class SupplierReportPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, SupplierReport $supplierReport): bool
+    public function view(User|Employee $user, SupplierReport $supplierReport): bool
     {
-        return $user->id === $supplierReport->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $supplierReport->supplier->user_id;
+        } else {
+            return $user->id === $supplierReport->supplier->user_id;
+        }
     }
 
     /**
@@ -35,32 +39,48 @@ class SupplierReportPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, SupplierReport $supplierReport): bool
+    public function update(User|Employee $user, SupplierReport $supplierReport): bool
     {
-        return $user->id === $supplierReport->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $supplierReport->supplier->user_id;
+        } else {
+            return $user->id === $supplierReport->supplier->user_id;
+        }
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, SupplierReport $supplierReport): bool
+    public function delete(User|Employee $user, SupplierReport $supplierReport): bool
     {
-        return $user->id === $supplierReport->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $supplierReport->supplier->user_id;
+        } else {
+            return $user->id === $supplierReport->supplier->user_id;
+        }
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, SupplierReport $supplierReport): bool
+    public function restore(User|Employee $user, SupplierReport $supplierReport): bool
     {
-        return $user->id === $supplierReport->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $supplierReport->supplier->user_id;
+        } else {
+            return $user->id === $supplierReport->supplier->user_id;
+        }
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, SupplierReport $supplierReport): bool
+    public function forceDelete(User|Employee $user, SupplierReport $supplierReport): bool
     {
-        return $user->id === $supplierReport->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $supplierReport->supplier->user_id;
+        } else {
+            return $user->id === $supplierReport->supplier->user_id;
+        }
     }
 }

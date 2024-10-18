@@ -26,7 +26,7 @@ new class extends Component {
 
         $validated['password'] = Hash::make($validated['password']);
 
-        $employee = \$this->currentUser()->employees()->create($validated);
+        $employee = \auth()->user()->employees()->create($validated);
 
     }
 
@@ -98,26 +98,7 @@ new class extends Component {
         </div>
 
         <div class="mt-4">
-            <flux:card class="space-y-6">
-                <flux:heading size="xl">Список</flux:heading>
-                <flux:table>
-                    <flux:columns>
-                        <flux:column>Имя</flux:column>
-                        <flux:column>Почта</flux:column>
-                    </flux:columns>
-                    <flux:rows>
-                        @foreach(\$this->currentUser()->employees as $employee)
-                            <flux:row :key="$employee->getKey()">
-                                <flux:cell>{{$employee->name}}</flux:cell>
-                                <flux:cell>{{$employee->email}}</flux:cell>
-                                <flux:cell>
-                                    <flux:button icon="trash" wire:click="destroy({{$employee->getKey()}})"/>
-                                </flux:cell>
-                            </flux:row>
-                        @endforeach
-                    </flux:rows>
-                </flux:table>
-            </flux:card>
+            <livewire:employee.employee-index />
         </div>
     </form>
 </section>

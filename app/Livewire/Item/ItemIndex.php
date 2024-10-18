@@ -42,7 +42,7 @@ class ItemIndex extends BaseComponent
     {
         $item = Item::find($id);
 
-        $this->authorize('delete', $item);
+        $this->authorizeForUser($this->user(), 'delete', $item);
 
         $item->delete();
 

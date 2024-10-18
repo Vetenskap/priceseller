@@ -32,7 +32,7 @@ class WarehouseEdit extends BaseComponent
 
     public function update(): void
     {
-        $this->authorize('update', $this->warehouse);
+        $this->authorizeForUser($this->user(), 'update', $this->warehouse);
 
         $this->form->update();
 
@@ -41,14 +41,14 @@ class WarehouseEdit extends BaseComponent
 
     public function destroy(): void
     {
-        $this->authorize('delete', $this->warehouse);
+        $this->authorizeForUser($this->user(), 'delete', $this->warehouse);
 
         $this->form->destroy();
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $this->authorize('view', $this->warehouse);
+        $this->authorizeForUser($this->user(), 'view', $this->warehouse);
 
         return view('livewire.warehouse.warehouse-edit');
     }

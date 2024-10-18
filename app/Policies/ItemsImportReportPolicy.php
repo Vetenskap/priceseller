@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Models\Employee;
 use App\Models\ItemsImportReport;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
@@ -19,9 +20,13 @@ class ItemsImportReportPolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, ItemsImportReport $itemsImportReport): bool
+    public function view(User|Employee $user, ItemsImportReport $itemsImportReport): bool
     {
-        return $user->id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        if ($user instanceof Employee) {
+            return $user->user_id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        } else {
+            return $user->id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        }
     }
 
     /**
@@ -35,32 +40,48 @@ class ItemsImportReportPolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, ItemsImportReport $itemsImportReport): bool
+    public function update(User|Employee $user, ItemsImportReport $itemsImportReport): bool
     {
-        return $user->id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        if ($user instanceof Employee) {
+            return $user->user_id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        } else {
+            return $user->id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        }
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, ItemsImportReport $itemsImportReport): bool
+    public function delete(User|Employee $user, ItemsImportReport $itemsImportReport): bool
     {
-        return $user->id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        if ($user instanceof Employee) {
+            return $user->user_id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        } else {
+            return $user->id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        }
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, ItemsImportReport $itemsImportReport): bool
+    public function restore(User|Employee $user, ItemsImportReport $itemsImportReport): bool
     {
-        return $user->id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        if ($user instanceof Employee) {
+            return $user->user_id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        } else {
+            return $user->id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        }
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, ItemsImportReport $itemsImportReport): bool
+    public function forceDelete(User|Employee $user, ItemsImportReport $itemsImportReport): bool
     {
-        return $user->id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        if ($user instanceof Employee) {
+            return $user->user_id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        } else {
+            return $user->id === ($itemsImportReport->reportable->user_id ?? $itemsImportReport->reportable->id);
+        }
     }
 }

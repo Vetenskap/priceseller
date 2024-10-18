@@ -118,7 +118,7 @@ class WbMarketEdit extends BaseComponent
 
     public function update(): void
     {
-        $this->authorize('update', $this->market);
+        $this->authorizeForUser($this->user(), 'update', $this->market);
 
         $this->form->update();
 
@@ -127,7 +127,7 @@ class WbMarketEdit extends BaseComponent
 
     public function destroy(): void
     {
-        $this->authorize('delete', $this->market);
+        $this->authorizeForUser($this->user(), 'delete', $this->market);
 
         $this->form->destroy();
 
@@ -210,7 +210,7 @@ class WbMarketEdit extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $this->authorize('view', $this->market);
+        $this->authorizeForUser($this->user(), 'view', $this->market);
 
         return view('livewire.wb-market.wb-market-edit');
     }

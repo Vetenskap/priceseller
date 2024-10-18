@@ -18,8 +18,8 @@ class OzonMarketPolicy
 
     public function view(User|Employee $user, OzonMarket $ozonMarket): bool
     {
-        if (get_class($user) === Employee::class) {
-            return $user->user->id === $ozonMarket->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $ozonMarket->user_id;
         } else {
             return $user->id === $ozonMarket->user_id;
         }
@@ -32,8 +32,8 @@ class OzonMarketPolicy
 
     public function update(User|Employee $user, OzonMarket $ozonMarket): bool
     {
-        if (get_class($user) === Employee::class) {
-            return $user->user->id === $ozonMarket->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $ozonMarket->user_id;
         } else {
             return $user->id === $ozonMarket->user_id;
         }
@@ -41,8 +41,8 @@ class OzonMarketPolicy
 
     public function delete(User|Employee $user, OzonMarket $ozonMarket): bool
     {
-        if (get_class($user) === Employee::class) {
-            return $user->user->id === $ozonMarket->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $ozonMarket->user_id;
         } else {
             return $user->id === $ozonMarket->user_id;
         }
@@ -50,8 +50,8 @@ class OzonMarketPolicy
 
     public function restore(User|Employee $user, OzonMarket $ozonMarket): bool
     {
-        if (get_class($user) === Employee::class) {
-            return $user->user->id === $ozonMarket->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $ozonMarket->user_id;
         } else {
             return $user->id === $ozonMarket->user_id;
         }
@@ -59,8 +59,8 @@ class OzonMarketPolicy
 
     public function forceDelete(User|Employee $user, OzonMarket $ozonMarket): bool
     {
-        if (get_class($user) === Employee::class) {
-            return $user->user->id === $ozonMarket->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $ozonMarket->user_id;
         } else {
             return $user->id === $ozonMarket->user_id;
         }

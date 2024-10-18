@@ -33,7 +33,7 @@ class ItemEdit extends BaseComponent
 
     public function save(): void
     {
-        $this->authorize('update', $this->item);
+        $this->authorizeForUser($this->user(), 'update', $this->item);
 
         $result = $this->form->update();
 
@@ -46,7 +46,7 @@ class ItemEdit extends BaseComponent
 
     public function destroy(): void
     {
-        $this->authorize('delete', $this->item);
+        $this->authorizeForUser($this->user(), 'delete', $this->item);
 
         $this->form->delete();
 
@@ -68,7 +68,7 @@ class ItemEdit extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $this->authorize('view', $this->item);
+        $this->authorizeForUser($this->user(), 'view', $this->item);
 
         return view('livewire.item.item-edit');
     }

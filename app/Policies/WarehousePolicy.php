@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
+use App\Models\Employee;
 use App\Models\User;
 use App\Models\Warehouse;
-use Illuminate\Auth\Access\Response;
 
 class WarehousePolicy
 {
@@ -19,9 +19,13 @@ class WarehousePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, Warehouse $warehouse): bool
+    public function view(User|Employee $user, Warehouse $warehouse): bool
     {
-        return $user->id === $warehouse->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $warehouse->user_id;
+        } else {
+            return $user->id === $warehouse->user_id;
+        }
     }
 
     /**
@@ -35,32 +39,48 @@ class WarehousePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, Warehouse $warehouse): bool
+    public function update(User|Employee $user, Warehouse $warehouse): bool
     {
-        return $user->id === $warehouse->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $warehouse->user_id;
+        } else {
+            return $user->id === $warehouse->user_id;
+        }
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, Warehouse $warehouse): bool
+    public function delete(User|Employee $user, Warehouse $warehouse): bool
     {
-        return $user->id === $warehouse->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $warehouse->user_id;
+        } else {
+            return $user->id === $warehouse->user_id;
+        }
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, Warehouse $warehouse): bool
+    public function restore(User|Employee $user, Warehouse $warehouse): bool
     {
-        return $user->id === $warehouse->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $warehouse->user_id;
+        } else {
+            return $user->id === $warehouse->user_id;
+        }
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, Warehouse $warehouse): bool
+    public function forceDelete(User|Employee $user, Warehouse $warehouse): bool
     {
-        return $user->id === $warehouse->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $warehouse->user_id;
+        } else {
+            return $user->id === $warehouse->user_id;
+        }
     }
 }

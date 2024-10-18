@@ -16,24 +16,79 @@ class DatabaseSeeder extends Seeder
         $permissions = [
             [
                 'name' => 'Подписка ОЗОН до 5 кабинетов',
-                'value' => 'ozon_five_markets'
+                'value' => 'ozon_five_markets',
+                'type' => 'main'
             ],
             [
                 'name' => 'Подписка ВБ до 5 кабинетов',
-                'value' => 'wb_five_markets'
+                'value' => 'wb_five_markets',
+                'type' => 'main'
             ],
             [
                 'name' => 'Подписка ОЗОН до 10 кабинетов',
-                'value' => 'ozon_ten_markets'
+                'value' => 'ozon_ten_markets',
+                'type' => 'main'
             ],
             [
                 'name' => 'Подписка ВБ до 10 кабинетов',
-                'value' => 'wb_ten_markets'
+                'value' => 'wb_ten_markets',
+                'type' => 'main'
             ],
             [
                 'name' => 'Админ',
-                'value' => 'admin'
-            ]
+                'value' => 'admin',
+                'type' => 'main'
+            ],
+            [
+                'name' => 'Почта',
+                'value' => 'emails',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Поставщики',
+                'value' => 'suppliers',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Товары',
+                'value' => 'items',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Комплекты',
+                'value' => 'bundles',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'ОЗОН',
+                'value' => 'ozon',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'ВБ',
+                'value' => 'wb',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Организации',
+                'value' => 'organizations',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Склады',
+                'value' => 'warehouses',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Сборочник',
+                'value' => 'assembly',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Редактор контента',
+                'value' => 'editor_content',
+                'type' => 'employee'
+            ],
         ];
 
         foreach ($permissions as $permission) {

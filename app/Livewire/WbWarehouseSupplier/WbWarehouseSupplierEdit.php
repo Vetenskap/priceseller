@@ -16,7 +16,7 @@ class WbWarehouseSupplierEdit extends BaseComponent
     public function destroy(): void
     {
         // TODO: add authorization
-//        $this->authorize('delete', $this->supplier);
+//        $this->authorizeForUser($this->user(), 'delete', $this->supplier);
 
         $this->supplier->delete();
     }

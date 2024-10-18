@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\EmailSupplierStockValue;
+use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Auth\Access\Response;
 
@@ -19,9 +20,13 @@ class EmailSupplierStockValuePolicy
     /**
      * Determine whether the user can view the model.
      */
-    public function view(User $user, EmailSupplierStockValue $emailSupplierStockValue): bool
+    public function view(User|Employee $user, EmailSupplierStockValue $emailSupplierStockValue): bool
     {
-        return $user->id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        } else {
+            return $user->id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        }
     }
 
     /**
@@ -35,32 +40,48 @@ class EmailSupplierStockValuePolicy
     /**
      * Determine whether the user can update the model.
      */
-    public function update(User $user, EmailSupplierStockValue $emailSupplierStockValue): bool
+    public function update(User|Employee $user, EmailSupplierStockValue $emailSupplierStockValue): bool
     {
-        return $user->id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        } else {
+            return $user->id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        }
     }
 
     /**
      * Determine whether the user can delete the model.
      */
-    public function delete(User $user, EmailSupplierStockValue $emailSupplierStockValue): bool
+    public function delete(User|Employee $user, EmailSupplierStockValue $emailSupplierStockValue): bool
     {
-        return $user->id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        } else {
+            return $user->id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        }
     }
 
     /**
      * Determine whether the user can restore the model.
      */
-    public function restore(User $user, EmailSupplierStockValue $emailSupplierStockValue): bool
+    public function restore(User|Employee $user, EmailSupplierStockValue $emailSupplierStockValue): bool
     {
-        return $user->id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        } else {
+            return $user->id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        }
     }
 
     /**
      * Determine whether the user can permanently delete the model.
      */
-    public function forceDelete(User $user, EmailSupplierStockValue $emailSupplierStockValue): bool
+    public function forceDelete(User|Employee $user, EmailSupplierStockValue $emailSupplierStockValue): bool
     {
-        return $user->id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        } else {
+            return $user->id === $emailSupplierStockValue->emailSupplier->supplier->user_id;
+        }
     }
 }

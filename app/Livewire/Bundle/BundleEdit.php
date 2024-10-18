@@ -20,7 +20,7 @@ class BundleEdit extends BaseComponent
     {
         // TODO: add authorization
 
-//        $this->authorize('update', $this->bundle);
+//        $this->authorizeForUser($this->user(), 'update', $this->bundle);
 
         $this->form->update();
 

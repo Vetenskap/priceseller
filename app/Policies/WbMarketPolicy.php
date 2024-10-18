@@ -2,10 +2,10 @@
 
 namespace App\Policies;
 
+use App\Models\Employee;
 use App\Models\User;
 use App\Models\WbMarket;
 use Illuminate\Auth\Access\HandlesAuthorization;
-use Illuminate\Support\Facades\App;
 
 class WbMarketPolicy
 {
@@ -16,9 +16,13 @@ class WbMarketPolicy
         return true;
     }
 
-    public function view(User $user, WbMarket $wbMarket): bool
+    public function view(User|Employee $user, WbMarket $wbMarket): bool
     {
-        return $user->id === $wbMarket->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $wbMarket->user_id;
+        } else {
+            return $user->id === $wbMarket->user_id;
+        }
     }
 
     public function create(User $user): bool
@@ -26,23 +30,39 @@ class WbMarketPolicy
         return true;
     }
 
-    public function update(User $user, WbMarket $wbMarket): bool
+    public function update(User|Employee $user, WbMarket $wbMarket): bool
     {
-        return $user->id === $wbMarket->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $wbMarket->user_id;
+        } else {
+            return $user->id === $wbMarket->user_id;
+        }
     }
 
-    public function delete(User $user, WbMarket $wbMarket): bool
+    public function delete(User|Employee $user, WbMarket $wbMarket): bool
     {
-        return $user->id === $wbMarket->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $wbMarket->user_id;
+        } else {
+            return $user->id === $wbMarket->user_id;
+        }
     }
 
-    public function restore(User $user, WbMarket $wbMarket): bool
+    public function restore(User|Employee $user, WbMarket $wbMarket): bool
     {
-        return $user->id === $wbMarket->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $wbMarket->user_id;
+        } else {
+            return $user->id === $wbMarket->user_id;
+        }
     }
 
-    public function forceDelete(User $user, WbMarket $wbMarket): bool
+    public function forceDelete(User|Employee $user, WbMarket $wbMarket): bool
     {
-        return $user->id === $wbMarket->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $wbMarket->user_id;
+        } else {
+            return $user->id === $wbMarket->user_id;
+        }
     }
 }

@@ -51,7 +51,7 @@ class WarehouseIndex extends BaseComponent
 
     public function store(): void
     {
-        $this->authorize('create', Warehouse::class);
+        $this->authorizeForUser($this->user(), 'create', Warehouse::class);
 
         $this->form->store();
 

@@ -28,14 +28,14 @@ class EmailSupplierEdit extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $this->authorize('view', $this->emailSupplier);
+        $this->authorizeForUser($this->user(), 'view', $this->emailSupplier);
 
         return view('livewire.email-supplier.email-supplier-edit');
     }
 
     public function update(): void
     {
-        $this->authorize('update', $this->emailSupplier);
+        $this->authorizeForUser($this->user(), 'update', $this->emailSupplier);
 
         $this->form->update();
 
@@ -44,7 +44,7 @@ class EmailSupplierEdit extends BaseComponent
 
     public function destroy(): void
     {
-        $this->authorize('delete', $this->emailSupplier);
+        $this->authorizeForUser($this->user(), 'delete', $this->emailSupplier);
 
         $this->form->destroy($this->emailSupplier->supplier_id);
     }

@@ -31,7 +31,7 @@ class EmailEdit extends BaseComponent
 
     public function destroy(): void
     {
-        $this->authorize('delete', $this->email);
+//        $this->authorizeForUser($this->user(), 'delete', $this->email);
 
         $this->form->destroy();
 
@@ -41,7 +41,7 @@ class EmailEdit extends BaseComponent
     public function update(): void
     {
 
-        $this->authorize('update', $this->email);
+//        $this->authorizeForUser($this->user(), 'update', $this->email);
 
         $this->form->update();
 
@@ -50,7 +50,7 @@ class EmailEdit extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $this->authorize('view', $this->email);
+        $this->authorizeForUser($this->user(), 'view', $this->email);
 
         return view('livewire.email.email-edit');
     }

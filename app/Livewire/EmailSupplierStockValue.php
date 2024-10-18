@@ -20,7 +20,7 @@ class EmailSupplierStockValue extends BaseComponent
 
     public function save()
     {
-        $this->authorize('update', $this->stockValue);
+        $this->authorizeForUser($this->user(), 'update', $this->stockValue);
 
         $this->form->update();
 
@@ -29,7 +29,7 @@ class EmailSupplierStockValue extends BaseComponent
 
     public function render()
     {
-        $this->authorize('view', $this->stockValue);
+        $this->authorizeForUser($this->user(), 'view', $this->stockValue);
 
         return view('livewire.email-supplier-stock-value');
     }

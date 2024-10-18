@@ -259,13 +259,13 @@ class WbItemPriceService
 
                     if ($wbItem->wbitemable_type === Item::class) {
                         if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
-                            if (!$wbItem->wbitemable->updated || !$wbItem->wbitemable->unload_wb) {
+                            if (!$wbItem->wbitemable->unload_wb) {
                                 return true;
                             }
                         }
                     } else {
                         if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                            if ($wbItem->wbitemable->items->first(fn(Item $item) => !$item->updated || !$item->unload_wb)) {
+                            if ($wbItem->wbitemable->items->first(fn(Item $item) => !$item->unload_wb)) {
                                 return true;
                             }
                         }

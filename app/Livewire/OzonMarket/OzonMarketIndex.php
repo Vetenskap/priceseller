@@ -57,7 +57,7 @@ class OzonMarketIndex extends BaseComponent
 
     public function store(): void
     {
-        $this->authorize('create', OzonMarket::class);
+        $this->authorizeForUser($this->user(), 'create', OzonMarket::class);
 
         if (!UsersPermissionsService::checkOzonPermission($this->currentUser())) {
             $this->js((new Toast('Не разрешено', 'Ваша подписка не позволяет добавлять ещё кабинеты'))->warning());

@@ -33,7 +33,7 @@ class OzonWarehouseUserWarehouseIndex extends BaseComponent
         $this->validate();
 
         // TODO: add authorization
-//        $this->authorize('create', OzonWarehouseUserWarehouse::class);
+//        $this->authorizeForUser($this->user(), 'create', OzonWarehouseUserWarehouse::class);
 
         $this->warehouse->userWarehouses()->create([
             'warehouse_id' => $this->user_warehouse_id

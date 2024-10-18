@@ -287,13 +287,13 @@ class OzonItemPriceService
 
                     if ($ozonItem->ozonitemable_type === Item::class) {
                         if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
-                            if (!$ozonItem->ozonitemable->updated || !$ozonItem->ozonitemable->unload_ozon) {
+                            if (!$ozonItem->ozonitemable->unload_ozon) {
                                 return true;
                             }
                         }
                     } else {
                         if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                            if ($ozonItem->ozonitemable->items->first(fn(Item $item) => !$item->updated || !$item->unload_ozon)) {
+                            if ($ozonItem->ozonitemable->items->first(fn(Item $item) => !$item->unload_ozon)) {
                                 return true;
                             }
                         }

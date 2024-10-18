@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Imports\SupplierPriceImport;
 use App\Models\EmailSupplier;
+use App\Models\EmailSupplierWarehouse;
 use App\Models\Item;
 use App\Services\Item\ItemPriceService;
 use App\Services\Item\ItemPriceWithCacheService;
@@ -28,6 +29,7 @@ class EmailSupplierService
     public function unload(): void
     {
         $this->nullUpdated();
+        $this->nullAllStocks();
 
         SupplierReportService::changeMessage($this->supplier->supplier, 'Чтение прайса');
 
@@ -85,6 +87,13 @@ class EmailSupplierService
     protected function importHandle(): void
     {
         Excel::import(new SupplierPriceImport($this), $this->path);
+    }
+
+    protected function nullAllStocks(): void
+    {
+        $this->supplier->warehouses->each(function (EmailSupplierWarehouse $warehouse) {
+            $warehouse->supplierWarehouse->stocks()->update(['stock' => 0]);
+        });
     }
 
     protected function nullUpdated(): void

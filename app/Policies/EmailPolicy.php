@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\Email;
+use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
@@ -15,9 +16,13 @@ class EmailPolicy
         return true;
     }
 
-    public function view(User $user, Email $email): bool
+    public function view(User|Employee $user, Email $email): bool
     {
-        return $user->id === $email->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $email->user_id;
+        } else {
+            return $user->id === $email->user_id;
+        }
     }
 
     public function create(User $user): bool
@@ -25,23 +30,39 @@ class EmailPolicy
         return true;
     }
 
-    public function update(User $user, Email $email): bool
+    public function update(User|Employee $user, Email $email): bool
     {
-        return $user->id === $email->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $email->user_id;
+        } else {
+            return $user->id === $email->user_id;
+        }
     }
 
-    public function delete(User $user, Email $email): bool
+    public function delete(User|Employee $user, Email $email): bool
     {
-        return $user->id === $email->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $email->user_id;
+        } else {
+            return $user->id === $email->user_id;
+        }
     }
 
-    public function restore(User $user, Email $email): bool
+    public function restore(User|Employee $user, Email $email): bool
     {
-        return $user->id === $email->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $email->user_id;
+        } else {
+            return $user->id === $email->user_id;
+        }
     }
 
-    public function forceDelete(User $user, Email $email): bool
+    public function forceDelete(User|Employee $user, Email $email): bool
     {
-        return $user->id === $email->user_id;
+        if ($user instanceof Employee) {
+            return $user->user_id === $email->user_id;
+        } else {
+            return $user->id === $email->user_id;
+        }
     }
 }

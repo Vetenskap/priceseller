@@ -8,6 +8,7 @@ use App\Jobs\Email\CheckEmails;
 use App\Jobs\Export;
 use App\Jobs\Import;
 use App\Listeners\ResponseReceivedLogging;
+use App\Models\Employee;
 use App\Models\User;
 use App\Services\Item\ItemPriceWithCacheService;
 use App\Services\Item\ItemPriceServiceInterface;
@@ -77,11 +78,19 @@ class AppServiceProvider extends ServiceProvider
 //            return $request->user() && $request->user()->isAdmin();
         });
 
+    }
+
+    public function gates()
+    {
         Gate::define('viewPulse', function (User $user) {
 
             if (App::isLocal()) return true;
 
             return $user->isAdmin();
+        });
+
+        Gate::define('view-email', function (Employee $employee) {
+             return $employee->permissions()->where('value', 'emails')->first()?->pivot->view;
         });
     }
 }
