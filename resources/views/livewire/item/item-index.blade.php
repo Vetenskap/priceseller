@@ -65,32 +65,38 @@
 
                             <flux:rows>
                                 @foreach ($this->items as $item)
-                                    <flux:row :key="$item->getKey()" class="{{session('selected-item') == $item->getKey() ? 'bg-blue-200' : ''}}">
+                                    <flux:row :key="$item->getKey()"
+                                              class="{{session('selected-item') == $item->getKey() ? 'bg-blue-200' : ''}}">
                                         <flux:cell class="flex items-center gap-3">
                                             {{ $item->code }}
                                         </flux:cell>
 
-                                        <flux:cell class="whitespace-nowrap">{{ \Illuminate\Support\Str::limit($item->name, 50) }}</flux:cell>
+                                        <flux:cell
+                                            class="whitespace-nowrap">{{ \Illuminate\Support\Str::limit($item->name, 50) }}</flux:cell>
 
                                         <flux:cell class="whitespace-nowrap">{{ $item->supplier->name }}</flux:cell>
 
                                         <flux:cell>
-                                            <flux:badge size="sm" :color="$item->updated ? 'lime' : 'red'" inset="top bottom">{{$item->updated ? 'Да' : 'Нет'}}</flux:badge>
+                                            <flux:badge size="sm" :color="$item->updated ? 'lime' : 'red'"
+                                                        inset="top bottom">{{$item->updated ? 'Да' : 'Нет'}}</flux:badge>
                                         </flux:cell>
 
                                         <flux:cell variant="strong">{{ $item->updated_at }}</flux:cell>
 
                                         <flux:cell align="right">
-                                            <flux:button :href="route('item-edit', ['item' => $item->getKey()])" icon="pencil-square" size="sm"/>
+                                            <flux:button :href="route('item-edit', ['item' => $item->getKey()])"
+                                                         icon="pencil-square" size="sm"/>
                                         </flux:cell>
 
-                                        <flux:cell align="right">
-                                            <flux:button icon="trash" variant="danger" size="sm"
-                                                         wire:click="destroy({{ json_encode($item->getKey()) }})"
-                                                         wire:target="destroy({{ json_encode($item->getKey()) }})"
-                                                         wire:confirm="Вы действительно хотите удалить этот товар?"
-                                            />
-                                        </flux:cell>
+                                        @if($this->user()->can('delete-items'))
+                                            <flux:cell align="right">
+                                                <flux:button icon="trash" variant="danger" size="sm"
+                                                             wire:click="destroy({{ json_encode($item->getKey()) }})"
+                                                             wire:target="destroy({{ json_encode($item->getKey()) }})"
+                                                             wire:confirm="Вы действительно хотите удалить этот товар?"
+                                                />
+                                            </flux:cell>
+                                        @endif
 
                                     </flux:row>
                                 @endforeach
@@ -102,29 +108,33 @@
                 </x-blocks.main-block>
             </flux:tab.panel>
             <flux:tab.panel name="manage">
-                <x-blocks.main-block>
-                    <flux:card class="space-y-6">
-                        <x-blocks.center-block>
-                            <flux:heading size="xl">Экспорт</flux:heading>
-                        </x-blocks.center-block>
-                        <x-blocks.center-block>
-                            <flux:button wire:click="export">Экспортировать</flux:button>
-                        </x-blocks.center-block>
-                        <livewire:items-export-report.items-export-report-index :model="$this->currentUser()"/>
-                    </flux:card>
-                </x-blocks.main-block>
-                <x-blocks.main-block>
-                    <flux:card class="space-y-6">
-                        <x-blocks.center-block>
-                            <flux:heading size="xl">Создайте новые товары или обновите старые</flux:heading>
-                        </x-blocks.center-block>
-                        <x-blocks.center-block>
-                            <flux:button wire:click="downloadTemplate">Скачать шаблон</flux:button>
-                        </x-blocks.center-block>
-                        <x-file-block action="import"/>
-                        <livewire:items-import-report.items-import-report-index :model="$this->currentUser()"/>
-                    </flux:card>
-                </x-blocks.main-block>
+                @if($this->user()->can('view-items'))
+                    <x-blocks.main-block>
+                        <flux:card class="space-y-6">
+                            <x-blocks.center-block>
+                                <flux:heading size="xl">Экспорт</flux:heading>
+                            </x-blocks.center-block>
+                            <x-blocks.center-block>
+                                <flux:button wire:click="export">Экспортировать</flux:button>
+                            </x-blocks.center-block>
+                            <livewire:items-export-report.items-export-report-index :model="$this->currentUser()"/>
+                        </flux:card>
+                    </x-blocks.main-block>
+                @endif
+                @if($this->user()->can('create-items') && $this->user()->can('update-items') && $this->user()->can('delete-items'))
+                        <x-blocks.main-block>
+                            <flux:card class="space-y-6">
+                                <x-blocks.center-block>
+                                    <flux:heading size="xl">Создайте новые товары или обновите старые</flux:heading>
+                                </x-blocks.center-block>
+                                <x-blocks.center-block>
+                                    <flux:button wire:click="downloadTemplate">Скачать шаблон</flux:button>
+                                </x-blocks.center-block>
+                                <x-file-block action="import"/>
+                                <livewire:items-import-report.items-import-report-index :model="$this->currentUser()"/>
+                            </flux:card>
+                        </x-blocks.main-block>
+                @endif
             </flux:tab.panel>
         </flux:tab-group>
     </x-layouts.main-container>

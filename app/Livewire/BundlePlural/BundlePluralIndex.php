@@ -33,6 +33,8 @@ class BundlePluralIndex extends BaseComponent
 
     public function store(): void
     {
+        $this->authorizeForUser($this->user(), 'update', $this->bundle);
+
         $this->validate();
 
         $this->bundle->items()->attach($this->only('item_id'), [
@@ -45,6 +47,8 @@ class BundlePluralIndex extends BaseComponent
 
     public function destroy($id): void
     {
+        $this->authorizeForUser($this->user(), 'update', $this->bundle);
+
         $this->bundle->items()->detach($id);
     }
 

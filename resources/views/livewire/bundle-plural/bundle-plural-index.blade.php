@@ -1,25 +1,27 @@
 <div>
-    <x-blocks.main-block>
-        <flux:card class="space-y-6">
-            <flux:select variant="listbox" searchable placeholder="Выберите товар..." :filter="false"
-                         wire:model.live="item_id">
-                <x-slot name="search">
-                    <flux:select.search placeholder="Введите код или наименование товара..."
-                                        wire:model.live="searchItems"/>
-                </x-slot>
+    @if($this->user()->can('update-bundles'))
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
+                <flux:select variant="listbox" searchable placeholder="Выберите товар..." :filter="false"
+                             wire:model.live="item_id">
+                    <x-slot name="search">
+                        <flux:select.search placeholder="Введите код или наименование товара..."
+                                            wire:model.live="searchItems"/>
+                    </x-slot>
 
-                <flux:icon.loading wire:loading wire:target="searchItems"/>
+                    <flux:icon.loading wire:loading wire:target="searchItems"/>
 
-                @if($items)
-                    @foreach($items as $item)
-                        <flux:option :value="$item->getKey()">({{$item->code}}) {{$item->name}}</flux:option>
-                    @endforeach
-                @endif
-            </flux:select>
-            <flux:input type="number" wire:model.live="multiplicity" required label="Кратность отгрузки"/>
-            <flux:button wire:click="store">Связать</flux:button>
-        </flux:card>
-    </x-blocks.main-block>
+                    @if($items)
+                        @foreach($items as $item)
+                            <flux:option :value="$item->getKey()">({{$item->code}}) {{$item->name}}</flux:option>
+                        @endforeach
+                    @endif
+                </flux:select>
+                <flux:input type="number" wire:model.live="multiplicity" required label="Кратность отгрузки"/>
+                <flux:button wire:click="store">Связать</flux:button>
+            </flux:card>
+        </x-blocks.main-block>
+    @endif
     <x-blocks.main-block>
         <flux:card class="space-y-6">
             <flux:heading size="xl">Список</flux:heading>
@@ -40,16 +42,18 @@
                                 <flux:cell>{{$item->pivot->multiplicity}}</flux:cell>
                                 <flux:cell>{{$item->pivot->created_at}}</flux:cell>
                                 <flux:cell>{{$item->pivot->updated_at}}</flux:cell>
-                                <flux:cell>
-                                    <flux:button
-                                        icon="trash"
-                                        variant="danger"
-                                        size="sm"
-                                        wire:click="destroy({{json_encode($item->getKey())}})"
-                                        wire:target="destroy({{json_encode($item->getKey())}})"
-                                        wire:confirm="Вы действительно хотите удалить эту связь?"
-                                    />
-                                </flux:cell>
+                                @if($this->user()->can('update-bundles'))
+                                    <flux:cell>
+                                        <flux:button
+                                            icon="trash"
+                                            variant="danger"
+                                            size="sm"
+                                            wire:click="destroy({{json_encode($item->getKey())}})"
+                                            wire:target="destroy({{json_encode($item->getKey())}})"
+                                            wire:confirm="Вы действительно хотите удалить эту связь?"
+                                        />
+                                    </flux:cell>
+                                @endif
                             </flux:row>
                         @endforeach
                     </flux:rows>

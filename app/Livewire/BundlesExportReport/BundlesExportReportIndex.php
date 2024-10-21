@@ -19,6 +19,10 @@ class BundlesExportReportIndex extends BaseComponent
 
     public function export(): void
     {
+        if (!$this->user()->can('view-bundles')) {
+            abort(403);
+        }
+
         $status = $this->checkTtlJob(\App\Jobs\Bundle\BundlesExport::getUniqueId($this->currentUser()), \App\Jobs\Bundle\BundlesExport::class);
 
         if ($status) \App\Jobs\Bundle\BundlesExport::dispatch($this->currentUser());
@@ -35,6 +39,10 @@ class BundlesExportReportIndex extends BaseComponent
 
     public function destroy($id): void
     {
+        if (!$this->user()->can('view-bundles')) {
+            abort(403);
+        }
+
         $report = BundlesExportReport::find($id);
 
         BundlesExportReportService::destroy($report);
@@ -42,6 +50,10 @@ class BundlesExportReportIndex extends BaseComponent
 
     public function download($id): BinaryFileResponse
     {
+        if (!$this->user()->can('view-bundles')) {
+            abort(403);
+        }
+
         $report = BundlesExportReport::find($id);
 
         return BundlesExportReportService::download($report);
@@ -49,6 +61,10 @@ class BundlesExportReportIndex extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        if (!$this->user()->can('view-bundles')) {
+            abort(403);
+        }
+
         return view('livewire.bundles-export-report.bundles-export-report-index');
     }
 }

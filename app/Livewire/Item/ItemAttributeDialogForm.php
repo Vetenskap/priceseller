@@ -16,6 +16,10 @@ class ItemAttributeDialogForm extends BaseComponent
 
     public function submit(): void
     {
+        if (!$this->user()->can('update-items')) {
+            abort(403);
+        }
+
         $this->validate();
 
         $this->currentUser()->itemAttributes()->updateOrCreate([
@@ -35,6 +39,10 @@ class ItemAttributeDialogForm extends BaseComponent
 
     public function render()
     {
+        if (!$this->user()->can('update-items')) {
+            abort(403);
+        }
+
         return view('livewire.item.item-attribute-dialog-form');
     }
 }

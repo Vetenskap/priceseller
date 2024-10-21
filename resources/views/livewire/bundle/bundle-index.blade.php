@@ -36,13 +36,15 @@
                                             <flux:button icon="pencil-square" size="sm"
                                                          :href="route('bundles.edit', ['bundle' => $bundle->getKey()])"/>
                                         </flux:cell>
-                                        <flux:cell>
-                                            <flux:button icon="trash" variant="danger" size="sm"
-                                                         wire:click="destroy({{$bundle->getKey()}})"
-                                                         wire:target="destroy({{$bundle->getKey()}})"
-                                                         wire:confirm="Вы действительно хотите удалить этот комплект?"
-                                            />
-                                        </flux:cell>
+                                        @if($this->user()->can('delete-bundles'))
+                                            <flux:cell>
+                                                <flux:button icon="trash" variant="danger" size="sm"
+                                                             wire:click="destroy({{json_encode($bundle->getKey())}})"
+                                                             wire:target="destroy({{json_encode($bundle->getKey())}})"
+                                                             wire:confirm="Вы действительно хотите удалить этот комплект?"
+                                                />
+                                            </flux:cell>
+                                        @endif
                                     </flux:row>
                                 @endforeach
                             </flux:rows>
@@ -53,12 +55,18 @@
                 </x-blocks.main-block>
             </flux:tab.panel>
             <flux:tab.panel name="manage">
-                <livewire:bundles-export-report.bundles-export-report-index/>
-                <livewire:bundles-import-report.bundles-import-report-index/>
+                @if($this->user()->can('view-bundles'))
+                    <livewire:bundles-export-report.bundles-export-report-index/>
+                @endif
+                @if($this->user()->can('create-bundles') && $this->user()->can('update-bundles') && $this->user()->can('delete-bundles'))
+                    <livewire:bundles-import-report.bundles-import-report-index/>
+                @endif
             </flux:tab.panel>
             <flux:tab.panel name="plural">
-                <livewire:bundle-items-export-report.bundle-items-export-report-index/>
-                <livewire:bundle-items-import-report.bundle-items-import-report-index/>
+                @if($this->user()->can('update-bundles'))
+                    <livewire:bundle-items-export-report.bundle-items-export-report-index/>
+                    <livewire:bundle-items-import-report.bundle-items-import-report-index/>
+                @endif
             </flux:tab.panel>
         </flux:tab-group>
     </x-layouts.main-container>

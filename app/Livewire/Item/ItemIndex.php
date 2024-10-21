@@ -33,11 +33,6 @@ class ItemIndex extends BaseComponent
 
     public User $user;
 
-    public function edit($id): void
-    {
-        $this->redirect(route('item-edit', ['item' => $id]));
-    }
-
     public function destroy($id): void
     {
         $item = Item::find($id);
@@ -73,6 +68,10 @@ class ItemIndex extends BaseComponent
 
     public function export(): void
     {
+        if (!$this->user()->can('view-items')) {
+            abort(403);
+        }
+
         $status = $this->checkTtlJob(Export::getUniqueId($this->user), Export::class);
 
         if ($status) Export::dispatch($this->currentUser(), ItemService::class);
@@ -80,7 +79,9 @@ class ItemIndex extends BaseComponent
 
     public function import(): void
     {
-        sleep(10);
+        if (!$this->user()->can('create-items') || !$this->user()->can('update-items') || !$this->user()->can('delete-items')) {
+            abort(403);
+        }
 
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
@@ -98,6 +99,10 @@ class ItemIndex extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        if (!$this->user()->can('view-items')) {
+            abort(403);
+        }
+
         return view('livewire.item.item-index');
     }
 }

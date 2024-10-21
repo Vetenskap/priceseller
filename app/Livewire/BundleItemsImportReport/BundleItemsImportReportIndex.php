@@ -26,6 +26,10 @@ class BundleItemsImportReportIndex extends BaseComponent
 
     public function destroy($id): void
     {
+        if (!$this->user()->can('update-bundles')) {
+            abort(403);
+        }
+
         $report = BundleItemsImportReport::find($id);
 
         BundleItemsImportReportService::destroy($report);
@@ -33,11 +37,19 @@ class BundleItemsImportReportIndex extends BaseComponent
 
     public function downloadTemplate(): BinaryFileResponse
     {
+        if (!$this->user()->can('update-bundles')) {
+            abort(403);
+        }
+
         return \Excel::download(new \App\Exports\BundleItemsExport($this->currentUser(), true), "priceseller_bundles_plural_шаблон.xlsx");
     }
 
     public function import(): void
     {
+        if (!$this->user()->can('update-bundles')) {
+            abort(403);
+        }
+
         $uuid = Str::uuid();
         $ext = $this->file->getClientOriginalExtension();
         $path = $this->file->storeAs(BundleItemsService::PATH, $uuid . '.' . $ext);
@@ -64,6 +76,10 @@ class BundleItemsImportReportIndex extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        if (!$this->user()->can('update-bundles')) {
+            abort(403);
+        }
+
         return view('livewire.bundle-items-import-report.bundle-items-import-report-index');
     }
 }

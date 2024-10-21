@@ -18,9 +18,7 @@ class BundleEdit extends BaseComponent
 
     public function update(): void
     {
-        // TODO: add authorization
-
-//        $this->authorizeForUser($this->user(), 'update', $this->bundle);
+        $this->authorizeForUser($this->user(), 'update', $this->bundle);
 
         $this->form->update();
 
@@ -29,6 +27,8 @@ class BundleEdit extends BaseComponent
 
     public function destroy(): void
     {
+        $this->authorizeForUser($this->user(), 'delete', $this->bundle);
+
         $this->form->destroy();
 
         $this->redirectRoute('bundles.index');
@@ -41,6 +41,8 @@ class BundleEdit extends BaseComponent
 
     public function render(): Factory|Application|View|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        $this->authorizeForUser($this->user(), 'view', $this->bundle);
+
         return view('livewire.bundle.bundle-edit');
     }
 }

@@ -19,7 +19,10 @@ class ItemPolicy
     public function view(User|Employee $user, Item $item): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $item->user_id;
+            if ($user->user_id === $item->user_id) {
+                return $user->can('view-items');
+            }
+            return false;
         } else {
             return $user->id === $item->user_id;
         }
@@ -33,7 +36,10 @@ class ItemPolicy
     public function update(User|Employee $user, Item $item): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $item->user_id;
+            if ($user->user_id === $item->user_id) {
+                return $user->can('update-items');
+            }
+            return false;
         } else {
             return $user->id === $item->user_id;
         }
@@ -42,7 +48,10 @@ class ItemPolicy
     public function delete(User|Employee $user, Item $item): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $item->user_id;
+            if ($user->user_id === $item->user_id) {
+                return $user->can('delete-items');
+            }
+            return false;
         } else {
             return $user->id === $item->user_id;
         }

@@ -53,31 +53,45 @@ new class extends Component {
                             {{ __('Поставщики') }}
                         </x-nav-link>
                     @endif
-                    <x-nav-link :href="route('items')" :active="request()->routeIs('items', 'item-edit')"
-                                wire:navigate.hover>
-                        {{ __('Товары') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('bundles.index')"
-                                :active="request()->routeIs('bundles.index', 'bundles.edit')"
-                                wire:navigate.hover>
-                        {{ __('Комплекты') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('ozon')" :active="request()->routeIs('ozon', 'ozon-market-edit')"
-                                wire:navigate.hover>
-                        {{ __('ОЗОН') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('wb')" :active="request()->routeIs('wb', 'wb-market-edit')"
-                                wire:navigate.hover>
-                        {{ __('ВБ') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('organizations.index')" :active="request()->routeIs('organizations.index')"
-                                wire:navigate.hover>
-                        {{ __('Организации') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('warehouses.index')"
-                                :active="request()->routeIs('warehouses.index', 'warehouses.edit')" wire:navigate.hover>
-                        {{ __('Склады') }}
-                    </x-nav-link>
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-items'))
+                        <x-nav-link :href="route('items')" :active="request()->routeIs('items', 'item-edit')"
+                                    wire:navigate.hover>
+                            {{ __('Товары') }}
+                        </x-nav-link>
+                    @endif
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-bundles'))
+                        <x-nav-link :href="route('bundles.index')"
+                                    :active="request()->routeIs('bundles.index', 'bundles.edit')"
+                                    wire:navigate.hover>
+                            {{ __('Комплекты') }}
+                        </x-nav-link>
+                    @endif
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-ozon'))
+                        <x-nav-link :href="route('ozon')" :active="request()->routeIs('ozon', 'ozon-market-edit')"
+                                    wire:navigate.hover>
+                            {{ __('ОЗОН') }}
+                        </x-nav-link>
+                    @endif
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-wb'))
+                        <x-nav-link :href="route('wb')" :active="request()->routeIs('wb', 'wb-market-edit')"
+                                    wire:navigate.hover>
+                            {{ __('ВБ') }}
+                        </x-nav-link>
+                    @endif
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-organizations'))
+                        <x-nav-link :href="route('organizations.index')"
+                                    :active="request()->routeIs('organizations.index')"
+                                    wire:navigate.hover>
+                            {{ __('Организации') }}
+                        </x-nav-link>
+                    @endif
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-warehouses'))
+                        <x-nav-link :href="route('warehouses.index')"
+                                    :active="request()->routeIs('warehouses.index', 'warehouses.edit')"
+                                    wire:navigate.hover>
+                            {{ __('Склады') }}
+                        </x-nav-link>
+                    @endif
                     <x-nav-link :href="route('modules.index')" :active="str_contains(request()->getUri(), 'modules')"
                                 wire:navigate.hover>
                         {{ __('Модули') }}
@@ -101,7 +115,7 @@ new class extends Component {
                 <x-dropdown align="right" width="48">
                     <x-slot name="trigger">
                         <button
-                            class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
+                                class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 hover:text-gray-700 dark:hover:text-gray-300 focus:outline-none transition ease-in-out duration-150">
                             <div x-data="{{ json_encode(['name' => \App\Helpers\Helpers::currentUser()->name]) }}"
                                  x-text="name"
                                  x-on:profile-updated.window="name = $event.detail.name"></div>
@@ -170,32 +184,44 @@ new class extends Component {
                     {{ __('Поставщики') }}
                 </x-responsive-nav-link>
             @endif
-            <x-responsive-nav-link :href="route('items')" :active="request()->routeIs('items', 'item-edit')"
-                                   wire:navigate.hover>
-                {{ __('Товары') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('bundles.index')"
-                                   :active="request()->routeIs('bundles.index', 'bundles.edit')"
-                                   wire:navigate.hover>
-                {{ __('Комплекты') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('ozon')" :active="request()->routeIs('ozon', 'ozon-market-edit')"
-                                   wire:navigate.hover>
-                {{ __('ОЗОН') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('wb')" :active="request()->routeIs('wb', 'wb-market-edit')"
-                                   wire:navigate.hover>
-                {{ __('ВБ') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('organizations.index')"
-                                   :active="request()->routeIs('organizations.index')" wire:navigate.hover>
-                {{ __('Организации') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('warehouses.index')"
-                                   :active="request()->routeIs('warehouses.index', 'warehouses.edit')"
-                                   wire:navigate.hover>
-                {{ __('Склады') }}
-            </x-responsive-nav-link>
+            @if(\App\Helpers\Helpers::currentUser()->can('view-items'))
+                <x-responsive-nav-link :href="route('items')" :active="request()->routeIs('items', 'item-edit')"
+                                       wire:navigate.hover>
+                    {{ __('Товары') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(\App\Helpers\Helpers::currentUser()->can('view-bundles'))
+                <x-responsive-nav-link :href="route('bundles.index')"
+                                       :active="request()->routeIs('bundles.index', 'bundles.edit')"
+                                       wire:navigate.hover>
+                    {{ __('Комплекты') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(\App\Helpers\Helpers::currentUser()->can('view-ozon'))
+                <x-responsive-nav-link :href="route('ozon')" :active="request()->routeIs('ozon', 'ozon-market-edit')"
+                                       wire:navigate.hover>
+                    {{ __('ОЗОН') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(\App\Helpers\Helpers::currentUser()->can('view-wb'))
+                <x-responsive-nav-link :href="route('wb')" :active="request()->routeIs('wb', 'wb-market-edit')"
+                                       wire:navigate.hover>
+                    {{ __('ВБ') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(\App\Helpers\Helpers::currentUser()->can('view-organizations'))
+                <x-responsive-nav-link :href="route('organizations.index')"
+                                       :active="request()->routeIs('organizations.index')" wire:navigate.hover>
+                    {{ __('Организации') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(\App\Helpers\Helpers::currentUser()->can('view-warehouses'))
+                <x-responsive-nav-link :href="route('warehouses.index')"
+                                       :active="request()->routeIs('warehouses.index', 'warehouses.edit')"
+                                       wire:navigate.hover>
+                    {{ __('Склады') }}
+                </x-responsive-nav-link>
+            @endif
             <x-responsive-nav-link :href="route('modules.index')" :active="str_contains(request()->getUri(), 'modules')"
                                    wire:navigate.hover>
                 {{ __('Модули') }}
