@@ -119,7 +119,7 @@ class EmailSupplierService
 
                 EmailPriceItemService::handleFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock, $item->id);
 
-                if (!is_null($price)) {
+                if (is_numeric($price) && $price > 0) {
                     $price = $this->preparePrice($price);
                     $item->price = $price;
 
