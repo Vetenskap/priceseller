@@ -43,7 +43,7 @@ class EmailSupplierService
 
                 report($e);
 
-                $this->anotherHandle();
+                $this->importHandle();
             }
         } else {
 
