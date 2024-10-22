@@ -21,9 +21,10 @@ class EmailSupplierService
         $this->stockValues = $this->supplier->stockValues->pluck('value', 'name');
     }
 
-    public function unload()
+    public function unload(): void
     {
         $this->nullUpdated();
+        $this->nullAllStocks();
 
         SupplierReportService::changeMessage($this->supplier->supplier, 'Чтение прайса');
 
@@ -51,6 +52,11 @@ class EmailSupplierService
         }
 
         SupplierReportService::changeMessage($this->supplier->supplier, 'Прайс прочитан');
+    }
+
+    protected function nullAllStocks(): void
+    {
+        $this->supplier->supplier->items()->update(['count' => 0]);
     }
 
     protected function xlsxHandle(): void
