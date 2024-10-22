@@ -24,7 +24,7 @@ class SupplierPriceImport implements ToCollection, WithChunkReading
 
     public function chunkSize(): int
     {
-        return 10000;
+        return 1000;
     }
 
 }
