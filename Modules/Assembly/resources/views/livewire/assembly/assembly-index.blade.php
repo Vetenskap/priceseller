@@ -58,7 +58,10 @@
                         <div>
                             <flux:card>
                                 <div class="flex gap-12">
-                                    <flux:heading :size="match($headingLevel) { '1' => 'base', '2' => 'lg', '3' => 'xl' }">Наименование</flux:heading>
+                                    <flux:heading
+                                        :size="match($headingLevel) { '1' => 'base', '2' => 'lg', '3' => 'xl' }">
+                                        Наименование
+                                    </flux:heading>
                                     <flux:input type="range" min="1" max="3" step="1" wire:model.live="headingLevel"/>
                                 </div>
                             </flux:card>
@@ -69,38 +72,55 @@
                                     </flux:card>
                                     <flux:card class="space-y-6 w-full">
                                         <div class="flex gap-12">
-                                            <flux:button :size="match($headingButton) { '1' => 'xs', '2' => 'sm', '3' => 'base' }">Получить этикетку</flux:button>
-                                            <flux:input type="range" min="1" max="3" step="1" wire:model.live="headingButton"/>
+                                            <flux:button
+                                                :size="match($headingButton) { '1' => 'xs', '2' => 'sm', '3' => 'base' }">
+                                                Получить этикетку
+                                            </flux:button>
+                                            <flux:input type="range" min="1" max="3" step="1"
+                                                        wire:model.live="headingButton"/>
                                         </div>
+                                        @foreach($selectedFields as $ssfield => $parameters)
+                                            <div class="flex gap-12" wire:key="{{$ssfield}}">
+                                                @if($parameters['level'] < 5)
+                                                    <flux:subheading
+                                                        class="text-nowrap {{'text-[' . $parameters['color'] . ']'}}"
+                                                        :size="match($parameters['level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$ssfield}}</flux:subheading>
+                                                @else
+                                                    <flux:heading
+                                                        class="text-nowrap {{'text-[' . $parameters['color'] . ']'}}"
+                                                        :size="match($parameters['level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$ssfield}}</flux:heading>
+                                                @endif
+
+                                                <flux:input type="color"
+                                                            wire:model.live="selectedFields.{{$ssfield}}.color"/>
+
+                                                <flux:input type="range" min="1" max="7" step="1"
+                                                            wire:model.live="selectedFields.{{$ssfield}}.level"/>
+                                            </div>
+                                        @endforeach
                                         <flux:input.group>
-                                            <flux:select variant="listbox" placeholder="Выберите поле...">
-                                                <flux:option>Photography</flux:option>
-                                                <flux:option>Design services</flux:option>
-                                                <flux:option>Web development</flux:option>
-                                                <flux:option>Accounting</flux:option>
-                                                <flux:option>Legal services</flux:option>
-                                                <flux:option>Consulting</flux:option>
-                                                <flux:option>Other</flux:option>
+                                            <flux:select variant="listbox" placeholder="Выберите поле..."
+                                                         wire:model="selectedField">
+                                                @foreach($fields as $field)
+                                                    <flux:option>{{$field}}</flux:option>
+                                                @endforeach
                                             </flux:select>
 
-                                            <flux:button icon="plus" />
+                                            <flux:button icon="plus" wire:click="addField"/>
                                         </flux:input.group>
                                     </flux:card>
                                 </div>
                                 <flux:card>
                                     <div class="flex gap-12">
                                         <flux:input.group>
-                                            <flux:select variant="listbox" placeholder="Выберите поле...">
-                                                <flux:option>Photography</flux:option>
-                                                <flux:option>Design services</flux:option>
-                                                <flux:option>Web development</flux:option>
-                                                <flux:option>Accounting</flux:option>
-                                                <flux:option>Legal services</flux:option>
-                                                <flux:option>Consulting</flux:option>
-                                                <flux:option>Other</flux:option>
+                                            <flux:select variant="listbox" placeholder="Выберите поле..."
+                                                         wire:model="selectedField">
+                                                @foreach($fields as $field)
+                                                    <flux:option>{{$field}}</flux:option>
+                                                @endforeach
                                             </flux:select>
 
-                                            <flux:button icon="plus" />
+                                            <flux:button icon="plus" wire:click="addField"/>
                                         </flux:input.group>
                                     </div>
                                 </flux:card>
