@@ -45,7 +45,7 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
         if (SupplierReportService::get($emailSupplier->supplier)) {
             return;
         } else {
-            SupplierReportService::new($emailSupplier->supplier, $this->path);
+            SupplierReportService::new($emailSupplier->supplier, $this->path, "({$emailSupplier->mainEmail->name})");
         }
 
         $service = new EmailSupplierService($emailSupplier, Storage::disk('public')->path($this->path));
