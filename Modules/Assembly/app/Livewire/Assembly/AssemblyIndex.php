@@ -11,8 +11,6 @@ class AssemblyIndex extends ModuleComponent
 
     public $headingButton = '3';
 
-    publi
-
     public function render()
     {
         return view('assembly::livewire.assembly.assembly-index', [
