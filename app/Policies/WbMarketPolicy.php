@@ -19,21 +19,30 @@ class WbMarketPolicy
     public function view(User|Employee $user, WbMarket $wbMarket): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $wbMarket->user_id;
+            if ($user->user_id === $wbMarket->user_id) {
+                return $user->can('view-wb');
+            }
+            return false;
         } else {
             return $user->id === $wbMarket->user_id;
         }
     }
 
-    public function create(User $user): bool
+    public function create(User|Employee $user): bool
     {
+        if ($user instanceof Employee) {
+            return $user->can('create-wb');
+        }
         return true;
     }
 
     public function update(User|Employee $user, WbMarket $wbMarket): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $wbMarket->user_id;
+            if ($user->user_id === $wbMarket->user_id) {
+                return $user->can('update-wb');
+            }
+            return false;
         } else {
             return $user->id === $wbMarket->user_id;
         }
@@ -42,7 +51,10 @@ class WbMarketPolicy
     public function delete(User|Employee $user, WbMarket $wbMarket): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $wbMarket->user_id;
+            if ($user->user_id === $wbMarket->user_id) {
+                return $user->can('delete-wb');
+            }
+            return false;
         } else {
             return $user->id === $wbMarket->user_id;
         }

@@ -33,14 +33,20 @@ class WbMarketIndex extends BaseComponent
     {
         collect($this->dirtyMarkets)->each(function ($market, $key) {
             $marketModel = WbMarket::findOrFail($key);
+
+            $this->authorizeForUser($this->user(), 'update', $marketModel);
+
             $marketModel->update($market);
         });
     }
 
     public function destroy($id): void
     {
-        $this->form->setMarket(WbMarket::findOrFail($id));
-        $this->form->destroy();
+        $market = WbMarket::findOrFail($id);
+
+        $this->authorizeForUser($this->user(), 'delete', $market);
+
+        $market->delete();
 
         $this->addSuccessDeleteNotification();
     }
@@ -72,6 +78,10 @@ class WbMarketIndex extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        if (!$this->user()->can('view-wb')) {
+            abort(403);
+        }
+
         return view('livewire.wb-market.wb-market-index');
     }
 }

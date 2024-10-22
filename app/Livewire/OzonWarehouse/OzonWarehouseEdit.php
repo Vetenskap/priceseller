@@ -18,7 +18,7 @@ class OzonWarehouseEdit extends BaseComponent
 
     public function update(): void
     {
-        $this->authorizeForUser($this->user(), 'update', $this->warehouse);
+        $this->authorizeForUser($this->user(), 'update', $this->warehouse->market);
 
         $this->warehouse->update($this->only('name'));
 
@@ -33,15 +33,13 @@ class OzonWarehouseEdit extends BaseComponent
 
     public function destroy(): void
     {
-        $this->authorizeForUser($this->user(), 'delete', $this->warehouse);
+        $this->authorizeForUser($this->user(), 'update', $this->warehouse->market);
 
         $this->warehouse->delete();
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
-        $this->authorizeForUser($this->user(), 'view', $this->warehouse);
-
         return view('livewire.ozon-warehouse.ozon-warehouse-edit');
     }
 }

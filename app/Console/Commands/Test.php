@@ -51,12 +51,12 @@ class Test extends Command
      */
     public function handle()
     {
-        $item = Item::where('code', '1-052002')->first();
+        $item = Item::where('code', '1-038056')->first();
         $wbItem = $item->wbItems()->first();
         $market = $wbItem->market;
         $supplier = $item->supplier;
 
-        $service = new WbItemPriceService($supplier, $market, ['9d0b5d3d-7351-4e51-ae82-7d955360b990']);
-        $service->recountStockWbItem($wbItem);
+        $service = new WbItemPriceService($supplier, $market, [$supplier->warehouses()->where('name', 'Основной')->first()->id]);
+        $service->updateStock();
     }
 }

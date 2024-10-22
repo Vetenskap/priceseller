@@ -3,16 +3,19 @@
     <flux:subheading>Склады поставщика с которых нужно выгружать остатки. Если добавить несколько складов, то они
         будут складываться
     </flux:subheading>
-    <flux:input.group>
-        <flux:select variant="combobox" placeholder="Выберите склад..." wire:model="supplier_warehouse_id">
 
-            @foreach($supplier->supplier->warehouses->all() as $warehouse)
-                <flux:option :value="$warehouse->id">{{$warehouse->name}}</flux:option>
-            @endforeach
-        </flux:select>
+    @if($this->user()->can('update-ozon'))
+        <flux:input.group>
+            <flux:select variant="combobox" placeholder="Выберите склад..." wire:model="supplier_warehouse_id">
 
-        <flux:button icon="plus" wire:click="store">Добавить</flux:button>
-    </flux:input.group>
+                @foreach($supplier->supplier->warehouses->all() as $warehouse)
+                    <flux:option :value="$warehouse->id">{{$warehouse->name}}</flux:option>
+                @endforeach
+            </flux:select>
+
+            <flux:button icon="plus" wire:click="store">Добавить</flux:button>
+        </flux:input.group>
+    @endif
 
     <flux:heading size="xl">Список</flux:heading>
     @if($this->warehouses->isNotEmpty())
@@ -28,15 +31,17 @@
                             {{ $warehouse->supplierWarehouse->name }}
                         </flux:cell>
 
-                        <flux:cell align="right">
-                            <flux:icon.trash wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
-                                             wire:loading.remove
-                                             wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
-                                             wire:confirm="Вы действительно хотите удалить этот склад?"
-                                             class="cursor-pointer hover:text-red-400"/>
-                            <flux:icon.loading wire:loading
-                                               wire:target="destroy({{ json_encode($warehouse->getKey()) }})"/>
-                        </flux:cell>
+                        @if($this->user()->can('update-ozon'))
+                            <flux:cell align="right">
+                                <flux:icon.trash wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                 wire:loading.remove
+                                                 wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                 wire:confirm="Вы действительно хотите удалить этот склад?"
+                                                 class="cursor-pointer hover:text-red-400"/>
+                                <flux:icon.loading wire:loading
+                                                   wire:target="destroy({{ json_encode($warehouse->getKey()) }})"/>
+                            </flux:cell>
+                        @endif
 
                     </flux:row>
                 @endforeach

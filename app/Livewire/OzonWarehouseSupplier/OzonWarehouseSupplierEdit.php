@@ -15,8 +15,7 @@ class OzonWarehouseSupplierEdit extends BaseComponent
 
     public function destroy(): void
     {
-        // TODO: add authorization
-//        $this->authorizeForUser($this->user(), 'delete', $this->supplier);
+        $this->authorizeForUser($this->user(), 'update', $this->supplier->warehouse->market);
 
         $this->supplier->delete();
     }

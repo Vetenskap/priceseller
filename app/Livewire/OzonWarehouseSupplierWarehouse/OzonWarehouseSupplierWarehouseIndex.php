@@ -39,11 +39,15 @@ class OzonWarehouseSupplierWarehouseIndex extends BaseComponent
     {
         $this->validate();
 
+        $this->authorizeForUser($this->user(), 'update', $this->supplier->warehouse->market);
+
         $this->supplier->warehouses()->create($this->except(['supplier']));
     }
 
     public function destroy($id): void
     {
+        $this->authorizeForUser($this->user(), 'update', $this->supplier->warehouse->market);
+
         OzonWarehouseSupplierWarehouse::findOrFail($id)->delete();
     }
 

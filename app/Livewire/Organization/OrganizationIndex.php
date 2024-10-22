@@ -22,8 +22,11 @@ class OrganizationIndex extends BaseComponent
 
     public function destroy($id): void
     {
-        $this->form->setOrganization(Organization::findOrFail($id));
-        $this->form->destroy();
+        $organization = Organization::findOrFail($id);
+
+        $this->authorizeForUser($this->user(), 'delete', $organization);
+
+        $organization->delete();
 
         $this->addSuccessDeleteNotification();
     }

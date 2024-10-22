@@ -1,12 +1,17 @@
 <div>
-    <x-layouts.header :name="$organization->name" />
+    <x-layouts.header :name="$organization->name"/>
     <x-layouts.actions>
-        <flux:button wire:click="update">Сохранить</flux:button>
-        <flux:button
-            variant="danger"
-            wire:click="destroy"
-            wire:confirm="Вы действительно хотите удалить эту организацию?"
-        >Удалить</flux:button>
+        @if($this->user()->can('update-organizations'))
+            <flux:button wire:click="update">Сохранить</flux:button>
+        @endif
+        @if($this->user()->can('delete-organizations'))
+                <flux:button
+                    variant="danger"
+                    wire:click="destroy"
+                    wire:confirm="Вы действительно хотите удалить эту организацию?"
+                >Удалить
+                </flux:button>
+        @endif
     </x-layouts.actions>
     <x-layouts.main-container>
         <x-blocks.main-block>

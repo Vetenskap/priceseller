@@ -8,10 +8,14 @@
     </x-notify-top>
     @enderror
     <x-layouts.actions>
-        <flux:button wire:click="update">Сохранить</flux:button>
-        <flux:button variant="danger" wire:click="destroy"
-                     wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить
-        </flux:button>
+        @if($this->user()->can('update-wb'))
+            <flux:button wire:click="update">Сохранить</flux:button>
+        @endif
+        @if($this->user()->can('delete-wb'))
+            <flux:button variant="danger" wire:click="destroy"
+                         wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить
+            </flux:button>
+        @endif
     </x-layouts.actions>
     <x-layouts.main-container>
 
@@ -64,7 +68,7 @@
                 <livewire:wb-warehouse.wb-warehouse-index :market="$market" :api-warehouses="$this->apiWarehouses"/>
             </flux:tab.panel>
             <flux:tab.panel name="relationships_commissions">
-                <x-marketPages.relationships-commissions :market="$market" :file="$file"
+                <x-marketPages.relationships-commissions :market="$market" :file="$file" market-name="wb"
                                                          sort-by="$sortBy" sort-direction="$sortDirection">
                     <flux:input wire:model="sales_percent" label="Комиссия" type="number"/>
                     <flux:input wire:model="min_price" label="Минимальная цена продажи" type="number"/>

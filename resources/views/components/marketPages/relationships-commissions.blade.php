@@ -1,47 +1,51 @@
-@props(['market' => null, 'file' => null, 'directLink' => false, 'sortBy' => null, 'sortDirection' => null])
+@props(['market' => null, 'file' => null, 'directLink' => false, 'sortBy' => null, 'sortDirection' => null, 'marketName' => 'ozon'])
 
 <div>
-    @isset($slot)
+    @if($this->user()->can('update-' . $marketName) && $this->user()->can('create-' . $marketName) && $this->user()->can('delete-' . $marketName))
+        @isset($slot)
+            <x-blocks.main-block>
+                <flux:card class="space-y-6">
+                    <flux:heading size="xl">Комиссии</flux:heading>
+                    <flux:subheading>Комиссии по умолчанию</flux:subheading>
+                    <div class="flex gap-6 items-end">
+                        {{$slot}}
+                        <flux:button wire:click="updateUserCommissions">Обновить сейчас</flux:button>
+                    </div>
+                </flux:card>
+            </x-blocks.main-block>
+        @endisset
         <x-blocks.main-block>
             <flux:card class="space-y-6">
-                <flux:heading size="xl">Комиссии</flux:heading>
-                <flux:subheading>Комиссии по умолчанию</flux:subheading>
-                <div class="flex gap-6 items-end">
-                    {{$slot}}
-                    <flux:button wire:click="updateUserCommissions">Обновить сейчас</flux:button>
-                </div>
+                <flux:heading size="xl">Создание/Обновление/Удаление связей и комиссий вручную</flux:heading>
+                <x-blocks.center-block>
+                    <flux:button wire:click="downloadTemplate">Скачать шаблон</flux:button>
+                </x-blocks.center-block>
+                <x-file-block action="import"/>
             </flux:card>
         </x-blocks.main-block>
-    @endisset
-    <x-blocks.main-block>
-        <flux:card class="space-y-6">
-            <flux:heading size="xl">Создание/Обновление/Удаление связей и комиссий вручную</flux:heading>
-            <x-blocks.center-block>
-                <flux:button wire:click="downloadTemplate">Скачать шаблон</flux:button>
-            </x-blocks.center-block>
-            <x-file-block action="import"/>
-        </flux:card>
-    </x-blocks.main-block>
-    <x-blocks.main-block>
-        <flux:card class="space-y-6">
-            <flux:heading size="xl">Загрузка по апи</flux:heading>
-            <div class="flex gap-6 items-center">
-                <flux:button wire:click="relationshipsAndCommissions">Загрузить/обновить связи и комиссии</flux:button>
-                <flux:switch wire:model="directLink" label="Прямая связь"/>
-            </div>
-            <flux:button wire:click="updateApiCommissions">Обновить комиссии</flux:button>
-        </flux:card>
-    </x-blocks.main-block>
-    <x-blocks.main-block>
-        <flux:card class="space-y-6">
-            <flux:heading size="xl">История загрузок</flux:heading>
-            <livewire:items-import-report.items-import-report-index :model="$market"/>
-        </flux:card>
-    </x-blocks.main-block>
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
+                <flux:heading size="xl">Загрузка по апи</flux:heading>
+                <div class="flex gap-6 items-center">
+                    <flux:button wire:click="relationshipsAndCommissions">Загрузить/обновить связи и комиссии</flux:button>
+                    <flux:switch wire:model="directLink" label="Прямая связь"/>
+                </div>
+                <flux:button wire:click="updateApiCommissions">Обновить комиссии</flux:button>
+            </flux:card>
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
+                <flux:heading size="xl">История загрузок</flux:heading>
+                <livewire:items-import-report.items-import-report-index :model="$market"/>
+            </flux:card>
+        </x-blocks.main-block>
+    @endif
     <x-blocks.main-block>
         <flux:card class="space-y-6">
             <flux:heading size="xl">Все связи</flux:heading>
-            <flux:button variant="danger" wire:click="clearRelationships">Очистить связи</flux:button>
+            @if($this->user()->can('delete-' . $marketName))
+                <flux:button variant="danger" wire:click="clearRelationships">Очистить связи</flux:button>
+            @endif
             <flux:card class="space-y-6">
                 <flux:heading size="lg">Фильтры</flux:heading>
                 <div class="flex gap-6 flex-wrap">

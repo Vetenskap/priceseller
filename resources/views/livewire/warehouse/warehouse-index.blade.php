@@ -1,24 +1,26 @@
 <div>
     <x-layouts.header name="Склады"/>
-    <flux:modal name="create-warehouse" class="md:w-96 space-y-6">
-        <div>
-            <flux:heading size="lg">Создание поставщика</flux:heading>
-        </div>
+    @if($this->user()->can('create-warehouses'))
+        <flux:modal name="create-warehouse" class="md:w-96 space-y-6">
+            <div>
+                <flux:heading size="lg">Создание склада</flux:heading>
+            </div>
 
-        <flux:input wire:model="form.name" label="Наименование" required badge="обязательное"/>
+            <flux:input wire:model="form.name" label="Наименование" required badge="обязательное"/>
 
-        <div class="flex">
-            <flux:spacer/>
+            <div class="flex">
+                <flux:spacer/>
 
-            <flux:button variant="primary" wire:click="store">Создать</flux:button>
-        </div>
-    </flux:modal>
+                <flux:button variant="primary" wire:click="store">Создать</flux:button>
+            </div>
+        </flux:modal>
 
-    <x-layouts.actions>
-        <flux:modal.trigger name="create-warehouse">
-            <flux:button>Добавить</flux:button>
-        </flux:modal.trigger>
-    </x-layouts.actions>
+        <x-layouts.actions>
+            <flux:modal.trigger name="create-warehouse">
+                <flux:button>Добавить</flux:button>
+            </flux:modal.trigger>
+        </x-layouts.actions>
+    @endif
     <x-layouts.main-container>
         <flux:tab.group>
             <x-blocks.main-block>
@@ -55,13 +57,15 @@
                                                          href="{{ route('warehouses.edit', ['warehouse' => $warehouse->getKey()]) }}" />
                                         </flux:cell>
 
-                                        <flux:cell align="right">
-                                            <flux:button icon="trash" variant="danger" size="sm"
-                                                         wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
-                                                         wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
-                                                         wire:confirm="Вы действительно хотите удалить этот склад?"
-                                            />
-                                        </flux:cell>
+                                        @if($this->user()->can('delete-warehouses'))
+                                            <flux:cell align="right">
+                                                <flux:button icon="trash" variant="danger" size="sm"
+                                                             wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                             wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                             wire:confirm="Вы действительно хотите удалить этот склад?"
+                                                />
+                                            </flux:cell>
+                                        @endif
 
                                     </flux:row>
                                 @endforeach
@@ -73,8 +77,12 @@
                 </x-blocks.main-block>
             </flux:tab.panel>
             <flux:tab.panel name="manage">
-                <livewire:warehouses-items-export.warehouses-items-export-index :model="$this->currentUser()"/>
-                <livewire:warehouses-items-import.warehouses-items-import-index :model="$this->currentUser()"/>
+                @if($this->user()->can('view-warehouses'))
+                    <livewire:warehouses-items-export.warehouses-items-export-index :model="$this->currentUser()"/>
+                @endif
+                @if($this->user()->can('update-warehouses'))
+                    <livewire:warehouses-items-import.warehouses-items-import-index :model="$this->currentUser()"/>
+                @endif
             </flux:tab.panel>
         </flux:tab-group>
     </x-layouts.main-container>

@@ -23,7 +23,7 @@ class OzonWarehouseIndex extends BaseComponent
             return;
         }
 
-        $this->authorizeForUser($this->user(), 'create', OzonWarehouse::class);
+        $this->authorizeForUser($this->user(), 'update', $this->market);
 
         $name = collect($this->apiWarehouses)->firstWhere('warehouse_id', $this->selectedWarehouse)['name'];
 

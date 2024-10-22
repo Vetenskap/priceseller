@@ -22,7 +22,10 @@ class WarehousePolicy
     public function view(User|Employee $user, Warehouse $warehouse): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $warehouse->user_id;
+            if ($user->user_id === $warehouse->user_id) {
+                return $user->can('view-warehouses');
+            }
+            return false;
         } else {
             return $user->id === $warehouse->user_id;
         }
@@ -31,8 +34,11 @@ class WarehousePolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User|Employee $user): bool
     {
+        if ($user instanceof Employee) {
+            return $user->can('create-warehouses');
+        }
         return true;
     }
 
@@ -42,7 +48,10 @@ class WarehousePolicy
     public function update(User|Employee $user, Warehouse $warehouse): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $warehouse->user_id;
+            if ($user->user_id === $warehouse->user_id) {
+                return $user->can('update-warehouses');
+            }
+            return false;
         } else {
             return $user->id === $warehouse->user_id;
         }
@@ -54,7 +63,10 @@ class WarehousePolicy
     public function delete(User|Employee $user, Warehouse $warehouse): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $warehouse->user_id;
+            if ($user->user_id === $warehouse->user_id) {
+                return $user->can('delete-warehouses');
+            }
+            return false;
         } else {
             return $user->id === $warehouse->user_id;
         }

@@ -1,24 +1,28 @@
 <div>
     <x-layouts.header name="Организации"/>
-    <flux:modal name="create-organization" class="md:w-96 space-y-6">
-        <div>
-            <flux:heading size="lg">Создание организации</flux:heading>
-        </div>
 
-        <flux:input wire:model="form.name" label="Наименование" badge="обязательное" required/>
+    @if($this->user()->can('create-organizations'))
+        <flux:modal name="create-organization" class="md:w-96 space-y-6">
+            <div>
+                <flux:heading size="lg">Создание организации</flux:heading>
+            </div>
 
-        <div class="flex">
-            <flux:spacer/>
+            <flux:input wire:model="form.name" label="Наименование" badge="обязательное" required/>
 
-            <flux:button variant="primary" wire:click="store">Создать</flux:button>
-        </div>
-    </flux:modal>
+            <div class="flex">
+                <flux:spacer/>
 
-    <x-layouts.actions>
-        <flux:modal.trigger name="create-organization">
-            <flux:button>Добавить</flux:button>
-        </flux:modal.trigger>
-    </x-layouts.actions>
+                <flux:button variant="primary" wire:click="store">Создать</flux:button>
+            </div>
+        </flux:modal>
+
+        <x-layouts.actions>
+            <flux:modal.trigger name="create-organization">
+                <flux:button>Добавить</flux:button>
+            </flux:modal.trigger>
+        </x-layouts.actions>
+    @endif
+
     <x-layouts.main-container>
         <x-blocks.main-block>
             <flux:heading size="xl">Список</flux:heading>
@@ -47,13 +51,15 @@
                                     <flux:button icon="pencil-square" size="sm" :href="route('organizations.edit', ['organization' => $organization->getKey()])" />
                                 </flux:cell>
 
-                                <flux:cell align="right">
-                                    <flux:button icon="trash" variant="danger" size="sm"
-                                                 wire:click="destroy({{ json_encode($organization->getKey()) }})"
-                                                 wire:target="destroy({{ json_encode($organization->getKey()) }})"
-                                                 wire:confirm="Вы действительно хотите удалить эту организацию?"
-                                    />
-                                </flux:cell>
+                                @if($this->user()->can('delete-organizations'))
+                                    <flux:cell align="right">
+                                        <flux:button icon="trash" variant="danger" size="sm"
+                                                     wire:click="destroy({{ json_encode($organization->getKey()) }})"
+                                                     wire:target="destroy({{ json_encode($organization->getKey()) }})"
+                                                     wire:confirm="Вы действительно хотите удалить эту организацию?"
+                                        />
+                                    </flux:cell>
+                                @endif
 
                             </flux:row>
                         @endforeach

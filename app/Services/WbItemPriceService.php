@@ -171,7 +171,7 @@ class WbItemPriceService
                 ->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds)
                 ->get()
                 ->map(function (WbWarehouseSupplierWarehouse $warehouse) {
-                    return $warehouse->supplierWarehouse->id;
+                    return $warehouse->supplier_warehouse_id;
                 });
 
             $new_count = 0;

@@ -19,7 +19,10 @@ class OzonMarketPolicy
     public function view(User|Employee $user, OzonMarket $ozonMarket): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $ozonMarket->user_id;
+            if ($user->user_id === $ozonMarket->user_id) {
+                return $user->can('view-ozon');
+            }
+            return false;
         } else {
             return $user->id === $ozonMarket->user_id;
         }
@@ -27,13 +30,19 @@ class OzonMarketPolicy
 
     public function create(User|Employee $user): bool
     {
+        if ($user instanceof Employee) {
+            return $user->can('create-ozon');
+        }
         return true;
     }
 
     public function update(User|Employee $user, OzonMarket $ozonMarket): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $ozonMarket->user_id;
+            if ($user->user_id === $ozonMarket->user_id) {
+                return $user->can('update-ozon');
+            }
+            return false;
         } else {
             return $user->id === $ozonMarket->user_id;
         }
@@ -42,7 +51,10 @@ class OzonMarketPolicy
     public function delete(User|Employee $user, OzonMarket $ozonMarket): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $ozonMarket->user_id;
+            if ($user->user_id === $ozonMarket->user_id) {
+                return $user->can('delete-ozon');
+            }
+            return false;
         } else {
             return $user->id === $ozonMarket->user_id;
         }

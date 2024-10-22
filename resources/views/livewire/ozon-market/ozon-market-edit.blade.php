@@ -8,10 +8,15 @@
     </x-notify-top>
     @enderror
     <x-layouts.actions>
-        <flux:button wire:click="update">Сохранить</flux:button>
-        <flux:button variant="danger" wire:click="destroy"
-                     wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить
-        </flux:button>
+        @if($this->user()->can('update-ozon'))
+            <flux:button wire:click="update">Сохранить</flux:button>
+        @endif
+        @if($this->user()->can('delete-ozon'))
+            <flux:button variant="danger" wire:click="destroy"
+                         wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить
+            </flux:button>
+        @endif
+
     </x-layouts.actions>
     <x-layouts.main-container>
 
@@ -40,7 +45,7 @@
 
                                 @foreach($this->currentUser()->organizations as $organization)
                                     <flux:option
-                                        :value="$organization->getKey()">{{$organization->name}}</flux:option>
+                                            :value="$organization->getKey()">{{$organization->name}}</flux:option>
                                 @endforeach
                             </flux:select>
                         </div>
@@ -93,7 +98,8 @@
                 <livewire:ozon-warehouse.ozon-warehouse-index :market="$market" :api-warehouses="$this->apiWarehouses"/>
             </flux:tab.panel>
             <flux:tab.panel name="relationships_commissions">
-                <x-marketPages.relationships-commissions :items="$this->items" :market="$market" :file="$file" sort-by="$sortBy" sort-direction="$sortDirection">
+                <x-marketPages.relationships-commissions :items="$this->items" :market="$market" :file="$file"
+                                                         sort-by="$sortBy" sort-direction="$sortDirection">
                     <flux:tooltip content="Какой процент добавить к цене закупки для получения чистой прибыли">
                         <flux:input wire:model="min_price_percent" label="Минимальная цена, %" type="number"/>
                     </flux:tooltip>

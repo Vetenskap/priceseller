@@ -1,12 +1,17 @@
 <div>
     <x-layouts.header :name="$warehouse->name"/>
     <x-layouts.actions>
-        <flux:button wire:click="update">Сохранить</flux:button>
-        <flux:button
-            variant="danger"
-            wire:click="destroy"
-            wire:confirm="Вы действительно хотите удалить этот склад?"
-        >Удалить</flux:button>
+        @if($this->user()->can('update-warehouses'))
+            <flux:button wire:click="update">Сохранить</flux:button>
+        @endif
+        @if($this->user()->can('delete-warehouses'))
+            <flux:button
+                variant="danger"
+                wire:click="destroy"
+                wire:confirm="Вы действительно хотите удалить этот склад?"
+            >Удалить
+            </flux:button>
+        @endif
     </x-layouts.actions>
     <x-layouts.main-container>
         <flux:tab.group>
@@ -25,7 +30,7 @@
                 </x-blocks.main-block>
             </flux:tab.panel>
             <flux:tab.panel name="stocks">
-                <livewire:warehouse-item-stock.warehouse-item-stock-index :warehouse="$warehouse" />
+                <livewire:warehouse-item-stock.warehouse-item-stock-index :warehouse="$warehouse"/>
             </flux:tab.panel>
         </flux:tab.group>
     </x-layouts.main-container>

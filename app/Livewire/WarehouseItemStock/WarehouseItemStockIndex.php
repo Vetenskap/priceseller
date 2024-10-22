@@ -42,7 +42,7 @@ class WarehouseItemStockIndex extends BaseComponent
     {
         $this->validate();
 
-        // TODO: add auth
+        $this->authorizeForUser($this->user(), 'update', $this->warehouse);
 
         $this->warehouse->stocks()->create([
             'item_id' => $this->item_id,
@@ -54,7 +54,7 @@ class WarehouseItemStockIndex extends BaseComponent
     {
         $stock = ItemWarehouseStock::find($id);
 
-        // TODO: add auth
+        $this->authorizeForUser($this->user(), 'update', $this->warehouse);
 
         $stock->delete();
     }

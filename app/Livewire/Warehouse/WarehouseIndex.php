@@ -33,8 +33,11 @@ class WarehouseIndex extends BaseComponent
 
     public function destroy($id): void
     {
-        $this->form->setWarehouse(Warehouse::findOrFail($id));
-        $this->form->destroy();
+        $warehouse = Warehouse::findOrFail($id);
+
+        $this->authorizeForUser($this->user(), 'delete', $warehouse);
+
+        $warehouse->delete();
 
         $this->addSuccessDeleteNotification();
     }
@@ -61,6 +64,10 @@ class WarehouseIndex extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        if (!$this->user()->can('view-warehouses')) {
+            abort(403);
+        }
+
         return view('livewire.warehouse.warehouse-index');
     }
 }

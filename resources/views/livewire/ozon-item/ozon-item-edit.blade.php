@@ -1,12 +1,14 @@
 <div>
     <x-layouts.header :name="$item->product_id"/>
     <x-layouts.actions>
-        <flux:button wire:click="update">Сохранить</flux:button>
-        <flux:button
-            variant="danger"
-            wire:click="destroy"
-            wire:confirm="Вы действительно хотите удалить этот товар?"
-        >Удалить</flux:button>
+        @if($this->user()->can('update-ozon'))
+            <flux:button wire:click="update">Сохранить</flux:button>
+            <flux:button
+                variant="danger"
+                wire:click="destroy"
+                wire:confirm="Вы действительно хотите удалить этот товар?"
+            >Удалить</flux:button>
+        @endif
     </x-layouts.actions>
     <x-layouts.main-container>
         <flux:tab.group>

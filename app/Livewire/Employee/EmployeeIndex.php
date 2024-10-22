@@ -7,7 +7,6 @@ use App\Models\Employee;
 use App\Models\EmployeePermission;
 use App\Models\Permission;
 use Livewire\Attributes\Computed;
-use Livewire\Component;
 use Livewire\WithPagination;
 
 class EmployeeIndex extends BaseComponent
@@ -49,6 +48,13 @@ class EmployeeIndex extends BaseComponent
                 'delete' => (bool) $permission->pivot->delete,
             ]];
         })->toArray();
+    }
+
+    public function destroy($id): void
+    {
+        $employee = Employee::find($id);
+
+        $employee->delete();
     }
 
     #[Computed]

@@ -22,7 +22,7 @@ class OrganizationEdit extends BaseComponent
 
     public function update(): void
     {
-        // TODO: add auth
+        $this->authorizeForUser($this->user(), 'update', $this->organization);
 
         $this->form->update();
 
@@ -31,7 +31,7 @@ class OrganizationEdit extends BaseComponent
 
     public function destroy(): void
     {
-        // TODO: add auth
+        $this->authorizeForUser($this->user(), 'delete', $this->organization);
 
         $this->form->destroy();
 
@@ -40,6 +40,8 @@ class OrganizationEdit extends BaseComponent
 
     public function render(): Factory|Application|View|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        $this->authorizeForUser($this->user(), 'view', $this->organization);
+
         return view('livewire.organization.organization-edit');
     }
 }

@@ -30,16 +30,17 @@ class WbWarehouseUserWarehouseIndex extends BaseComponent
     {
         $this->validate();
 
-        // TODO: add authorization
-//        $this->authorizeForUser($this->user(), 'create', OzonWarehouseUserWarehouse::class);
+        $this->authorizeForUser($this->user(), 'create', $this->warehouse->market);
 
         $this->warehouse->userWarehouses()->create([
             'warehouse_id' => $this->user_warehouse_id
         ]);
     }
 
-    public function destroy($id)
+    public function destroy($id): void
     {
+        $this->authorizeForUser($this->user(), 'create', $this->warehouse->market);
+
         WbWarehouseUserWarehouse::findOrFail($id)->delete();
     }
 

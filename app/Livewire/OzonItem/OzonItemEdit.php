@@ -44,7 +44,7 @@ class OzonItemEdit extends BaseComponent
 
     public function update(): void
     {
-        // TODO: add auth
+        $this->authorizeForUser($this->user(), 'update', $this->item->market);
 
         $this->form->update();
 
@@ -53,7 +53,7 @@ class OzonItemEdit extends BaseComponent
 
     public function destroy(): void
     {
-        // TODO: add auth
+        $this->authorizeForUser($this->user(), 'update', $this->item->market);
 
         $this->form->destroy();
 

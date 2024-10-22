@@ -22,7 +22,10 @@ class OrganizationPolicy
     public function view(User|Employee $user, Organization $organization): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $organization->user_id;
+            if ($user->user_id === $organization->user_id) {
+                return $user->can('view-organizations');
+            }
+            return false;
         } else {
             return $user->id === $organization->user_id;
         }
@@ -31,8 +34,11 @@ class OrganizationPolicy
     /**
      * Determine whether the user can create models.
      */
-    public function create(User $user): bool
+    public function create(User|Employee $user): bool
     {
+        if ($user instanceof Employee) {
+            return $user->can('create-organizations');
+        }
         return true;
     }
 
@@ -42,7 +48,10 @@ class OrganizationPolicy
     public function update(User|Employee $user, Organization $organization): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $organization->user_id;
+            if ($user->user_id === $organization->user_id) {
+                return $user->can('update-organizations');
+            }
+            return false;
         } else {
             return $user->id === $organization->user_id;
         }
@@ -54,7 +63,10 @@ class OrganizationPolicy
     public function delete(User|Employee $user, Organization $organization): bool
     {
         if ($user instanceof Employee) {
-            return $user->user_id === $organization->user_id;
+            if ($user->user_id === $organization->user_id) {
+                return $user->can('delete-organizations');
+            }
+            return false;
         } else {
             return $user->id === $organization->user_id;
         }

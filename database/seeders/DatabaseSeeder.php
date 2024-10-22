@@ -86,7 +86,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'name' => 'Редактор контента',
-                'value' => 'editor_content',
+                'value' => 'editorcontent',
                 'type' => 'employee'
             ],
         ];
@@ -94,7 +94,6 @@ class DatabaseSeeder extends Seeder
         foreach ($permissions as $permission) {
             Permission::updateOrCreate([
                 'name' => $permission['name'],
-                'value' => $permission['value'],
             ], $permission);
         }
 

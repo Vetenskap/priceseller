@@ -22,7 +22,7 @@ class OzonMarketIndex extends BaseComponent
 
     public OzonMarketPostForm $form;
 
-    public $dirtyMarkets= [];
+    public $dirtyMarkets = [];
 
     public function mount(): void
     {
@@ -33,14 +33,20 @@ class OzonMarketIndex extends BaseComponent
     {
         collect($this->dirtyMarkets)->each(function ($market, $key) {
             $marketModel = OzonMarket::findOrFail($key);
+
+            $this->authorizeForUser($this->user(), 'update', $marketModel);
+
             $marketModel->update($market);
         });
     }
 
     public function destroy($id): void
     {
-        $this->form->setMarket(OzonMarket::findOrFail($id));
-        $this->form->destroy();
+        $market = OzonMarket::findOrFail($id);
+
+        $this->authorizeForUser($this->user(), 'delete', $market);
+
+        $market->delete();
 
         $this->addSuccessDeleteNotification();
     }
@@ -72,6 +78,10 @@ class OzonMarketIndex extends BaseComponent
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
+        if (!$this->user()->can('view-ozon')) {
+            abort(403);
+        }
+
         return view('livewire.ozon-market.ozon-market-index');
     }
 }

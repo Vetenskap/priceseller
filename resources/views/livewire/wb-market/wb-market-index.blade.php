@@ -1,26 +1,28 @@
 <div>
     <x-layouts.header name="ВБ"/>
 
-    <flux:modal name="create-wb-market" class="md:w-96 space-y-6">
-        <div>
-            <flux:heading size="lg">Создание кабинета</flux:heading>
-        </div>
+    @if($this->user()->can('create-wb'))
+        <flux:modal name="create-wb-market" class="md:w-96 space-y-6">
+            <div>
+                <flux:heading size="lg">Создание кабинета</flux:heading>
+            </div>
 
-        <flux:input wire:model="form.name" label="Наименование" required badge="обязательное"/>
-        <flux:input wire:model="form.api_key" label="АПИ ключ" required badge="обязательное"/>
+            <flux:input wire:model="form.name" label="Наименование" required badge="обязательное"/>
+            <flux:input wire:model="form.api_key" label="АПИ ключ" required badge="обязательное"/>
 
-        <div class="flex">
-            <flux:spacer/>
+            <div class="flex">
+                <flux:spacer/>
 
-            <flux:button variant="primary" wire:click="store">Создать</flux:button>
-        </div>
-    </flux:modal>
+                <flux:button variant="primary" wire:click="store">Создать</flux:button>
+            </div>
+        </flux:modal>
 
-    <x-layouts.actions>
-        <flux:modal.trigger name="create-wb-market">
-            <flux:button>Добавить</flux:button>
-        </flux:modal.trigger>
-    </x-layouts.actions>
+        <x-layouts.actions>
+            <flux:modal.trigger name="create-wb-market">
+                <flux:button>Добавить</flux:button>
+            </flux:modal.trigger>
+        </x-layouts.actions>
+    @endif
 
     <x-layouts.main-container>
         <x-blocks.main-block>
@@ -46,20 +48,24 @@
 
                                 <flux:cell variant="strong">{{ $market->updated_at }}</flux:cell>
 
-                                <flux:cell align="right">
-                                    <flux:switch wire:model.live="dirtyMarkets.{{ $market->getKey() }}.open"/>
-                                </flux:cell>
+                                @if($this->user()->can('update-wb'))
+                                    <flux:cell align="right">
+                                        <flux:switch wire:model.live="dirtyMarkets.{{ $market->getKey() }}.open"/>
+                                    </flux:cell>
+                                @endif
 
                                 <flux:cell align="right">
                                     <flux:button icon="pencil-square" size="sm" :href="route('wb-market-edit', ['market' => $market->getKey()])" />
                                 </flux:cell>
 
-                                <flux:cell align="right">
-                                    <flux:button icon="trash" variant="danger" size="sm"
-                                                 wire:click="destroy({{ json_encode($market->getKey()) }})"
-                                                 wire:target="destroy({{ json_encode($market->getKey()) }})"
-                                                 wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены." />
-                                </flux:cell>
+                                @if($this->user()->can('delete-wb'))
+                                    <flux:cell align="right">
+                                        <flux:button icon="trash" variant="danger" size="sm"
+                                                     wire:click="destroy({{ json_encode($market->getKey()) }})"
+                                                     wire:target="destroy({{ json_encode($market->getKey()) }})"
+                                                     wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены." />
+                                    </flux:cell>
+                                @endif
 
                             </flux:row>
                         @endforeach
