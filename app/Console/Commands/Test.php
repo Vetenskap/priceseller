@@ -53,6 +53,7 @@ class Test extends Command
      */
     public function handle()
     {
+        $this->info(ini_get('memory_limit'));
         $service = new EmailSupplierService(EmailSupplier::find($this->argument('emailSupplierId')), Storage::disk('public')->path($this->argument('path')));
         $service->unload();
     }
