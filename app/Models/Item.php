@@ -44,7 +44,7 @@ class Item extends MainModel
         ],
         [
             'name' => 'brand',
-            'label' => 'Бренд'
+            'label' => 'Бренд поставщика'
         ],
         [
             'name' => 'name',

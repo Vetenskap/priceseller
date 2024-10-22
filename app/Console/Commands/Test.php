@@ -16,10 +16,12 @@ use App\Models\SupplierWarehouse;
 use App\Models\User;
 use App\Models\WbItem;
 use App\Models\WbMarket;
+use App\Services\EmailSupplierService;
 use App\Services\OzonItemPriceService;
 use App\Services\WbItemPriceService;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Modules\EditorContent\Services\EditorContentService;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
@@ -51,12 +53,7 @@ class Test extends Command
      */
     public function handle()
     {
-        $item = Item::where('code', '1-038056')->first();
-        $wbItem = $item->wbItems()->first();
-        $market = $wbItem->market;
-        $supplier = $item->supplier;
-
-        $service = new WbItemPriceService($supplier, $market, [$supplier->warehouses()->where('name', 'Основной')->first()->id]);
-        $service->updateStock();
+        $service = new EmailSupplierService(EmailSupplier::find($this->argument('emailSupplierId')), Storage::disk('public')->path($this->argument('path')));
+        $service->unload();
     }
 }

@@ -29,6 +29,45 @@ class WbItem extends MainModel
         'wbitemable_type'
     ];
 
+    const MAINATTRIBUTES = [
+        [
+            'name' => 'nm_id',
+            'label' => 'Идентификатор товара'
+        ],
+        [
+            'name' => 'vendor_code',
+            'label' => 'Артикул клиента'
+        ],
+        [
+            'name' => 'sku',
+            'label' => 'Штрихкод'
+        ],
+        [
+            'name' => 'sales_percent',
+            'label' => 'Комиссия'
+        ],
+        [
+            'name' => 'min_price',
+            'label' => 'Минимальная цена'
+        ],
+        [
+            'name' => 'retail_markup_percent',
+            'label' => 'Наценка'
+        ],
+        [
+            'name' => 'package',
+            'label' => 'Упаковка'
+        ],
+        [
+            'name' => 'volume',
+            'label' => 'Объем'
+        ],
+        [
+            'name' => 'price_market',
+            'label' => 'Цена из кабинета'
+        ],
+    ];
+
     public function scopeFilters(Builder $query)
     {
         return $query->when(request('filters.market_id'), function (Builder $query) {

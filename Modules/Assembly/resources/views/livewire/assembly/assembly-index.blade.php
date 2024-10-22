@@ -67,8 +67,9 @@
                             </flux:card>
                             <flux:card>
                                 <div class="flex">
-                                    <flux:card>
-                                        Фото
+                                    <flux:card class="w-1/4 space-y-6 text-center">
+                                        <img src="https://www.susu.ru/sites/default/files/field/image/1_53.png" />
+                                        <flux:button variant="danger" size="sm">Пожаловаться</flux:button>
                                     </flux:card>
                                     <flux:card class="space-y-6 w-full">
                                         <div class="flex gap-12">
@@ -81,13 +82,21 @@
                                         </div>
                                         @foreach($selectedFields as $ssfield => $parameters)
                                             <div class="flex gap-12" wire:key="{{$ssfield}}">
+
+                                                <flux:button icon="chevron-{{$this->upOrDown($ssfield)}}" wire:click="upField({{json_encode($ssfield)}})"/>
+
+                                                <div class="flex">
+
+                                                </div>
                                                 @if($parameters['level'] < 5)
                                                     <flux:subheading
-                                                        class="text-nowrap {{'text-[' . $parameters['color'] . ']'}}"
+                                                        class="text-nowrap"
+                                                        style="color: {{ $parameters['color'] }};"
                                                         :size="match($parameters['level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$ssfield}}</flux:subheading>
                                                 @else
                                                     <flux:heading
-                                                        class="text-nowrap {{'text-[' . $parameters['color'] . ']'}}"
+                                                        class="text-nowrap"
+                                                        style="color: {{ $parameters['color'] }};"
                                                         :size="match($parameters['level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$ssfield}}</flux:heading>
                                                 @endif
 
@@ -98,30 +107,58 @@
                                                             wire:model.live="selectedFields.{{$ssfield}}.level"/>
                                             </div>
                                         @endforeach
-                                        <flux:input.group>
-                                            <flux:select variant="listbox" placeholder="Выберите поле..."
-                                                         wire:model="selectedField">
-                                                @foreach($fields as $field)
-                                                    <flux:option>{{$field}}</flux:option>
-                                                @endforeach
-                                            </flux:select>
-
-                                            <flux:button icon="plus" wire:click="addField"/>
-                                        </flux:input.group>
+                                        <div>
+                                            <flux:dropdown>
+                                                <flux:button icon-trailing="chevron-down">Добавить поле</flux:button>
+                                                <flux:menu>
+                                                    @foreach($fields as $name => $subfields)
+                                                        <flux:menu.submenu heading="{{$name}}">
+                                                            @foreach($subfields as $field)
+                                                                <flux:menu.item wire:click="addField({{json_encode($field)}})">{{$field}}</flux:menu.item>
+                                                            @endforeach
+                                                        </flux:menu.submenu>
+                                                    @endforeach
+                                                </flux:menu>
+                                            </flux:dropdown>
+                                        </div>
                                     </flux:card>
                                 </div>
                                 <flux:card>
                                     <div class="flex gap-12">
-                                        <flux:input.group>
-                                            <flux:select variant="listbox" placeholder="Выберите поле..."
-                                                         wire:model="selectedField">
-                                                @foreach($fields as $field)
-                                                    <flux:option>{{$field}}</flux:option>
-                                                @endforeach
-                                            </flux:select>
+                                        @foreach($additionalFields as $ssfield => $parameters)
+                                            <div wire:key="{{$ssfield}}">
 
-                                            <flux:button icon="plus" wire:click="addField"/>
-                                        </flux:input.group>
+                                                @if($parameters['level'] < 5)
+                                                    <flux:subheading
+                                                        class="text-nowrap"
+                                                        style="color: {{ $parameters['color'] }};"
+                                                        :size="match($parameters['level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$ssfield}}</flux:subheading>
+                                                @else
+                                                    <flux:heading
+                                                        class="text-nowrap"
+                                                        style="color: {{ $parameters['color'] }};"
+                                                        :size="match($parameters['level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$ssfield}}</flux:heading>
+                                                @endif
+
+                                                <flux:input type="color"
+                                                            wire:model.live="additionalFields.{{$ssfield}}.color"/>
+
+                                                <flux:input type="range" min="1" max="7" step="1"
+                                                            wire:model.live="additionalFields.{{$ssfield}}.level"/>
+                                            </div>
+                                        @endforeach
+                                            <flux:dropdown>
+                                                <flux:button icon-trailing="chevron-down">Добавить поле</flux:button>
+                                                <flux:menu>
+                                                    @foreach($fields as $name => $subfields)
+                                                        <flux:menu.submenu heading="{{$name}}">
+                                                            @foreach($subfields as $field)
+                                                                <flux:menu.item wire:click="addAdditionalField({{json_encode($field)}})">{{$field}}</flux:menu.item>
+                                                            @endforeach
+                                                        </flux:menu.submenu>
+                                                    @endforeach
+                                                </flux:menu>
+                                            </flux:dropdown>
                                     </div>
                                 </flux:card>
                             </flux:card>
