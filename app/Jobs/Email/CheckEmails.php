@@ -15,6 +15,7 @@ use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\RateLimiter;
 
 class CheckEmails implements ShouldQueue, ShouldBeUnique
 {
@@ -42,12 +43,15 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
             $handler = new EmailHandlerLaravelImap($email->address, $email->password);
             foreach ($email->suppliers()->where('open', true)->where('unload_without_price', false)->get() as $supplier) {
 
-                if (!SupplierReportService::get($supplier)) {
+                RateLimiter::attempt('email-unload-' . $supplier->id, 1, function () use ($handler, $supplier) {
+                    if (!SupplierReportService::get($supplier)) {
 
-                    $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
+                        $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
 
-                    PriceUnload::dispatchIf((boolean) $pricePath, $supplier->pivot->id, $pricePath);
-                }
+                        PriceUnload::dispatchIf((boolean) $pricePath, $supplier->pivot->id, $pricePath);
+                    }
+                });
+
             }
         }
 
