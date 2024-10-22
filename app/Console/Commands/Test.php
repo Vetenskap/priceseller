@@ -39,7 +39,7 @@ class Test extends Command
      *
      * @var string
      */
-    protected $signature = 'app:test';
+    protected $signature = 'app:test {emailSupplierId} {path}';
 
     /**
      * The console command description.
