@@ -17,14 +17,18 @@ class SupplierPriceImport implements ToCollection, WithChunkReading
      */
     public function collection(Collection $collection)
     {
-        $collection->each(function (Collection $row) {
-            $this->emailSupplierService->processData($row);
-        });
+        $emailSupplierService = $this->emailSupplierService;
+
+        dispatch(function () use ($collection, $emailSupplierService) {
+            $collection->each(function (Collection $row) use ($emailSupplierService) {
+                $emailSupplierService->processData($row);
+            });
+        })->onQueue('email-supplier-unload');
     }
 
     public function chunkSize(): int
     {
-        return 1000;
+        return 10000;
     }
 
 }
