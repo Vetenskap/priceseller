@@ -57,6 +57,7 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
     public function __construct(public OzonMarket $market)
     {
         $this->user = User::findOrFail($this->market->user_id);
+        $this->market->clearSuppliersCache();
     }
 
     public function model(array $row)

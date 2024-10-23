@@ -56,6 +56,7 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
     public function __construct(public WbMarket $market)
     {
         $this->user = User::findOrFail($this->market->user_id);
+        $this->market->clearSuppliersCache();
     }
 
     public function model(array $row)

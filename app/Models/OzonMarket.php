@@ -68,12 +68,17 @@ class OzonMarket extends MainModel
 
     public function suppliers(): Collection
     {
-        return Cache::tags(['ozon', 'market', 'suppliers'])->remember($this->id, now()->addDay(), function () {
+        return Cache::tags(['ozon', 'market', 'suppliers'])->rememberForever($this->id, function () {
             return Supplier::whereHas('items', function ($query) {
                 $query->whereHas('ozonItems', function ($query) {
                     $query->whereIn('ozon_items.id', $this->items()->pluck('id')->toArray());
                 });
             })->distinct()->get();
         });
+    }
+
+    public function clearSuppliersCache(): void
+    {
+        Cache::tags(['ozon', 'market', 'suppliers'])->forget($this->id);
     }
 }

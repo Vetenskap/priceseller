@@ -46,6 +46,8 @@ class WbMarketService
 
     public function directRelationships(Collection $defaultFields, bool $directLink = false): Collection
     {
+        $this->market->clearSuppliersCache();
+
         $defaultFields = $defaultFields->filter();
 
         $correct = 0;

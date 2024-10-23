@@ -62,12 +62,17 @@ class WbMarket extends MainModel
 
     public function suppliers(): Collection
     {
-        return Cache::tags(['wb', 'market', 'suppliers'])->remember($this->id, now()->addDay(), function () {
+        return Cache::tags(['wb', 'market', 'suppliers'])->rememberForever($this->id, function () {
             return Supplier::whereHas('items', function ($query) {
                 $query->whereHas('wbItems', function ($query) {
                     $query->whereIn('wb_items.id', $this->items()->pluck('id')->toArray());
                 });
             })->distinct()->get();
         });
+    }
+
+    public function clearSuppliersCache(): void
+    {
+        Cache::tags(['wb', 'market', 'suppliers'])->forget($this->id);
     }
 }
