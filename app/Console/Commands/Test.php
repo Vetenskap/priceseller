@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\HttpClient\OzonClient\Resources\DescriptionCategory;
 use App\HttpClient\OzonClient\Resources\DescriptionCategoryAttribute;
 use App\HttpClient\OzonClient\Resources\DescriptionCategoryTree;
+use App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled\PostingUnfulfilledList;
 use App\HttpClient\OzonClient\Resources\ProductInfoPrices;
 use App\Models\Bundle;
 use App\Models\EmailSupplier;
@@ -39,7 +40,7 @@ class Test extends Command
      *
      * @var string
      */
-    protected $signature = 'app:test {emailSupplierId} {path}';
+    protected $signature = 'app:test';
 
     /**
      * The console command description.
@@ -53,8 +54,10 @@ class Test extends Command
      */
     public function handle()
     {
-        $this->info(ini_get('memory_limit'));
-        $service = new EmailSupplierService(EmailSupplier::find($this->argument('emailSupplierId')), Storage::disk('public')->path($this->argument('path')));
-        $service->unload();
+        $list = new PostingUnfulfilledList();
+        $list->setFilterCutoffFrom(now()->format('Y-m-d\TH:i:s\Z'));
+        $list->setFilterCutoffTo(now()->addDays(2)->format('Y-m-d\TH:i:s\Z'));
+        $list->setFilterStatus('awaiting_deliver');
+        dd($list->next('14252280-8f09-4ac4-a814-4b1799c71d9d', 112234));
     }
 }

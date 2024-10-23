@@ -9,9 +9,9 @@ class PostingUnfulfilledList
 {
     const ENDPOINT = '/v3/posting/fbs/unfulfilled/list';
 
-    protected string $dir = 'asc';
+    protected string $dir = 'ASC';
 
-    protected int $limit = 1000;
+    protected int $limit = 500;
 
     protected int $offset = 0;
 
@@ -19,13 +19,13 @@ class PostingUnfulfilledList
     protected string $filter_cutoff_to;
     protected string $filter_delivering_date_from;
     protected string $filter_delivering_date_to;
-    protected array $filter_delivery_method_id;
-    protected string $filter_provider_id;
+    protected array $filter_delivery_method_id = [];
+    protected array $filter_provider_id = [];
     protected string $filter_status;
-    protected array $warehouse_id;
+    protected array $warehouse_id = [];
     protected int $count;
 
-    public function next(string $apiKey, int $clientId)
+    public function next(string $apiKey, int $clientId): Collection
     {
         $data = array(
             "dir" => $this->dir,
