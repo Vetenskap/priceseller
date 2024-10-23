@@ -218,6 +218,21 @@ return [
                 'nice' => 0,
                 'balanceMaxShift' => 1,
                 'balanceCooldown' => 3,
+            ],
+            'supervisor-3' => [
+                'connection' => 'redis',
+                'queue' => ['market-update-stock'],
+                'balance' => 'auto',
+                'autoScalingStrategy' => 'size',
+                'maxProcesses' => 10,
+                'maxTime' => 0,
+                'maxJobs' => 10,
+                'memory' => 12800,
+                'tries' => 1,
+                'timeout' => 14350,
+                'nice' => 0,
+                'balanceMaxShift' => 1,
+                'balanceCooldown' => 3,
             ]
         ],
 

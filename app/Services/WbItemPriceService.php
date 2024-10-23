@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\HttpClient\WbClient;
+use App\Jobs\Market\UpdateStockBatch;
 use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\ItemWarehouseStock;
@@ -18,6 +19,7 @@ use App\Models\WbWarehouseUserWarehouse;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\Bus;
 use Modules\Moysklad\Services\MoyskladItemOrderService;
 
 class WbItemPriceService
@@ -129,29 +131,19 @@ class WbItemPriceService
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт остатков");
 
+        $batch = Bus::batch([])->onQueue('market-update-stock')->dispatch();
+
         $this->market
             ->items()
             ->with('wbitemable')
-            ->chunk(1000, function ($items) {
-                $items->filter(function (WbItem $wbItem) {
-
-                    if ($wbItem->wbitemable_type === Item::class) {
-                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
-                            return true;
-                        }
-                    } else {
-                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                            return true;
-                        }
-                    }
-
-                    return false;
-
-                })->each(function (WbItem $wbItem) {
-                    $wbItem = $this->recountStockWbItem($wbItem);
-                    $wbItem->save();
-                });
+            ->chunk(1000, function (Collection $items) use ($batch) {
+                $batch->add(new UpdateStockBatch($this, $items));
             });
+
+        while (!$batch->finished()) {
+            sleep(60);
+            $batch = $batch->fresh();
+        }
 
         $this->nullNotUpdatedStocks();
     }
