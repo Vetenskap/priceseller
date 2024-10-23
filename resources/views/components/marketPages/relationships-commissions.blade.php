@@ -31,6 +31,12 @@
                     <flux:switch wire:model="directLink" label="Прямая связь"/>
                 </div>
                 <flux:button wire:click="updateApiCommissions">Обновить комиссии</flux:button>
+                <div class="flex">
+                    <div class="space-y-6">
+                        <flux:switch wire:model="form.enabled_update_commissions_in_time" label="Обновлять комиссии по времени"/>
+                        <flux:input type="time" wire:model="form.update_commissions_time" label="Время обновления"/>
+                    </div>
+                </div>
             </flux:card>
         </x-blocks.main-block>
         <x-blocks.main-block>

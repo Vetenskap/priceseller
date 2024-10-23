@@ -27,7 +27,9 @@ class WbMarket extends MainModel
         'volume',
         'user_id',
         'organization_id',
-        'minus_stock'
+        'minus_stock',
+        'enabled_update_commissions_in_time',
+        'update_commissions_time'
     ];
 
     public function items()

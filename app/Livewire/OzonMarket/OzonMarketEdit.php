@@ -127,9 +127,9 @@ class OzonMarketEdit extends BaseComponent
     public function updateApiCommissions(): void
     {
         MarketUpdateApiCommissions::dispatch(
-            defaultFields: collect($this->only(['shipping_processing', 'min_price', 'min_price_percent'])),
             model: $this->market,
             service: OzonMarketService::class,
+            defaultFields: collect($this->only(['shipping_processing', 'min_price', 'min_price_percent']))->filter()->toArray(),
         );
 
         $this->addJobNotification();

@@ -56,28 +56,26 @@ class OzonMarketService
 
     }
 
-    public function updateApiCommissions(Collection $defaultFields): Collection
+    public function updateApiCommissions(array $defaultFields): Collection
     {
-        $defaultFields->filter()->each(fn($value, $key) => $this->market->items()->update([$key => $value]));;
-
         $updated = 0;
 
-        $this->market->items()->chunk(1000, function (Collection $items) use (&$updated) {
+        $this->market->items()->chunk(1000, function (Collection $items) use (&$updated, $defaultFields) {
 
             $productIdToOzonItem = $items->pluck(null, 'product_id');
 
             $productsInfoPrices = ProductInfoPrices::fetchAll($this->market, $productIdToOzonItem->keys()->toArray());
 
-            $productsInfoPrices->each(function (ProductInfoPrices $productInfoPrices) use ($productIdToOzonItem, &$updated) {
+            $productsInfoPrices->each(function (ProductInfoPrices $productInfoPrices) use ($productIdToOzonItem, &$updated, $defaultFields) {
                 $ozonItem = $productIdToOzonItem->get($productInfoPrices->getProductId());
                 if ($ozonItem) {
-                    $ozonItem->update([
+                    $ozonItem->update(array_merge([
                         'direct_flow_trans' => (float)$productInfoPrices->getCommissions()->get('fbs_direct_flow_trans_max_amount'),
                         'deliv_to_customer' => (float)$productInfoPrices->getCommissions()->get('fbs_deliv_to_customer_amount'),
                         'sales_percent' => (int)$productInfoPrices->getCommissions()->get('sales_percent_fbs'),
                         'price_market' => (int)$productInfoPrices->getPrice()->get('price'),
                         'price_seller' => (int)$productInfoPrices->getPriceIndexes()->get('ozon_index_data')->get('minimal_price'),
-                    ]);
+                    ], $defaultFields));
                     $updated++;
                 }
             });

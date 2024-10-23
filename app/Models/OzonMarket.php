@@ -33,7 +33,9 @@ class OzonMarket extends MainModel
         'user_id',
         'organization_id',
         'minus_stock',
-        'enabled_price'
+        'enabled_price',
+        'enabled_update_commissions_in_time',
+        'update_commissions_time'
     ];
 
     public function items()

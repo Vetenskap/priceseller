@@ -51,6 +51,12 @@ class WbMarketPostForm extends Form
     #[Validate]
     public $minus_stock = 0;
 
+    #[Validate]
+    public $enabled_update_commissions_in_time = false;
+
+    #[Validate]
+    public $update_commissions_time = '00:00';
+
     public function rules(): array
     {
         return [
@@ -72,7 +78,9 @@ class WbMarketPostForm extends Form
             'basic_logistics' => ['nullable', 'integer'],
             'price_one_liter' => ['nullable', 'numeric'],
             'organization_id' => ['nullable', 'uuid', 'exists:organizations,id'],
-            'minus_stock' => ['nullable', 'integer', 'min:0']
+            'minus_stock' => ['nullable', 'integer', 'min:0'],
+            'enabled_update_commissions_in_time' => ['nullable', 'boolean'],
+            'update_commissions_time' => ['nullable', 'string', 'date_format:H:i'],
         ];
     }
 
@@ -91,6 +99,8 @@ class WbMarketPostForm extends Form
         $this->price_one_liter = $this->market->price_one_liter;
         $this->organization_id = $market->organization_id;
         $this->minus_stock = $market->minus_stock;
+        $this->enabled_update_commissions_in_time = (bool) $market->enabled_update_commissions_in_time;
+        $this->update_commissions_time = $market->update_commissions_time;
     }
 
     public function store(): void

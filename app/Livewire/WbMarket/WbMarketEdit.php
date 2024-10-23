@@ -97,9 +97,9 @@ class WbMarketEdit extends BaseComponent
     public function updateApiCommissions(): void
     {
         MarketUpdateApiCommissions::dispatch(
-            defaultFields: collect($this->only('sales_percent', 'min_price', 'retail_markup_percent', 'package')),
             model: $this->market,
             service: WbMarketService::class,
+            defaultFields: collect($this->only('sales_percent', 'min_price', 'retail_markup_percent', 'package'))->filter()->toArray(),
         );
 
         $this->addJobNotification();

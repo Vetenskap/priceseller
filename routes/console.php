@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Schedule;
 
 Schedule::call(function () {
 
+    \App\Services\MarketsService::updateCommissionsInTime();
     \App\Services\BusinessLogicService::usersEmailsUnload();
     \App\Services\ReportService::checkTimeouts();
 

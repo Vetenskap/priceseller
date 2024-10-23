@@ -45,14 +45,15 @@ class Helpers {
         return Auth::user(); // Обычный пользователь
     }
 
-    static public function toBatch(\Closure $callback, string $queue = 'default'): void
+    static public function toBatch(\Closure $callback, string $queue = 'default', \Closure $progress = null): void
     {
         $batch = Bus::batch([])->onQueue($queue)->dispatch();
 
         $callback($batch);
 
         while (!$batch->finished()) {
-            sleep(60);
+            if ($progress) $progress($batch->progress());
+            sleep(20);
             $batch = $batch->fresh();
         }
     }

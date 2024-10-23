@@ -22,7 +22,7 @@ class MarketUpdateApiCommissions implements ShouldQueue, ShouldBeUnique
     /**
      * Create a new job instance.
      */
-    public function __construct(public Collection $defaultFields, public OzonMarket|WbMarket $model, public string $service)
+    public function __construct(public OzonMarket|WbMarket $model, public string $service, public array $defaultFields = [])
     {
         if (!ItemsImportReportService::new($this->model, '') ){
             throw new \Exception("Уже идёт импорт");

@@ -48,7 +48,14 @@ class OzonMarketPostForm extends Form
     #[Validate]
     public $minus_stock = 0;
 
+    #[Validate]
     public $enabled_price = true;
+
+    #[Validate]
+    public $enabled_update_commissions_in_time = false;
+
+    #[Validate]
+    public $update_commissions_time = '00:00';
 
     public function rules(): array
     {
@@ -75,7 +82,9 @@ class OzonMarketPostForm extends Form
             'max_mile' => ['nullable', 'integer'],
             'organization_id' => ['nullable', 'uuid', 'exists:organizations,id'],
             'minus_stock' => ['nullable', 'integer', 'min:0'],
-            'enabled_price' => ['nullable', 'boolean']
+            'enabled_price' => ['nullable', 'boolean'],
+            'enabled_update_commissions_in_time' => ['nullable', 'boolean'],
+            'update_commissions_time' => ['nullable', 'string', 'date_format:H:i'],
         ];
     }
 
@@ -99,6 +108,8 @@ class OzonMarketPostForm extends Form
         $this->organization_id = $market->organization_id;
         $this->minus_stock = $market->minus_stock;
         $this->enabled_price = $market->enabled_price;
+        $this->enabled_update_commissions_in_time = (bool) $market->enabled_update_commissions_in_time;
+        $this->update_commissions_time = $market->update_commissions_time;
     }
 
     public function store(): void
