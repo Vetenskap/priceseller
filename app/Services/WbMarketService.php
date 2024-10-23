@@ -44,6 +44,27 @@ class WbMarketService
         return $uuid;
     }
 
+    public function updateApiCommissions(Collection $defaultFields): Collection
+    {
+        $defaultFields->filter()->each(fn($value, $key) => $this->market->items()->update([$key => $value]));;
+
+        $updated = 0;
+
+        $this->market->items()->chunk(1000, function (Collection $items) use (&$updated) {
+
+
+            ItemsImportReportService::flush($this->market, 0, 0, $updated);
+
+        });
+
+        return collect([
+            'correct' => 0,
+            'error' => 0,
+            'updated' => $updated,
+        ]);
+
+    }
+
     public function directRelationships(Collection $defaultFields, bool $directLink = false): Collection
     {
         $this->market->clearSuppliersCache();
@@ -73,35 +94,37 @@ class WbMarketService
             $nmId = $result->get('cursor')->get('nmID');
             $total = $result->get('cursor')->get('total');
 
-            $result->get('cards')->each(function (array $wbItem) use ($externalClient, $defaultFields, &$error, &$correct, &$updated, $directLink) {
+            $result->get('cards')->toCollectionSpread()->each(function (Collection $wbItem) use ($externalClient, $defaultFields, &$error, &$correct, &$updated, $directLink) {
 
                 if ($directLink) {
                     try {
-                        $item = $this->market->user->items()->where('code', $wbItem['vendorCode'])->first();
+                        $item = $this->market->user->items()->where('code', $wbItem->get('vendorCode'))->first();
                         if (!$item) {
-                            $item = $this->market->user->bundles()->where('code', $wbItem['vendorCode'])->firstOrFail();
+                            $item = $this->market->user->bundles()->where('code', $wbItem->get('vendorCode'))->firstOrFail();
                         }
                     } catch (ModelNotFoundException) {
                         $error++;
 
-                        MarketItemRelationshipService::handleNotFoundItem($wbItem['vendorCode'], $this->market->id, 'App\Models\WbMarket');
+                        MarketItemRelationshipService::handleNotFoundItem($wbItem->get('vendorCode'), $this->market->id, 'App\Models\WbMarket');
 
                         return;
                     }
                 } else {
                     try {
-                        $item = $this->market->items()->where('vendor_code', $wbItem['vendorCode'])->firstOrFail()->wbitemable;
+                        $item = $this->market->items()->where('vendor_code', $wbItem->get('vendorCode'))->firstOrFail()->wbitemable;
                     } catch (ModelNotFoundException) {
 
                         $error++;
 
-                        MarketItemRelationshipService::handleNotFoundItem($wbItem['vendorCode'], $this->market->id, 'App\Models\WbMarket');
+                        MarketItemRelationshipService::handleNotFoundItem($wbItem->get('vendorCode'), $this->market->id, 'App\Models\WbMarket');
 
                         return;
                     }
                 }
 
-                $sku = collect(collect(collect($wbItem['sizes'])->first(fn(array $size) => isset($size['skus'])))->get('skus'))->first();
+                $sku = $wbItem->get('sizes')->first(fn(Collection $size) => $size->get('skus'))->get('skus')->first();
+                $dimensions = $wbItem->get('dimensions');
+
 
 //                    /** @var Collection $info */
 //                    $info = Cache::tags(['wb', 'external_card'])
@@ -111,24 +134,25 @@ class WbMarketService
 //                            fn() => $externalClient->getCardDetail($wbItem['nmID'])
 //                        );
 
-                MarketItemRelationshipService::handleFoundItem($wbItem['vendorCode'], $item->code, $this->market->id, 'App\Models\WbMarket');
+                MarketItemRelationshipService::handleFoundItem($wbItem->get('vendorCode'), $item->code, $this->market->id, 'App\Models\WbMarket');
 
-                if (WbItem::where('vendor_code', $wbItem['vendorCode'])->where('wb_market_id', $this->market->id)->exists()) {
+                if (WbItem::where('vendor_code', $wbItem->get('vendorCode'))->where('wb_market_id', $this->market->id)->exists()) {
                     $updated++;
                 } else {
                     $correct++;
                 }
 
                 $newWbItem = WbItem::updateOrCreate([
-                    'vendor_code' => $wbItem['vendorCode'],
+                    'vendor_code' => $wbItem->get('vendorCode'),
                     'wb_market_id' => $this->market->id,
                 ], [
-                    'vendor_code' => $wbItem['vendorCode'],
-                    'nm_id' => $wbItem['nmID'],
+                    'vendor_code' => $wbItem->get('vendorCode'),
+                    'nm_id' => $wbItem->get('nmID'),
                     'sku' => $sku,
                     'wb_market_id' => $this->market->id,
                     'wbitemable_id' => $item->id,
                     'wbitemable_type' => $item->getMorphClass(),
+                    'volume' => $dimensions->get('length') * $dimensions->get('width') * $dimensions->get('height') / 1000,
                 ]);
 
                 $defaultFields->each(function ($value, $key) use ($newWbItem) {
