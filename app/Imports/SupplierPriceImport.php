@@ -2,7 +2,9 @@
 
 namespace App\Imports;
 
+use App\Jobs\Supplier\ProcessData;
 use App\Services\EmailSupplierService;
+use Illuminate\Bus\Batch;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
 use Maatwebsite\Excel\Concerns\WithChunkReading;
@@ -10,20 +12,14 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 class SupplierPriceImport implements ToCollection, WithChunkReading
 {
 
-    public function __construct(protected EmailSupplierService $emailSupplierService) {}
+    public function __construct(protected EmailSupplierService $emailSupplierService, protected Batch $batch) {}
 
     /**
      * @param Collection $collection
      */
     public function collection(Collection $collection)
     {
-        $emailSupplierService = $this->emailSupplierService;
-
-        dispatch(function () use ($collection, $emailSupplierService) {
-            $collection->each(function (Collection $row) use ($emailSupplierService) {
-                $emailSupplierService->processData($row);
-            });
-        })->onQueue('email-supplier-unload');
+        $this->batch->add(new ProcessData($this->emailSupplierService, $collection));
     }
 
     public function chunkSize(): int

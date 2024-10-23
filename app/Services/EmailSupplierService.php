@@ -11,6 +11,7 @@ use App\Services\Item\ItemPriceWithCacheService;
 use Box\Spout\Common\Exception\IOException;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Bus;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Moysklad\Models\MoyskladQuarantine;
 
@@ -86,7 +87,20 @@ class EmailSupplierService
 
     protected function importHandle(): void
     {
-        Excel::import(new SupplierPriceImport($this), $this->path);
+        $batch = Bus::batch([])->onQueue('email-supplier-unload')->dispatch();
+
+        dump('Создали batch');
+
+        Excel::import(new SupplierPriceImport($this, $batch), $this->path);
+
+        dump('Завершили наполение batch');
+
+        while (!$batch->finished()) {
+            dump('wait 10 sec...');
+            sleep(10);
+        }
+
+        dump('Batch is finished!');
     }
 
     protected function nullAllStocks(): void
