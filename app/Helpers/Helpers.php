@@ -4,6 +4,7 @@ namespace App\Helpers;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
 
 class Helpers {
@@ -42,5 +43,17 @@ class Helpers {
         }
 
         return Auth::user(); // Обычный пользователь
+    }
+
+    static public function toBatch(\Closure $callback, string $queue = 'default'): void
+    {
+        $batch = Bus::batch([])->onQueue($queue)->dispatch();
+
+        $callback($batch);
+
+        while (!$batch->finished()) {
+            sleep(60);
+            $batch = $batch->fresh();
+        }
     }
 }

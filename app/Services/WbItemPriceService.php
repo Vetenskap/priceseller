@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Helpers\Helpers;
 use App\HttpClient\WbClient;
 use App\Jobs\Market\NullNotUpdatedStocksBatch;
 use App\Jobs\Market\UpdateStockBatch;
@@ -17,6 +18,7 @@ use App\Models\WbWarehouseStock;
 use App\Models\WbWarehouseSupplier;
 use App\Models\WbWarehouseSupplierWarehouse;
 use App\Models\WbWarehouseUserWarehouse;
+use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
@@ -130,19 +132,14 @@ class WbItemPriceService
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт остатков");
 
-        $batch = Bus::batch([])->onQueue('market-update-stock')->dispatch();
-
-        $this->market
-            ->items()
-            ->with('wbitemable')
-            ->chunk(1000, function (Collection $items) use ($batch) {
-                $batch->add(new UpdateStockBatch($this, $items));
-            });
-
-        while (!$batch->finished()) {
-            sleep(60);
-            $batch = $batch->fresh();
-        }
+        Helpers::toBatch(function (Batch $batch) {
+            $this->market
+                ->items()
+                ->with('wbitemable')
+                ->chunk(1000, function (Collection $items) use ($batch) {
+                    $batch->add(new UpdateStockBatch($this, $items));
+                });
+        }, 'market-update-stock');
 
         $this->nullNotUpdatedStocks();
     }
@@ -232,32 +229,28 @@ class WbItemPriceService
 
     public function nullNotUpdatedStocks(): void
     {
-        $batch = Bus::batch([])->onQueue('market-update-stock')->dispatch();
+        Helpers::toBatch(function (Batch $batch) {
+            WbWarehouseStock::query()
+                ->with('wbItem')
+                ->whereHas('wbItem', function (Builder $query) {
+                    $query->where('wb_market_id', $this->market->id);
+                })
+                ->whereHas('warehouse', function (Builder $query) {
+                    $query->whereHas('suppliers', function (Builder $query) {
+                        $query
+                            ->where('supplier_id', $this->supplier->id)
+                            ->whereHas('warehouses', function (Builder $query) {
+                                $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+                            });
+                    });
+                })
+                ->chunk(1000, function (Collection $stocks) use ($batch) {
 
-        WbWarehouseStock::query()
-            ->with('wbItem')
-            ->whereHas('wbItem', function (Builder $query) {
-                $query->where('wb_market_id', $this->market->id);
-            })
-            ->whereHas('warehouse', function (Builder $query) {
-                $query->whereHas('suppliers', function (Builder $query) {
-                    $query
-                        ->where('supplier_id', $this->supplier->id)
-                        ->whereHas('warehouses', function (Builder $query) {
-                            $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
-                        });
+                    $batch->add(new NullNotUpdatedStocksBatch($this, $stocks));
+
                 });
-            })
-            ->chunk(1000, function (Collection $stocks) use ($batch) {
+        }, 'market-update-stock');
 
-                $batch->add(new NullNotUpdatedStocksBatch($this, $stocks));
-
-            });
-
-        while (!$batch->finished()) {
-            sleep(60);
-            $batch = $batch->fresh();
-        }
     }
 
     public function nullAllStocks(): void

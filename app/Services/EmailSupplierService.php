@@ -2,24 +2,23 @@
 
 namespace App\Services;
 
+use App\Helpers\Helpers;
 use App\Imports\SupplierPriceImport;
+use App\Jobs\Supplier\ProcessData;
 use App\Models\EmailSupplier;
 use App\Models\EmailSupplierWarehouse;
 use App\Models\Item;
 use App\Services\Item\ItemPriceService;
-use App\Services\Item\ItemPriceWithCacheService;
 use Box\Spout\Common\Exception\IOException;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
+use Illuminate\Bus\Batch;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Bus;
 use Maatwebsite\Excel\Facades\Excel;
-use Modules\Moysklad\Models\MoyskladQuarantine;
 
 class EmailSupplierService
 {
     protected Collection $stockValues;
     protected Collection $warehouses;
-    protected int $totalRows = 0;
 
     public function __construct(protected EmailSupplier $supplier, protected string $path)
     {
@@ -29,6 +28,8 @@ class EmailSupplierService
 
     public function unload(): void
     {
+        SupplierReportService::changeMessage($this->supplier->supplier, 'Обнуление остатков');
+
         $this->nullUpdated();
         $this->nullAllStocks();
 
@@ -52,6 +53,8 @@ class EmailSupplierService
                 $this->importHandle();
             } catch (\TypeError $e) {
 
+                report($e);
+
                 $this->anotherHandle();
 
             }
@@ -62,39 +65,42 @@ class EmailSupplierService
 
     protected function xlsxHandle(): void
     {
-        $reader = ReaderEntityFactory::createXLSXReader();
-        $reader->open($this->path);
+        Helpers::toBatch(function (Batch $batch) {
 
-        foreach ($reader->getSheetIterator() as $sheet) {
-            foreach ($sheet->getRowIterator() as $row) {
-                $this->processData(collect($row->toArray()));
+            $reader = ReaderEntityFactory::createXLSXReader();
+            $reader->open($this->path);
+
+            foreach ($reader->getSheetIterator() as $sheet) {
+                $batch->add(new ProcessData($this, $sheet));
             }
-        }
 
-        $reader->close();
+            $reader->close();
+
+        }, 'email-supplier-unload');
     }
 
     protected function anotherHandle(): void
     {
-        $sheets = Excel::toCollection(new Collection(), $this->path);
+        Helpers::toBatch(function (Batch $batch) {
 
-        $sheets->each(function (Collection $sheet) {
-            $sheet->each(function (Collection $row) {
-                $this->processData($row);
+            $sheets = Excel::toCollection(new Collection(), $this->path);
+
+            $sheets->each(function (Collection $sheet) use ($batch) {
+
+                $batch->add(new ProcessData($this, $sheet));
+
+                $sheet->each(function (Collection $row) {
+                    $this->processData($row);
+                });
             });
-        });
+        }, 'email-supplier-unload');
     }
 
     protected function importHandle(): void
     {
-        $batch = Bus::batch([])->onQueue('email-supplier-unload')->dispatch();
-
-        Excel::import(new SupplierPriceImport($this, $batch), $this->path);
-
-        while (!$batch->finished()) {
-            sleep(60);
-            $batch = $batch->fresh();
-        }
+        Helpers::toBatch(function (Batch $batch) {
+            Excel::import(new SupplierPriceImport($this, $batch), $this->path);
+        }, 'email-supplier-unload');
     }
 
     protected function nullAllStocks(): void
@@ -189,10 +195,6 @@ class EmailSupplierService
         } else {
             EmailPriceItemService::handleNotFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock);
         }
-
-        $this->totalRows++;
-
-        if ($this->totalRows % 1000 === 0) SupplierReportService::changeMessage($this->supplier->supplier, 'Выгружено: ' . $this->totalRows);
     }
 
     public function prepareStock(string $stock): int
