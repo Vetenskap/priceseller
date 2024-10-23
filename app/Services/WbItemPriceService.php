@@ -24,12 +24,10 @@ use Modules\Moysklad\Services\MoyskladItemOrderService;
 
 class WbItemPriceService
 {
-    protected WbClient $wbClient;
     protected User $user;
 
     public function __construct(public ?Supplier $supplier = null, public WbMarket $market, public array $supplierWarehousesIds)
     {
-        $this->wbClient = new WbClient($this->market->api_key);
         $this->user = $this->market->user;
     }
 
@@ -381,7 +379,8 @@ class WbItemPriceService
                         });
 
                         if (App::isProduction()) {
-                            $this->wbClient->putStocks($data->values()->all(), $warehouse->warehouse_id, $this->supplier);
+                            $wbClient = new WbClient($this->market->api_key);
+                            $wbClient->putStocks($data->values()->all(), $warehouse->warehouse_id, $this->supplier);
                         }
 
                     });
@@ -440,7 +439,8 @@ class WbItemPriceService
                 });
 
                 if (App::isProduction()) {
-                    $this->wbClient->putPrices($data->values()->all(), $this->supplier);
+                    $wbClient = new WbClient($this->market->api_key);
+                    $wbClient->putPrices($data->values()->all(), $this->supplier);
                 }
 
             });

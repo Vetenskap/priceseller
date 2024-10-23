@@ -54,10 +54,9 @@ class Test extends Command
      */
     public function handle()
     {
-        $list = new PostingUnfulfilledList();
-        $list->setFilterCutoffFrom(now()->format('Y-m-d\TH:i:s\Z'));
-        $list->setFilterCutoffTo(now()->addDays(2)->format('Y-m-d\TH:i:s\Z'));
-        $list->setFilterStatus('awaiting_deliver');
-        dd($list->next('14252280-8f09-4ac4-a814-4b1799c71d9d', 112234));
+        $market = WbMarket::where('user_id', 10)->first();
+        $supplier = Supplier::find('9cd532e5-7327-4714-ae9e-810b3d241421');
+        $service = new WbItemPriceService($supplier, $market, [$supplier->warehouses()->first()->id]);
+        $service->updateStock();
     }
 }

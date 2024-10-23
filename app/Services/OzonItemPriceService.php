@@ -24,12 +24,10 @@ use Modules\Moysklad\Services\MoyskladItemOrderService;
 
 class OzonItemPriceService
 {
-    protected OzonClient $ozonClient;
     protected User $user;
 
     public function __construct(public ?Supplier $supplier = null, public OzonMarket $market, public array $supplierWarehousesIds)
     {
-        $this->ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
         $this->user = $this->market->user;
     }
 
@@ -414,7 +412,8 @@ class OzonItemPriceService
                         });
 
                         if (App::isProduction()) {
-                            $this->ozonClient->putStocks($data->values()->all(), $this->supplier);
+                            $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
+                            $ozonClient->putStocks($data->values()->all(), $this->supplier);
                         }
 
                     });
@@ -486,7 +485,8 @@ class OzonItemPriceService
                 });
 
                 if (App::isProduction()) {
-                    $this->ozonClient->putPrices($data->values()->all());
+                    $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
+                    $ozonClient->putPrices($data->values()->all());
                 }
             });
     }
