@@ -47,8 +47,7 @@ class ModuleIndex extends BaseComponent
         $enabledModules = [];
 
         foreach (\Module::allEnabled() as $name => $module) {
-            dd($module);
-            if (Permission::where('value', Str::lower($module['name']))->exists()) {
+            if (Permission::where('value', Str::lower($name))->exists()) {
                 if ($this->user() instanceof Employee) {
                     if (!$this->user()->can('view-' . $name)) continue;
                 }
