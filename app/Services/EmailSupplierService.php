@@ -89,19 +89,12 @@ class EmailSupplierService
     {
         $batch = Bus::batch([])->onQueue('email-supplier-unload')->dispatch();
 
-        dump('Создали batch');
-
         Excel::import(new SupplierPriceImport($this, $batch), $this->path);
 
-        dump('Завершили наполение batch');
-
         while (!$batch->finished()) {
-            dump('wait 60 sec...');
             sleep(60);
             $batch = $batch->fresh();
         }
-
-        dump('Batch is finished!');
     }
 
     protected function nullAllStocks(): void
