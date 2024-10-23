@@ -71,7 +71,7 @@ class OzonMarket extends MainModel
         return Cache::tags(['ozon', 'market', 'suppliers'])->rememberForever($this->id, function () {
             return Supplier::whereHas('items', function ($query) {
                 $query->whereHas('ozonItems', function ($query) {
-                    $query->whereIn('ozon_items.id', $this->items()->pluck('id')->toArray());
+                    $query->whereIn('ozon_items.ozon_market_id', $this->id);
                 });
             })->distinct()->get();
         });

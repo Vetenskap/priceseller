@@ -65,7 +65,7 @@ class WbMarket extends MainModel
         return Cache::tags(['wb', 'market', 'suppliers'])->rememberForever($this->id, function () {
             return Supplier::whereHas('items', function ($query) {
                 $query->whereHas('wbItems', function ($query) {
-                    $query->whereIn('wb_items.id', $this->items()->pluck('id')->toArray());
+                    $query->whereIn('wb_items.wb_market_id', $this->id);
                 });
             })->distinct()->get();
         });
