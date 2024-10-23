@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\HttpClient\WbClient;
+use App\Jobs\Market\NullNotUpdatedStocksBatch;
 use App\Jobs\Market\UpdateStockBatch;
 use App\Models\Bundle;
 use App\Models\Item;
@@ -231,6 +232,8 @@ class WbItemPriceService
 
     public function nullNotUpdatedStocks(): void
     {
+        $batch = Bus::batch([])->onQueue('market-update-stock')->dispatch();
+
         WbWarehouseStock::query()
             ->with('wbItem')
             ->whereHas('wbItem', function (Builder $query) {
@@ -245,33 +248,16 @@ class WbItemPriceService
                         });
                 });
             })
-            ->chunk(1000, function (Collection $stocks) {
+            ->chunk(1000, function (Collection $stocks) use ($batch) {
 
-                $stocks->filter(function (WbWarehouseStock $stock) {
-
-                    $wbItem = $stock->wbItem;
-
-                    if ($wbItem->wbitemable_type === Item::class) {
-                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
-                            if (!$wbItem->wbitemable->unload_wb) {
-                                return true;
-                            }
-                        }
-                    } else {
-                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                            if ($wbItem->wbitemable->items->first(fn(Item $item) => !$item->unload_wb)) {
-                                return true;
-                            }
-                        }
-                    }
-
-                    return false;
-
-                })->each(function (WbWarehouseStock $stock) {
-                    $stock->update(['stock' => 0]);
-                });
+                $batch->add(new NullNotUpdatedStocksBatch($this, $stocks));
 
             });
+
+        while (!$batch->finished()) {
+            sleep(60);
+            $batch = $batch->fresh();
+        }
     }
 
     public function nullAllStocks(): void

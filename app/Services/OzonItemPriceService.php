@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\HttpClient\OzonClient\OzonClient;
+use App\Jobs\Market\NullNotUpdatedStocksBatch;
 use App\Jobs\Market\UpdateStockBatch;
 use App\Models\Bundle;
 use App\Models\Item;
@@ -261,6 +262,8 @@ class OzonItemPriceService
 
     public function nullNotUpdatedStocks(): void
     {
+        $batch = Bus::batch([])->onQueue('market-update-stock')->dispatch();
+
         OzonWarehouseStock::query()
             ->with(['ozonItem'])
             ->whereHas('ozonItem', function (Builder $query) {
@@ -275,29 +278,14 @@ class OzonItemPriceService
                         });
                 });
             })
-            ->chunk(1000, function (Collection $stocks) {
-                $stocks->filter(function (OzonWarehouseStock $stock) {
-
-                    $ozonItem = $stock->ozonItem;
-
-                    if ($ozonItem->ozonitemable_type === Item::class) {
-                        if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
-                            if (!$ozonItem->ozonitemable->unload_ozon) {
-                                return true;
-                            }
-                        }
-                    } else {
-                        if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                            if ($ozonItem->ozonitemable->items->first(fn(Item $item) => !$item->unload_ozon)) {
-                                return true;
-                            }
-                        }
-                    }
-
-                    return false;
-
-                })->each(fn(OzonWarehouseStock $stock) => $stock->update(['stock' => 0]));
+            ->chunk(1000, function (Collection $stocks) use ($batch) {
+                $batch->add(new NullNotUpdatedStocksBatch($this, $stocks));
             });
+
+        while (!$batch->finished()) {
+            sleep(60);
+            $batch = $batch->fresh();
+        }
     }
 
     public function nullAllStocks(): void
