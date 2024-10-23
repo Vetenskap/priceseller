@@ -126,14 +126,6 @@ class WbMarketService
                 $dimensions = $wbItem->get('dimensions');
 
 
-//                    /** @var Collection $info */
-//                    $info = Cache::tags(['wb', 'external_card'])
-//                        ->remember(
-//                            $wbItem['nmID'],
-//                            now()->addDay(),
-//                            fn() => $externalClient->getCardDetail($wbItem['nmID'])
-//                        );
-
                 MarketItemRelationshipService::handleFoundItem($wbItem->get('vendorCode'), $item->code, $this->market->id, 'App\Models\WbMarket');
 
                 if (WbItem::where('vendor_code', $wbItem->get('vendorCode'))->where('wb_market_id', $this->market->id)->exists()) {
@@ -142,24 +134,18 @@ class WbMarketService
                     $correct++;
                 }
 
-                $newWbItem = WbItem::updateOrCreate([
+                WbItem::updateOrCreate([
                     'vendor_code' => $wbItem->get('vendorCode'),
                     'wb_market_id' => $this->market->id,
-                ], [
+                ], array_merge([
                     'vendor_code' => $wbItem->get('vendorCode'),
                     'nm_id' => $wbItem->get('nmID'),
                     'sku' => $sku,
                     'wb_market_id' => $this->market->id,
                     'wbitemable_id' => $item->id,
                     'wbitemable_type' => $item->getMorphClass(),
-                    'volume' => $dimensions->get('length') * $dimensions->get('width') * $dimensions->get('height') / 1000,
-                ]);
-
-                $defaultFields->each(function ($value, $key) use ($newWbItem) {
-                    $newWbItem->{$key} = $value;
-                });
-
-                $newWbItem->save();
+                    'volume' => round($dimensions->get('length') * $dimensions->get('width') * $dimensions->get('height') / 1000, 2),
+                ], $defaultFields->toArray()));
             });
 
             ItemsImportReportService::flush($this->market, $correct, $error, $updated);
