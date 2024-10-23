@@ -96,8 +96,9 @@ class EmailSupplierService
         dump('Завершили наполение batch');
 
         while (!$batch->finished()) {
-            dump('wait 10 sec...');
-            sleep(10);
+            dump('wait 60 sec...');
+            sleep(60);
+            $batch = $batch->fresh();
         }
 
         dump('Batch is finished!');
