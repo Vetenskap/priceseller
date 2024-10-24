@@ -16,7 +16,7 @@ class ProcessData implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public EmailSupplierService $emailSupplierService, public Collection|Sheet $collection)
+    public function __construct(public EmailSupplierService $emailSupplierService, public Collection $collection)
     {
         //
     }
@@ -26,14 +26,8 @@ class ProcessData implements ShouldQueue
      */
     public function handle(): void
     {
-        if ($this->collection instanceof Collection) {
-            $this->collection->each(function (Collection $row) {
-                $this->emailSupplierService->processData($row);
-            });
-        } else {
-            foreach ($this->collection->getRowIterator() as $row) {
-                $this->emailSupplierService->processData(collect($row->toArray()));
-            }
-        }
+        $this->collection->each(function (Collection $row) {
+            $this->emailSupplierService->processData($row);
+        });
     }
 }

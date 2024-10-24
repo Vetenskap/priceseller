@@ -9,8 +9,10 @@ use App\Models\EmailSupplier;
 use App\Models\EmailSupplierWarehouse;
 use App\Models\Item;
 use App\Services\Item\ItemPriceService;
+use Box\Spout\Common\Entity\Row;
 use Box\Spout\Common\Exception\IOException;
 use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
+use Box\Spout\Reader\XLSX\Sheet;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Facades\Excel;
@@ -65,18 +67,18 @@ class EmailSupplierService
 
     protected function xlsxHandle(): void
     {
-        Helpers::toBatch(function (Batch $batch) {
+        $reader = ReaderEntityFactory::createXLSXReader();
+        $reader->open($this->path);
 
-            $reader = ReaderEntityFactory::createXLSXReader();
-            $reader->open($this->path);
-
-            foreach ($reader->getSheetIterator() as $sheet) {
-                $batch->add(new ProcessData($this, $sheet));
+        /** @var Sheet $sheet */
+        foreach ($reader->getSheetIterator() as $sheet) {
+            /** @var Row $row */
+            foreach ($sheet->getRowIterator() as $row) {
+                $this->processData(collect($row->toArray()));
             }
+        }
 
-            $reader->close();
-
-        }, 'email-supplier-unload');
+        $reader->close();
     }
 
     protected function anotherHandle(): void
