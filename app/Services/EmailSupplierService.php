@@ -37,14 +37,29 @@ class EmailSupplierService
 
         SupplierReportService::changeMessage($this->supplier->supplier, 'Чтение прайса');
 
-        try {
-            $this->importHandle();
-        } catch (\TypeError $e) {
+        $ext = pathinfo($this->path, PATHINFO_EXTENSION);
 
-            report($e);
+        if ($ext === 'xlsx') {
 
-            $this->anotherHandle();
+            try {
+                $this->xlsxHandle();
+            } catch (IOException $e) {
 
+                report($e);
+
+                $this->importHandle();
+            }
+        } else {
+
+            try {
+                $this->importHandle();
+            } catch (\TypeError $e) {
+
+                report($e);
+
+                $this->anotherHandle();
+
+            }
         }
 
         SupplierReportService::changeMessage($this->supplier->supplier, 'Прайс прочитан');
