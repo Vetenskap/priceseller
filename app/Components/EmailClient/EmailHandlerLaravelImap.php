@@ -103,8 +103,8 @@ class EmailHandlerLaravelImap
                     foreach ($message->getAttachments()->paginate()->getIterator() as $file) {
 
                         $name = $file->getName();
-                        $ext = pathinfo($name, PATHINFO_EXTENSION);
-                        $name = str_replace('.' . $ext, '', $name);
+                        $ext = '.' . pathinfo($name, PATHINFO_EXTENSION);
+                        $name = str_replace($ext, '', $name);
 
                         if (!Str::contains($name, $supplierFilename)) {
                             continue;
@@ -128,8 +128,8 @@ class EmailHandlerLaravelImap
                             if ($res === TRUE) {
 
                                 $nameZip = $zip->getNameIndex(0);
-                                $zipExt = pathinfo($nameZip, PATHINFO_EXTENSION);
-                                $nameZip = str_replace('.' . $zipExt, '', $nameZip);
+                                $zipExt = '.' . pathinfo($nameZip, PATHINFO_EXTENSION);
+                                $nameZip = str_replace($zipExt, '', $nameZip);
 
                                 $this->storage->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($nameZip)) . $zipExt, $zip->getFromIndex(0));
 
