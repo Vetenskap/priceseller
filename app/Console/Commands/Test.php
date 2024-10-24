@@ -58,7 +58,7 @@ class Test extends Command
      */
     public function handle()
     {
-        $path = Storage::disk('public')->path('test.xlsx');
+        $path = Storage::disk('public')->path('671a16f040dab_Ostatki_2_skladov_Ska_d_Skakun_Cernicenko.xlsx');
         $emailSupplier = EmailSupplier::find(18);
         $service = new EmailSupplierService($emailSupplier, $path);
         $service->unload();

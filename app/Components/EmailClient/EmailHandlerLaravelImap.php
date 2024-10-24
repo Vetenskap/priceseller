@@ -115,25 +115,25 @@ class EmailHandlerLaravelImap
 
                         $fullPath = SupplierService::PATH . uniqid() . '_';
 
-                        $this->storage->put($fullPath . Str::ascii($name), $file->getContent());
+                        $this->storage->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)), $file->getContent());
 
                         if (in_array($file->getContentType(), self::ZIP_TYPES)) {
 
                             $zip = new ZipArchive;
 
-                            $res = $zip->open($this->storage->path($fullPath . Str::ascii($name)));
+                            $res = $zip->open($this->storage->path($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name))));
 
                             if ($res === TRUE) {
 
                                 $nameZip = $zip->getNameIndex(0);
 
-                                $this->storage->put($fullPath . Str::ascii($nameZip), $zip->getFromIndex(0));
+                                $this->storage->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($nameZip)), $zip->getFromIndex(0));
 
                                 $zip->close();
 
-                                $this->storage->delete($fullPath . Str::ascii($name));
+                                $this->storage->delete($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)));
 
-                                $fullPath = $fullPath . Str::ascii($nameZip);
+                                $fullPath = $fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($nameZip));
 
                             } else {
                                 Context::push('unload', [
@@ -142,7 +142,7 @@ class EmailHandlerLaravelImap
                             }
                         } else {
 
-                            $fullPath = $fullPath . Str::ascii($name);
+                            $fullPath = $fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name));
 
                         }
 
