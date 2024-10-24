@@ -55,20 +55,13 @@ class EmailSupplierService
 
                 $command = "/usr/bin/soffice --convert-to ods {$this->path} --headless --outdir {$directory}";
 
-                $process = Process::timeout(300)->run($command);
+                $process = Process::timeout(600)->run($command);
 
                 if (!$process->successful()) {
                     throw new \Exception($process->errorOutput());
                 }
 
                 $this->path = str_replace('xlsx', 'ods', $this->path);
-
-                if (!Storage::disk('public')->exists($this->path)) {
-                    sleep(60);
-                    if (!Storage::disk('public')->exists($this->path)) {
-                        throw new \Exception('could not find price');
-                    }
-                }
 
                 $this->odsHandle();
             }
