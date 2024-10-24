@@ -15,6 +15,7 @@ use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Box\Spout\Reader\XLSX\Sheet;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Process;
 use Maatwebsite\Excel\Facades\Excel;
 
 class EmailSupplierService
@@ -48,7 +49,16 @@ class EmailSupplierService
 
                 report($e);
 
-                $this->importHandle();
+                $pathInfo = pathinfo($this->path);
+                $directory = $pathInfo['dirname'];
+
+                $command = "soffice --convert-to ods {$this->path} --headless --outdir {$directory}";
+
+                $process = Process::run($command);
+
+                $this->path = str_replace('xlsx', 'ods', $this->path);
+
+                $this->odsHandle();
             }
         } else {
 
@@ -80,11 +90,36 @@ class EmailSupplierService
                 /** @var Row $row */
                 foreach ($sheet->getRowIterator() as $row) {
 
-                    while (memory_get_usage(true) > $this->limitMemory) {
-                        logger('Memory usage - ' .memory_get_usage(true));
-                        logger('limit - ' . $this->limitMemory);
-                        sleep(20);
+                    $rows->add(collect($row->toArray()));
+
+                    if ($rows->count() >= 10000) {
+                        $batch->add(new ProcessData($this, $rows));
+                        $rows = collect();
                     }
+                }
+
+                if ($rows->isNotEmpty()) {
+                    $batch->add(new ProcessData($this, $rows));
+                }
+            }
+
+            $reader->close();
+        }, 'email-supplier-unload');
+    }
+
+    protected function odsHandle(): void
+    {
+        Helpers::toBatch(function (Batch $batch) {
+            $reader = ReaderEntityFactory::createODSReader();
+            $reader->open($this->path);
+
+            /** @var Sheet $sheet */
+            foreach ($reader->getSheetIterator() as $sheet) {
+
+                $rows = collect();
+
+                /** @var Row $row */
+                foreach ($sheet->getRowIterator() as $row) {
 
                     $rows->add(collect($row->toArray()));
 

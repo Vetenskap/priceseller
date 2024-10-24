@@ -20,6 +20,9 @@ use App\Models\WbMarket;
 use App\Services\EmailSupplierService;
 use App\Services\OzonItemPriceService;
 use App\Services\WbItemPriceService;
+use Box\Spout\Common\Entity\Row;
+use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
+use Box\Spout\Reader\XLSX\Sheet;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Facades\Storage;
@@ -55,9 +58,9 @@ class Test extends Command
      */
     public function handle()
     {
-        while (memory_get_usage() > $this->limitMemory) {
-            $this->info(memory_get_usage() / 1024 / 1024 . 'MB memory usage');
-            sleep(20);
-        }
+        $path = Storage::disk('public')->path('test.xlsx');
+        $emailSupplier = EmailSupplier::find(18);
+        $service = new EmailSupplierService($emailSupplier, $path);
+        $service->unload();
     }
 }
