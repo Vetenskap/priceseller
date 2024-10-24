@@ -50,6 +50,8 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
 
                         $ttl = Redis::ttl('laravel_unique_job:'.PriceUnload::class.':'.PriceUnload::getUniqueId(EmailSupplier::find($supplier->pivot->id)));
 
+                        logger($supplier->name . ': ttl = ' . $ttl);
+
                         if (!($ttl > 0)) {
                             $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
 
