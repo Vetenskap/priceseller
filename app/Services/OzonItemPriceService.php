@@ -159,16 +159,16 @@ class OzonItemPriceService
 
     public function updateStock(): void
     {
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
-
-        Helpers::toBatch(function (Batch $batch) {
-            $this->market
-                ->items()
-                ->with('ozonitemable')
-                ->chunk(1000, function ($items) use ($batch) {
-                    $batch->add(new UpdateStockBatch($this, $items));
-                });
-        }, 'market-update-stock');
+//        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
+//
+//        Helpers::toBatch(function (Batch $batch) {
+//            $this->market
+//                ->items()
+//                ->with('ozonitemable')
+//                ->chunk(1000, function ($items) use ($batch) {
+//                    $batch->add(new UpdateStockBatch($this, $items));
+//                });
+//        }, 'market-update-stock');
 
         $this->nullNotUpdatedStocks();
     }
@@ -261,7 +261,7 @@ class OzonItemPriceService
     {
         Helpers::toBatch(function (Batch $batch) {
             OzonWarehouseStock::query()
-                ->with(['ozonItem'])
+                ->with('ozonItem')
                 ->whereHas('ozonItem', function (Builder $query) {
                     $query->where('ozon_market_id', $this->market->id);
                 })

@@ -54,9 +54,10 @@ class Test extends Command
      */
     public function handle()
     {
-        $market = WbMarket::where('user_id', 10)->first();
-        $supplier = Supplier::find('9cd532e5-7327-4714-ae9e-810b3d241421');
-        $service = new WbItemPriceService($supplier, $market, [$supplier->warehouses()->first()->id]);
+        $market = OzonMarket::find('9cd55507-b41b-422e-9333-9f7837f52d28');
+        $supplier = Supplier::find('9cd532d4-3a81-4058-b939-eaf71dc29af9');
+        $warehouse = SupplierWarehouse::find('9d0b5d3d-7351-4e51-ae82-7d955360b990');
+        $service = new OzonItemPriceService($supplier, $market, [$warehouse->id]);
         $service->updateStock();
     }
 }

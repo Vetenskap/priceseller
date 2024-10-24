@@ -51,7 +51,9 @@ class Helpers {
 
         $callback($batch);
 
-        while (!$batch->finished()) {
+        $batch = $batch->fresh();
+
+        while (!$batch->finished() && ($batch->totalJobs > 0)) {
             if ($progress) $progress($batch->progress());
             sleep(20);
             $batch = $batch->fresh();

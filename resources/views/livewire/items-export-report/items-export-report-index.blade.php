@@ -24,7 +24,7 @@
 
                         <flux:cell variant="strong">{{ $itemExportReport->created_at }}</flux:cell>
 
-                        <flux:cell variant="strong">{{$temExportReport->status != 2 ? $itemExportReport->updated_at : '' }}</flux:cell>
+                        <flux:cell variant="strong">{{$itemExportReport->status != 2 ? $itemExportReport->updated_at : '' }}</flux:cell>
 
                         @if($itemExportReport->status != 2)
                             <flux:cell align="right">
