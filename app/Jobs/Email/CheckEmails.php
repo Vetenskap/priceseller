@@ -5,6 +5,7 @@ namespace App\Jobs\Email;
 use App\Components\EmailClient\EmailHandlerLaravelImap;
 use App\Jobs\Supplier\PriceUnload;
 use App\Models\Email;
+use App\Models\EmailSupplier;
 use App\Models\User;
 use App\Services\SupplierReportService;
 use Illuminate\Bus\Queueable;
@@ -47,7 +48,7 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
                 RateLimiter::attempt('email-unload-' . $supplier->id, 1, function () use ($handler, $supplier) {
                     if (!SupplierReportService::get($supplier)) {
 
-                        $ttl = Redis::ttl('laravel_unique_job:'.PriceUnload::class.':'.PriceUnload::getUniqueId($supplier));
+                        $ttl = Redis::ttl('laravel_unique_job:'.PriceUnload::class.':'.PriceUnload::getUniqueId(EmailSupplier::find($supplier->pivot->id)));
 
                         if (!($ttl > 0)) {
                             $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
