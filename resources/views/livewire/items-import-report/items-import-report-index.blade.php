@@ -39,7 +39,7 @@
                         <flux:cell variant="strong">{{ $report->updated }}</flux:cell>
                         <flux:cell variant="strong">{{ $report->deleted }}</flux:cell>
                         <flux:cell variant="strong">{{ $report->created_at }}</flux:cell>
-                        <flux:cell variant="strong">{{ $report->updated_at }}</flux:cell>
+                        <flux:cell variant="strong">{{ $report->status != 2 ? $report->updated_at : '' }}</flux:cell>
 
                         @if($report->status != 2)
                             <flux:cell align="right">

@@ -7,20 +7,27 @@
 
             <flux:columns>
                 <flux:column>Статус</flux:column>
-                <flux:column sortable :sorted="$sortBy === 'created_at'" :direction="$sortDirection" wire:click="sort('created_at')">Начало</flux:column>
-                <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection" wire:click="sort('updated_at')">Конец</flux:column>
+                <flux:column sortable :sorted="$sortBy === 'created_at'" :direction="$sortDirection"
+                             wire:click="sort('created_at')">Начало
+                </flux:column>
+                <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
+                             wire:click="sort('updated_at')">Конец
+                </flux:column>
             </flux:columns>
 
             <flux:rows>
                 @foreach($this->reports as $report)
                     <flux:row :key="$report->getKey()">
                         <flux:cell>
-                            <flux:badge size="sm" :color="$report->status == 2 ? 'yellow' : ($report->status == 1 ? 'red' : 'lime')" inset="top bottom">{{ $report->message }}</flux:badge>
+                            <flux:badge size="sm"
+                                        :color="$report->status == 2 ? 'yellow' : ($report->status == 1 ? 'red' : 'lime')"
+                                        inset="top bottom">{{ $report->message }}</flux:badge>
                         </flux:cell>
                         <flux:cell variant="strong">{{$report->created_at}}</flux:cell>
-                        <flux:cell variant="strong">{{$report->updated_at}}</flux:cell>
+                        <flux:cell variant="strong">{{ $report->status != 2 ? $report->updated_at : ''}}</flux:cell>
                         <flux:cell align="right">
-                            <flux:link href="{{ route('supplier.report.edit', ['report' => $report->getKey(), 'supplier' => $supplier]) }}">
+                            <flux:link
+                                href="{{ route('supplier.report.edit', ['report' => $report->getKey(), 'supplier' => $supplier]) }}">
                                 <flux:icon.eye class="cursor-pointer hover:text-gray-800"/>
                             </flux:link>
                         </flux:cell>
