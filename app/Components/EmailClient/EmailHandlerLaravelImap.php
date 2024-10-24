@@ -106,7 +106,7 @@ class EmailHandlerLaravelImap
                         $ext = '.' . pathinfo($name, PATHINFO_EXTENSION);
                         $name = str_replace($ext, '', $name);
 
-                        if (!Str::contains($name, $supplierFilename)) {
+                        if (!Str::contains($file->getName(), $supplierFilename)) {
                             continue;
                         }
 
