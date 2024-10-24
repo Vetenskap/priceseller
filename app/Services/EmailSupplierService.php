@@ -21,6 +21,7 @@ class EmailSupplierService
 {
     protected Collection $stockValues;
     protected Collection $warehouses;
+    public int $limitMemory = 10000 * 1024 * 1024;
 
     public function __construct(protected EmailSupplier $supplier, protected string $path)
     {
@@ -79,9 +80,15 @@ class EmailSupplierService
                 /** @var Row $row */
                 foreach ($sheet->getRowIterator() as $row) {
 
+                    logger(memory_get_usage() / 1024 / 1024 . 'MB memory usage');
+
+                    while (memory_get_usage() > $this->limitMemory) {
+                        sleep(20);
+                    }
+
                     $rows->add(collect($row->toArray()));
 
-                    if ($rows->count() >= 10000) {
+                    if ($rows->count() >= 1000) {
                         $batch->add(new ProcessData($this, $rows));
                         $rows = collect();
                     }
@@ -104,7 +111,13 @@ class EmailSupplierService
 
             $sheets->each(function (Collection $sheet) use ($batch) {
 
-                $sheet->chunk(10000)->each(function (Collection $rows) use ($batch) {
+                logger(memory_get_usage() / 1024 / 1024 . 'MB memory usage');
+
+                while (memory_get_usage() > $this->limitMemory) {
+                    sleep(20);
+                }
+
+                $sheet->chunk(1000)->each(function (Collection $rows) use ($batch) {
                     $batch->add(new ProcessData($this, $rows));
                 });
 
@@ -114,6 +127,10 @@ class EmailSupplierService
 
     protected function importHandle(): void
     {
+        while (memory_get_usage() > $this->limitMemory) {
+            sleep(20);
+        }
+
         Helpers::toBatch(function (Batch $batch) {
             Excel::import(new SupplierPriceImport($this, $batch), $this->path);
         }, 'email-supplier-unload');

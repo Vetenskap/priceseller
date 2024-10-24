@@ -81,6 +81,7 @@ class AppServiceProvider extends ServiceProvider
 
         $this->gates();
 
+
     }
 
     public function gates(): void

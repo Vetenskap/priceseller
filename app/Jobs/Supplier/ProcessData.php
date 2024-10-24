@@ -26,6 +26,7 @@ class ProcessData implements ShouldQueue
      */
     public function handle(): void
     {
+
         $this->collection->each(function (Collection $row) {
             $this->emailSupplierService->processData($row);
         });
