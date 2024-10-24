@@ -16,6 +16,7 @@ use Box\Spout\Reader\XLSX\Sheet;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Process;
+use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class EmailSupplierService
@@ -61,6 +62,13 @@ class EmailSupplierService
                 }
 
                 $this->path = str_replace('xlsx', 'ods', $this->path);
+
+                if (!Storage::disk('public')->exists($this->path)) {
+                    sleep(60);
+                    if (!Storage::disk('public')->exists($this->path)) {
+                        throw new \Exception('could not find price');
+                    }
+                }
 
                 $this->odsHandle();
             }
