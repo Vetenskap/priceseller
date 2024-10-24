@@ -203,7 +203,7 @@ return [
             'maxProcesses' => 10,
             'maxTime' => 0,
             'maxJobs' => 10,
-            'memory' => 12800,
+            'memory' => 24400,
             'tries' => 1,
             'timeout' => 14350,
             'nice' => 0,

@@ -35,6 +35,7 @@ use Modules\VoshodApi\Models\VoshodApi;
 
 class Test extends Command
 {
+    public $limitMemory = 10000 * 1024 * 1024;
     /**
      * The name and signature of the console command.
      *
@@ -54,10 +55,9 @@ class Test extends Command
      */
     public function handle()
     {
-        $market = OzonMarket::find('9cd55507-b41b-422e-9333-9f7837f52d28');
-        $supplier = Supplier::find('9cd532d4-3a81-4058-b939-eaf71dc29af9');
-        $warehouse = SupplierWarehouse::find('9d0b5d3d-7351-4e51-ae82-7d955360b990');
-        $service = new OzonItemPriceService($supplier, $market, [$warehouse->id]);
-        $service->updateStock();
+        while (memory_get_usage() > $this->limitMemory) {
+            $this->info(memory_get_usage() / 1024 / 1024 . 'MB memory usage');
+            sleep(20);
+        }
     }
 }

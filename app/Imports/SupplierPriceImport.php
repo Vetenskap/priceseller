@@ -19,12 +19,6 @@ class SupplierPriceImport implements ToCollection, WithChunkReading
      */
     public function collection(Collection $collection)
     {
-        logger(memory_get_usage() / 1024 / 1024 . 'MB memory usage');
-
-        while (memory_get_usage() > $this->emailSupplierService->limitMemory) {
-            sleep(20);
-        }
-
         $this->batch->add(new ProcessData($this->emailSupplierService, $collection));
     }
 
