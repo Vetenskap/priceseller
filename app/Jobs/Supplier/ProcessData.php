@@ -3,13 +3,11 @@
 namespace App\Jobs\Supplier;
 
 use App\Services\EmailSupplierService;
-use Box\Spout\Reader\IteratorInterface;
 use Box\Spout\Reader\XLSX\Sheet;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Collection;
-use Iterator;
 
 class ProcessData implements ShouldQueue
 {

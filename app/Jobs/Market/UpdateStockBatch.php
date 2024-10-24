@@ -52,8 +52,12 @@ class UpdateStockBatch implements ShouldQueue
             return false;
 
         })->each(function (WbItem|OzonItem $item) {
-            $wbItem = $this->service->recountStockWbItem($item);
-            $wbItem->save();
+            if ($item instanceof WbItem) {
+                $item = $this->service->recountStockWbItem($item);
+            } else {
+                $item = $this->service->recountStockOzonItem($item);
+            }
+            $item->save();
         });
     }
 }
