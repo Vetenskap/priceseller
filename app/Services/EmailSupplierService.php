@@ -86,6 +86,10 @@ class EmailSupplierService
                         $rows = collect();
                     }
                 }
+
+                if ($rows->isNotEmpty()) {
+                    $batch->add(new ProcessData($this, $rows));
+                }
             }
 
             $reader->close();
