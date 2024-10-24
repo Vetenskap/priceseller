@@ -2,25 +2,28 @@
 
 use Illuminate\Support\Facades\Schedule;
 
-Schedule::call(function () {
+if (\Illuminate\Support\Facades\App::isProduction())
+{
+    Schedule::call(function () {
 
-    \App\Services\MarketsService::updateCommissionsInTime();
-    \App\Services\BusinessLogicService::usersEmailsUnload();
-    \App\Services\ReportService::checkTimeouts();
+        \App\Services\MarketsService::updateCommissionsInTime();
+        \App\Services\BusinessLogicService::usersEmailsUnload();
+        \App\Services\ReportService::checkTimeouts();
 
-})->everyMinute()->name('everyMinuteSchedule');
+    })->everyMinute()->name('everyMinuteSchedule');
 
-Schedule::call(function () {
+    Schedule::call(function () {
 
-    \Illuminate\Support\Facades\Artisan::call('horizon:snapshot');
-    \App\Services\UsersPermissionsService::closeMarkets();
+        \Illuminate\Support\Facades\Artisan::call('horizon:snapshot');
+        \App\Services\UsersPermissionsService::closeMarkets();
 
-})->everyFiveMinutes()->name('everyFiveMinutesSchedule')->withoutOverlapping();
+    })->everyFiveMinutes()->name('everyFiveMinutesSchedule')->withoutOverlapping();
 
-Schedule::call(function () {
+    Schedule::call(function () {
 
-    \Illuminate\Support\Facades\Artisan::call('telescope:prune');
-    \App\Services\PruneService::reports();
-    \App\Services\UsersPermissionsService::sendNotifications();
+        \Illuminate\Support\Facades\Artisan::call('telescope:prune');
+        \App\Services\PruneService::reports();
+        \App\Services\UsersPermissionsService::sendNotifications();
 
-})->daily();
+    })->daily();
+}

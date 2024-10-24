@@ -4,6 +4,7 @@ namespace App\Jobs\Supplier;
 
 use App\Services\EmailSupplierService;
 use Box\Spout\Reader\IteratorInterface;
+use Box\Spout\Reader\XLSX\Sheet;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -17,7 +18,7 @@ class ProcessData implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public EmailSupplierService $emailSupplierService, public Collection|IteratorInterface|Iterator $collection)
+    public function __construct(public EmailSupplierService $emailSupplierService, public Collection|Sheet $collection)
     {
         //
     }
