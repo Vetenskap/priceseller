@@ -52,7 +52,7 @@ class EmailSupplierService
                 $pathInfo = pathinfo($this->path);
                 $directory = $pathInfo['dirname'];
 
-                $command = "sudo /usr/bin/soffice --convert-to ods {$this->path} --headless --outdir {$directory}";
+                $command = "/usr/bin/soffice --convert-to ods {$this->path} --headless --outdir {$directory}";
 
                 $process = Process::run($command);
 
