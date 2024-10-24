@@ -54,7 +54,11 @@ class EmailSupplierService
 
                 $command = "sudo /usr/bin/soffice --convert-to ods {$this->path} --headless --outdir {$directory}";
 
-                $process = Process::run($command)->throw();
+                $process = Process::run($command);
+
+                if (!$process->successful()) {
+                    throw new \Exception($process->errorOutput());
+                }
 
                 $this->path = str_replace('xlsx', 'ods', $this->path);
 
