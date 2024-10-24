@@ -55,7 +55,7 @@ class EmailSupplierService
 
                 $command = "/usr/bin/soffice --convert-to ods {$this->path} --headless --outdir {$directory}";
 
-                $process = Process::run($command);
+                $process = Process::timeout(300)->run($command);
 
                 if (!$process->successful()) {
                     throw new \Exception($process->errorOutput());
