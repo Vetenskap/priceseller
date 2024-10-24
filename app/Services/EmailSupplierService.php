@@ -67,18 +67,29 @@ class EmailSupplierService
 
     protected function xlsxHandle(): void
     {
-        $reader = ReaderEntityFactory::createXLSXReader();
-        $reader->open($this->path);
+        Helpers::toBatch(function (Batch $batch) {
+            $reader = ReaderEntityFactory::createXLSXReader();
+            $reader->open($this->path);
 
-        /** @var Sheet $sheet */
-        foreach ($reader->getSheetIterator() as $sheet) {
-            /** @var Row $row */
-            foreach ($sheet->getRowIterator() as $row) {
-                $this->processData(collect($row->toArray()));
+            /** @var Sheet $sheet */
+            foreach ($reader->getSheetIterator() as $sheet) {
+
+                $rows = collect();
+
+                /** @var Row $row */
+                foreach ($sheet->getRowIterator() as $row) {
+
+                    $rows->add(collect($row->toArray()));
+
+                    if ($rows->count() >= 10000) {
+                        $batch->add(new ProcessData($this, $rows));
+                        $rows = collect();
+                    }
+                }
             }
-        }
 
-        $reader->close();
+            $reader->close();
+        }, 'email-supplier-unload');
     }
 
     protected function anotherHandle(): void
@@ -89,11 +100,10 @@ class EmailSupplierService
 
             $sheets->each(function (Collection $sheet) use ($batch) {
 
-                $batch->add(new ProcessData($this, $sheet));
-
-                $sheet->each(function (Collection $row) {
-                    $this->processData($row);
+                $sheet->chunk(10000)->each(function (Collection $rows) use ($batch) {
+                    $batch->add(new ProcessData($this, $rows));
                 });
+
             });
         }, 'email-supplier-unload');
     }

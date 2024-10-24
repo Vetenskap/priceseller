@@ -3,6 +3,7 @@
 namespace Modules\BergApi\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\BergApi\Services\BergUserProcessService;
@@ -48,12 +49,14 @@ class BergApiServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->call(function () {
-                BergUserProcessService::processUsers();
-            })->name('BergApiEveryMinuteSchedule')->everyMinute()->withoutOverlapping();
-        });
+        if (App::isProduction()) {
+            $this->app->booted(function () {
+                $schedule = $this->app->make(Schedule::class);
+                $schedule->call(function () {
+                    BergUserProcessService::processUsers();
+                })->name('BergApiEveryMinuteSchedule')->everyMinute()->withoutOverlapping();
+            });
+        }
     }
 
     /**

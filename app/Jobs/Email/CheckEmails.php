@@ -16,6 +16,7 @@ use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Context;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Redis;
 
 class CheckEmails implements ShouldQueue, ShouldBeUnique
 {
@@ -46,9 +47,14 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
                 RateLimiter::attempt('email-unload-' . $supplier->id, 1, function () use ($handler, $supplier) {
                     if (!SupplierReportService::get($supplier)) {
 
-                        $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
+                        $ttl = Redis::ttl('laravel_unique_job:'.PriceUnload::class.':'.PriceUnload::getUniqueId($supplier));
 
-                        PriceUnload::dispatchIf((boolean) $pricePath, $supplier->pivot->id, $pricePath);
+                        if (!($ttl > 0)) {
+                            $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
+
+                            PriceUnload::dispatchIf((boolean) $pricePath, $supplier->pivot->id, $pricePath);
+                        }
+
                     }
                 });
 

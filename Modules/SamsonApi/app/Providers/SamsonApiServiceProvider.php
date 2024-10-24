@@ -3,6 +3,7 @@
 namespace Modules\SamsonApi\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Modules\SamsonApi\Services\SamsonUserProcessService;
@@ -48,12 +49,14 @@ class SamsonApiServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-         $this->app->booted(function () {
-             $schedule = $this->app->make(Schedule::class);
-             $schedule->call(function () {
-                 SamsonUserProcessService::processUsers();
-             })->name('SamsonApiEveryMinuteSchedule')->everyMinute()->withoutOverlapping();
-         });
+        if (App::isProduction()) {
+            $this->app->booted(function () {
+                $schedule = $this->app->make(Schedule::class);
+                $schedule->call(function () {
+                    SamsonUserProcessService::processUsers();
+                })->name('SamsonApiEveryMinuteSchedule')->everyMinute()->withoutOverlapping();
+            });
+        }
     }
 
     /**

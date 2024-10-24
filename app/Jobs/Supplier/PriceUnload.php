@@ -21,7 +21,7 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 
-class PriceUnload implements ShouldQueue
+class PriceUnload implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
@@ -71,5 +71,10 @@ class PriceUnload implements ShouldQueue
     public function uniqueId(): string
     {
         return $this->emailSupplierId . "price_unload";
+    }
+
+    public static function getUniqueId(EmailSupplier $emailSupplier): string
+    {
+        return $emailSupplier->id . 'price_unload';
     }
 }
