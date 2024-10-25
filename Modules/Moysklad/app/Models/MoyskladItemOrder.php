@@ -2,7 +2,7 @@
 
 namespace Modules\Moysklad\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MoyskladItemOrder extends MainModel

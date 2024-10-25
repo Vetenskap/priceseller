@@ -2,7 +2,7 @@
 
 namespace Modules\VoshodApi\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\VoshodApi\Database\Factories\VoshodApiReportFactory;
 

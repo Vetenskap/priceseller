@@ -3,7 +3,7 @@
 namespace Modules\Moysklad\Models;
 
 use App\Models\ItemAttribute;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 
 class MoyskladItemAdditionalAttributeLink extends MainModel
 {

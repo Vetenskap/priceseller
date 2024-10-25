@@ -3,7 +3,7 @@
 namespace Modules\Moysklad\Models;
 
 use App\Models\Warehouse;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Moysklad\Database\Factories\MoyskladWarehouseWarehouseFactory;
 

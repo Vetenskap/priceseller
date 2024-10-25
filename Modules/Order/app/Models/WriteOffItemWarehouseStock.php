@@ -3,7 +3,7 @@
 namespace Modules\Order\Models;
 
 use App\Models\ItemWarehouseStock;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Order\Database\Factories\WriteOffItemWarehouseStockFactory;
 

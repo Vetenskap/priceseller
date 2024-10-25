@@ -3,7 +3,7 @@
 namespace Modules\VoshodApi\Models;
 
 use App\Models\SupplierWarehouse;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class VoshodApiWarehouse extends MainModel

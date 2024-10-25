@@ -3,7 +3,7 @@
 namespace Modules\Moysklad\Models;
 
 use App\Models\Supplier;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class MoyskladSupplierSupplier extends MainModel

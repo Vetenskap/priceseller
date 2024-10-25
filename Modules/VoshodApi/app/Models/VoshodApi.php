@@ -4,7 +4,7 @@ namespace Modules\VoshodApi\Models;
 
 use App\Models\Supplier;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 
 class VoshodApi extends MainModel
 {

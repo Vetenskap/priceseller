@@ -4,7 +4,7 @@ namespace Modules\BergApi\Models;
 
 use App\Models\Supplier;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BergApi extends MainModel

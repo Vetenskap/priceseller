@@ -2,7 +2,7 @@
 
 namespace Modules\VoshodApi\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 
 class VoshodApiItemAdditionalAttributeLink extends MainModel
 {

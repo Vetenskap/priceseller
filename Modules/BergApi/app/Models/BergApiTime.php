@@ -2,7 +2,7 @@
 
 namespace Modules\BergApi\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 
 class BergApiTime extends MainModel
 {

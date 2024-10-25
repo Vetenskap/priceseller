@@ -4,7 +4,7 @@ namespace Modules\Moysklad\Models;
 
 use App\Models\Item;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MoyskladQuarantine extends MainModel

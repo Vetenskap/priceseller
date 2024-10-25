@@ -2,7 +2,7 @@
 
 namespace Modules\Moysklad\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 
 class MoyskladOrderUuid extends MainModel
 {

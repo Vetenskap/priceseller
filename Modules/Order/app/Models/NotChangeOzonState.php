@@ -3,7 +3,7 @@
 namespace Modules\Order\Models;
 
 use App\Models\Item;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Order\Database\Factories\NotChangeOzonStateFactory;
 

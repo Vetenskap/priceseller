@@ -5,7 +5,7 @@ namespace Modules\SamsonApi\Models;
 use App\Models\Supplier;
 use App\Models\SupplierWarehouse;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
