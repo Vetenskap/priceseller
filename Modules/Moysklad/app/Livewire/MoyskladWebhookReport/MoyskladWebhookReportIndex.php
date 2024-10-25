@@ -2,12 +2,25 @@
 
 namespace Modules\Moysklad\Livewire\MoyskladWebhookReport;
 
-use Illuminate\Support\Collection;
+use App\Livewire\Traits\WithSort;
+use Livewire\Attributes\Computed;
 use Livewire\Component;
+use Livewire\WithPagination;
+use Modules\Moysklad\Models\MoyskladWebhook;
 
 class MoyskladWebhookReportIndex extends Component
 {
-    public Collection $webhookReports;
+    use WithPagination, WithSort;
+
+    public MoyskladWebhook $webhook;
+
+    #[Computed]
+    public function reports()
+    {
+        return $this->webhook
+            ->reports()
+            ->paginate();
+    }
 
     public function render()
     {
