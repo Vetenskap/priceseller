@@ -4,7 +4,7 @@ namespace Modules\VoshodApi\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class VoshodApiItemAdditionalAttributeLink extends Model
+class VoshodApiItemAdditionalAttributeLink extends MainModel
 {
     protected $fillable = [
         'link',

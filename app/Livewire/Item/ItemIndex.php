@@ -11,6 +11,7 @@ use App\Livewire\Traits\WithSort;
 use App\Models\Item;
 use App\Models\User;
 use App\Services\Item\ItemService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -45,15 +46,9 @@ class ItemIndex extends BaseComponent
     }
 
     #[Computed]
-    public function items()
+    public function items(): LengthAwarePaginator
     {
-        return $this->currentUser()
-            ->items()
-            ->with('supplier')
-            ->filters()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
-
+        return $this->tapQuery($this->currentUser()->items()->with('supplier')->filters());
     }
 
     public function mount(): void

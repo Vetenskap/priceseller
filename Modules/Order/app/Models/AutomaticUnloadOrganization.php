@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Order\Database\Factories\AutomaticUnloadOrganizationFactory;
 
-class AutomaticUnloadOrganization extends Model
+class AutomaticUnloadOrganization extends MainModel
 {
     use HasFactory;
 

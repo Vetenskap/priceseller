@@ -6,7 +6,7 @@ use App\Models\SupplierWarehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class BergApiWarehouse extends Model
+class BergApiWarehouse extends MainModel
 {
     protected $fillable = [
         'name',

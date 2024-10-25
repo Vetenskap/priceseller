@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MoyskladQuarantine extends Model
+class MoyskladQuarantine extends MainModel
 {
 
     protected $fillable = [

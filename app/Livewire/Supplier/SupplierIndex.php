@@ -6,6 +6,7 @@ use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Supplier\SupplierPostForm;
 use App\Livewire\Traits\WithSort;
 use App\Models\Supplier;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -57,12 +58,9 @@ class SupplierIndex extends BaseComponent
     }
 
     #[Computed]
-    public function suppliers()
+    public function suppliers(): LengthAwarePaginator
     {
-        return $this->currentUser()
-            ->suppliers()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->currentUser()->suppliers());
 
     }
 

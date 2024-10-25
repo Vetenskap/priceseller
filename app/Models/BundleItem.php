@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class BundleItem extends Model
+class BundleItem extends MainModel
 {
     protected $fillable = [
         'bundle_id',

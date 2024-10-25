@@ -4,7 +4,7 @@ namespace Modules\VoshodApi\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class VoshodApiTime extends Model
+class VoshodApiTime extends MainModel
 {
 
     protected $fillable = [

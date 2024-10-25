@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Order\Database\Factories\NotChangeOzonStateFactory;
 
-class NotChangeOzonState extends Model
+class NotChangeOzonState extends MainModel
 {
     use HasFactory;
 

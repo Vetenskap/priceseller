@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\VoshodApi\Database\Factories\VoshodApiReportFactory;
 
-class VoshodApiReport extends Model
+class VoshodApiReport extends MainModel
 {
     use HasFactory;
 

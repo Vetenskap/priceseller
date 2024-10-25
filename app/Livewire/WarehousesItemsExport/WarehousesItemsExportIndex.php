@@ -7,6 +7,7 @@ use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithSort;
 use App\Models\User;
 use App\Models\WarehousesItemsExportReport;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -51,12 +52,9 @@ class WarehousesItemsExportIndex extends BaseComponent
     }
 
     #[Computed]
-    public function warehousesItemsExportReports()
+    public function warehousesItemsExportReports(): LengthAwarePaginator
     {
-        return $this->currentUser()
-            ->warehousesItemsExportReports()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->currentUser()->warehousesItemsExportReports());
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application

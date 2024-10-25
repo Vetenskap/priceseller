@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class SamsonApi extends Model
+class SamsonApi extends MainModel
 {
     protected $fillable = [
         'api_key',

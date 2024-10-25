@@ -14,7 +14,7 @@
                 <flux:heading size="lg">Вебхук на создание товара</flux:heading>
                 @if($webhook = $moysklad->webhooks()->where(['action' => 'CREATE', 'type' => 'product'])->first())
                     <flux:subheading>Дата создания: {{$webhook->created_at}}</flux:subheading>
-                    <flux:button wire:click="deleteWebhook({{$webhook}})">Удалить</flux:button>
+                    <flux:button variant="danger" wire:click="deleteWebhook({{$webhook}})">Удалить</flux:button>
                 @else
                     <flux:button wire:click="addCreateWebhook">Добавить</flux:button>
                 @endif

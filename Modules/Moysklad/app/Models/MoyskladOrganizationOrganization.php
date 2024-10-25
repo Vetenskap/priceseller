@@ -5,7 +5,7 @@ namespace Modules\Moysklad\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MoyskladOrganizationOrganization extends Model
+class MoyskladOrganizationOrganization extends MainModel
 {
     protected $fillable = [
         'moysklad_organization_uuid',

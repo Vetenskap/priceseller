@@ -5,7 +5,7 @@ namespace Modules\Moysklad\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Model;
 
-class MoyskladWebhook extends Model
+class MoyskladWebhook extends MainModel
 {
     use HasUuids;
 

@@ -4,7 +4,7 @@ namespace Modules\SamsonApi\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class SamsonApiItemAdditionalAttributeLink extends Model
+class SamsonApiItemAdditionalAttributeLink extends MainModel
 {
 
     protected $fillable = [

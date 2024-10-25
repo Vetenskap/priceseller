@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Moysklad\Database\Factories\MoyskladWarehouseWarehouseFactory;
 
-class MoyskladWarehouseWarehouse extends Model
+class MoyskladWarehouseWarehouse extends MainModel
 {
     use HasFactory;
 

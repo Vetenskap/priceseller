@@ -4,7 +4,7 @@ namespace Modules\BergApi\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class BergApiItemAdditionalAttributeLink extends Model
+class BergApiItemAdditionalAttributeLink extends MainModel
 {
     protected $fillable = [
         'link',

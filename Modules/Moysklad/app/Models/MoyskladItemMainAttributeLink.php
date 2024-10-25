@@ -4,7 +4,7 @@ namespace Modules\Moysklad\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MoyskladItemMainAttributeLink extends Model
+class MoyskladItemMainAttributeLink extends MainModel
 {
     protected $fillable = [
         'attribute_name',

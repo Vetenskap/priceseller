@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
 
-class BundleItemsExportReport extends Model
+class BundleItemsExportReport extends MainModel
 {
     use HasFactory;
 

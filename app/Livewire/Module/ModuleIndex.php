@@ -15,29 +15,27 @@ use Illuminate\Support\Str;
 
 class ModuleIndex extends BaseComponent
 {
-    public function changeOpen(array $module): void
+    public $changeOpen = [];
+
+    public function mount()
     {
-        /** @var UserModule $userModule */
-        $userModule = $this->currentUser()->modules()->where('module_id', $module['id'])->first();
+        $this->changeOpen = $this->currentUser()->modules->mapWithKeys(fn (UserModule $userModule) => [$userModule->module_id => (bool) $userModule->enabled])->toArray();
+    }
 
-        if (Permission::where('value', Str::lower($module['name']))->exists()) {
-            if (!$this->user()->can('update-' . Str::lower($module['name']))) {
-                abort(403);
+    public function updatedChangeOpen(): void
+    {
+        foreach ($this->changeOpen as $key => $value) {
+            $userModule = $this->currentUser()->modules()->where('module_id', $key)->first();
+
+            if ($userModule) {
+                $userModule->enabled = $value;
+                $userModule->save();
+            } else {
+                $this->currentUser()->modules()->create([
+                    'module_id' => $key,
+                    'enabled' => true
+                ]);
             }
-        }
-
-        if (!ModuleService::moduleIsVisible($module['name'], $this->currentUser())) {
-            return;
-        }
-
-        if ($userModule) {
-            $userModule->enabled = !$userModule->enabled;
-            $userModule->save();
-        } else {
-            $this->currentUser()->modules()->create([
-                'module_id' => $module['id'],
-                'enabled' => true
-            ]);
         }
 
     }

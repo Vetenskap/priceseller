@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class EmployeePermission extends Model
+class EmployeePermission extends MainModel
 {
     public $fillable = [
         'view',

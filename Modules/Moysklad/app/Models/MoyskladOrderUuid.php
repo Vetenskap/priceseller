@@ -4,7 +4,7 @@ namespace Modules\Moysklad\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MoyskladOrderUuid extends Model
+class MoyskladOrderUuid extends MainModel
 {
     protected $fillable = [
         'uuid',

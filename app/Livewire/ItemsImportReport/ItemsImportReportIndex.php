@@ -6,12 +6,14 @@ use App\Exports\ItemsExport;
 use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Livewire\Traits\WithModelsPaths;
+use App\Livewire\Traits\WithSort;
 use App\Models\ItemsImportReport;
 use App\Models\OzonMarket;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WbMarket;
 use App\Services\ItemsImportReportService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -22,30 +24,14 @@ use Livewire\WithPagination;
 
 class ItemsImportReportIndex extends BaseComponent
 {
-    use WithModelsPaths, WithPagination, WithJsNotifications;
+    use WithModelsPaths, WithPagination, WithJsNotifications, WithSort;
 
     public User|WbMarket|OzonMarket|Warehouse $model;
 
-    public $sortBy = 'updated_at';
-    public $sortDirection = 'desc';
-
-    public function sort($column): void
-    {
-        if ($this->sortBy === $column) {
-            $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
-        } else {
-            $this->sortBy = $column;
-            $this->sortDirection = 'asc';
-        }
-    }
-
     #[Computed]
-    public function itemsImportReports()
+    public function itemsImportReports(): LengthAwarePaginator
     {
-        return $this->model
-            ->itemsImportReports()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->model->itemsImportReports());
 
     }
 

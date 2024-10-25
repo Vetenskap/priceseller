@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\Livewire\MoyskladWebhookReport;
 
 use App\Livewire\Traits\WithSort;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
@@ -17,12 +18,9 @@ class MoyskladWebhookReportIndex extends Component
     public MoyskladWebhook $webhook;
 
     #[Computed]
-    public function reports()
+    public function reports(): LengthAwarePaginator
     {
-        return $this->webhook
-            ->reports()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->webhook->reports());
     }
 
     public function repeat($id): void

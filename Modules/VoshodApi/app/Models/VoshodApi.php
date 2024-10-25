@@ -6,7 +6,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
-class VoshodApi extends Model
+class VoshodApi extends MainModel
 {
     /**
      * The attributes that are mass assignable.

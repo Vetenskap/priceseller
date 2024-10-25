@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Order\Database\Factories\SelectedWarehousesFactory;
 
-class SelectedWarehouses extends Model
+class SelectedWarehouses extends MainModel
 {
     use HasFactory;
 

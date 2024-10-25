@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Modules\Order\Database\Factories\SupplierOrderReportFactory;
 
-class SupplierOrderReport extends Model
+class SupplierOrderReport extends MainModel
 {
     use HasFactory;
 

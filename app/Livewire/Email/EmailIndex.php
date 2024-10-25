@@ -6,6 +6,7 @@ use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Email\EmailPostForm;
 use App\Livewire\Traits\WithSort;
 use App\Models\Email;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -47,12 +48,9 @@ class EmailIndex extends BaseComponent
     }
 
     #[Computed]
-    public function emails()
+    public function emails(): LengthAwarePaginator
     {
-        return $this->currentUser()
-            ->emails()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->currentUser()->emails());
 
     }
 

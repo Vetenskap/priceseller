@@ -70,11 +70,7 @@ class WbMarketEdit extends BaseComponent
     #[Computed]
     public function items(): LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator|array
     {
-        return $this->market
-            ->items()
-            ->filters()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->market->items()->filters());
 
     }
 

@@ -6,7 +6,7 @@ use App\Models\Supplier;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-class MoyskladSupplierSupplier extends Model
+class MoyskladSupplierSupplier extends MainModel
 {
 
     /**

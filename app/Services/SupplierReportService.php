@@ -29,7 +29,7 @@ class SupplierReportService
                 'path' => $path
             ]);
 
-            static::addLog($supplier, 'Начало выгрузки');
+            static::addLog($supplier, 'Начало выгрузки' . ($message ? ': ' . $message : ''));
 
             return true;
         }

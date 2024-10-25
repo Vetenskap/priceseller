@@ -26,10 +26,7 @@ class SupplierReportEdit extends BaseComponent
     #[Computed]
     public function logs(): LengthAwarePaginator|array|\Illuminate\Pagination\LengthAwarePaginator|_IH_SupplierReportLog_C
     {
-        return $this->report
-            ->logs()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->report->logs());
     }
 
     public function destroy(): RedirectResponse

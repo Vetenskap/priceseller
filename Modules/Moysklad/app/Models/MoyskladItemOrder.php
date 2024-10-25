@@ -5,7 +5,7 @@ namespace Modules\Moysklad\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class MoyskladItemOrder extends Model
+class MoyskladItemOrder extends MainModel
 {
     protected $fillable = [
         'orders',

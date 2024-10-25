@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UserBaseSetting extends Model
+class UserBaseSetting extends MainModel
 {
     protected $fillable = [
         'enabled_use_buy_price_reserve',

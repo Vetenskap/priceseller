@@ -11,6 +11,7 @@ use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WbMarket;
 use App\Services\ItemsExportReportService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -38,12 +39,9 @@ class ItemsExportReportIndex extends BaseComponent
     }
 
     #[Computed]
-    public function itemsExportReport()
+    public function itemsExportReport(): LengthAwarePaginator
     {
-        return $this->model
-            ->itemsExportReports()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->model->itemsExportReports());
 
     }
 

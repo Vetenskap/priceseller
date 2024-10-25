@@ -8,6 +8,7 @@ use App\Livewire\Traits\WithSort;
 use App\Models\BundleItemsImportReport;
 use App\Services\Bundle\BundleItemsImportReportService;
 use App\Services\Bundle\BundleItemsService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -65,12 +66,9 @@ class BundleItemsImportReportIndex extends BaseComponent
     }
 
     #[Computed]
-    public function bundleItemsImportReports()
+    public function bundleItemsImportReports(): LengthAwarePaginator
     {
-        return $this->currentUser()
-            ->bundleItemsImportReports()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->currentUser()->bundleItemsImportReports());
 
     }
 

@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class UserModule extends Model
+class UserModule extends MainModel
 {
     protected $fillable = [
         'enabled',

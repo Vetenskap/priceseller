@@ -12,6 +12,7 @@ use App\Livewire\Traits\WithSort;
 use App\Models\Warehouse;
 use App\Services\WarehouseItemsExportReportService;
 use App\Services\WarehouseItemsImportReportService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -43,12 +44,9 @@ class WarehouseIndex extends BaseComponent
     }
 
     #[Computed]
-    public function warehouses()
+    public function warehouses(): LengthAwarePaginator
     {
-        return $this->currentUser()
-            ->warehouses()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->currentUser()->warehouses());
 
     }
 

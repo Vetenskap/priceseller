@@ -6,7 +6,7 @@ use App\Models\SupplierWarehouse;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class VoshodApiWarehouse extends Model
+class VoshodApiWarehouse extends MainModel
 {
     protected $fillable = [
         'name',

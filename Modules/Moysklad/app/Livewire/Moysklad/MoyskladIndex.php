@@ -33,15 +33,13 @@ class MoyskladIndex extends ModuleComponent
     #[Computed]
     public function quarantine(): LengthAwarePaginator|array|\Illuminate\Pagination\LengthAwarePaginator|_IH_MoyskladQuarantine_C
     {
-        return $this->form->moysklad
+        return $this->tapQuery($this->form->moysklad
             ->quarantine()
             ->join('items', 'moysklad_quarantines.item_id', '=', 'items.id') // Присоединяем таблицу items
             ->selectRaw('moysklad_quarantines.*, items.buy_price_reserve,
             ((items.buy_price_reserve - moysklad_quarantines.supplier_buy_price)
             / ((items.buy_price_reserve + moysklad_quarantines.supplier_buy_price) / 2) * 100) AS price_difference')
-            ->filters()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+            ->filters());
     }
 
     public function unloadQuarantine(): void

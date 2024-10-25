@@ -4,7 +4,7 @@ namespace Modules\Moysklad\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class MoyskladWebhookReport extends Model
+class MoyskladWebhookReport extends MainModel
 {
 
     /**

@@ -8,6 +8,7 @@ use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
 use App\Livewire\Traits\WithSort;
 use App\Models\OzonMarket;
 use App\Services\UsersPermissionsService;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -52,12 +53,9 @@ class OzonMarketIndex extends BaseComponent
     }
 
     #[Computed]
-    public function markets()
+    public function markets(): LengthAwarePaginator
     {
-        return $this->currentUser()
-            ->ozonMarkets()
-            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
-            ->paginate();
+        return $this->tapQuery($this->currentUser()->ozonMarkets());
 
     }
 
