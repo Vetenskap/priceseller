@@ -22,6 +22,8 @@ class AssemblyIndex extends ModuleComponent
 
     public function mount(): void
     {
+        parent::mount();
+
         $this->fields['Поля товара'] = Arr::pluck(Item::MAINATTRIBUTES, 'label');
         $this->fields['Доп. поля товара'] = $this->currentUser()->itemAttributes()->pluck('name');
         $this->fields['Поля связи'] = Arr::pluck(WbItem::MAINATTRIBUTES, 'label');

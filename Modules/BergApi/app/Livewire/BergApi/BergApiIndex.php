@@ -20,6 +20,8 @@ class BergApiIndex extends ModuleComponent
 
     public function mount($page = 'main'): void
     {
+        parent::mount();
+
         $this->page = $page;
         $this->form->setBergApi(auth()->user()->bergApi);
         if (!$this->form->bergApi) {

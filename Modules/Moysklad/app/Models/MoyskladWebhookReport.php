@@ -17,4 +17,13 @@ class MoyskladWebhookReport extends Model
         'exception',
     ];
 
+    protected $casts = [
+        'payload' => 'collection'
+    ];
+
+    public function moyskladWebhook()
+    {
+        return $this->belongsTo(MoyskladWebhook::class, 'moysklad_webhook_id', 'id');
+    }
+
 }

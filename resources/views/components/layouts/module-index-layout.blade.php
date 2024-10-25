@@ -3,19 +3,21 @@
 <div>
     <x-layouts.header name="Модули"/>
     <x-layouts.module-container class="flex p-6">
-        <div class="p-6 dark:bg-gray-700 bg-gray-100 w-1/4 shadow-sm sm:rounded-lg mr-6">
+        <div class="p-6 w-1/4 shadow-sm sm:rounded-lg mr-6 space-y-6">
             @foreach($modules as $module)
-                <a href="{{route(config(\Illuminate\Support\Str::lower($module->name) . ".main_route"))}}">
-                    <div
-                        class="flex justify-between mb-6 text-center shadow-sm sm:rounded-lg p-4 dark:text-white {{str_contains(request()->getUri(), \Illuminate\Support\Str::lower($module->name)) ? 'dark:bg-gray-600 bg-gray-300' : 'dark:bg-gray-500 bg-gray-200'}}">
-                        <div>
+                <flux:card>
+                    <div class="flex justify-between">
+                        <a href="{{route(config(\Illuminate\Support\Str::lower($module->name) . ".main_route"))}}" class="{{str_contains(request()->getUri(), \Illuminate\Support\Str::lower($module->name)) ? 'text-gray-500' : ''}}">
                             {{config(\Illuminate\Support\Str::lower($module->name) . ".name")}}
-                        </div>
+                        </a>
                         <div>
-                            <x-inputs.switcher :checked="$this->currentUser()->modules()->where('module_id', $module->id)->first()?->enabled" wire:click="changeOpen({{$module}})" disabled="{{!\App\Services\ModuleService::moduleIsVisible($module->name, $this->currentUser())}}"/>
+                            <flux:separator vertical/>
+                            <flux:switch
+                                wire:model.live="changeOpen.{{$module->id}}"
+                                />
                         </div>
                     </div>
-                </a>
+                </flux:card>
             @endforeach
         </div>
         <div class="p-6 dark:bg-gray-700 bg-gray-100 w-3/4 shadow-sm sm:rounded-lg mr-6">

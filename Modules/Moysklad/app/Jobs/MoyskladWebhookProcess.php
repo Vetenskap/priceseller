@@ -26,7 +26,7 @@ class MoyskladWebhookProcess implements ShouldQueue
     {
         $this->report = $this->webhook->reports()->create([
             'status' => false,
-            'payload' => $this->apiWebhook->toJson(),
+            'payload' => $this->apiWebhook,
         ]);
     }
 

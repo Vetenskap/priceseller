@@ -77,6 +77,8 @@ class EditorContentIndex extends ModuleComponent
 
     public function mount()
     {
+        parent::mount();
+
         $descriptionCategoryTree = $this->getDescriptionCategoryTree();
 
         $this->currentAvailableCategories[0] = $this->getCurrentAvailableCategoriesFromTree($descriptionCategoryTree)->toArray();

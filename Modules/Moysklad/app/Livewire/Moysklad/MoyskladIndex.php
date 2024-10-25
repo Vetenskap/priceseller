@@ -83,6 +83,8 @@ class MoyskladIndex extends ModuleComponent
 
     public function mount($page = 'main'): void
     {
+        parent::mount();
+
         $this->page = $page;
         $this->form->setMoysklad(auth()->user()->moysklad);
         if (!$this->form->moysklad) {

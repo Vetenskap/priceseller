@@ -26,10 +26,25 @@
                                 {{$report->status ? 'Не обработано' : 'Обработано'}}
                             </flux:badge>
                         </flux:cell>
-                        <flux:cell>{{$report->payload}}</flux:cell>
-                        <flux:cell>{{$report->exception}}</flux:cell>
+                        <flux:cell>
+                            <flux:textarea readonly>{{$report->payload}}</flux:textarea>
+                        </flux:cell>
+                        <flux:cell>
+                            <flux:textarea readonly>{{$report->exception}}</flux:textarea>
+                        </flux:cell>
                         <flux:cell>{{$report->created_at}}</flux:cell>
                         <flux:cell>{{$report->updated_at}}</flux:cell>
+                        <flux:cell>
+                            @if($report->status != 0)
+                                <flux:tooltip content="Повторить обработку">
+                                    <flux:button
+                                        icon="arrow-up-tray"
+                                        wire:click="repeat({{json_encode($report->getKey())}})"
+                                        wire:target="repeat({{json_encode($report->getKey())}})"
+                                    />
+                                </flux:tooltip>
+                            @endif
+                        </flux:cell>
                     </flux:row>
                 @endforeach
             </flux:rows>

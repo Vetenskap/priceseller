@@ -3,22 +3,32 @@
 namespace App\Livewire;
 
 use App\Models\Module;
+use App\Models\UserModule;
 use Illuminate\Support\Collection;
 
 class ModuleComponent extends BaseComponent
 {
-    public function changeOpen(array $module): void
-    {
-        $userModule = $this->currentUser()->modules()->where('module_id', $module['id'])->first();
+    public $changeOpen = [];
 
-        if ($userModule) {
-            $userModule->enabled = !$userModule->enabled;
-            $userModule->save();
-        } else {
-            $this->currentUser()->modules()->create([
-                'module_id' => $module['id'],
-                'enabled' => true
-            ]);
+    public function mount()
+    {
+        $this->changeOpen = $this->currentUser()->modules->mapWithKeys(fn (UserModule $userModule) => [$userModule->module_id => (bool) $userModule->enabled])->toArray();
+    }
+
+    public function updatedChangeOpen(): void
+    {
+        foreach ($this->changeOpen as $key => $value) {
+            $userModule = $this->currentUser()->modules()->where('module_id', $key)->first();
+
+            if ($userModule) {
+                $userModule->enabled = $value;
+                $userModule->save();
+            } else {
+                $this->currentUser()->modules()->create([
+                    'module_id' => $key,
+                    'enabled' => true
+                ]);
+            }
         }
 
     }

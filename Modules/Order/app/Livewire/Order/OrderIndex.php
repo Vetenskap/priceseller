@@ -75,6 +75,8 @@ class OrderIndex extends ModuleComponent
 
     public function mount($page = 'main'): void
     {
+        parent::mount();
+
         $this->page = $page;
 
         if ($this->organizationId) {

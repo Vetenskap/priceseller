@@ -20,6 +20,8 @@ class VoshodApiIndex extends ModuleComponent
 
     public function mount($page = 'main'): void
     {
+        parent::mount();
+
         $this->page = $page;
         $this->form->setVoshodApi(auth()->user()->voshodApi);
         if (!$this->form->voshodApi) {

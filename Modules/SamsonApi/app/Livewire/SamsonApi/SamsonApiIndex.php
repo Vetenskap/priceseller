@@ -20,6 +20,8 @@ class SamsonApiIndex extends ModuleComponent
 
     public function mount($page = 'main'): void
     {
+        parent::mount();
+
         $this->page = $page;
         $this->form->setSamsonApi(auth()->user()->samsonApi);
         if (!$this->form->samsonApi) {

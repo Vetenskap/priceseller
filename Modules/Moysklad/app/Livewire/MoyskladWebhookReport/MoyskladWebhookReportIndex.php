@@ -6,7 +6,9 @@ use App\Livewire\Traits\WithSort;
 use Livewire\Attributes\Computed;
 use Livewire\Component;
 use Livewire\WithPagination;
+use Modules\Moysklad\Jobs\MoyskladWebhookProcess;
 use Modules\Moysklad\Models\MoyskladWebhook;
+use Modules\Moysklad\Models\MoyskladWebhookReport;
 
 class MoyskladWebhookReportIndex extends Component
 {
@@ -19,7 +21,24 @@ class MoyskladWebhookReportIndex extends Component
     {
         return $this->webhook
             ->reports()
+            ->tap(fn($query) => $this->sortBy ? $query->orderBy($this->sortBy, $this->sortDirection) : $query)
             ->paginate();
+    }
+
+    public function repeat($id): void
+    {
+        $report = MoyskladWebhookReport::find($id);
+
+        if (!$report->status) {
+            abort(403);
+        }
+
+        if ($report->payload->isNotEmpty()) {
+            MoyskladWebhookProcess::dispatch($report->payload, $report->moyskladWebhook);
+            $report->delete();
+        } else {
+            \Flux::toast('Нет данных', variant: 'danger');
+        }
     }
 
     public function render()
