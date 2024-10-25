@@ -11,18 +11,23 @@ use Illuminate\Support\Collection;
 use Modules\Moysklad\HttpClient\Resources\Webhooks\WebhookPost;
 use Modules\Moysklad\HttpClient\Resources\Webhooks\WebhookStockPost;
 use Modules\Moysklad\Models\MoyskladWebhook;
+use Modules\Moysklad\Models\MoyskladWebhookReport;
 use Modules\Moysklad\Services\MoyskladWebhookProcessService;
 
 class MoyskladWebhookProcess implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
+    public MoyskladWebhookReport $report;
     /**
      * Create a new job instance.
      */
     public function __construct(public Collection $apiWebhook, public MoyskladWebhook $webhook)
     {
-        //
+        $this->report = $this->webhook->reports()->create([
+            'status' => false,
+            'payload' => $this->apiWebhook->toJson(),
+        ]);
     }
 
     /**
@@ -37,12 +42,13 @@ class MoyskladWebhookProcess implements ShouldQueue
         }
 
         $service->process();
-
-        $this->webhook->reports()->create(['status' => false]);
     }
 
-    public function failed()
+    public function failed(\Throwable $th): void
     {
-        $this->webhook->reports()->create(['status' => true]);
+        $this->report->update([
+            'status' => true,
+            'exception' => $th->getMessage()
+        ]);
     }
 }

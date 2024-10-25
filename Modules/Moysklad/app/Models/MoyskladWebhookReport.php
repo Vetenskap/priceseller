@@ -13,6 +13,8 @@ class MoyskladWebhookReport extends Model
     protected $fillable = [
         'status',
         'moysklad_webhook_id',
+        'payload',
+        'exception',
     ];
 
 }
