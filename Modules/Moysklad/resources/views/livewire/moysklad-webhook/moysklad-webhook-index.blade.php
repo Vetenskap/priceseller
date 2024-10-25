@@ -2,7 +2,7 @@
     <x-layouts.main-container>
         <flux:navbar>
             @foreach($moysklad->webhooks as $wh)
-                <flux:navbar.item :current="$webhook->getKey() === $wh->getKey()" :href="route('moysklad.index', ['page' => 'webhooks', 'webhookId' => $wh->id])" :badge="$wh->reports()->count()" badge-color="lime">{{$wh->name}}</flux:navbar.item>
+                <flux:navbar.item :current="$webhook?->getKey() === $wh->getKey()" :href="route('moysklad.index', ['page' => 'webhooks', 'webhookId' => $wh->id])" :badge="$wh->reports()->count()" badge-color="lime">{{$wh->name}}</flux:navbar.item>
             @endforeach
         </flux:navbar>
     </x-layouts.main-container>
