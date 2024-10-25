@@ -30,6 +30,8 @@ class MoyskladIndex extends ModuleComponent
 
     public $file;
 
+    public Collection $assortmentAttributes;
+
     #[Computed]
     public function quarantine(): LengthAwarePaginator|array|\Illuminate\Pagination\LengthAwarePaginator|_IH_MoyskladQuarantine_C
     {
@@ -85,6 +87,8 @@ class MoyskladIndex extends ModuleComponent
 
         $this->page = $page;
         $this->form->setMoysklad(auth()->user()->moysklad);
+        $this->assortmentAttributes = (new MoyskladService($this->form->moysklad))->getAllAssortmentAttributes();
+        $this->form->setAssortmentAttributes($this->assortmentAttributes);
         if (!$this->form->moysklad) {
             $this->page = 'main';
         }

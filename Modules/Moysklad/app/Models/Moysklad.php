@@ -21,7 +21,12 @@ class Moysklad extends MainModel
         'clear_order_time',
         'enabled_orders',
         'diff_price',
-        'enabled_diff_price'
+        'enabled_diff_price',
+        'enabled_recount_retail_markup',
+        'link_recount_retail_markup_percent',
+        'link_name_recount_retail_markup_percent',
+        'link_label_recount_retail_markup_percent',
+        'link_type_recount_retail_markup_percent',
     ];
 
     public function warehouses()

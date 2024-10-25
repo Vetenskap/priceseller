@@ -38,7 +38,6 @@ use Modules\VoshodApi\Models\VoshodApi;
 
 class Test extends Command
 {
-    public $limitMemory = 10000 * 1024 * 1024;
     /**
      * The name and signature of the console command.
      *
@@ -58,9 +57,10 @@ class Test extends Command
      */
     public function handle()
     {
-        $path = Storage::disk('public')->path('671a16f040dab_Ostatki_2_skladov_Ska_d_Skakun_Cernicenko.xlsx');
-        $emailSupplier = EmailSupplier::find(18);
-        $service = new EmailSupplierService($emailSupplier, $path);
-        $service->unload();
+        $item = User::find(10)->items()->first();
+        $product = new Product();
+        $product->setId($item->ms_uuid);
+        $product->fetch(Moysklad::where('user_id', 10)->first()->api_key);
+        dd($product->data);
     }
 }

@@ -40,6 +40,9 @@ class MoyskladWebhookProcessService
                 switch ($this->webhook->action) {
                     case 'UPDATE':
                         $this->updateItem();
+//                        if ($this->webhook->moysklad->enabled_recount_retail_markup) {
+//                            $this->recountRetailMarkup();
+//                        }
                         break;
                     case 'CREATE':
                         $this->createItem();
@@ -219,6 +222,23 @@ class MoyskladWebhookProcessService
                     ]);
                 }
             });
+
+        });
+    }
+
+    private function recountRetailMarkup()
+    {
+        $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
+
+            $updatedFields = $event->getUpdatedFields()->get('buyPrice');
+            if (!$updatedFields) $event->getUpdatedFields()->get($this->webhook->moysklad->link_name_recount_retail_markup_percent);
+
+            if ($updatedFields) {
+
+                $product = $event->getMeta();
+                $product->getAttributes();
+
+            }
 
         });
     }

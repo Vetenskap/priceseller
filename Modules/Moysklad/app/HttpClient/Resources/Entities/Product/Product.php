@@ -245,10 +245,15 @@ class Product extends Entity
 
     public function update(Moysklad $moysklad, array $fields = []): bool
     {
+        $data = [];
+
         if (in_array('buyPrice', $fields)) {
-            $data = $this->buyPrice->getFieldProduct();
-            return $this->put($moysklad->api_key, $data);
+            $data[] = $this->buyPrice->getFieldProduct();
+        } else if (in_array('attributes', $fields)) {
+
         }
+
+        return $this->put($moysklad->api_key, $data);
 
         return false;
     }
