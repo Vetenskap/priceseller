@@ -10,6 +10,16 @@ class ProductInfoAttribute
 {
     const ENDPOINT = '/v3/products/info/attributes';
 
+    const ATTRIBUTES = [
+        ['name' => 'height', 'label' => 'Высота упаковки'],
+        ['name' => 'depth', 'label' => 'Глубина'],
+        ['name' => 'width', 'label' => 'Ширина упаковки'],
+        ['name' => 'dimension_unit', 'label' => 'Единица измерения габаритов'],
+        ['name' => 'weight', 'label' => 'Вес товара в упаковке'],
+        ['name' => 'weight_unit', 'label' => 'Единица измерения веса'],
+        ['name' => 'description', 'label' => 'Описание товара'],
+    ];
+
     protected int $id;
     protected string $barcode;
     protected string $category_id;
@@ -41,30 +51,26 @@ class ProductInfoAttribute
         $this->images = $productInfoAttribute->get('images');
     }
 
-    public function fetch(OzonMarket $market, int $productId, string $offerId): void
+    public function fetch(OzonMarket $market, string $productId = null, string $offerId = null): void
     {
         $data = [
             "filter" => [
-                "product_id" => [
-                    $productId
-                ],
-                "offer_id" => [
-                    $offerId
-                ],
+                "product_id" => $productId ? [$productId]: [],
+                "offer_id" => $offerId ? [$offerId] : [],
                 "visibility" => "ALL"
             ],
-            "limit" => 100,
+            "limit" => 1000,
             "last_id" => "",
             "sort_dir" => "ASC"
         ];
 
         $ozonClient = new OzonClient($market->api_key, $market->client_id);
 
-        $response = $ozonClient->post(self::ENDPOINT, $data)->toCollectionSpread()->get('result')->first();
+        $response = $ozonClient->post(self::ENDPOINT, $data)->collect()->toCollectionSpread()->get('result')->first();
         $description = $ozonClient->post('/v1/product/info/description', [
             "offer_id" => $offerId,
             "product_id" => $productId
-        ])->toCollectionSpread()->get('result');
+        ])->collect()->toCollectionSpread()->get('result');
 
         $this->description = $description->get('description');
 
@@ -72,9 +78,9 @@ class ProductInfoAttribute
     }
 
 
-    public function toArray(): array
+    public function toCollection(): Collection
     {
-        return [
+        return collect([
             'id' => $this->id,
             'barcode' => $this->barcode,
             'category_id' => $this->category_id,
@@ -88,6 +94,6 @@ class ProductInfoAttribute
             'weight_unit' => $this->weight_unit,
             'images' => $this->images->toArray(),
             'description' => $this->description
-        ];
+        ]);
     }
 }

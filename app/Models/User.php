@@ -12,6 +12,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\App;
 use Laravel\Sanctum\HasApiTokens;
+use Modules\Assembly\Models\AssemblyProductSettings;
 use Modules\BergApi\Models\BergApi;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Order\Models\Order;
@@ -258,5 +259,10 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
     public function employees(): HasMany
     {
         return $this->hasMany(Employee::class, 'user_id', 'id');
+    }
+
+    public function assemblyProductSettings(): HasMany
+    {
+        return $this->hasMany(AssemblyProductSettings::class);
     }
 }

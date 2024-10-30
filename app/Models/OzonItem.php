@@ -13,6 +13,22 @@ class OzonItem extends MainModel
     use HasFactory;
     use HasUuids;
 
+    const MAINATTRIBUTES = [
+        ['name' => 'product_id', 'label' => 'Идентификатор товара в ОЗОН'],
+        ['name' => 'offer_id', 'label' => 'Артикул клиента в ОЗОН'],
+        ['name' => 'min_price_percent', 'label' => 'Минимальная цена в процентах'],
+        ['name' => 'min_price', 'label' => 'Минимальная цена'],
+        ['name' => 'shipping_processing', 'label' => 'Обработка отправления'],
+        ['name' => 'direct_flow_trans', 'label' => 'Магистраль'],
+        ['name' => 'deliv_to_customer', 'label' => 'Последняя миля'],
+        ['name' => 'sales_percent', 'label' => 'Комиссия'],
+        ['name' => 'price', 'label' => 'Цена'],
+        ['name' => 'price_seller', 'label' => 'Цена конкурента'],
+        ['name' => 'price_min', 'label' => 'Итоговая минимальная цена'],
+        ['name' => 'price_max', 'label' => 'Итоговая максимальная цена'],
+        ['name' => 'price_market', 'label' => 'Цена из кабинета'],
+    ];
+
     protected $fillable = [
         'product_id',
         'offer_id',

@@ -26,7 +26,7 @@ class OzonClient
             ->withHeaders([
                 'Client-Id' => $clientId,
                 'Api-Key' => $apiKey,
-                'Content-Type' => 'application/json'
+                'Content-Type' => 'application/json',
             ])->baseUrl(self::BASEURL);
     }
 
@@ -40,9 +40,9 @@ class OzonClient
         return $this->request->delete($endpoint)->throw()->successful();
     }
 
-    public function post(string $endpoint, array $data): Collection
+    public function post(string $endpoint, array $data)
     {
-        return $this->request->post($endpoint, $data)->throw()->collect();
+        return $this->request->post($endpoint, $data)->throw();
     }
 
     public function put(string $endpoint, array $data): bool

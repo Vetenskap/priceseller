@@ -16,7 +16,7 @@ class OzonWarehouseSupplier extends MainModel
 
     public function warehouse()
     {
-        return $this->belongsTo(OzonWarehouse::class);
+        return $this->belongsTo(OzonWarehouse::class, 'ozon_warehouse_id', 'id');
     }
 
     public function supplier()

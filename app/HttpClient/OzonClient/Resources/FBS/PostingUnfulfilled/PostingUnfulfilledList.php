@@ -3,6 +3,7 @@
 namespace App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled;
 
 use App\HttpClient\OzonClient\OzonClient;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class PostingUnfulfilledList
@@ -21,7 +22,7 @@ class PostingUnfulfilledList
     protected string $filter_delivering_date_to;
     protected array $filter_delivery_method_id = [];
     protected array $filter_provider_id = [];
-    protected string $filter_status;
+    protected string $filter_status = '';
     protected array $warehouse_id = [];
     protected int $count;
 
@@ -48,7 +49,7 @@ class PostingUnfulfilledList
         );
 
         $client = new OzonClient($apiKey, $clientId);
-        $result = $client->post(static::ENDPOINT, $data)->toCollectionSpread();
+        $result = $client->post(static::ENDPOINT, $data)->collect()->toCollectionSpread();
         $this->count = $result->get('result')->get('count');
 
         return $result->get('result')->get('postings')->map(function (Collection $posting) {
@@ -77,14 +78,14 @@ class PostingUnfulfilledList
         $this->offset = $offset;
     }
 
-    public function setFilterCutoffFrom(string $filter_cutoff_from): void
+    public function setFilterCutoffFrom(Carbon $filter_cutoff_from): void
     {
-        $this->filter_cutoff_from = $filter_cutoff_from;
+        $this->filter_cutoff_from = $filter_cutoff_from->format('Y-m-d\TH:i:s.v') . 'Z';
     }
 
-    public function setFilterCutoffTo(string $filter_cutoff_to): void
+    public function setFilterCutoffTo(Carbon $filter_cutoff_to): void
     {
-        $this->filter_cutoff_to = $filter_cutoff_to;
+        $this->filter_cutoff_to = $filter_cutoff_to->format('Y-m-d\TH:i:s.v') . 'Z';
     }
 
     public function setFilterDeliveringDateFrom(string $filter_delivering_date_from): void
@@ -107,6 +108,18 @@ class PostingUnfulfilledList
         $this->filter_provider_id = $filter_provider_id;
     }
 
+    /** @param string $filter_status One of:
+     * acceptance_in_progress — идёт приёмка,
+     * awaiting_approve — ожидает подтверждения,
+     * awaiting_packaging — ожидает упаковки,
+     * awaiting_registration — ожидает регистрации,
+     * awaiting_deliver — ожидает отгрузки,
+     * arbitration — арбитраж,
+     * client_arbitration — клиентский арбитраж доставки,
+     * delivering — доставляется,
+     * driver_pickup — у водителя,
+     * not_accepted — не принят на сортировочном центре.
+     */
     public function setFilterStatus(string $filter_status): void
     {
         $this->filter_status = $filter_status;

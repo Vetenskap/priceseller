@@ -53,10 +53,12 @@ class Helpers {
 
         $batch = $batch->fresh();
 
-        while (!$batch->finished() && ($batch->totalJobs > 0)) {
+        while (!$batch->finished() && ($batch->pendingJobs > 0)) {
             if ($progress) $progress($batch->progress());
             sleep(20);
             $batch = $batch->fresh();
         }
+
+        if (!($batch->totalJobs > 0)) $batch->delete();
     }
 }

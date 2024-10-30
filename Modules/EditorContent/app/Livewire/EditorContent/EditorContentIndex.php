@@ -172,7 +172,7 @@ class EditorContentIndex extends ModuleComponent
     {
         $service = new EditorContentService(auth()->user());
         $cards = $service->getOzonProductsInfo($this->article);
-        $this->cards = $cards->map(fn(ProductInfoAttribute $product) => $product->toArray())->toArray();
+        $this->cards = $cards->map(fn(ProductInfoAttribute $product) => $product->toCollection())->toArray();
     }
 
     // Метод для выбора карточки

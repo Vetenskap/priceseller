@@ -15,5 +15,6 @@ use Modules\Assembly\Http\Controllers\AssemblyController;
 */
 
 Route::prefix('modules')->group( function () {
-    Route::get('/assembly/{page?}', \Modules\Assembly\Livewire\Assembly\AssemblyIndex::class)->name('assembly.index');
+    Route::get('/assembly', \Modules\Assembly\Livewire\Assembly\AssemblyIndex::class)->name('assembly.index');
+    Route::get('/assembly/ozon/{warehouse}', \Modules\Assembly\Livewire\Assembly\AssemblyOzon::class)->name('assembly.ozon');
 });
