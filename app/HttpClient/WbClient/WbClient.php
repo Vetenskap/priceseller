@@ -102,7 +102,7 @@ class WbClient
         $response = RateLimiter::attempt(
             'wb_get_cards_list',
             100,
-            fn() => $this->request->post('/content/v2/get/cards/list', $data)->throw()->collect()
+            fn() => $this->request->post('https://suppliers-api.wildberries.ru/content/v2/get/cards/list', $data)->throw()->collect()
         );
 
         $cards = collect($response->get('cards'));
@@ -116,7 +116,7 @@ class WbClient
 
     public function getWarehouses()
     {
-        return $this->request->get('/api/v3/warehouses')->throw()->collect();
+        return $this->request->get('https://suppliers-api.wildberries.ru/api/v3/warehouses')->throw()->collect();
     }
 
     public function putStocks(array $data, int $warehouseId, Supplier $supplier): void
@@ -139,7 +139,7 @@ class WbClient
                 RateLimiter::attempt(
                     'wb_put_stocks',
                     300,
-                    fn() => $this->request->put("/api/v3/stocks/{$warehouseId}", ['stocks' => $data])->throw()
+                    fn() => $this->request->put("https://suppliers-api.wildberries.ru/api/v3/stocks/{$warehouseId}", ['stocks' => $data])->throw()
                 );
 
                 return;
@@ -192,7 +192,7 @@ class WbClient
             RateLimiter::attempt(
                 'wb_put_prices',
                 10,
-                fn() => $this->request->baseUrl('https://discounts-prices-api.wb.ru')->post("/api/v2/upload/task", ['data' => $data])->throw(),
+                fn() => $this->request->post("https://discounts-prices-api.wb.ru/api/v2/upload/task", ['data' => $data])->throw(),
                 6
             );
 
