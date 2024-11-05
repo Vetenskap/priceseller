@@ -166,8 +166,26 @@ class OzonItemPriceService
                 ->items()
                 ->with('ozonitemable')
                 ->chunk(1000, function ($items) use ($batch) {
+
+                    $items = $items->filter(function (OzonItem $ozonItem) {
+
+                        if ($ozonItem->ozonitemable_type === Item::class) {
+                            if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
+                                return true;
+                            }
+                        } else {
+                            if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+
+                    });
+
                     $batch->add(new UpdateStockBatch($this, $items));
                 });
+
         }, 'market-update-stock');
 
         $this->nullNotUpdatedStocks();

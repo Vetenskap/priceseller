@@ -29,7 +29,7 @@ class WbItemPriceService
 {
     protected User $user;
 
-    public function __construct(public ?Supplier $supplier = null, public WbMarket $market, public array $supplierWarehousesIds)
+    public function __construct(public ?Supplier $supplier = null, public WbMarket $market, public array $supplierWarehousesIds = [])
     {
         $this->user = $this->market->user;
     }
@@ -137,7 +137,25 @@ class WbItemPriceService
                 ->items()
                 ->with('wbitemable')
                 ->chunk(1000, function (Collection $items) use ($batch) {
+
+                    $items = $items->filter(function (WbItem $wbItem) {
+
+                        if ($wbItem->wbitemable_type === Item::class) {
+                            if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                                return true;
+                            }
+                        } else {
+                            if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                                return true;
+                            }
+                        }
+
+                        return false;
+
+                    });
+
                     $batch->add(new UpdateStockBatch($this, $items));
+
                 });
         }, 'market-update-stock');
 

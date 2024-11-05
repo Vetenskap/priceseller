@@ -34,12 +34,10 @@ class TestStock implements ShouldQueue
     {
         $this->user->suppliers->each(function (Supplier $supplier) {
 
-            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
+            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn($value, $key) => $value)->keys()->toArray();
 
-            if ($warehouses) {
-                $service = new OzonItemPriceService($supplier, $this->market, $warehouses);
-                $service->updateStock();
-            }
+            $service = new OzonItemPriceService($supplier, $this->market, $warehouses);
+            $service->updateStock();
 
         });
     }

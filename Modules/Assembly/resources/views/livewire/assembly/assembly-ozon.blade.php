@@ -10,9 +10,17 @@
                             @foreach(array_merge($fields, $additionalFields) as $field => $parameters)
                                 <flux:menu.item>
                                     @if($sortDirection === 'desc')
-                                        <flux:button icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
+                                        @if($sortBy === $field)
+                                            <flux:button variany="primary" wire:click="sort({{json_encode($field)}})" icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
+                                        @else
+                                            <flux:button wire:click="sort({{json_encode($field)}})" icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
+                                        @endif
                                     @else
-                                        <flux:button wire:click="" icon-trailing="chevron-up">{{$parameters['label']}}</flux:button>
+                                        @if($sortBy === $field)
+                                            <flux:button variant="primary" wire:click="sort({{json_encode($field)}})" icon-trailing="chevron-up">{{$parameters['label']}}</flux:button>
+                                        @else
+                                            <flux:button wire:click="sort({{json_encode($field)}})" icon-trailing="chevron-up">{{$parameters['label']}}</flux:button>
+                                        @endif
                                     @endif
                                 </flux:menu.item>
                             @endforeach

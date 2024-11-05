@@ -26,12 +26,60 @@ class AssemblyOzon extends BaseComponent
 
     public function updatedSortBy(): void
     {
-        $this->postings = $this->postings->tap(fn (Collection $postings) => $this->sortBy ? ($this->sortDirection === 'asc' ? $postings->sortBy($this->sortBy) : $postings->sortByDesc($this->sortBy)) : $postings);
+        if ($this->sortDirection === 'asc') {
+            $this->postings = $this->postings->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
+                $collection->sortBy($this->sortBy) :
+                $collection->get('products')->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
+                    $collection->sortBy($this->sortBy) :
+                    ($collection->get('product')->get($this->sortBy) ?
+                        $collection->get('product')->sortBy($this->sortBy) :
+                        ($collection->get('attribute')->get($this->sortBy) ?
+                            $collection->get('attribute')->sortBy($this->sortBy) :
+                            $collection->get('product')->get('ozonitemable')->sortBy($this->sortBy)))
+                )
+            );
+        } else {
+            $this->postings = $this->postings->sortDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
+                $collection->sortBy($this->sortBy) :
+                $collection->get('products')->sortDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
+                    $collection->sortBy($this->sortBy) :
+                    ($collection->get('product')->get($this->sortBy) ?
+                        $collection->get('product')->sortDesc($this->sortBy) :
+                        ($collection->get('attribute')->get($this->sortBy) ?
+                            $collection->get('attribute')->sortDesc($this->sortBy) :
+                            $collection->get('product')->get('ozonitemable')->sortDesc($this->sortBy)))
+                )
+            );
+        }
     }
 
     public function updatedSortDirection()
     {
-
+        if ($this->sortDirection === 'asc') {
+            $this->postings = $this->postings->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
+                $collection->sortBy($this->sortBy) :
+                $collection->get('products')->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
+                    $collection->sortBy($this->sortBy) :
+                    ($collection->get('product')->get($this->sortBy) ?
+                        $collection->get('product')->sortBy($this->sortBy) :
+                        ($collection->get('attribute')->get($this->sortBy) ?
+                            $collection->get('attribute')->sortBy($this->sortBy) :
+                            $collection->get('product')->get('ozonitemable')->sortBy($this->sortBy)))
+                    )
+            );
+        } else {
+            $this->postings = $this->postings->sortDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
+                $collection->sortBy($this->sortBy) :
+                $collection->get('products')->sortDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
+                    $collection->sortBy($this->sortBy) :
+                    ($collection->get('product')->get($this->sortBy) ?
+                        $collection->get('product')->sortDesc($this->sortBy) :
+                        ($collection->get('attribute')->get($this->sortBy) ?
+                            $collection->get('attribute')->sortDesc($this->sortBy) :
+                            $collection->get('product')->get('ozonitemable')->sortDesc($this->sortBy)))
+                )
+            );
+        }
     }
 
     public function mount()

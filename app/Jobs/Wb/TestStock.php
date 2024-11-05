@@ -33,12 +33,10 @@ class TestStock implements ShouldQueue
     public function handle(): void
     {
         $this->user->suppliers->each(function (Supplier $supplier) {
-            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
+            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn($value, $key) => $value)->keys()->toArray();
 
-            if ($warehouses) {
-                $service = new WbItemPriceService($supplier, $this->market, $warehouses);
-                $service->updateStock();
-            }
+            $service = new WbItemPriceService($supplier, $this->market, $warehouses);
+            $service->updateStock();
         });
     }
 
