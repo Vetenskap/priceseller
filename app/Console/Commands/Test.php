@@ -30,11 +30,8 @@ class Test extends Command
      */
     public function handle()
     {
-        $wbItem = WbItem::find('9d62035d-1913-4623-8847-8aebf66e2372');
-        $market = $wbItem->market;
-        $supplier = $wbItem->wbitemable->supplier;
+        $collect = collect(['123key', 'userWarehouses']);
 
-        $service = new WbItemPriceService($supplier, $market, []);
-        $service->recountStockWbItem($wbItem);
+        dd($collect->search('userWarehouses'));
     }
 }

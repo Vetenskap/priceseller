@@ -248,6 +248,7 @@ class WbItemPriceService
     public function nullNotUpdatedStocks(): void
     {
         Helpers::toBatch(function (Batch $batch) {
+
             WbWarehouseStock::query()
                 ->with('wbItem')
                 ->whereHas('wbItem', function (Builder $query) {
@@ -257,16 +258,17 @@ class WbItemPriceService
                     $query->whereHas('suppliers', function (Builder $query) {
                         $query
                             ->where('supplier_id', $this->supplier->id)
-                            ->whereHas('warehouses', function (Builder $query) {
-                                $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+                            ->when($this->supplierWarehousesIds, function (Builder $query) {
+                                $query->whereHas('warehouses', function (Builder $query) {
+                                    $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+                                });
                             });
                     });
                 })
                 ->chunk(1000, function (Collection $stocks) use ($batch) {
-
                     $batch->add(new NullNotUpdatedStocksBatch($this, $stocks));
-
                 });
+
         }, 'market-update-stock');
 
     }
@@ -340,8 +342,10 @@ class WbItemPriceService
             ->whereHas('suppliers', function (Builder $query) {
                 $query
                     ->where('supplier_id', $this->supplier->id)
-                    ->whereHas('warehouses', function (Builder $query) {
-                        $query->where('supplier_warehouse_id', $this->supplierWarehousesIds);
+                    ->when($this->supplierWarehousesIds, function (Builder $query) {
+                        $query->whereHas('warehouses', function (Builder $query) {
+                            $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+                        });
                     });
             })
             ->get()
