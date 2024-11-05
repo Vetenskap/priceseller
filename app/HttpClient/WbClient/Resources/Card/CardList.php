@@ -7,7 +7,7 @@ use Illuminate\Support\Collection;
 
 class CardList
 {
-    const ENDPOINT = '/content/v2/get/cards/list';
+    const ENDPOINT = 'https://suppliers-api.wildberries.ru/content/v2/get/cards/list';
     protected bool $sort_ascending = false;
     protected int $filter_with_photo = -1;
     protected string $filter_text_search = '';

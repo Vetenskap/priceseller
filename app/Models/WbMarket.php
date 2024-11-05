@@ -30,7 +30,8 @@ class WbMarket extends MainModel
         'organization_id',
         'minus_stock',
         'enabled_update_commissions_in_time',
-        'update_commissions_time'
+        'update_commissions_time',
+        'tariff'
     ];
 
     public function items()

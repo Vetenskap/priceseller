@@ -250,12 +250,12 @@ class Product extends Entity
         if (in_array('buyPrice', $fields)) {
             $data[] = $this->buyPrice->getFieldProduct();
         } else if (in_array('attributes', $fields)) {
-
+            $data['attributes'] = $this->attributes->map(function (Attribute $attribute) {
+                return $attribute->getFieldProduct();
+            });
         }
 
         return $this->put($moysklad->api_key, $data);
-
-        return false;
     }
 
     public function getField(): array

@@ -5,8 +5,8 @@ namespace App\Services;
 use App\Exports\WbItemsExport;
 use App\HttpClient\WbClient\Resources\Card\Card;
 use App\HttpClient\WbClient\Resources\Card\CardList;
+use App\HttpClient\WbClient\Resources\Tariffs\Commission;
 use App\HttpClient\WbClient\WbClient;
-use App\HttpClient\WbExternalClient;
 use App\Imports\WbItemsImport;
 use App\Models\User;
 use App\Models\WbItem;
@@ -48,19 +48,24 @@ class WbMarketService
     {
         $updated = 0;
 
+        $commissions = new Commission();
+        $commissions->fetch($this->market->api_key);
+
         $list = new CardList($this->market->api_key);
 
         do {
 
             $cards = $list->next();
 
-            $cards->each(function (Card $card) use (&$updated, $defaultFields) {
+            $cards->each(function (Card $card) use (&$updated, $defaultFields, $commissions) {
 
                 $wbItem = $this->market->items()->where('nm_id', $card->getNmId())->first();
 
                 if ($wbItem) {
                     $wbItem->update(array_merge([
-                        'volume' => round($card->getDimensionsLength() * $card->getDimensionsWidth() * $card->getDimensionsHeight() / 1000, 2)
+                        'volume' => round($card->getDimensionsLength() * $card->getDimensionsWidth() * $card->getDimensionsHeight() / 1000, 2),
+                        'subject_id' => $card->getSubjectId(),
+                        'sales_percent' => $commissions->getReport()->firstWhere('subjectID', $card->getSubjectId())?->get($this->market->tariff)
                     ], $defaultFields));
                     $updated++;
                 }
@@ -83,88 +88,79 @@ class WbMarketService
     {
         $this->market->clearSuppliersCache();
 
+        $commissions = new Commission();
+        $commissions->fetch($this->market->api_key);
+
         $defaultFields = $defaultFields->filter();
 
         $correct = 0;
         $error = 0;
         $updated = 0;
 
-        $client = new WbClient($this->market->api_key);
-        $externalClient = new WbExternalClient();
-
-        $updatedAt = "";
-        $nmId = 0;
+        $list = new CardList($this->market->api_key);
 
         do {
 
-            $result = Cache::tags(['wb', 'direct_relation'])
-                ->remember(
-                    $this->market->id . '_' . $updatedAt . '_' . $nmId,
-                    now()->addHours(2),
-                    fn() => $client->getCardsList($updatedAt, $nmId)
-                );
+            $cards = $list->next();
 
-            $updatedAt = $result->get('cursor')->get('updatedAt');
-            $nmId = $result->get('cursor')->get('nmID');
-            $total = $result->get('cursor')->get('total');
-
-            $result->get('cards')->toCollectionSpread()->each(function (Collection $wbItem) use ($externalClient, $defaultFields, &$error, &$correct, &$updated, $directLink) {
+            $cards->each(function (Card $card) use (&$updated, $defaultFields, $directLink, &$error, &$correct, $commissions) {
 
                 if ($directLink) {
                     try {
-                        $item = $this->market->user->items()->where('code', $wbItem->get('vendorCode'))->first();
+                        $item = $this->market->user->items()->where('code', $card->getVendorCode())->first();
                         if (!$item) {
-                            $item = $this->market->user->bundles()->where('code', $wbItem->get('vendorCode'))->firstOrFail();
+                            $item = $this->market->user->bundles()->where('code', $card->getVendorCode())->firstOrFail();
                         }
                     } catch (ModelNotFoundException) {
                         $error++;
 
-                        MarketItemRelationshipService::handleNotFoundItem($wbItem->get('vendorCode'), $this->market->id, 'App\Models\WbMarket');
+                        MarketItemRelationshipService::handleNotFoundItem($card->getVendorCode(), $this->market->id, 'App\Models\WbMarket');
 
                         return;
                     }
                 } else {
                     try {
-                        $item = $this->market->items()->where('vendor_code', $wbItem->get('vendorCode'))->firstOrFail()->wbitemable;
+                        $item = $this->market->items()->where('vendor_code', $card->getVendorCode())->firstOrFail()->wbitemable;
                     } catch (ModelNotFoundException) {
 
                         $error++;
 
-                        MarketItemRelationshipService::handleNotFoundItem($wbItem->get('vendorCode'), $this->market->id, 'App\Models\WbMarket');
+                        MarketItemRelationshipService::handleNotFoundItem($card->getVendorCode(), $this->market->id, 'App\Models\WbMarket');
 
                         return;
                     }
                 }
 
-                $sku = $wbItem->get('sizes')->first(fn(Collection $size) => $size->get('skus'))->get('skus')->first();
-                $dimensions = $wbItem->get('dimensions');
+                $sku = $card->getSizes()->first(fn(Collection $size) => $size->get('skus'))->get('skus')->first();
 
+                MarketItemRelationshipService::handleFoundItem($card->getVendorCode(), $item->code, $this->market->id, 'App\Models\WbMarket');
 
-                MarketItemRelationshipService::handleFoundItem($wbItem->get('vendorCode'), $item->code, $this->market->id, 'App\Models\WbMarket');
-
-                if (WbItem::where('vendor_code', $wbItem->get('vendorCode'))->where('wb_market_id', $this->market->id)->exists()) {
+                if (WbItem::where('vendor_code', $card->getVendorCode())->where('wb_market_id', $this->market->id)->exists()) {
                     $updated++;
                 } else {
                     $correct++;
                 }
 
                 WbItem::updateOrCreate([
-                    'vendor_code' => $wbItem->get('vendorCode'),
+                    'vendor_code' => $card->getVendorCode(),
                     'wb_market_id' => $this->market->id,
                 ], array_merge([
-                    'vendor_code' => $wbItem->get('vendorCode'),
-                    'nm_id' => $wbItem->get('nmID'),
+                    'vendor_code' => $card->getVendorCode(),
+                    'nm_id' => $card->getNmId(),
                     'sku' => $sku,
                     'wb_market_id' => $this->market->id,
                     'wbitemable_id' => $item->id,
                     'wbitemable_type' => $item->getMorphClass(),
-                    'volume' => round($dimensions->get('length') * $dimensions->get('width') * $dimensions->get('height') / 1000, 2),
+                    'volume' => round($card->getDimensionsLength() * $card->getDimensionsWidth() * $card->getDimensionsHeight() / 1000, 2),
+                    'subject_id' => $card->getSubjectId(),
+                    'sales_percent' => $commissions->getReport()->firstWhere('subjectID', $card->getSubjectId())?->get($this->market->tariff)
                 ], $defaultFields->toArray()));
+
             });
 
             ItemsImportReportService::flush($this->market, $correct, $error, $updated);
 
-        } while ($total === 100);
+        } while ($list->hasNext());
 
         return collect(['error' => $error, 'correct' => $correct, 'updated' => $updated]);
     }

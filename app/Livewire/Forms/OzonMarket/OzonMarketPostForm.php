@@ -56,6 +56,8 @@ class OzonMarketPostForm extends Form
 
     #[Validate]
     public $update_commissions_time = '00:00';
+    #[Validate]
+    public $tariff = 'fbs';
 
     public function rules(): array
     {
@@ -85,6 +87,7 @@ class OzonMarketPostForm extends Form
             'enabled_price' => ['nullable', 'boolean'],
             'enabled_update_commissions_in_time' => ['nullable', 'boolean'],
             'update_commissions_time' => ['nullable', 'string', 'date_format:H:i'],
+            'tariff' => ['nullable', 'in:fbs,fbo'],
         ];
     }
 
@@ -110,6 +113,7 @@ class OzonMarketPostForm extends Form
         $this->enabled_price = $market->enabled_price;
         $this->enabled_update_commissions_in_time = (bool) $market->enabled_update_commissions_in_time;
         $this->update_commissions_time = $market->update_commissions_time;
+        $this->tariff = $market->tariff;
     }
 
     public function store(): void

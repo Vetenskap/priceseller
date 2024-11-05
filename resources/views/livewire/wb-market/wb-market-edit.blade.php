@@ -53,6 +53,11 @@
             <flux:tab.panel name="prices">
                 <x-blocks.main-block>
                     <flux:card class="space-y-12">
+                        <flux:select wire:model="form.tariff" placeholder="Выберите тариф..." label="Тариф">
+                            @foreach(\App\HttpClient\WbClient\Resources\Tariffs\Commission::TARRIFS as $tariff)
+                                <flux:option :value="$tariff['name']">{{$tariff['label']}}</flux:option>
+                            @endforeach
+                        </flux:select>
                         <div class="flex gap-6 flex-wrap">
                             <flux:input wire:model="form.coefficient" label="Коэффициент" type="number"/>
                             <flux:input wire:model="form.basic_logistics" label="Базовая цена логистики"

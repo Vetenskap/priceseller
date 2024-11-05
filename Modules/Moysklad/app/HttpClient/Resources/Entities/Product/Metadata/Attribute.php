@@ -41,5 +41,12 @@ class Attribute
         return $this->value;
     }
 
+    public function getFieldProduct(): array
+    {
+        return [
+
+        ];
+    }
+
 
 }

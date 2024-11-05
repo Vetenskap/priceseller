@@ -2,11 +2,14 @@
 
 namespace App\HttpClient\WbClient;
 
+use App\HttpClient\WbClient\Resources\Card\CardList;
+use App\HttpClient\WbClient\Resources\Tariffs\Commission;
 use App\Models\Supplier;
 use App\Services\SupplierReportService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
+use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
@@ -18,7 +21,8 @@ class WbClient
     public PendingRequest $request;
 
     CONST RATE_LIMITS = [
-        'wb_get_cards_list'
+        CardList::ENDPOINT => 100,
+        Commission::ENDPOINT => 1
     ];
 
     public function __construct(string $api_key)
@@ -29,28 +33,48 @@ class WbClient
             ->timeout(60)
             ->connectTimeout(60)
             ->withToken($api_key, '')
-            ->withHeader('Content-Type', 'application/json')
-            ->baseUrl('https://suppliers-api.wildberries.ru');
+            ->withHeader('Content-Type', 'application/json');
     }
 
-    public function get(string $endpoint, array $queryParameters = []): Collection
+    public function get(string $endpoint, array $queryParameters = []): Response
     {
-        return $this->request->withQueryParameters($queryParameters)->get($endpoint)->throw()->collect();
+        return $this->rateLimit($endpoint, function () use ($endpoint, $queryParameters) {
+            return $this->request->withQueryParameters($queryParameters)->get($endpoint)->throw();
+        });
     }
 
     public function delete(string $endpoint): bool
     {
-        return $this->request->delete($endpoint)->throw()->successful();
+        return $this->rateLimit($endpoint, function () use ($endpoint) {
+            return $this->request->delete($endpoint)->throw()->successful();
+        });
     }
 
-    public function post(string $endpoint, array $data)
+    public function post(string $endpoint, array $data): Response
     {
-        return $this->request->post($endpoint, $data)->throw();
+        return $this->rateLimit($endpoint, function () use ($endpoint, $data) {
+            return $this->request->post($endpoint, $data)->throw();
+        });
     }
 
     public function put(string $endpoint, array $data): bool
     {
-        return $this->request->put($endpoint, $data)->throw()->successful();
+        return $this->rateLimit($endpoint, function () use ($endpoint, $data) {
+            return $this->request->put($endpoint, $data)->throw()->successful();
+        });
+    }
+
+    public function rateLimit(string $endpoint, \Closure $closure)
+    {
+        while (RateLimiter::attempts($endpoint) >= self::RATE_LIMITS[$endpoint]) {
+            sleep(1);
+        }
+
+        return RateLimiter::attempt(
+            $endpoint,
+            self::RATE_LIMITS[$endpoint],
+            fn() => $closure()
+        );
     }
 
     public function getCardsList($updatedAt = '', $nmId = 0): Collection

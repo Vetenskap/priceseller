@@ -70,9 +70,9 @@ class OzonMarketService
                 $ozonItem = $productIdToOzonItem->get($productInfoPrices->getProductId());
                 if ($ozonItem) {
                     $ozonItem->update(array_merge([
-                        'direct_flow_trans' => (float)$productInfoPrices->getCommissions()->get('fbs_direct_flow_trans_max_amount'),
-                        'deliv_to_customer' => (float)$productInfoPrices->getCommissions()->get('fbs_deliv_to_customer_amount'),
-                        'sales_percent' => (int)$productInfoPrices->getCommissions()->get('sales_percent_fbs'),
+                        'direct_flow_trans' => (float)$productInfoPrices->getCommissions()->get($this->market->tariff . '_direct_flow_trans_max_amount'),
+                        'deliv_to_customer' => (float)$productInfoPrices->getCommissions()->get($this->market->tariff . '_deliv_to_customer_amount'),
+                        'sales_percent' => (int)$productInfoPrices->getCommissions()->get('sales_percent_' . $this->market->tariff),
                         'price_market' => (int)$productInfoPrices->getPrice()->get('price'),
                         'price_seller' => (int)$productInfoPrices->getPriceIndexes()->get('ozon_index_data')->get('minimal_price'),
                     ], $defaultFields));
@@ -167,9 +167,9 @@ class OzonMarketService
                 ], [
                     'offer_id' => $ozonItem['offer_id'],
                     'product_id' => $ozonItem['product_id'],
-                    'direct_flow_trans' => (float)$commissions->get('fbs_direct_flow_trans_max_amount'),
-                    'deliv_to_customer' => (float)$commissions->get('fbs_deliv_to_customer_amount'),
-                    'sales_percent' => (int)$commissions->get('sales_percent_fbs'),
+                    'direct_flow_trans' => (float)$commissions->get($this->market->tariff . '_direct_flow_trans_max_amount'),
+                    'deliv_to_customer' => (float)$commissions->get($this->market->tariff . '_deliv_to_customer_amount'),
+                    'sales_percent' => (int)$commissions->get('sales_percent_' . $this->market->tariff),
                     'price_market' => (int)$price->get('price'),
                     'price_seller' => (int)collect($priceIndexes->get('ozon_index_data'))->get('minimal_price'),
                     'ozon_market_id' => $this->market->id,

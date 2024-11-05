@@ -26,7 +26,8 @@ class WbItem extends MainModel
         'wb_market_id',
         'id',
         'wbitemable_id',
-        'wbitemable_type'
+        'wbitemable_type',
+        'subject_id',
     ];
 
     const MAINATTRIBUTES = [

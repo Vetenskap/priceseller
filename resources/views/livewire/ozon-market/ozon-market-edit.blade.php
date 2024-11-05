@@ -55,6 +55,10 @@
             <flux:tab.panel name="prices">
                 <x-blocks.main-block>
                     <flux:card class="space-y-12">
+                        <flux:select wire:model="form.tariff" placeholder="Выберите тариф..." label="Тариф">
+                            <flux:option value="fbs">FBS</flux:option>
+                            <flux:option value="fbo">FBO</flux:option>
+                        </flux:select>
                         <div class="flex">
                             <div class="flex gap-6">
                                 <flux:switch wire:model="form.seller_price" label="Учитывать цену конкурента"/>

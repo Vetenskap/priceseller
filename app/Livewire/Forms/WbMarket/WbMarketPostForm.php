@@ -57,6 +57,9 @@ class WbMarketPostForm extends Form
     #[Validate]
     public $update_commissions_time = '00:00';
 
+    #[Validate]
+    public $tariff = null;
+
     public function rules(): array
     {
         return [
@@ -81,6 +84,7 @@ class WbMarketPostForm extends Form
             'minus_stock' => ['nullable', 'integer', 'min:0'],
             'enabled_update_commissions_in_time' => ['nullable', 'boolean'],
             'update_commissions_time' => ['nullable', 'string', 'date_format:H:i'],
+            'tariff' => ['nullable', 'string'],
         ];
     }
 
@@ -101,6 +105,7 @@ class WbMarketPostForm extends Form
         $this->minus_stock = $market->minus_stock;
         $this->enabled_update_commissions_in_time = (bool) $market->enabled_update_commissions_in_time;
         $this->update_commissions_time = $market->update_commissions_time;
+        $this->tariff = $market->tariff;
     }
 
     public function store(): void
