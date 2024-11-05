@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
 use Opcodes\LogViewer\Facades\Cache;
@@ -56,6 +57,11 @@ class OzonMarket extends MainModel
     public function itemsExportReports()
     {
         return $this->morphMany(ItemsExportReport::class, 'reportable');
+    }
+
+    public function actionReports(): MorphMany
+    {
+        return $this->morphMany(MarketActionReport::class, 'reportable');
     }
 
     public function relationships()

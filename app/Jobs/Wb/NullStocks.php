@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Wb;
 
+use App\Models\MarketActionReport;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbMarket;
@@ -19,12 +20,18 @@ class NullStocks implements ShouldQueue
 
     public int $uniqueFor = 600;
 
+    public MarketActionReport $report;
+
     /**
      * Create a new job instance.
      */
     public function __construct(public User $user, public $testWarehouses, public WbMarket $market)
     {
-        //
+        $this->report = $this->market->actionReports()->create([
+            'action' => 'Обнуление остатков',
+            'status' => 2,
+            'message' => 'В процессе'
+        ]);
     }
 
     /**
@@ -41,10 +48,23 @@ class NullStocks implements ShouldQueue
                 $service->unloadAllStocks();
             }
         });
+
+        $this->report->update([
+            'status' => 0,
+            'message' => 'Успех'
+        ]);
     }
 
     public function uniqueId(): string
     {
         return $this->market->id . 'null-stocks';
+    }
+
+    public function failed(\Throwable $th): void
+    {
+        $this->report->update([
+            'status' => 1,
+            'message' => 'Ошибка'
+        ]);
     }
 }

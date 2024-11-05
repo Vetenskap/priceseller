@@ -1,6 +1,6 @@
 <?php
 
-namespace App\HttpClient;
+namespace App\HttpClient\WbClient;
 
 use App\Models\Supplier;
 use App\Services\SupplierReportService;
@@ -17,6 +17,10 @@ class WbClient
 
     public PendingRequest $request;
 
+    CONST RATE_LIMITS = [
+        'wb_get_cards_list'
+    ];
+
     public function __construct(string $api_key)
     {
         $this->request = Http::retry(3, 2000, function (\Exception $exception, PendingRequest $request) {
@@ -27,6 +31,26 @@ class WbClient
             ->withToken($api_key, '')
             ->withHeader('Content-Type', 'application/json')
             ->baseUrl('https://suppliers-api.wildberries.ru');
+    }
+
+    public function get(string $endpoint, array $queryParameters = []): Collection
+    {
+        return $this->request->withQueryParameters($queryParameters)->get($endpoint)->throw()->collect();
+    }
+
+    public function delete(string $endpoint): bool
+    {
+        return $this->request->delete($endpoint)->throw()->successful();
+    }
+
+    public function post(string $endpoint, array $data)
+    {
+        return $this->request->post($endpoint, $data)->throw();
+    }
+
+    public function put(string $endpoint, array $data): bool
+    {
+        return $this->request->put($endpoint, $data)->throw()->successful();
     }
 
     public function getCardsList($updatedAt = '', $nmId = 0): Collection

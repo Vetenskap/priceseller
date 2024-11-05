@@ -25,8 +25,16 @@ class PostingUnfulfilledList
     protected string $filter_status = '';
     protected array $warehouse_id = [];
     protected int $count;
+    protected string $api_key;
+    protected int $client_id;
 
-    public function next(string $apiKey, int $clientId): Collection
+    public function __construct(string $apiKey, int $clientId)
+    {
+        $this->api_key = $apiKey;
+        $this->client_id = $clientId;
+    }
+
+    public function next(): Collection
     {
         $data = array(
             "dir" => $this->dir,
@@ -48,7 +56,7 @@ class PostingUnfulfilledList
             )
         );
 
-        $client = new OzonClient($apiKey, $clientId);
+        $client = new OzonClient($this->api_key, $this->client_id);
         $result = $client->post(static::ENDPOINT, $data)->collect()->toCollectionSpread();
         $this->count = $result->get('result')->get('count');
 

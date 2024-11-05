@@ -3,10 +3,9 @@
 namespace App\Services;
 
 use App\Helpers\Helpers;
-use App\HttpClient\WbClient;
+use App\HttpClient\WbClient\WbClient;
 use App\Jobs\Market\NullNotUpdatedStocksBatch;
 use App\Jobs\Market\UpdateStockBatch;
-use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\ItemWarehouseStock;
 use App\Models\Supplier;
@@ -22,7 +21,6 @@ use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Bus;
 use Modules\Moysklad\Services\MoyskladItemOrderService;
 
 class WbItemPriceService

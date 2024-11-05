@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Ozon;
 
+use App\Models\MarketActionReport;
 use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
@@ -19,12 +20,17 @@ class NullStocks implements ShouldQueue
 
     public int $uniqueFor = 600;
 
+    public MarketActionReport $report;
     /**
      * Create a new job instance.
      */
     public function __construct(public User $user, public array $testWarehouses, public OzonMarket $market)
     {
-        //
+        $this->report = $this->market->actionReports()->create([
+            'action' => 'Обнуление остатков',
+            'status' => 2,
+            'message' => 'В процессе'
+        ]);
     }
 
     /**
@@ -43,10 +49,23 @@ class NullStocks implements ShouldQueue
             }
 
         });
+
+        $this->report->update([
+            'status' => 0,
+            'message' => 'Успех'
+        ]);
     }
 
     public function uniqueId(): string
     {
         return $this->market->id . 'null-stocks';
+    }
+
+    public function failed(\Throwable $th): void
+    {
+        $this->report->update([
+            'status' => 1,
+            'message' => 'Ошибка'
+        ]);
     }
 }

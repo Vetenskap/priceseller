@@ -3,16 +3,16 @@
 namespace App\Services;
 
 use App\Exports\WbItemsExport;
-use App\HttpClient\WbClient;
+use App\HttpClient\WbClient\Resources\Card\Card;
+use App\HttpClient\WbClient\Resources\Card\CardList;
+use App\HttpClient\WbClient\WbClient;
 use App\HttpClient\WbExternalClient;
 use App\Imports\WbItemsImport;
-use App\Models\Item;
 use App\Models\User;
 use App\Models\WbItem;
 use App\Models\WbMarket;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
@@ -44,18 +44,32 @@ class WbMarketService
         return $uuid;
     }
 
-    public function updateApiCommissions(Collection $defaultFields): Collection
+    public function updateApiCommissions(array $defaultFields): Collection
     {
-        $defaultFields->filter()->each(fn($value, $key) => $this->market->items()->update([$key => $value]));;
-
         $updated = 0;
 
-        $this->market->items()->chunk(1000, function (Collection $items) use (&$updated) {
+        $list = new CardList($this->market->api_key);
 
+        do {
+
+            $cards = $list->next();
+
+            $cards->each(function (Card $card) use (&$updated, $defaultFields) {
+
+                $wbItem = $this->market->items()->where('nm_id', $card->getNmId())->first();
+
+                if ($wbItem) {
+                    $wbItem->update(array_merge([
+                        'volume' => round($card->getDimensionsLength() * $card->getDimensionsWidth() * $card->getDimensionsHeight() / 1000, 2)
+                    ], $defaultFields));
+                    $updated++;
+                }
+
+            });
 
             ItemsImportReportService::flush($this->market, 0, 0, $updated);
 
-        });
+        } while ($list->hasNext());
 
         return collect([
             'correct' => 0,
