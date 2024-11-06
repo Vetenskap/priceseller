@@ -6,23 +6,33 @@ use App\Livewire\Traits\WithJsNotifications;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Modules\Moysklad\Livewire\Forms\MoyskladSupplier\MoyskladSupplierPostForm;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Services\MoyskladService;
 
 class MoyskladSupplierIndex extends Component
 {
-    use WithJsNotifications;
+    use WithJsNotifications, WithPagination;
 
     public MoyskladSupplierPostForm $form;
     public Moysklad $moysklad;
 
-    #[On('delete-supplier')]
     public function mount(): void
     {
         $this->form->setMoysklad($this->moysklad);
+    }
+
+    #[Computed]
+    public function suppliers(): LengthAwarePaginator
+    {
+        return $this->moysklad
+            ->suppliers()
+            ->paginate();
     }
 
     public function store(): void
@@ -30,10 +40,10 @@ class MoyskladSupplierIndex extends Component
         $this->form->store();
     }
 
-    public function update(): void
+    public function destroy($id): void
     {
-        $this->dispatch('update-supplier')->component(MoyskladSupplierEdit::class);
-        $this->addSuccessSaveNotification();
+        $supplier = $this->moysklad->suppliers()->find($id);
+        $supplier->delete();
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application

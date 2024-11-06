@@ -1,57 +1,72 @@
 <div>
-    <x-layouts.main-container>
-        <x-blocks.main-block>
-            <x-layouts.title name="Добавление новой организации"/>
-            <x-information>
-                Вы можете привязать свои организации с Моего Склада к своим существующим.
-            </x-information>
-        </x-blocks.main-block>
-        <div x-data="{ open: false }">
-            <x-blocks.main-block>
-                <x-secondary-button @click="open = ! open">Добавить</x-secondary-button>
-            </x-blocks.main-block>
-            <div x-show="open">
-                <x-blocks.flex-block>
-                    <x-dropdowns.dropdown-select name="organization_id"
-                                                 :items="auth()->user()->organizations"
-                                                 field="form.organization_id"
-                                                 :current-id="$form->organization_id"
-                                                 :current-items="$moysklad->organizations"
-                                                 current-items-option-value="organization_id"
-                    >Ваша организация (priceseller)
-                    </x-dropdowns.dropdown-select>
-                    <x-dropdowns.dropdown-select name="moysklad_organization_uuid"
-                                                 :items="$moyskladOrganizations"
-                                                 field="form.moysklad_organization_uuid"
-                                                 :current-id="$form->moysklad_organization_uuid"
-                                                 :current-items="$moysklad->organizations"
-                                                 current-items-option-value="moysklad_organization_uuid"
-                    >Ваша организация (Мой склад)
-                    </x-dropdowns.dropdown-select>
-                </x-blocks.flex-block>
-                <x-blocks.main-block>
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </x-blocks.main-block>
-            </div>
+    <flux:modal name="create-moysklad-organization" class="md:w-96 space-y-6">
+        <div>
+            <flux:heading size="lg">Связать нового поставщика</flux:heading>
         </div>
-    </x-layouts.main-container>
-    <x-layouts.main-container>
-        <x-blocks.main-block>
-            <x-layouts.title name="Список"/>
-        </x-blocks.main-block>
-        @if($moysklad->organizations->isNotEmpty())
-            <x-blocks.main-block>
-                <x-success-button wire:click="update">Сохранить</x-success-button>
-            </x-blocks.main-block>
-            @foreach($moysklad->organizations as $organization)
-                <livewire:moysklad::moysklad-organization.moysklad-organization-edit
-                    :moysklad="$moysklad" wire:key="{{$organization->id}}" :organization="$organization"/>
+
+        <flux:select variant="combobox" placeholder="Выберите организацию..." label="Ваша организация (priceseller)"
+                     wire:model="form.organization_id">
+
+            @foreach(auth()->user()->organizations as $organization)
+                <flux:option :value="$organization->getKey()">{{$organization->name}}</flux:option>
             @endforeach
-        @else
-            <x-blocks.main-block>
-                <x-information>Вы пока ещё не добавляли организации</x-information>
-            </x-blocks.main-block>
-        @endif
-    </x-layouts.main-container>
+        </flux:select>
+
+        <flux:select variant="combobox" placeholder="Выберите организацию..." label="Ваша организация (Мой склад)"
+                     wire:model="form.moysklad_organization_uuid">
+
+            @foreach($moyskladOrganizations as $moyskladOrganization)
+                <flux:option :value="$moyskladOrganization['id']">{{$moyskladOrganization['name']}}</flux:option>
+            @endforeach
+        </flux:select>
+
+        <div class="flex">
+            <flux:spacer/>
+
+            <flux:button variant="primary" wire:click="store">Связать</flux:button>
+        </div>
+    </flux:modal>
+    <x-blocks.main-block>
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Связать новую организацию</flux:heading>
+            <flux:subheading>Вы можете привязать свои организации с Моего Склада к своим существующим.</flux:subheading>
+            <div>
+                <flux:modal.trigger name="create-moysklad-organization">
+                    <flux:button>Связать</flux:button>
+                </flux:modal.trigger>
+            </div>
+        </flux:card>
+    </x-blocks.main-block>
+    <x-blocks.main-block>
+
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Список</flux:heading>
+            @if($this->organizations->isNotEmpty())
+                <flux:table :paginate="$this->organizations">
+                    <flux:columns>
+                        <flux:column>Организация priceseller</flux:column>
+                        <flux:column>Организация мой склад</flux:column>
+                    </flux:columns>
+                    <flux:rows>
+                        @foreach($this->organizations as $organization)
+                            <flux:row :key="$organization->getKey()">
+                                <flux:cell>{{collect($moyskladOrganizations)->firstWhere('id', $organization->moysklad_organization_uuid)['name']}}</flux:cell>
+                                <flux:cell>{{$organization->organization->name}}</flux:cell>
+                                <flux:cell align="right">
+                                    <flux:button icon="trash"
+                                                 variant="danger"
+                                                 size="sm"
+                                                 wire:click="destroy({{ json_encode($organization->getKey()) }})"
+                                                 wire:target="destroy({{ json_encode($organization->getKey()) }})"
+                                                 wire:confirm="Вы действительно хотите удалить эту организацию?"
+                                    />
+                                </flux:cell>
+                            </flux:row>
+                        @endforeach
+                    </flux:rows>
+                </flux:table>
+            @endif
+        </flux:card>
+    </x-blocks.main-block>
 </div>
 

@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\Models;
 
 use App\Models\MainModel;
+use App\Models\Organization;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class MoyskladOrganizationOrganization extends MainModel
@@ -16,5 +17,10 @@ class MoyskladOrganizationOrganization extends MainModel
     public function moysklad(): BelongsTo
     {
         return $this->belongsTo(Moysklad::class);
+    }
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'organization_id', 'id');
     }
 }

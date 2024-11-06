@@ -1,5 +1,4 @@
 <x-layouts.module-index-layout :modules="$modules">
-
     <x-blocks.main-block>
         <flux:navbar>
             <flux:navbar.item :href="route('moysklad.index', ['page' => 'main'])" :current="$page === 'main'">
@@ -30,7 +29,7 @@
                               :current="$page === 'change_warehouse'">Задача изменения склада
             </flux:navbar.item>
             <flux:navbar.item :href="route('moysklad.index', ['page' => 'quarantine'])"
-                              :current="$page === 'quarantine'" :badge="$this->quarantine->count()" badge-color="red">Карантин
+                              :current="$page === 'quarantine'" :badge="$this->quarantine->total()" badge-color="red">Карантин
             </flux:navbar.item>
         </flux:navbar>
     </x-blocks.main-block>

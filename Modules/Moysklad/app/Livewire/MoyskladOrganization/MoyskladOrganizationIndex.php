@@ -3,35 +3,45 @@
 namespace Modules\Moysklad\Livewire\MoyskladOrganization;
 
 use App\Livewire\Traits\WithJsNotifications;
+use Illuminate\Pagination\LengthAwarePaginator;
+use Livewire\Attributes\Computed;
 use Livewire\Attributes\On;
 use Livewire\Component;
+use Livewire\WithPagination;
 use Modules\Moysklad\Livewire\Forms\MoyskladOrganization\MoyskladOrganizationPostForm;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Services\MoyskladService;
 
 class MoyskladOrganizationIndex extends Component
 {
-    use WithJsNotifications;
+    use WithJsNotifications, WithPagination;
 
     public MoyskladOrganizationPostForm $form;
 
     public Moysklad $moysklad;
+
+    #[Computed]
+    public function organizations(): LengthAwarePaginator
+    {
+        return $this->moysklad
+            ->organizations()
+            ->paginate();
+    }
 
     public function store(): void
     {
         $this->form->store();
     }
 
-    #[On('delete-organization')]
     public function mount(): void
     {
         $this->form->setMoysklad($this->moysklad);
     }
 
-    public function update(): void
+    public function destroy($id): void
     {
-        $this->dispatch('update-organization')->component(MoyskladOrganizationEdit::class);
-        $this->addSuccessSaveNotification();
+        $organization = $this->moysklad->organizations()->find($id);
+        $organization->delete();
     }
 
     public function render()
