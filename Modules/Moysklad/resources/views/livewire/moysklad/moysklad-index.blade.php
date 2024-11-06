@@ -30,7 +30,7 @@
                               :current="$page === 'change_warehouse'">Задача изменения склада
             </flux:navbar.item>
             <flux:navbar.item :href="route('moysklad.index', ['page' => 'quarantine'])"
-                              :current="$page === 'quarantine'">Карантин
+                              :current="$page === 'quarantine'" badge="$this->quarantine->count()" badge-color="red">Карантин
             </flux:navbar.item>
         </flux:navbar>
     </x-blocks.main-block>
