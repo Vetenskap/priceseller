@@ -545,7 +545,7 @@ class MoyskladService
         $productEntity = new Product();
         $productEntity->setId($quarantine->item->ms_uuid);
         $productEntity->getBuyPrice()->setValue($quarantine->supplier_buy_price);
-        $status = $productEntity->update($this->moysklad->api_key, ['buyPrice']);
+        $status = $productEntity->update($this->moysklad->api_key, ['buyPrice' => []]);
         if ($status) {
             $quarantine->item()->update([
                 'buy_price_reserve' => $quarantine->supplier_buy_price

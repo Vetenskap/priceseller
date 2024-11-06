@@ -22,12 +22,6 @@ class Moysklad extends MainModel
         'enabled_orders',
         'diff_price',
         'enabled_diff_price',
-        'enabled_recount_retail_markup',
-        'link_recount_retail_markup_percent',
-        'link_name_recount_retail_markup_percent',
-        'link_label_recount_retail_markup_percent',
-        'link_type_recount_retail_markup_percent',
-        'price_type_uuids'
     ];
 
     protected $casts = [
@@ -87,6 +81,11 @@ class Moysklad extends MainModel
     public function quarantine(): HasMany
     {
         return $this->hasMany(MoyskladQuarantine::class);
+    }
+
+    public function recountRetailMarkups(): HasMany
+    {
+        return $this->hasMany(MoyskladRecountRetailMarkup::class, 'moysklad_id', 'id');
     }
 
 }

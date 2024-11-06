@@ -16,6 +16,7 @@ use Modules\Moysklad\HttpClient\Resources\Webhooks\WebhookEvent;
 use Modules\Moysklad\HttpClient\Resources\Webhooks\WebhookPost;
 use Modules\Moysklad\HttpClient\Resources\Webhooks\WebhookStockPost;
 use Modules\Moysklad\Models\MoyskladOrderUuid;
+use Modules\Moysklad\Models\MoyskladRecountRetailMarkup;
 use Modules\Moysklad\Models\MoyskladWarehouseWarehouse;
 use Modules\Moysklad\Models\MoyskladWebhook;
 
@@ -228,38 +229,47 @@ class MoyskladWebhookProcessService
         });
     }
 
-    private function recountRetailMarkup()
+    private function recountRetailMarkup(): void
     {
         $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
 
-            $updatedFields = $event->getUpdatedFields()->get('buyPrice');
-            if (!$updatedFields) $event->getUpdatedFields()->get($this->webhook->moysklad->link_name_recount_retail_markup_percent);
+            $recountRetailMarkups = collect();
 
-            if ($updatedFields) {
+            $updatedFields = $event->getUpdatedFields()->get('buyPrice');
+            if (!$updatedFields) {
+                $this->webhook->moysklad->recountRetailMarkups->each(function (MoyskladRecountRetailMarkup $recountRetailMarkup) use ($event, &$recountRetailMarkups) {
+                    if ($event->getUpdatedFields()->get($recountRetailMarkup->link_name)) {
+                        $recountRetailMarkups->push($recountRetailMarkup);
+                    }
+                });
+            } else {
+                $recountRetailMarkups = $this->webhook->moysklad->recountRetailMarkups;
+            }
+
+            if ($recountRetailMarkups->isNotEmpty()) {
 
                 $product = $event->getMeta();
                 $product->fetch($this->webhook->moysklad->api_key);
 
-                $retail_markup_percent = MoyskladService::getValueFromAttributesAndProduct(
-                    $this->webhook->moysklad->link_type_recount_retail_markup_percent,
-                    $this->webhook->moysklad->link_recount_retail_markup_percent,
-                    $product,
-                );
+                $recountRetailMarkups->each(function (MoyskladRecountRetailMarkup $recountRetailMarkup) use ($product) {
 
-                if ($retail_markup_percent) {
+                    $retail_markup_percent = MoyskladService::getValueFromAttributesAndProduct(
+                        $recountRetailMarkup->link_type,
+                        $recountRetailMarkup->link,
+                        $product,
+                    );
 
-                    collect($this->webhook->moysklad->price_type_uuids)->filter(fn ($value, $key) => $value)->each(function ($price_type_uuid) use ($product, $retail_markup_percent) {
+                    if (is_int($retail_markup_percent)) {
 
-                        /** @var SalePrice $salePrice */
-                        $salePrice = $product->getSalePrices()->firstWhere(fn (SalePrice $salePrice) => $salePrice->getPriceType()->id === $price_type_uuid);
+                        $salePrice = $product->getSalePrices()->firstWhere(fn (SalePrice $salePrice) => $salePrice->getPriceType()->id === $recountRetailMarkup->price_type_uuid);
+
                         if ($salePrice) {
                             $salePrice->setValue($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100));
-                            $product->update($this->webhook->moysklad->api_key, ['salePrices']);
+                            $product->update($this->webhook->moysklad->api_key, ['salePrices' => [$salePrice]]);
                         }
 
-                    });
-
-                }
+                    }
+                });
 
             }
 

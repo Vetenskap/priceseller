@@ -43,32 +43,7 @@
                 <flux:input label="АПИ ключ" wire:model="form.api_key" required/>
             </flux:card>
         </x-blocks.main-block>
-        <x-blocks.main-block>
-            <flux:card class="space-y-6">
-                <flux:switch label="Пересчитывать розничную цену" wire:model="form.enabled_recount_retail_markup"/>
-                <flux:select variant="combobox" placeholder="Выберите атрибут..."
-                             label="Атрибут мой склад с процентом розничной наценки"
-                             wire:model="form.link_recount_retail_markup_percent">
-
-                    @foreach($assortmentAttributes as $assortmentAttribute)
-                        <flux:option
-                            :value="$assortmentAttribute['name']">{{$assortmentAttribute['label']}}</flux:option>
-                    @endforeach
-                </flux:select>
-                <div>
-                    <flux:dropdown>
-                        <flux:button icon-trailing="chevron-down">Типы цен для перерасчета</flux:button>
-
-                        <flux:menu>
-                            @foreach($priceTypes as $priceType)
-                                <flux:menu.checkbox
-                                    wire:model.live="form.price_type_uuids.{{$priceType['name']}}">{{$priceType['label']}}</flux:menu.checkbox>
-                            @endforeach
-                        </flux:menu>
-                    </flux:dropdown>
-                </div>
-            </flux:card>
-        </x-blocks.main-block>
+        <livewire:moysklad::moysklad-recount-retail-markup.moysklad-recount-retail-markup-index :moysklad="$form->moysklad"/>
     @endif
     @if($page === 'warehouses')
         <livewire:moysklad::moysklad-warehouse.moysklad-warehouse-index :moysklad="$form->moysklad"/>

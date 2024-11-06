@@ -264,16 +264,30 @@ class Product extends Entity
     {
         $data = [];
 
-        if (in_array('buyPrice', $fields)) {
+        if (isset($fields['buyPrice'])) {
             $data[] = $this->buyPrice->getFieldProduct();
         } else if (in_array('attributes', $fields)) {
-            $data['attributes'] = $this->attributes->map(function (Attribute $attribute) {
-                return $attribute->getFieldProduct();
-            });
-        } else if (in_array('salePrices', $fields)) {
-            $data['salePrices'] = $this->salePrices->map(function (SalePrice $salePrice) {
-                return $salePrice->getFieldProduct();
-            });
+            if (count($fields['attributes']) > 0) {
+                /** @var Attribute $attribute */
+                foreach ($fields['attributes'] as $attribute) {
+                    $data['attributes'] = $attribute->getFieldProduct();
+                }
+            } else {
+                $data['attributes'] = $this->attributes->map(function (Attribute $attribute) {
+                    return $attribute->getFieldProduct();
+                });
+            }
+        } else if (isset($fields['salePrices'])) {
+            if (count($fields['salePrices']) > 0) {
+                /** @var SalePrice $salePrice */
+                foreach ($fields['salePrices'] as $salePrice) {
+                    $data['salePrices'] = $salePrice->getFieldProduct();
+                }
+            } else {
+                $data['salePrices'] = $this->salePrices->map(function (SalePrice $salePrice) {
+                    return $salePrice->getFieldProduct();
+                });
+            }
         }
 
         logger('Тест мой склад (обновление товара)', ['data' => $data]);

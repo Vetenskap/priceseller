@@ -31,13 +31,8 @@ class Test extends Command
      */
     public function handle()
     {
-        $moysklad = Moysklad::where('user_id', 10)->first();
+        $array = ['buyPrice' => [100], 'salePrices' => [123]];
 
-        $product = new Product();
-        $product->setId('0bae6d5c-9047-11ef-0a80-112f0008ba74');
-        $product->fetch($moysklad->api_key);
-
-        /** @var SalePrice $salePrice */
-        $salePrice = $product->getSalePrices()->first();
+        dd(isset($array['salePrices']));
     }
 }
