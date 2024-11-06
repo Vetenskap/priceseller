@@ -32,6 +32,8 @@ class MoyskladPostForm extends Form
     public $link_label_recount_retail_markup_percent = null;
     #[Validate]
     public $link_type_recount_retail_markup_percent = null;
+    #[Validate]
+    public $price_type_uuids = [];
 
     public function setAssortmentAttributes(Collection $assortmentAttributes): void
     {
@@ -50,6 +52,7 @@ class MoyskladPostForm extends Form
             $this->link_name_recount_retail_markup_percent = $moysklad->link_name_recount_retail_markup_percent;
             $this->link_label_recount_retail_markup_percent = $moysklad->link_label_recount_retail_markup_percent;
             $this->link_type_recount_retail_markup_percent = $moysklad->link_type_recount_retail_markup_percent;
+            if (is_array($moysklad->price_type_uuids)) $this->price_type_uuids = $moysklad->price_type_uuids;
         }
     }
 
@@ -64,6 +67,7 @@ class MoyskladPostForm extends Form
             'link_name_recount_retail_markup_percent' => ['nullable', 'string'],
             'link_label_recount_retail_markup_percent' => ['nullable', 'string'],
             'link_type_recount_retail_markup_percent' => ['nullable', 'string'],
+            'price_type_uuids' => ['nullable', 'array'],
         ];
     }
 

@@ -27,6 +27,11 @@ class Moysklad extends MainModel
         'link_name_recount_retail_markup_percent',
         'link_label_recount_retail_markup_percent',
         'link_type_recount_retail_markup_percent',
+        'price_type_uuids'
+    ];
+
+    protected $casts = [
+        'price_type_uuids' => 'array'
     ];
 
     public function warehouses()

@@ -55,6 +55,18 @@
                             :value="$assortmentAttribute['name']">{{$assortmentAttribute['label']}}</flux:option>
                     @endforeach
                 </flux:select>
+                <div>
+                    <flux:dropdown>
+                        <flux:button icon-trailing="chevron-down">Типы цен для перерасчета</flux:button>
+
+                        <flux:menu>
+                            @foreach($priceTypes as $priceType)
+                                <flux:menu.checkbox
+                                    wire:model.live="form.price_type_uuids.{{$priceType['name']}}">{{$priceType['label']}}</flux:menu.checkbox>
+                            @endforeach
+                        </flux:menu>
+                    </flux:dropdown>
+                </div>
             </flux:card>
         </x-blocks.main-block>
     @endif

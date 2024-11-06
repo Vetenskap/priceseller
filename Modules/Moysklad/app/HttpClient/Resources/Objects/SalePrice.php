@@ -16,7 +16,7 @@ class SalePrice
     public function __construct(Collection $salePrice = null)
     {
         if ($salePrice) {
-            $this->value = $salePrice->get('value');
+            $this->value = $salePrice->get('value') / 100;
 
             if ($salePrice->has('currency')) {
                 $currency = new Currency();
@@ -35,7 +35,7 @@ class SalePrice
     public function getFieldProduct(): array
     {
         return [
-            "value" => $this->value,
+            "value" => $this->value * 100,
             "currency" => $this->currency->getMeta(),
             "priceType" => $this->priceType->getMeta(),
         ];
@@ -50,5 +50,17 @@ class SalePrice
     {
         $this->priceType = $priceType;
     }
+
+    public function getPriceType(): PriceType
+    {
+        return $this->priceType;
+    }
+
+    public function getValue(): float
+    {
+        return $this->value;
+    }
+
+
 
 }

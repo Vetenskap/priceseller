@@ -255,9 +255,9 @@ class Product extends Entity
         }
     }
 
-    public function update(Moysklad $moysklad, array $fields = []): bool
+    public function update(string $api_key, array $fields = []): bool
     {
-        return $this->put($moysklad->api_key, $this->getMetasToUpdate($fields));
+        return $this->put($api_key, $this->getMetasToUpdate($fields));
     }
 
     private function getMetasToUpdate(array $fields = []): array
@@ -275,6 +275,8 @@ class Product extends Entity
                 return $salePrice->getFieldProduct();
             });
         }
+
+        logger('Тест мой склад (обновление товара)', ['data' => $data]);
 
         return $data;
     }

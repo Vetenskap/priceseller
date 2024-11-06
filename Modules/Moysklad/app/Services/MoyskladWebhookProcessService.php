@@ -4,11 +4,13 @@ namespace Modules\Moysklad\Services;
 
 use App\Models\Item;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 use Modules\Moysklad\HttpClient\MoyskladClient;
 use Modules\Moysklad\HttpClient\Resources\Entities\CustomerOrder\MetaArrays\Position;
 use Modules\Moysklad\HttpClient\Resources\Entities\Demand;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 use Modules\Moysklad\HttpClient\Resources\Entities\Store;
+use Modules\Moysklad\HttpClient\Resources\Objects\SalePrice;
 use Modules\Moysklad\HttpClient\Resources\Reports\StocksAll;
 use Modules\Moysklad\HttpClient\Resources\Webhooks\WebhookEvent;
 use Modules\Moysklad\HttpClient\Resources\Webhooks\WebhookPost;
@@ -40,9 +42,9 @@ class MoyskladWebhookProcessService
                 switch ($this->webhook->action) {
                     case 'UPDATE':
                         $this->updateItem();
-//                        if ($this->webhook->moysklad->enabled_recount_retail_markup) {
-//                            $this->recountRetailMarkup();
-//                        }
+                        if ($this->webhook->moysklad->enabled_recount_retail_markup) {
+                            $this->recountRetailMarkup();
+                        }
                         break;
                     case 'CREATE':
                         $this->createItem();
@@ -236,7 +238,28 @@ class MoyskladWebhookProcessService
             if ($updatedFields) {
 
                 $product = $event->getMeta();
-                $product->getAttributes();
+                $product->fetch($this->webhook->moysklad->api_key);
+
+                $retail_markup_percent = MoyskladService::getValueFromAttributesAndProduct(
+                    $this->webhook->moysklad->link_type_recount_retail_markup_percent,
+                    $this->webhook->moysklad->link_recount_retail_markup_percent,
+                    $product,
+                );
+
+                if ($retail_markup_percent) {
+
+                    collect($this->webhook->moysklad->price_type_uuids)->filter(fn ($value, $key) => $value)->each(function ($price_type_uuid) use ($product, $retail_markup_percent) {
+
+                        /** @var SalePrice $salePrice */
+                        $salePrice = $product->getSalePrices()->firstWhere(fn (SalePrice $salePrice) => $salePrice->getPriceType()->id === $price_type_uuid);
+                        if ($salePrice) {
+                            $salePrice->setValue($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100));
+                            $product->update($this->webhook->moysklad->api_key, ['salePrices']);
+                        }
+
+                    });
+
+                }
 
             }
 

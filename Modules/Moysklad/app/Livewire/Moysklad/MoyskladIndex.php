@@ -32,6 +32,13 @@ class MoyskladIndex extends ModuleComponent
 
     public Collection $assortmentAttributes;
 
+    public $priceTypes;
+
+    public function updatedPriceType()
+    {
+        dd($this->price_type);
+    }
+
     #[Computed]
     public function quarantine(): LengthAwarePaginator|array|\Illuminate\Pagination\LengthAwarePaginator|_IH_MoyskladQuarantine_C
     {
@@ -87,8 +94,13 @@ class MoyskladIndex extends ModuleComponent
 
         $this->page = $page;
         $this->form->setMoysklad(auth()->user()->moysklad);
-        $this->assortmentAttributes = (new MoyskladService($this->form->moysklad))->getAllAssortmentAttributes();
-        $this->form->setAssortmentAttributes($this->assortmentAttributes);
+
+        if ($page === 'main') {
+            $this->assortmentAttributes = (new MoyskladService($this->form->moysklad))->getAllAssortmentAttributes();
+            $this->form->setAssortmentAttributes($this->assortmentAttributes);
+            $this->priceTypes = (new MoyskladService($this->form->moysklad))->getAllPriceTypes();
+        }
+
         if (!$this->form->moysklad) {
             $this->page = 'main';
         }

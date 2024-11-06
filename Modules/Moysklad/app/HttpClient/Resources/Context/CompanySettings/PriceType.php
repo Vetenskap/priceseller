@@ -20,7 +20,7 @@ class PriceType extends Entity
         }
     }
 
-    public static function fetchAll(string $api_key)
+    public static function fetchAll(string $api_key): Collection
     {
         $client = new MoyskladClient($api_key);
 
@@ -49,4 +49,15 @@ class PriceType extends Entity
             ]
         ];
     }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getExternalCode(): string
+    {
+        return $this->externalCode;
+    }
+
 }

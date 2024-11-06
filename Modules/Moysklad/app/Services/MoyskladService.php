@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
+use Modules\Moysklad\HttpClient\Resources\Context\CompanySettings\PriceType;
 use Modules\Moysklad\HttpClient\Resources\Entities\Bundle\Bundle;
 use Modules\Moysklad\HttpClient\Resources\Entities\Bundle\MetaArrays\Component;
 use Modules\Moysklad\HttpClient\Resources\Entities\Counterparty;
@@ -104,6 +105,13 @@ class MoyskladService
         return $assortmentAttributes->merge(Product::FIELDS);
     }
 
+    public function getAllPriceTypes(): Collection
+    {
+        return PriceType::fetchAll($this->moysklad->api_key)->map(function (PriceType $priceType) {
+            return ['name' => $priceType->id, 'label' => $priceType->getName()];
+        });
+    }
+
     public function getAllBundleAttributes(): Collection
     {
         $assortmentAttributes = Cache::tags(['moysklad', 'assortment', 'attributes'])->remember($this->moysklad->id, now()->addDay(), function () {
@@ -141,7 +149,10 @@ class MoyskladService
 
             $products->each(function (Product $product) use (&$dirtyItems) {
 
-                $code = $this->getValueFromAttributesAndProduct($this->moysklad->itemMainAttributeLinks->where('attribute_name', 'code')->first(), $product);
+                /** @var MoyskladItemMainAttributeLink $itemMainAttributeLink */
+                $itemMainAttributeLink = $this->moysklad->itemMainAttributeLinks->where('attribute_name', 'code')->first();
+
+                $code = static::getValueFromAttributesAndProduct($itemMainAttributeLink->type, $itemMainAttributeLink->link, $product, $itemMainAttributeLink->user_type, $itemMainAttributeLink->invert, $itemMainAttributeLink->attribute_name);
 
                 if ($item = $this->moysklad->user->items()->where('ms_uuid', $product->id)
                     ->orWhere('code', $code)
@@ -171,7 +182,10 @@ class MoyskladService
 
             $bundles->each(function (Bundle $bundle) use (&$dirtyItems) {
 
-                $code = $this->getValueFromAttributesAndProduct($this->moysklad->bundleMainAttributeLinks->where('attribute_name', 'code')->first(), $bundle);
+                /** @var MoyskladBundleMainAttributeLink $bundleMainAttributeLink */
+                $bundleMainAttributeLink = $this->moysklad->bundleMainAttributeLinks->where('attribute_name', 'code')->first();
+
+                $code = static::getValueFromAttributesAndProduct($bundleMainAttributeLink->type, $bundleMainAttributeLink->link, $bundle, $bundleMainAttributeLink->user_type, link_attribute_name: $bundleMainAttributeLink->attribute_name);
 
                 if ($userBundle = $this->moysklad->user->bundles()->where('ms_uuid', $bundle->id)
                     ->orWhere('code', $code)
@@ -203,14 +217,15 @@ class MoyskladService
             $data['unload_wb'] = true;
 
             foreach ($this->moysklad->itemMainAttributeLinks as $itemMainAttributeLink) {
-                $value = $this->getValueFromAttributesAndProduct($itemMainAttributeLink, $product);
+                $value = static::getValueFromAttributesAndProduct($itemMainAttributeLink->type, $itemMainAttributeLink->link, $product, $itemMainAttributeLink->user_type, $itemMainAttributeLink->invert, $itemMainAttributeLink->attribute_name);
 
                 $data[$itemMainAttributeLink->attribute_name] = $value;
             }
 
+            /** @var MoyskladItemAdditionalAttributeLink $itemAdditionalAttributeLink */
             foreach ($this->moysklad->itemAdditionalAttributeLinks as $itemAdditionalAttributeLink) {
 
-                $value = $this->getValueFromAttributesAndProduct($itemAdditionalAttributeLink, $product);
+                $value = static::getValueFromAttributesAndProduct($itemAdditionalAttributeLink->type, $itemAdditionalAttributeLink->link, $product, $itemAdditionalAttributeLink->user_type, $itemAdditionalAttributeLink->invert);
 
                 if ($value) {
 
@@ -235,8 +250,9 @@ class MoyskladService
     {
         $updatedFields->each(function (string $updatedField) use ($product, $item) {
 
+            /** @var MoyskladItemMainAttributeLink $itemMainAttributeLink */
             if ($itemMainAttributeLink = $this->moysklad->itemMainAttributeLinks->where('link_name', $updatedField)->first()) {
-                $value = $this->getValueFromAttributesAndProduct($itemMainAttributeLink, $product);
+                $value = static::getValueFromAttributesAndProduct($itemMainAttributeLink->type, $itemMainAttributeLink->link, $product, $itemMainAttributeLink->user_type, $itemMainAttributeLink->invert, $itemMainAttributeLink->attribute_name);
 
                 $item->{$itemMainAttributeLink->attribute_name} = $value;
 
@@ -248,9 +264,10 @@ class MoyskladService
                 }
             }
 
+            /** @var MoyskladItemAdditionalAttributeLink $itemAdditionalAttributeLink */
             if ($itemAdditionalAttributeLink = $this->moysklad->itemAdditionalAttributeLinks->where('link_name', $updatedField)->first()) {
 
-                $value = $this->getValueFromAttributesAndProduct($itemAdditionalAttributeLink, $product);
+                $value = static::getValueFromAttributesAndProduct($itemAdditionalAttributeLink->type, $itemAdditionalAttributeLink->link, $product, $itemAdditionalAttributeLink->user_type, $itemAdditionalAttributeLink->invert);
 
                 $item->attributesValues()->updateOrCreate([
                     'item_attribute_id' => $itemAdditionalAttributeLink->item_attribute_id,
@@ -269,7 +286,7 @@ class MoyskladService
 
         foreach ($this->moysklad->bundleMainAttributeLinks as $bundleMainAttributeLink) {
 
-            $value = $this->getValueFromAttributesAndProduct($bundleMainAttributeLink, $bundle);
+            $value = static::getValueFromAttributesAndProduct($bundleMainAttributeLink->type, $bundleMainAttributeLink->link, $bundle, $bundleMainAttributeLink->user_type, link_attribute_name: $bundleMainAttributeLink->attribute_name);
 
             $data[$bundleMainAttributeLink->attribute_name] = $value;
 
@@ -323,7 +340,7 @@ class MoyskladService
 
         foreach ($this->moysklad->bundleMainAttributeLinks as $bundleMainAttributeLink) {
 
-            $value = $this->getValueFromAttributesAndProduct($bundleMainAttributeLink, $bundle);
+            $value = static::getValueFromAttributesAndProduct($bundleMainAttributeLink->type, $bundleMainAttributeLink->link, $bundle, $bundleMainAttributeLink->user_type, link_attribute_name: $bundleMainAttributeLink->attribute_name);
 
             $userBundle->{$bundleMainAttributeLink->attribute_name} = $value;
 
@@ -399,7 +416,7 @@ class MoyskladService
 
         foreach ($this->moysklad->itemMainAttributeLinks as $itemMainAttributeLink) {
 
-            $value = $this->getValueFromAttributesAndProduct($itemMainAttributeLink, $product);
+            $value = static::getValueFromAttributesAndProduct($itemMainAttributeLink->type, $itemMainAttributeLink->link, $product, $itemMainAttributeLink->user_type, $itemMainAttributeLink->invert, $itemMainAttributeLink->attribute_name);
 
             $item->{$itemMainAttributeLink->attribute_name} = $value;
 
@@ -413,7 +430,7 @@ class MoyskladService
         }
 
         foreach ($this->moysklad->itemAdditionalAttributeLinks as $itemAdditionalAttributeLink) {
-            $value = $this->getValueFromAttributesAndProduct($itemAdditionalAttributeLink, $product);
+            $value = static::getValueFromAttributesAndProduct($itemAdditionalAttributeLink->type, $itemAdditionalAttributeLink->link, $product, $itemAdditionalAttributeLink->user_type, $itemAdditionalAttributeLink->invert);
 
             if ($value) {
                 $item->attributesValues()->updateOrCreate([
@@ -427,42 +444,42 @@ class MoyskladService
 
     }
 
-    public function prepareAttributes(MoyskladItemMainAttributeLink|MoyskladItemAdditionalAttributeLink $link, Product $product): int|bool|float|string|null
+    public static function prepareAttributes($link, Product|Bundle $product, $link_user_type = null, $link_invert = null, $link_attribute_name = null): int|bool|float|string|null
     {
         /** @var Attribute $attribute */
-        if ($attribute = $product->getAttributes()->firstWhere(fn(Attribute $attribute) => $attribute->getId() === $link->link)) {
-            if ($link->user_type === 'boolean') {
+        if ($attribute = $product->getAttributes()->firstWhere(fn(Attribute $attribute) => $attribute->getId() === $link)) {
+            if ($link_user_type === 'boolean') {
                 $value = boolval($attribute->getValue());
-                return $link->invert ? !$value : $value;
-            } elseif ($link->user_type === 'double') {
+                return $link_invert ? !$value : $value;
+            } elseif ($link_user_type === 'double') {
                 return floatval($attribute->getValue());
-            } elseif ($link->user_type === 'integer') {
+            } elseif ($link_user_type === 'integer') {
                 return intval(preg_replace("/[^0-9]/", "", $attribute->getValue()));
-            } else if ($link->user_type === 'string') {
+            } else if ($link_user_type === 'string') {
                 return $attribute->getValue();
             }
         }
 
-        if ($link->attribute_name === 'unload_ozon' || $link->attribute_name === 'unload_wb') {
+        if ($link_attribute_name === 'unload_ozon' || $link_attribute_name === 'unload_wb') {
             return true;
         }
 
         return null;
     }
 
-    public function getValueFromAttributesAndProduct(MoyskladItemMainAttributeLink|MoyskladItemAdditionalAttributeLink|MoyskladBundleMainAttributeLink $link, Product|Bundle $product): int|bool|float|string|null
+    public static function getValueFromAttributesAndProduct($link_type, $link, Product|Bundle $product, $link_user_type = null, $link_invert = null, $link_attribute_name = null): int|bool|float|string|null
     {
-        if ($link->type === 'metadata') {
-            return $this->prepareAttributes($link, $product);
-        } else if ($link->type === 'object.value') {
-            return $product->{'get' . Str::apa($link->link)}()->getValue();
-        } else if ($link->type === 'main') {
-            if ($link->user_type === 'boolean') {
-               $value = boolval($product->{'is' . Str::apa($link->link)}());
+        if ($link_type === 'metadata') {
+            return self::prepareAttributes($link, $product, $link_user_type, $link_invert, $link_attribute_name);
+        } else if ($link_type === 'object.value') {
+            return $product->{'get' . Str::apa($link)}()->getValue();
+        } else if ($link_type === 'main') {
+            if ($link_user_type === 'boolean') {
+               $value = boolval($product->{'is' . Str::apa($link)}());
 
-               return $link->invert ? !$value : $value;
+               return $link_invert ? !$value : $value;
             }
-            return $product->{'get' . Str::apa($link->link)}();
+            return $product->{'get' . Str::apa($link)}();
         }
 
         return null;
@@ -528,7 +545,7 @@ class MoyskladService
         $productEntity = new Product();
         $productEntity->setId($quarantine->item->ms_uuid);
         $productEntity->getBuyPrice()->setValue($quarantine->supplier_buy_price);
-        $status = $productEntity->update($this->moysklad, ['buyPrice']);
+        $status = $productEntity->update($this->moysklad->api_key, ['buyPrice']);
         if ($status) {
             $quarantine->item()->update([
                 'buy_price_reserve' => $quarantine->supplier_buy_price

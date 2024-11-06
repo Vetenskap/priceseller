@@ -11,8 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('wb_markets', function (Blueprint $table) {
-            $table->string('tariff')->default('paidStorageKgvp')->after('api_key');
+        Schema::table('moysklads', function (Blueprint $table) {
+            $table->json('price_type_uuids')->nullable()->after('link_type_recount_retail_markup_percent');
         });
     }
 
@@ -21,8 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('wb_markets', function (Blueprint $table) {
-            $table->dropColumn('tariff');
+        Schema::table('moysklads', function (Blueprint $table) {
+            $table->dropColumn('price_type_uuids');
         });
     }
 };

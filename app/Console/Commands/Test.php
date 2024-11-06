@@ -7,6 +7,7 @@ use Illuminate\Console\Command;
 use Modules\Moysklad\HttpClient\Resources\Context\CompanySettings\PriceType;
 use Modules\Moysklad\HttpClient\Resources\Entities\EntityList;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
+use Modules\Moysklad\HttpClient\Resources\Objects\SalePrice;
 use Modules\Moysklad\Models\Moysklad;
 
 class Test extends Command
@@ -32,6 +33,11 @@ class Test extends Command
     {
         $moysklad = Moysklad::where('user_id', 10)->first();
 
-        dd(PriceType::fetchAll($moysklad->api_key));
+        $product = new Product();
+        $product->setId('0bae6d5c-9047-11ef-0a80-112f0008ba74');
+        $product->fetch($moysklad->api_key);
+
+        /** @var SalePrice $salePrice */
+        $salePrice = $product->getSalePrices()->first();
     }
 }
