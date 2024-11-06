@@ -2,17 +2,12 @@
 
 namespace App\Console\Commands;
 
-use App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled\PostingUnfulfilledList;
-use App\HttpClient\WbClient\Resources\Card\Card;
-use App\HttpClient\WbClient\Resources\Card\CardList;
-use App\Models\OzonMarket;
-use App\Models\Supplier;
-use App\Models\WbItem;
-use App\Models\WbMarket;
-use App\Services\ItemsImportReportService;
-use App\Services\WbItemPriceService;
+use App\Models\Item;
 use Illuminate\Console\Command;
-use Illuminate\Support\Collection;
+use Modules\Moysklad\HttpClient\Resources\Context\CompanySettings\PriceType;
+use Modules\Moysklad\HttpClient\Resources\Entities\EntityList;
+use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
+use Modules\Moysklad\Models\Moysklad;
 
 class Test extends Command
 {
@@ -35,17 +30,8 @@ class Test extends Command
      */
     public function handle()
     {
-        $market = WbMarket::find('9d095e54-1835-4275-b61b-7da0a4b2b82d');
-        $list = new CardList($market->api_key);
+        $moysklad = Moysklad::where('user_id', 10)->first();
 
-        do {
-
-            $cards = $list->next();
-
-            $cards->each(function (Card $card) {
-                dd($card);
-            });
-
-        } while ($list->hasNext());
+        dd(PriceType::fetchAll($moysklad->api_key));
     }
 }

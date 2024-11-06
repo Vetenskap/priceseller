@@ -4,6 +4,7 @@ namespace App\Livewire\WbItem;
 
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\WbItem\WbItemForm;
+use App\Livewire\Traits\WithItemsFind;
 use App\Models\Bundle;
 use App\Models\WbItem;
 use Illuminate\Contracts\View\Factory;
@@ -26,7 +27,10 @@ class WbItemEdit extends BaseComponent
 
         $this->items = $query
             ->when($this->searchItems, function ($query) {
-                $query->where('code', 'like', '%' . $this->searchItems . '%')->orWhere('name', 'like', '%' . $this->searchItems . '%');
+                $query->where(function ($q) {
+                    $q->where('code', 'like', '%' . $this->searchItems . '%')
+                        ->orWhere('name', 'like', '%' . $this->searchItems . '%');
+                });
             })
             ->limit(15)
             ->get();

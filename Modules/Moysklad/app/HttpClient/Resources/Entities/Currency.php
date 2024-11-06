@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\HttpClient\Resources\Entities;
 
 use Illuminate\Support\Collection;
+use Modules\Moysklad\HttpClient\MoyskladClient;
 
 class Currency extends Entity
 {
@@ -11,11 +12,11 @@ class Currency extends Entity
     protected bool $archived;
     protected string $code;
     protected bool $default;
-    protected ?string $fullName;
+    protected ?string $fullName = null;
     protected bool $indirect;
     protected string $isoCode;
 
-    protected ?float $margin;
+    protected ?float $margin = null;
 
     protected int $multiplicity;
     protected string $name;
@@ -47,6 +48,18 @@ class Currency extends Entity
         $this->rate = $currency->get('rate');
         $this->rateUpdateType = $currency->get('rateUpdateType');
         $this->system = $currency->get('system');
+    }
+
+    public function getMeta(): array
+    {
+        return [
+            "meta" => [
+                "href" => MoyskladClient::BASEURL . self::ENDPOINT . $this->id,
+                "metadataHref" => MoyskladClient::BASEURL . self::ENDPOINT . 'metadata',
+                "type" => "currency",
+                "mediaType" => "application/json"
+            ]
+        ];
     }
 
 

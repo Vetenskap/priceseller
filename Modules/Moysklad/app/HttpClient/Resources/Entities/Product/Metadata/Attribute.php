@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\HttpClient\Resources\Entities\Product\Metadata;
 
 use Illuminate\Support\Collection;
+use Modules\Moysklad\HttpClient\MoyskladClient;
 
 class Attribute
 {
@@ -44,7 +45,13 @@ class Attribute
     public function getFieldProduct(): array
     {
         return [
-
+            "meta" => [
+                "href" => MoyskladClient::BASEURL . self::ENDPOINT . $this->id,
+                "type" => "attributemetadata",
+                "mediaType" => "application/json"
+            ],
+            "name" => $this->name,
+            "value" => $this->value
         ];
     }
 

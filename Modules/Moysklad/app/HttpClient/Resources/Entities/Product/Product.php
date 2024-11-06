@@ -15,6 +15,7 @@ use Modules\Moysklad\HttpClient\Resources\Entities\Uom;
 use Modules\Moysklad\HttpClient\Resources\Objects\Alcoholic;
 use Modules\Moysklad\HttpClient\Resources\Objects\BuyPrice;
 use Modules\Moysklad\HttpClient\Resources\Objects\MinPrice;
+use Modules\Moysklad\HttpClient\Resources\Objects\SalePrice;
 use Modules\Moysklad\Models\Moysklad;
 
 class Product extends Entity
@@ -109,6 +110,7 @@ class Product extends Entity
     protected ?Collection $attributes = null;
     protected ?Collection $barcodes = null;
     protected ?Collection $packs = null;
+    protected ?Collection $salePrices = null;
 
     public function __construct(?Collection $product = null)
     {
@@ -195,6 +197,16 @@ class Product extends Entity
             }
         }
 
+        if ($product->has('salePrices')) {
+
+            $this->salePrices = new Collection();
+
+            foreach ($product->get('salePrices') as $salePrice) {
+                $this->salePrices->push(new SalePrice(collect($salePrice)));
+            }
+
+        }
+
         if ($product->has('barcodes')) {
             $this->barcodes = collect($product->get('barcodes'));
         }
@@ -245,6 +257,11 @@ class Product extends Entity
 
     public function update(Moysklad $moysklad, array $fields = []): bool
     {
+        return $this->put($moysklad->api_key, $this->getMetasToUpdate($fields));
+    }
+
+    private function getMetasToUpdate(array $fields = []): array
+    {
         $data = [];
 
         if (in_array('buyPrice', $fields)) {
@@ -253,12 +270,16 @@ class Product extends Entity
             $data['attributes'] = $this->attributes->map(function (Attribute $attribute) {
                 return $attribute->getFieldProduct();
             });
+        } else if (in_array('salePrices', $fields)) {
+            $data['salePrices'] = $this->salePrices->map(function (SalePrice $salePrice) {
+                return $salePrice->getFieldProduct();
+            });
         }
 
-        return $this->put($moysklad->api_key, $data);
+        return $data;
     }
 
-    public function getField(): array
+    public function getMeta(): array
     {
         return [
             "meta" => [
@@ -276,13 +297,9 @@ class Product extends Entity
 
     }
 
-    public function arrayToMassive(array $fields = []): array
+    public function arrayToMassiveUpdate(array $fields = []): array
     {
-        if (in_array('buyPrice', $fields)) {
-            return array_merge($this->getField(), $this->buyPrice->getFieldProduct());
-        }
-
-        return [];
+        return array_merge($this->getMeta(), $this->getMetasToUpdate($fields));
     }
 
     public function getAccountId(): string
@@ -480,5 +497,9 @@ class Product extends Entity
         return $this->packs;
     }
 
+    public function getSalePrices(): ?Collection
+    {
+        return $this->salePrices;
+    }
 
 }

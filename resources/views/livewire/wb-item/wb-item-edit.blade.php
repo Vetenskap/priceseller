@@ -30,12 +30,12 @@
                                 <flux:option value="App\Models\Bundle">Комплект</flux:option>
                             </flux:select>
                         </div>
-                        <flux:input wire:model.live="searchItems" label="Товар/Комплект" placeholder="Поиск..."/>
                         <div>
-                            <flux:select variant="listbox" searchable placeholder="Выберите товар..." :filter="false"
-                                         wire:model="form.wbitemable_id">
+                            <flux:select variant="listbox" searchable placeholder="Выберите товар или комплект..." :filter="false"
+                                         wire:model.live="form.wbitemable_id" label="Товар/Комплект">
                                 <x-slot name="search">
-                                    <flux:select.search placeholder="Введите код или наименование товара..."/>
+                                    <flux:select.search placeholder="Введите код или наименование товара/комплекта..."
+                                                        wire:model.live="searchItems"/>
                                 </x-slot>
 
                                 <flux:icon.loading wire:loading wire:target="searchItems"/>

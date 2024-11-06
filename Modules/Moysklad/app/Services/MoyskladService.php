@@ -501,7 +501,7 @@ class MoyskladService
                 $productEntity = new Product();
                 $productEntity->setId($item->item->ms_uuid);
                 $productEntity->getBuyPrice()->setValue($item->supplier_buy_price);
-                $updateMassive[] = $productEntity->arrayToMassive(['buyPrice']);
+                $updateMassive[] = $productEntity->arrayToMassiveUpdate(['buyPrice']);
             });
 
             $result = Product::updateMassive($this->moysklad, $updateMassive)->toCollectionSpread();
