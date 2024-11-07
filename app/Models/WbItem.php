@@ -99,8 +99,8 @@ class WbItem extends MainModel
         return $this->hasMany(WbWarehouseStock::class);
     }
 
-    public function wbitemable()
+    public function itemable()
     {
-        return $this->morphTo('wbitemable', 'wbitemable_type', 'wbitemable_id');
+        return $this->morphTo('itemable', 'wbitemable_type', 'wbitemable_id');
     }
 }

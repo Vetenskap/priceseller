@@ -6,19 +6,18 @@ use App\Livewire\Components\Toast;
 use App\Livewire\ModuleComponent;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Organization;
+use App\Models\OzonItem;
+use App\Models\Warehouse;
+use App\Models\WbItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Str;
-use Livewire\Attributes\On;
 use Livewire\Attributes\Session;
 use Livewire\Attributes\Url;
-use Livewire\Component;
 use Livewire\WithFileUploads;
 use Modules\Order\Exports\NotChangeOzonStatesExport;
-use Modules\Order\Exports\SupplierOrderExport;
 use Modules\Order\Exports\WriteOffItemWarehouseStockExport;
 use Modules\Order\Imports\NotChangeOzonStatesImport;
 use Modules\Order\Models\SupplierOrderReport;
@@ -47,7 +46,7 @@ class OrderIndex extends ModuleComponent
 
     public $automatic;
 
-    public function store(): void
+    public function updatedAutomatic(): void
     {
         $this->organization->automaticUnloadOrder()->updateOrCreate([
             'organization_id' => $this->organizationId
@@ -55,10 +54,18 @@ class OrderIndex extends ModuleComponent
             'automatic' => $this->automatic
         ]);
 
+        $this->addSuccessSaveNotification();
+    }
+
+    public function updatedSelectedWarehouses(): void
+    {
         $oldSelected = $this->organization->selectedOrdersWarehouses->pluck('id')->toArray();
 
         $this->organization->selectedOrdersWarehouses()->detach($oldSelected);
-        $this->organization->selectedOrdersWarehouses()->attach($this->selectedWarehouses);
+
+        $selectedWarehouses = collect($this->selectedWarehouses)->filter(fn ($value, $key) => $value)->keys()->toArray();
+
+        $this->organization->selectedOrdersWarehouses()->attach($selectedWarehouses);
 
         $this->addSuccessSaveNotification();
     }
@@ -81,9 +88,14 @@ class OrderIndex extends ModuleComponent
 
         if ($this->organizationId) {
             $this->organization = $this->currentUser()->organizations()->findOrFail($this->organizationId);
-            $this->orders = $this->organization->orders()->whereHas('orderable')->with('orderable.item')->where('state', 'new')->get();
-            $this->selectedWarehouses = $this->organization->selectedOrdersWarehouses->pluck('id')->toArray();
-            $this->automatic = $this->organization->automaticUnloadOrder ? $this->organization->automaticUnloadOrder->automatic : false;
+            $this->orders = $this->organization
+                ->orders()
+                ->whereHas('orderable')
+                ->with('orderable.itemable')
+                ->where('state', 'new')
+                ->get();
+            $this->selectedWarehouses = $this->organization->selectedOrdersWarehouses->mapWithKeys(fn (Warehouse $selectedWarehouses) => [$selectedWarehouses->id => true])->toArray();
+            $this->automatic = $this->organization->automaticUnloadOrder ? boolval($this->organization->automaticUnloadOrder->automatic) : false;
         }
     }
 
@@ -176,22 +188,13 @@ class OrderIndex extends ModuleComponent
             $this->authorize('view', $this->organization);
         }
 
-        if ($this->page === 'main') {
-            return view('order::livewire.order.pages.order-index-main-page', [
-                'organizations' => auth()->user()->organizations,
-                'warehouses' => auth()->user()->warehouses,
-                'writeOff' => WriteOffItemWarehouseStock::whereHas('order', function (Builder $query) {
-                    $query->where('organization_id', $this->organizationId);
-                })->count(),
-                'modules' => $this->getEnabledModules()
-            ]);
-        } else if ($this->page === 'states') {
-            return view('order::livewire.order.pages.order-index-states-page', [
-                'modules' => $this->getEnabledModules()
-            ]);
-        }
-
-        abort(404);
-
+        return view('order::livewire.order.order-index', [
+            'organizations' => auth()->user()->organizations,
+            'warehouses' => auth()->user()->warehouses,
+            'writeOff' => WriteOffItemWarehouseStock::whereHas('order', function (Builder $query) {
+                $query->where('organization_id', $this->organizationId);
+            })->count(),
+            'modules' => $this->getEnabledModules()
+        ]);
     }
 }

@@ -4,8 +4,10 @@ namespace Modules\Order\Services;
 
 use Alcohol\ISO4217;
 use App\Models\Organization;
+use App\Models\OzonItem;
 use App\Models\User;
 use App\Models\Warehouse;
+use App\Models\WbItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -230,10 +232,27 @@ class OrderService
 
         $organization
             ->orders()
-            ->with('orderable.item')
+            ->with(['orderable' => function ($query) {
+                $query->when(
+                    $query->getModel() instanceof WbItem, // Проверяем, является ли моделью Wb
+                    fn($q) => $q->with('wbitemable') // Загружаем связь 'wbitemable'
+                )->when(
+                    $query->getModel() instanceof OzonItem, // Проверяем, является ли моделью Ozon
+                    fn($q) => $q->with('ozonitemable') // Загружаем связь 'ozonitemable'
+                );
+            }])
             ->where('state', 'new')
             ->get()
-            ->groupBy('orderable.item.supplier_id')->each(function (Collection $hh, string $supplierId) {
+            ->groupBy(['orderable' => function ($query) {
+                $query->when(
+                    $query->getModel() instanceof WbItem, // Проверяем, является ли моделью Wb
+                    fn($q) => $q->groupBy('wbitemable.supplier_id') // Загружаем связь 'wbitemable'
+                )->when(
+                    $query->getModel() instanceof OzonItem, // Проверяем, является ли моделью Ozon
+                    fn($q) => $q->groupBy('ozonitemable.supplier_id') // Загружаем связь 'ozonitemable'
+                );
+            }])
+            ->each(function (Collection $hh, string $supplierId) {
 
                 $uuid = Str::uuid();
 

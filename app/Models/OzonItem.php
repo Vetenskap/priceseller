@@ -80,8 +80,8 @@ class OzonItem extends MainModel
         return $warehouse->stocks()->where('ozon_item_id', $this->id)->first();
     }
 
-    public function ozonitemable()
+    public function itemable()
     {
-        return $this->morphTo('ozonitemable', 'ozonitemable_type', 'ozonitemable_id');
+        return $this->morphTo('itemable', 'ozonitemable_type', 'ozonitemable_id');
     }
 }

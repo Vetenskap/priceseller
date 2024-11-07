@@ -2,6 +2,8 @@
 
 namespace Modules\Order\Exports;
 
+use App\Models\OzonItem;
+use App\Models\WbItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
@@ -24,14 +26,28 @@ class SupplierOrderExport implements FromCollection, WithHeadings
      */
     public function collection()
     {
-        $orders = Order::with('orderable.item')
-            ->whereHas('orderable')
+        $orders = Order::whereHas('orderable')
+            ->with(['orderable' => function ($query) {
+                $query->when(
+                    $query->getModel() instanceof WbItem, // Проверяем, является ли моделью Wb
+                    fn($q) => $q->with('wbitemable') // Загружаем связь 'wbitemable'
+                )->when(
+                    $query->getModel() instanceof OzonItem, // Проверяем, является ли моделью Ozon
+                    fn($q) => $q->with('ozonitemable') // Загружаем связь 'ozonitemable'
+                );
+            }])
             ->where('count', '>', 0)
             ->where('state', 'new')
             ->where('organization_id', $this->organizationId)->whereHas('orderable', function (Builder $builder) {
-                $builder->whereHas('item', function (Builder $builder) {
-                    $builder->where('supplier_id', $this->supplierId);
-                });
+                $builder->where(['orderable' => function ($query) {
+                    $query->when(
+                        $query->getModel() instanceof WbItem, // Проверяем, является ли моделью Wb
+                        fn($q) => $q->where('wbitemable.supplier_id') // Загружаем связь 'wbitemable'
+                    )->when(
+                        $query->getModel() instanceof OzonItem, // Проверяем, является ли моделью Ozon
+                        fn($q) => $q->where('ozonitemable.supplier_id') // Загружаем связь 'ozonitemable'
+                    );
+                }]);
             })
             ->get();
 

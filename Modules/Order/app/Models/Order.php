@@ -22,6 +22,11 @@ class Order extends MainModel
         'write_off'
     ];
 
+    public function getItemableAttribute()
+    {
+        return $this->relationLoaded('ozonitemable') ? $this->ozonitemable : $this->wbitemable;
+    }
+
     public function orderable()
     {
         return $this->morphTo();

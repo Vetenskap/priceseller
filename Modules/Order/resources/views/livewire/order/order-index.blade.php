@@ -1,169 +1,112 @@
 <x-layouts.module-index-layout :modules="$modules">
+    <x-blocks.main-block>
+        <flux:navbar>
+            <flux:navbar.item :href="route('orders.index', ['page' => 'main'])" :current="$page === 'main'">
+                Основное
+            </flux:navbar.item>
+            <flux:navbar.item :href="route('orders.index', ['page' => 'states'])"
+                              :current="$page === 'states'">Не менять статус
+            </flux:navbar.item>
+        </flux:navbar>
+    </x-blocks.main-block>
     @if($page === 'main')
-        <x-layouts.main-container>
-            <x-navigate-pages>
-                <x-links.tab-link href="{{route('orders.index', ['page' => 'main'])}}" :active="$page === 'main'">Основное
-                </x-links.tab-link>
-                <x-links.tab-link href="{{route('orders.index', ['page' => 'states'])}}" :active="$page === 'states'">Не менять
-                    статус
-                </x-links.tab-link>
-            </x-navigate-pages>
-            <x-blocks.center-block>
-                <x-layouts.title name="Организации"/>
-            </x-blocks.center-block>
-            <x-blocks.flex-block>
+        <x-blocks.main-block>
+            <flux:navbar>
                 @foreach($organizations as $org)
-                    <a href="{{route('orders.index', ['page' => 'main', 'organizationId' => $org->id])}}">
-                        <div
-                            class="w-[250px] mb-6 text-center shadow-sm sm:rounded-lg p-4 dark:text-white {{$organizationId === $org->id ? 'dark:bg-gray-600 bg-gray-300' : 'dark:bg-gray-500 bg-gray-200'}}">
-                            {{$org->name}}
-                        </div>
-                    </a>
+                    <flux:navbar.item :href="route('orders.index', ['page' => 'main', 'organizationId' => $org->id])"
+                                      :current="$organizationId === $org->id">
+                        {{$org->name}}
+                    </flux:navbar.item>
                 @endforeach
-            </x-blocks.flex-block>
-        </x-layouts.main-container>
-        <x-layouts.main-container>
-            @if($organization)
-                <div class="w-3/4">
-                    <div class="dark:bg-gray-700 bg-gray-100 overflow-hidden shadow-sm sm:rounded-lg mb-6">
-                        <x-blocks.main-block>
-                            <x-layouts.title :name="$organization->name"/>
-                        </x-blocks.main-block>
-                        @if($orders->count())
-                            <x-blocks.main-block>
-                                <x-danger-button wire:click="clear">Очистить</x-danger-button>
-                                <x-information>При очистке текущие заказы больше не будут учитываться при выгрузке
-                                    прайса
-                                </x-information>
-                            </x-blocks.main-block>
-                        @endif
-                        <x-blocks.flex-block-end>
-                            <x-inputs.switcher :checked="$automatic" wire:model="automatic"/>
-                            <x-layouts.simple-text name="Автоматическая выгрузка"/>
-                        </x-blocks.flex-block-end>
-                        <x-blocks.main-block>
-                            <x-dropdowns.dropdown-checkboxes :options="$warehouses"
-                                                             :selected-options="$selectedWarehouses"
-                                                             wire-func="selectWarehouse"
-                                                             :active="$openSelectedWarehouses"
-                            >
-                                Склады
-                            </x-dropdowns.dropdown-checkboxes>
-                            <x-information>С указанных складов будут списаны остатки при автоматической выгрузке и
-                                ручной
-                            </x-information>
-                        </x-blocks.main-block>
-                        <x-blocks.flex-block-end>
-                            <x-primary-button wire:click="startAllActions">Выполнить все действия</x-primary-button>
-                        </x-blocks.flex-block-end>
-                        <x-blocks.main-block>
-                            <x-layouts.title name="Ручная выгрузка"/>
-                        </x-blocks.main-block>
-                        <x-blocks.main-block>
-                            <x-primary-button wire:click="getOrders">Получить заказы</x-primary-button>
-                            <x-information>Получить заказы с ОЗОН и ВБ в которых указана данная организация
-                            </x-information>
-                        </x-blocks.main-block>
-                        @if($orders->count())
-                            <x-blocks.main-block>
-                                <x-primary-button wire:click="writeOffBalance">Списать остатки со складов
-                                </x-primary-button>
-                                <x-information>Списать остатки в счёт заказов с указанных выше складов</x-information>
-                            </x-blocks.main-block>
-                            @if($writeOff)
-                                <x-blocks.flex-block-end>
-                                    <x-success-button wire:click="downloadWriteOffBalance">Скачать списанные
-                                    </x-success-button>
-                                </x-blocks.flex-block-end>
-                                <x-blocks.flex-block-end>
-                                    <x-danger-button wire:click="writeOffBalanceRollback">Отменить списание
-                                    </x-danger-button>
-                                </x-blocks.flex-block-end>
-                            @endif
-                            <x-blocks.main-block>
-                                <x-primary-button wire:click="purchaseOrder">Сформировать заказы поставщикам
-                                </x-primary-button>
-                                <x-information>Сформировать заказы поставщикам в формате EXCEL</x-information>
-                            </x-blocks.main-block>
-                            <x-blocks.flex-block-end>
-                                @foreach($organization->supplierOrderReports as $report)
-                                    <x-success-button
-                                        wire:click="downloadPurchaseOrder({{$report}})">{{$report->supplier->name}}
-                                        ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('orderable.item.id')->count()}}
-                                        )
-                                    </x-success-button>
-                                @endforeach
-                            </x-blocks.flex-block-end>
-                            <x-blocks.main-block>
-                                <x-layouts.title name="Управление кабинетами"/>
-                            </x-blocks.main-block>
-                            <x-blocks.flex-block-end>
-                                <x-primary-button wire:click="writeOffMarketsStocks">Списать остатки с остальных
-                                    кабинетов
-                                </x-primary-button>
-                            </x-blocks.flex-block-end>
-                            <x-blocks.main-block>
-                                <x-primary-button wire:click="setOrdersState">Поменять статус заказов</x-primary-button>
-                                <x-information>Установить статусы в ОЗОН на "Готово к отгрузке"</x-information>
-                            </x-blocks.main-block>
-                        @endif
-                    </div>
-                    @if($orders->count())
-                        <div class="p-6 dark:bg-gray-700 overflow-hidden shadow-sm sm:rounded-lg">
-                            <x-layouts.title :name="'Заказы ' . '(' . $orders->count() . ')'"/>
-                            <x-table.table-layout>
-                                <x-table.table-header>
-                                    <x-table.table-child>
-                                        <x-layouts.simple-text name="Номер заказа"/>
-                                    </x-table.table-child>
-                                    <x-table.table-child>
-                                        <x-layouts.simple-text name="Код клиента"/>
-                                    </x-table.table-child>
-                                    <x-table.table-child>
-                                        <x-layouts.simple-text name="Код магазина"/>
-                                    </x-table.table-child>
-                                    <x-table.table-child>
-                                        <x-layouts.simple-text name="Кабинет"/>
-                                    </x-table.table-child>
-                                    <x-table.table-child>
-                                        <x-layouts.simple-text name="Количество"/>
-                                    </x-table.table-child>
-                                    <x-table.table-child>
-                                        <x-layouts.simple-text name="Цена"/>
-                                    </x-table.table-child>
-                                </x-table.table-header>
-                                @foreach($orders as $order)
-                                    <x-table.table-item :status="$order->writeOffStocks()->count() ? 2 : -1"
-                                                        wire:key="{{$order->getKey()}}">
-                                        <x-table.table-child>
-                                            <x-layouts.simple-text :name="$order->number"/>
-                                        </x-table.table-child>
-                                        <x-table.table-child>
-                                            <x-layouts.simple-text :name="$order->orderable?->item->code"/>
-                                        </x-table.table-child>
-                                        <x-table.table-child>
-                                            <x-layouts.simple-text
-                                                :name="$order->orderable?->offer_id ?? $order->orderable?->vendor_code"/>
-                                        </x-table.table-child>
-                                        <x-table.table-child>
-                                            <x-layouts.simple-text :name="$order->orderable?->market->name"/>
-                                        </x-table.table-child>
-                                        <x-table.table-child>
-                                            <x-layouts.simple-text
-                                                :name="$order->count"/>
-                                        </x-table.table-child>
-                                        <x-table.table-child>
-                                            <x-layouts.simple-text
-                                                :name="$order->price . (' ' . $order->currency_code ?: '')"/>
-                                        </x-table.table-child>
-                                    </x-table.table-item>
-                                @endforeach
-                            </x-table.table-layout>
-                        </div>
-                    @endif
+            </flux:navbar>
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
+                <div class="flex">
+                    <flux:switch wire:model.live="automatic" label="Автоматическая выгрузка"/>
                 </div>
-            @endif
-        </x-layouts.main-container>
+                <div>
+                    <flux:dropdown>
+                        <flux:button icon-trailing="chevron-down">Склады</flux:button>
+
+                        <flux:menu>
+                            @foreach($warehouses as $warehouse)
+                                <flux:menu.checkbox
+                                    wire:model.live="selectedWarehouses.{{$warehouse->getKey()}}">{{$warehouse->name}}</flux:menu.checkbox>
+                            @endforeach
+                        </flux:menu>
+                    </flux:dropdown>
+                </div>
+                <flux:subheading>С указанных складов будут списаны остатки при автоматической выгрузке и
+                    ручной
+                </flux:subheading>
+            </flux:card>
+        </x-blocks.main-block>
+        @if($organization)
+            <x-blocks.main-block>
+                <flux:card class="space-y-6">
+                    <flux:button wire:click="startAllActions">Выполнить все действия</flux:button>
+                    <flux:heading size="xl">Ручная выгрузка</flux:heading>
+                    <flux:button wire:click="getOrders">Получить заказы</flux:button>
+                    <flux:subheading>Получить заказы с ОЗОН и ВБ в которых указана данная организация</flux:subheading>
+                    @if($orders->count())
+                        <flux:button variant="danger" wire:click="clear">Очистить</flux:button>
+                        <flux:subheading>При очистке текущие заказы больше не будут учитываться при выгрузке прайса
+                        </flux:subheading>
+                        <flux:button wire:click="writeOffBalance">Списать остатки со складов</flux:button>
+                        <flux:subheading>Списать остатки в счёт заказов с указанных выше складов</flux:subheading>
+                        @if($writeOff)
+                            <flux:button wire:click="downloadWriteOffBalance">Скачать списанные</flux:button>
+                            <flux:button variant="danger" wire:click="writeOffBalanceRollback">Отменить списание
+                            </flux:button>
+                        @endif
+                        <flux:button wire:click="purchaseOrder">Сформировать заказы поставщикам</flux:button>
+                        <flux:subheading>Сформировать заказы поставщикам в формате EXCEL</flux:subheading>
+                        <div class="flex gap-6">
+                            @foreach($organization->supplierOrderReports as $report)
+                                <flux:button wire:click="downloadPurchaseOrder({{$report}})">{{$report->supplier->name}}
+                                    ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('orderable.item.id')->count()}}
+                                    )
+                                </flux:button>
+                            @endforeach
+                        </div>
+                        <flux:heading size="xl">Управление кабинетами</flux:heading>
+                        <flux:button wire:click="writeOffMarketsStocks">Списать остатки с остальных кабинетов
+                        </flux:button>
+                        <flux:button wire:click="setOrdersState">Поменять статус заказов</flux:button>
+                        <flux:subheading>Установить статусы в ОЗОН на "Готово к отгрузке"</flux:subheading>
+                    @endif
+                </flux:card>
+            </x-blocks.main-block>
+        @endif
+        @if($orders->count())
+            <x-blocks.main-block>
+                <flux:card>
+                    <flux:table>
+                        <flux:columns>
+                            <flux:column>Номер заказа</flux:column>
+                            <flux:column>Код клиента</flux:column>
+                            <flux:column>Код магазина</flux:column>
+                            <flux:column>Кабинет</flux:column>
+                            <flux:column>Количество</flux:column>
+                            <flux:column>Цена</flux:column>
+                        </flux:columns>
+                        <flux:rows>
+                            @foreach($orders as $order)
+                                <flux:row :key="$order->getKey()">
+                                    <flux:cell>{{$order->number}}</flux:cell>
+                                    <flux:cell>{{$order->orderable?->itemable->code}}</flux:cell>
+                                    <flux:cell>{{$order->orderable?->offer_id ?? $order->orderable?->vendor_code}}</flux:cell>
+                                    <flux:cell>{{$order->orderable?->market->name}}</flux:cell>
+                                    <flux:cell>{{$order->count}}</flux:cell>
+                                    <flux:cell>{{$order->price . (' ' . $order->currency_code ?: '')}}</flux:cell>
+                                </flux:row>
+                            @endforeach
+                        </flux:rows>
+                    </flux:table>
+                </flux:card>
+            </x-blocks.main-block>
+        @endif
     @endif
     @if($page === 'states')
         <x-layouts.module-container>
@@ -204,8 +147,4 @@
             </x-blocks.main-block>
         </x-layouts.module-container>
     @endif
-    <div wire:loading
-         wire:target="startAllActions, setOrdersState, export, import, getOrders, writeOffBalance, purchaseOrder, clear, writeOffBalanceRollback, writeOffMarketsStocks">
-        <x-loader/>
-    </div>
 </x-layouts.module-index-layout>
