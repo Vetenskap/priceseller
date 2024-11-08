@@ -13,7 +13,7 @@
                             <flux:option :value="$warehouse->getKey()">{{$warehouse->name}}</flux:option>
                         @endforeach
                     </flux:select>
-                    <flux:button wire:click="store" e>Добавить</flux:button>
+                    <flux:button wire:click="store">Добавить</flux:button>
                 </div>
             </flux:card>
         </x-blocks.main-block>

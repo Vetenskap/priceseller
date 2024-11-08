@@ -20,8 +20,33 @@ class BergApiWarehouseIndex extends Component
     public BergApi $bergApi;
 
     public $name;
-    public $warehouse_id;
+    public $warehouse_name;
     public $supplier_warehouse_id;
+
+    public function rules(): array
+    {
+        return [
+            'name' => [
+                'required',
+                'string',
+                Rule::unique('berg_api_warehouses', 'name')
+                    ->where('berg_api_id', $this->bergApi->id)
+            ],
+            'warehouse_name' => [
+                'required',
+                'string',
+                Rule::unique('berg_api_warehouses', 'warehouse_name')
+                    ->where('berg_api_id', $this->bergApi->id)
+            ],
+            'supplier_warehouse_id' => [
+                'required',
+                'uuid',
+                'exists:supplier_warehouses,id',
+                Rule::unique('berg_api_warehouses', 'supplier_warehouse_id')
+                    ->where('berg_api_id', $this->bergApi->id)
+            ]
+        ];
+    }
 
     #[Computed]
     public function warehouses(): array|LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator
@@ -37,38 +62,13 @@ class BergApiWarehouseIndex extends Component
         $warehouse->delete();
     }
 
-    public function rules(): array
-    {
-        return [
-            'name' => [
-                'required',
-                'string',
-                Rule::unique('berg_api_warehouses', 'name')
-                    ->where('berg_api_id', $this->bergApi->id)
-            ],
-            'warehouse_id' => [
-                'required',
-                'integer',
-                Rule::unique('berg_api_warehouses', 'warehouse_id')
-                    ->where('berg_api_id', $this->bergApi->id)
-            ],
-            'supplier_warehouse_id' => [
-                'required',
-                'uuid',
-                'exists:supplier_warehouses,id',
-                Rule::unique('berg_api_warehouses', 'supplier_warehouse_id')
-                    ->where('berg_api_id', $this->bergApi->id)
-            ]
-        ];
-    }
-
     public function store(): void
     {
         $this->validate();
 
         $this->bergApi->warehouses()->create([
             'name' => $this->name,
-            'warehouse_id' => $this->warehouse_id,
+            'warehouse_name' => $this->warehouse_name,
             'supplier_warehouse_id' => $this->supplier_warehouse_id
         ]);
     }
