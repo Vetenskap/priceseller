@@ -5,7 +5,7 @@
                 <flux:heading size="xl">Добавление нового склада</flux:heading>
                 <div class="flex gap-6 items-end">
                     <flux:input wire:model="name" label="Наименование" required/>
-                    <flux:input wire:model="warehouse_name" label="Наименование склада" type="number" required/>
+                    <flux:input wire:model="warehouse_name" label="Наименование склада" required/>
                     <flux:select variant="combobox" placeholder="Выберите ваш склад поставщика..." label="Склад"
                                  wire:model="supplier_warehouse_id">
 
