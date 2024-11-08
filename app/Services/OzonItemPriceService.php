@@ -40,14 +40,14 @@ class OzonItemPriceService
 
         $this->market
             ->items()
-            ->with('ozonitemable')
+            ->with('itemable')
             ->chunk(1000, function (Collection $items) {
                 $items->filter(function (OzonItem $ozonItem) {
 
                     if ($ozonItem->ozonitemable_type === Item::class) {
-                        if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
+                        if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
                             if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($ozonItem->ozonitemable->updated) {
+                                if ($ozonItem->itemable->updated) {
                                     return true;
                                 }
                             } else {
@@ -55,9 +55,9 @@ class OzonItemPriceService
                             }
                         }
                     } else {
-                        if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                        if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                             if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->updated)) {
+                                if ($ozonItem->itemable->items->every(fn(Item $item) => $item->updated)) {
                                     return true;
                                 }
                             } else {
@@ -79,19 +79,19 @@ class OzonItemPriceService
     {
         if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
 
-            $multiplicity = $ozonItem->ozonitemable->multiplicity;
+            $multiplicity = $ozonItem->itemable->multiplicity;
 
-            if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$ozonItem->ozonitemable->price) {
-                $price = $ozonItem->ozonitemable->buy_price_reserve;
+            if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$ozonItem->itemable->price) {
+                $price = $ozonItem->itemable->buy_price_reserve;
             } else {
-                $price = $ozonItem->ozonitemable->price;
+                $price = $ozonItem->itemable->price;
             }
 
         } else {
 
             $multiplicity = 1;
 
-            $price = $ozonItem->ozonitemable->items->map(function (Item $item) {
+            $price = $ozonItem->itemable->items->map(function (Item $item) {
                 if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$item->price) {
                     return $item->buy_price_reserve * $item->pivot->multiplicity;
                 } else {
@@ -164,17 +164,17 @@ class OzonItemPriceService
         Helpers::toBatch(function (Batch $batch) {
             $this->market
                 ->items()
-                ->with('ozonitemable')
+                ->with('itemable')
                 ->chunk(1000, function ($items) use ($batch) {
 
                     $items = $items->filter(function (OzonItem $ozonItem) {
 
                         if ($ozonItem->ozonitemable_type === Item::class) {
-                            if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
+                            if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
                                 return true;
                             }
                         } else {
-                            if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                            if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                                 return true;
                             }
                         }
@@ -212,24 +212,24 @@ class OzonItemPriceService
             $new_count = 0;
 
             if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
-                $unload_ozon = !$ozonItem->ozonitemable->unload_ozon;
+                $unload_ozon = !$ozonItem->itemable->unload_ozon;
             } else {
-                $unload_ozon = boolval($ozonItem->ozonitemable->items->first(fn(Item $item) => !$item->unload_ozon));
+                $unload_ozon = boolval($ozonItem->itemable->items->first(fn(Item $item) => !$item->unload_ozon));
             }
 
             if (!$unload_ozon) {
 
-                $itemIds = $ozonItem->ozonitemable_type === 'App\Models\Item' ? [$ozonItem->ozonitemable_id] : $ozonItem->ozonitemable->items->pluck('id')->toArray();
+                $itemIds = $ozonItem->ozonitemable_type === 'App\Models\Item' ? [$ozonItem->ozonitemable_id] : $ozonItem->itemable->items->pluck('id')->toArray();
 
                 $myWarehousesStocks = $warehouse->userWarehouses->map(function (OzonWarehouseUserWarehouse $userWarehouse) use ($ozonItem, $itemIds) {
                     return $userWarehouse->warehouse->stocks()->whereIn('item_id', $itemIds)->get()->map(fn(ItemWarehouseStock $stock) => $stock->stock)->sum();
                 })->sum();
 
                 if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
-                    $new_count = $ozonItem->ozonitemable->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock');
-                    $multiplicity = $ozonItem->ozonitemable->multiplicity;
+                    $new_count = $ozonItem->itemable->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock');
+                    $multiplicity = $ozonItem->itemable->multiplicity;
                 } else {
-                    $new_count = $ozonItem->ozonitemable->items->map(function (Item $item) use ($supplierWarehousesIds) {
+                    $new_count = $ozonItem->itemable->items->map(function (Item $item) use ($supplierWarehousesIds) {
 
                         $count = $item->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock') / $item->pivot->multiplicity;
 
@@ -254,7 +254,7 @@ class OzonItemPriceService
 
                 if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
                     if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                        $new_count = $new_count - (($ozonItem->ozonitemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($ozonItem->ozonitemable)->sum('orders') : 0) * $ozonItem->ozonitemable->multiplicity);
+                        $new_count = $new_count - (($ozonItem->itemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($ozonItem->itemable)->sum('orders') : 0) * $ozonItem->itemable->multiplicity);
                     }
                 }
 
@@ -316,11 +316,11 @@ class OzonItemPriceService
                     $ozonItem = $stock->ozonItem;
 
                     if ($ozonItem->ozonitemable_type === Item::class) {
-                        if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
+                        if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
                             return true;
                         }
                     } else {
-                        if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                        if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                             return true;
                         }
                     }
@@ -383,7 +383,7 @@ class OzonItemPriceService
 
                 $this->market
                     ->items()
-                    ->with('ozonitemable')
+                    ->with('itemable')
                     ->chunk(100, function (Collection $items) use ($warehouse) {
 
                         $test = true;
@@ -396,11 +396,11 @@ class OzonItemPriceService
                             }
 
                             if ($ozonItem->ozonitemable_type === Item::class) {
-                                if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
+                                if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
                                     return true;
                                 }
                             } else {
-                                if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                                if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                                     return true;
                                 }
                             }
@@ -436,7 +436,7 @@ class OzonItemPriceService
 
         $this->market
             ->items()
-            ->with('ozonitemable')
+            ->with('itemable')
             ->whereNotNull('price_min')
             ->whereNotNull('offer_id')
             ->whereNotNull('price_max')
@@ -453,9 +453,9 @@ class OzonItemPriceService
                 $data = $items->filter(function (OzonItem $ozonItem) {
 
                     if ($ozonItem->ozonitemable_type === Item::class) {
-                        if ($ozonItem->ozonitemable->supplier_id === $this->supplier->id) {
+                        if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
                             if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($ozonItem->ozonitemable->updated) {
+                                if ($ozonItem->itemable->updated) {
                                     return true;
                                 }
                             } else {
@@ -463,9 +463,9 @@ class OzonItemPriceService
                             }
                         }
                     } else {
-                        if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                        if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                             if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($ozonItem->ozonitemable->items->every(fn(Item $item) => $item->updated)) {
+                                if ($ozonItem->itemable->items->every(fn(Item $item) => $item->updated)) {
                                     return true;
                                 }
                             } else {

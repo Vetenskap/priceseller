@@ -141,7 +141,7 @@ class OzonMarketService
                 } else {
 
                     try {
-                        $item = $this->market->items()->where('offer_id', $ozonItem['offer_id'])->firstOrFail()->ozonitemable;
+                        $item = $this->market->items()->where('offer_id', $ozonItem['offer_id'])->firstOrFail()->itemable;
                     } catch (ModelNotFoundException) {
 
                         $error++;

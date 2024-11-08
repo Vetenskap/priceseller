@@ -78,15 +78,15 @@
                                 <flux:cell>{{$item->product_id ?? $item->nm_id}}</flux:cell>
                                 <flux:cell>{{$item->offer_id ?? $item->vendor_code}}</flux:cell>
                                 <flux:cell>
-                                    <flux:link :href="$item->ozonitemable ? ($item->ozonitemable instanceof App\Models\Item ? route('item-edit', ['item' => $item->ozonitemable->getKey()]) : route('bundles.edit', ['bundle' => $item->ozonitemable->getKey()])) : ($item->wbitemable instanceof App\Models\Item ? route('item-edit', ['item' => $item->wbitemable->getKey()]) : route('bundles.edit', ['bundle' => $item->wbitemable->getKey()]))">
-                                        {{$item->ozonitemable ? $item->ozonitemable->code : $item->wbitemable->code}}
+                                    <flux:link :href="$item->itemable ? ($item->itemable instanceof App\Models\Item ? route('item-edit', ['item' => $item->itemable->getKey()]) : route('bundles.edit', ['bundle' => $item->itemable->getKey()])) : ($item->itemable instanceof App\Models\Item ? route('item-edit', ['item' => $item->itemable->getKey()]) : route('bundles.edit', ['bundle' => $item->itemable->getKey()]))">
+                                        {{$item->itemable ? $item->itemable->code : $item->itemable->code}}
                                     </flux:link>
                                 </flux:cell>
                                 <flux:cell>{{$item->price}}</flux:cell>
                                 <flux:cell>{{$item->created_at}}</flux:cell>
                                 <flux:cell>{{$item->updated_at}}</flux:cell>
                                 <flux:cell>
-                                    <flux:button icon="pencil-square" :href="$item->ozonitemable ? route('ozon.item.edit', ['item' => $item->getKey()]) : route('wb.item.edit', ['item' => $item->getKey()])" />
+                                    <flux:button icon="pencil-square" :href="$item->itemable ? route('ozon.item.edit', ['item' => $item->getKey()]) : route('wb.item.edit', ['item' => $item->getKey()])" />
                                 </flux:cell>
                             </flux:row>
                         @endforeach

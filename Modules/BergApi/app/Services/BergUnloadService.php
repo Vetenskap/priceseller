@@ -61,8 +61,9 @@ class BergUnloadService
                     foreach ($items as $item) {
 
                         $this->bergApi->warehouses()->each(function (BergApiWarehouse $warehouse) use ($resource, $item) {
+
                             /** @var Offer $offer */
-                            $offer = $resource->getOffers()->firstWhere(fn (Offer $offer) => $offer->getWarehouseId() == $warehouse->warehouse_id);
+                            $offer = $resource->getOffers()->firstWhere(fn (Offer $offer) => $offer->getWarehouseName() == $warehouse->warehouse_name);
 
                             if ($offer) {
                                 $stock = $offer->getQuantity();

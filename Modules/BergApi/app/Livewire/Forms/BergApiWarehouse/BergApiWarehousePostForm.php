@@ -9,23 +9,23 @@ class BergApiWarehousePostForm extends Form
 {
     public ?BergApiWarehouse $bergApiWarehouse;
     public string $name;
-    public int $warehouse_id;
+    public int $warehouse_name;
 
     public function setBergApiWarehouse(?BergApiWarehouse $bergApiWarehouse)
     {
         $this->bergApiWarehouse = $bergApiWarehouse;
         if ($bergApiWarehouse) {
             $this->name = $bergApiWarehouse->name;
-            $this->warehouse_id = $bergApiWarehouse->warehouse_id;
+            $this->warehouse_name = $bergApiWarehouse->warehouse_name;
         }
     }
 
     public function create()
     {
         auth()->user()->bergApi->warehouses()->updateOrCreate([
-            'warehouse_id' => $this->warehouse_id
+            'warehouse_name' => $this->warehouse_name
         ], $this->only([
-            'warehouse_id',
+            'warehouse_name',
             'name'
         ]));
     }
@@ -33,7 +33,7 @@ class BergApiWarehousePostForm extends Form
     public function update()
     {
         $this->bergApiWarehouse->update($this->only([
-            'warehouse_id',
+            'warehouse_name',
             'name'
         ]));
     }

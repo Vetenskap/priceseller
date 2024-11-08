@@ -38,15 +38,15 @@ class WbItemPriceService
 
         $this->market
             ->items()
-            ->with('wbitemable')
+            ->with('itemable')
             ->chunk(1000, function (Collection $items) {
 
                 $items->filter(function (WbItem $wbItem) {
 
                     if ($wbItem->wbitemable_type === Item::class) {
-                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                        if ($wbItem->itemable->supplier_id === $this->supplier->id) {
                             if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($wbItem->wbitemable->updated) {
+                                if ($wbItem->itemable->updated) {
                                     return true;
                                 }
                             } else {
@@ -54,9 +54,9 @@ class WbItemPriceService
                             }
                         }
                     } else {
-                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                        if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                             if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->updated)) {
+                                if ($wbItem->itemable->items->every(fn(Item $item) => $item->updated)) {
                                     return true;
                                 }
                             } else {
@@ -79,19 +79,19 @@ class WbItemPriceService
     {
         if ($wbItem->wbitemable_type === 'App\Models\Item') {
 
-            $multiplicity = $wbItem->wbitemable->multiplicity;
+            $multiplicity = $wbItem->itemable->multiplicity;
 
-            if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$wbItem->wbitemable->price) {
-                $price = $wbItem->wbitemable->buy_price_reserve;
+            if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$wbItem->itemable->price) {
+                $price = $wbItem->itemable->buy_price_reserve;
             } else {
-                $price = $wbItem->wbitemable->price;
+                $price = $wbItem->itemable->price;
             }
 
         } else {
 
             $multiplicity = 1;
 
-            $price = $wbItem->wbitemable->items->map(function (Item $item) {
+            $price = $wbItem->itemable->items->map(function (Item $item) {
                 if ($this->user->baseSettings?->enabled_use_buy_price_reserve && !$item->price) {
                     return $item->buy_price_reserve * $item->pivot->multiplicity;
                 } else {
@@ -133,17 +133,17 @@ class WbItemPriceService
         Helpers::toBatch(function (Batch $batch) {
             $this->market
                 ->items()
-                ->with('wbitemable')
+                ->with('itemable')
                 ->chunk(1000, function (Collection $items) use ($batch) {
 
                     $items = $items->filter(function (WbItem $wbItem) {
 
                         if ($wbItem->wbitemable_type === Item::class) {
-                            if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                            if ($wbItem->itemable->supplier_id === $this->supplier->id) {
                                 return true;
                             }
                         } else {
-                            if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                            if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                                 return true;
                             }
                         }
@@ -181,24 +181,24 @@ class WbItemPriceService
             $new_count = 0;
 
             if ($wbItem->wbitemable_type === 'App\Models\Item') {
-                $unload_wb = !$wbItem->wbitemable->unload_wb;
+                $unload_wb = !$wbItem->itemable->unload_wb;
             } else {
-                $unload_wb = boolval($wbItem->wbitemable->items->first(fn(Item $item) => !$item->unload_wb));
+                $unload_wb = boolval($wbItem->itemable->items->first(fn(Item $item) => !$item->unload_wb));
             }
 
             if (!$unload_wb) {
 
-                $itemIds = $wbItem->wbitemable_type === 'App\Models\Item' ? [$wbItem->wbitemable_id] : $wbItem->wbitemable->items->pluck('id')->toArray();
+                $itemIds = $wbItem->wbitemable_type === 'App\Models\Item' ? [$wbItem->wbitemable_id] : $wbItem->itemable->items->pluck('id')->toArray();
 
                 $myWarehousesStocks = $warehouse->userWarehouses->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($wbItem, $itemIds) {
                     return $userWarehouse->warehouse->stocks()->whereIn('item_id', $itemIds)->get()->map(fn(ItemWarehouseStock $stock) => $stock->stock)->sum();
                 })->sum();
 
                 if ($wbItem->wbitemable_type === 'App\Models\Item') {
-                    $new_count = $wbItem->wbitemable->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock');
-                    $multiplicity = $wbItem->wbitemable->multiplicity;
+                    $new_count = $wbItem->itemable->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock');
+                    $multiplicity = $wbItem->itemable->multiplicity;
                 } else {
-                    $new_count = $wbItem->wbitemable->items->map(function (Item $item) use ($supplierWarehousesIds) {
+                    $new_count = $wbItem->itemable->items->map(function (Item $item) use ($supplierWarehousesIds) {
 
                         $count = $item->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock') / $item->pivot->multiplicity;
 
@@ -223,7 +223,7 @@ class WbItemPriceService
 
                 if ($wbItem->wbitemable_type === 'App\Models\Item') {
                     if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                        $new_count = $new_count - (($wbItem->wbitemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($wbItem->wbitemable)->sum('orders') : 0) * $wbItem->wbitemable->multiplicity);
+                        $new_count = $new_count - (($wbItem->itemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($wbItem->itemable)->sum('orders') : 0) * $wbItem->itemable->multiplicity);
                     }
                 }
 
@@ -285,11 +285,11 @@ class WbItemPriceService
                     $wbItem = $stock->wbItem;
 
                     if ($wbItem->wbitemable_type === Item::class) {
-                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                        if ($wbItem->itemable->supplier_id === $this->supplier->id) {
                             return true;
                         }
                     } else {
-                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                        if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                             return true;
                         }
                     }
@@ -353,17 +353,17 @@ class WbItemPriceService
 
                 $this->market
                     ->items()
-                    ->with('wbitemable')
+                    ->with('itemable')
                     ->chunk(1000, function (Collection $items) use ($warehouse) {
 
                         $data = $items->filter(function (WbItem $wbItem) {
 
                             if ($wbItem->wbitemable_type === Item::class) {
-                                if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                                if ($wbItem->itemable->supplier_id === $this->supplier->id) {
                                     return true;
                                 }
                             } else {
-                                if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                                if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                                     return true;
                                 }
                             }
@@ -392,7 +392,7 @@ class WbItemPriceService
 
         $this->market
             ->items()
-            ->with('wbitemable')
+            ->with('itemable')
             ->whereNotNull('volume')
             ->whereNotNull('retail_markup_percent')
             ->whereNotNull('package')
@@ -406,9 +406,9 @@ class WbItemPriceService
                 $data = $items->filter(function (WbItem $wbItem) {
 
                     if ($wbItem->wbitemable_type === Item::class) {
-                        if ($wbItem->wbitemable->supplier_id === $this->supplier->id) {
+                        if ($wbItem->itemable->supplier_id === $this->supplier->id) {
                             if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($wbItem->wbitemable->updated) {
+                                if ($wbItem->itemable->updated) {
                                     return true;
                                 }
                             } else {
@@ -416,9 +416,9 @@ class WbItemPriceService
                             }
                         }
                     } else {
-                        if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                        if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
                             if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($wbItem->wbitemable->items->every(fn(Item $item) => $item->updated)) {
+                                if ($wbItem->itemable->items->every(fn(Item $item) => $item->updated)) {
                                     return true;
                                 }
                             } else {

@@ -5,6 +5,8 @@ namespace Modules\Order\Models;
 use App\Models\Organization;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use App\Models\MainModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Order extends MainModel
 {
@@ -22,22 +24,22 @@ class Order extends MainModel
         'write_off'
     ];
 
-    public function getItemableAttribute()
-    {
-        return $this->relationLoaded('ozonitemable') ? $this->ozonitemable : $this->wbitemable;
-    }
-
     public function orderable()
     {
         return $this->morphTo();
     }
 
-    public function writeOffStocks()
+    public function items(): HasMany
+    {
+        return $this->hasMany(OrderItem::class, 'order_id', 'id');
+    }
+
+    public function writeOffStocks(): HasMany
     {
         return $this->hasMany(WriteOffItemWarehouseStock::class);
     }
 
-    public function organization()
+    public function organization(): BelongsTo
     {
         return $this->belongsTo(Organization::class);
     }

@@ -20,36 +20,36 @@
                 @endforeach
             </flux:navbar>
         </x-blocks.main-block>
-        <x-blocks.main-block>
-            <flux:card class="space-y-6">
-                <div class="flex">
-                    <flux:switch wire:model.live="automatic" label="Автоматическая выгрузка"/>
-                </div>
-                <div>
-                    <flux:dropdown>
-                        <flux:button icon-trailing="chevron-down">Склады</flux:button>
-
-                        <flux:menu>
-                            @foreach($warehouses as $warehouse)
-                                <flux:menu.checkbox
-                                    wire:model.live="selectedWarehouses.{{$warehouse->getKey()}}">{{$warehouse->name}}</flux:menu.checkbox>
-                            @endforeach
-                        </flux:menu>
-                    </flux:dropdown>
-                </div>
-                <flux:subheading>С указанных складов будут списаны остатки при автоматической выгрузке и
-                    ручной
-                </flux:subheading>
-            </flux:card>
-        </x-blocks.main-block>
         @if($organization)
+            <x-blocks.main-block>
+                <flux:card class="space-y-6">
+                    <div class="flex">
+                        <flux:switch wire:model.live="automatic" label="Автоматическая выгрузка"/>
+                    </div>
+                    <div>
+                        <flux:dropdown>
+                            <flux:button icon-trailing="chevron-down">Склады</flux:button>
+
+                            <flux:menu>
+                                @foreach($warehouses as $warehouse)
+                                    <flux:menu.checkbox
+                                        wire:model.live="selectedWarehouses.{{$warehouse->getKey()}}">{{$warehouse->name}}</flux:menu.checkbox>
+                                @endforeach
+                            </flux:menu>
+                        </flux:dropdown>
+                    </div>
+                    <flux:subheading>С указанных складов будут списаны остатки при автоматической выгрузке и
+                        ручной
+                    </flux:subheading>
+                </flux:card>
+            </x-blocks.main-block>
             <x-blocks.main-block>
                 <flux:card class="space-y-6">
                     <flux:button wire:click="startAllActions">Выполнить все действия</flux:button>
                     <flux:heading size="xl">Ручная выгрузка</flux:heading>
                     <flux:button wire:click="getOrders">Получить заказы</flux:button>
                     <flux:subheading>Получить заказы с ОЗОН и ВБ в которых указана данная организация</flux:subheading>
-                    @if($orders->count())
+                    @if($orders && $orders->count())
                         <flux:button variant="danger" wire:click="clear">Очистить</flux:button>
                         <flux:subheading>При очистке текущие заказы больше не будут учитываться при выгрузке прайса
                         </flux:subheading>
@@ -64,26 +64,27 @@
                         <flux:subheading>Сформировать заказы поставщикам в формате EXCEL</flux:subheading>
                         <div class="flex gap-6">
                             @foreach($organization->supplierOrderReports as $report)
-                                <flux:button wire:click="downloadPurchaseOrder({{$report}})">{{$report->supplier->name}}
-                                    ({{$orders->where('orderable.item.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('orderable.item.id')->count()}}
-                                    )
+                                <flux:button wire:click="downloadPurchaseOrder({{$report}})" wire:target="downloadPurchaseOrder({{$report}})">{{$report->supplier->name}}
+                                    <flux:badge color="lime">{{$orders->where('orderable.items.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('orderable.items.item.id')->count()}}</flux:badge>
                                 </flux:button>
                             @endforeach
                         </div>
                         <flux:heading size="xl">Управление кабинетами</flux:heading>
-                        <flux:button wire:click="writeOffMarketsStocks">Списать остатки с остальных кабинетов
-                        </flux:button>
                         <flux:button wire:click="setOrdersState">Поменять статус заказов</flux:button>
                         <flux:subheading>Установить статусы в ОЗОН на "Готово к отгрузке"</flux:subheading>
+                        <flux:button wire:click="writeOffMarketsStocks">Списать остатки с остальных кабинетов</flux:button>
                     @endif
                 </flux:card>
             </x-blocks.main-block>
         @endif
-        @if($orders->count())
+        @if($orders && $orders->count())
             <x-blocks.main-block>
-                <flux:card>
+                <flux:card class="space-y-6">
+                    <flux:heading size="xl">Всего заказов: {{$orders->count()}}</flux:heading>
                     <flux:table>
                         <flux:columns>
+                            <flux:column>Тип</flux:column>
+                            <flux:column>Товар(-ы)</flux:column>
                             <flux:column>Номер заказа</flux:column>
                             <flux:column>Код клиента</flux:column>
                             <flux:column>Код магазина</flux:column>
@@ -94,6 +95,12 @@
                         <flux:rows>
                             @foreach($orders as $order)
                                 <flux:row :key="$order->getKey()">
+                                    <flux:cell>{{$order->orderable->itemable instanceof \App\Models\Bundle ? 'Комплект' : 'Товар'}}</flux:cell>
+                                    <flux:cell>
+                                        @foreach($order->items as $item)
+                                            <flux:link :href="route('item-edit', ['item' => $item->item->getKey()])">{{$item->item->code}}</flux:link>
+                                        @endforeach
+                                    </flux:cell>
                                     <flux:cell>{{$order->number}}</flux:cell>
                                     <flux:cell>{{$order->orderable?->itemable->code}}</flux:cell>
                                     <flux:cell>{{$order->orderable?->offer_id ?? $order->orderable?->vendor_code}}</flux:cell>

@@ -120,7 +120,7 @@ class WbMarketService
                     }
                 } else {
                     try {
-                        $item = $this->market->items()->where('vendor_code', $card->getVendorCode())->firstOrFail()->wbitemable;
+                        $item = $this->market->items()->where('vendor_code', $card->getVendorCode())->firstOrFail()->itemable;
                     } catch (ModelNotFoundException) {
 
                         $error++;

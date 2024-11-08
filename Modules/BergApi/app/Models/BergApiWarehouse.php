@@ -10,7 +10,7 @@ class BergApiWarehouse extends MainModel
 {
     protected $fillable = [
         'name',
-        'warehouse_id',
+        'warehouse_name',
         'berg_api_id',
         'supplier_warehouse_id'
     ];

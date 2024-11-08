@@ -3,6 +3,7 @@
 namespace Modules\Order\Services;
 
 use Alcohol\ISO4217;
+use App\Models\Bundle;
 use App\Models\Organization;
 use App\Models\OzonItem;
 use App\Models\User;
@@ -66,13 +67,32 @@ class OrderService
 
                     $iso4217 = new ISO4217();
 
-                    $wbItem->orders()->create([
+                    try {
+                        $currency_code = collect($iso4217->getByNumeric($order->get('currencyCode')))->get('alpha3');
+                    } catch (\DomainException $e) {
+                        $currency_code = 'Не определено';
+                    }
+
+                    /** @var Order $orderModel */
+                    $orderModel = $wbItem->orders()->create([
                         'number' => $order->get('id'),
                         'count' => $order->get('count'),
                         'price' => $order->get('price') / 100,
                         'organization_id' => $this->organizationId,
-                        'currency_code' => collect($iso4217->getByNumeric($order->get('currencyCode')))->get('alpha3'),
+                        'currency_code' => $currency_code,
                     ]);
+
+                    if ($wbItem->itemable instanceof Bundle) {
+                        foreach ($wbItem->itemable->items as $item) {
+                            $orderModel->items()->create([
+                                'item_id' => $item->id,
+                            ]);
+                        }
+                    } else {
+                        $orderModel->items()->create([
+                            'item_id' => $wbItem->itemable->id,
+                        ]);
+                    }
 
                     $total++;
 
@@ -111,13 +131,25 @@ class OrderService
 
                     if ($ozonItem && !Order::where('organization_id', $this->organizationId)->where('number', $posting->get('posting_number'))->exists()) {
 
-                        $ozonItem->orders()->create([
+                        $orderModel = $ozonItem->orders()->create([
                             'number' => $posting->get('posting_number'),
                             'count' => $product->get('quantity'),
                             'price' => $product->get('price'),
                             'organization_id' => $this->organizationId,
                             'currency_code' => $product->get('currency_code')
                         ]);
+
+                        if ($ozonItem->itemable instanceof Bundle) {
+                            foreach ($ozonItem->itemable->items as $item) {
+                                $orderModel->items()->create([
+                                    'item_id' => $item->id,
+                                ]);
+                            }
+                        } else {
+                            $orderModel->items()->create([
+                                'item_id' => $ozonItem->itemable->id,
+                            ]);
+                        }
 
                         $total++;
                     }
@@ -232,26 +264,10 @@ class OrderService
 
         $organization
             ->orders()
-            ->with(['orderable' => function ($query) {
-                $query->when(
-                    $query->getModel() instanceof WbItem, // Проверяем, является ли моделью Wb
-                    fn($q) => $q->with('wbitemable') // Загружаем связь 'wbitemable'
-                )->when(
-                    $query->getModel() instanceof OzonItem, // Проверяем, является ли моделью Ozon
-                    fn($q) => $q->with('ozonitemable') // Загружаем связь 'ozonitemable'
-                );
-            }])
+            ->with('orderable.itemable')
             ->where('state', 'new')
             ->get()
-            ->groupBy(['orderable' => function ($query) {
-                $query->when(
-                    $query->getModel() instanceof WbItem, // Проверяем, является ли моделью Wb
-                    fn($q) => $q->groupBy('wbitemable.supplier_id') // Загружаем связь 'wbitemable'
-                )->when(
-                    $query->getModel() instanceof OzonItem, // Проверяем, является ли моделью Ozon
-                    fn($q) => $q->groupBy('ozonitemable.supplier_id') // Загружаем связь 'ozonitemable'
-                );
-            }])
+            ->groupBy('items.supplier_id')
             ->each(function (Collection $hh, string $supplierId) {
 
                 $uuid = Str::uuid();

@@ -31,8 +31,6 @@ class Test extends Command
      */
     public function handle()
     {
-        $array = ['buyPrice' => [100], 'salePrices' => [123]];
-
-        dd(isset($array['salePrices']));
+        dd(collect()->range(500, 1000));
     }
 }
