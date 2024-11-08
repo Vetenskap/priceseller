@@ -5,7 +5,7 @@
                 <flux:heading size="xl">Добавление нового склада</flux:heading>
                 <div class="flex gap-6 items-end">
                     <flux:input wire:model="name" label="Наименование" required/>
-                    <flux:input wire:model="warehouse_id" label="Идентификатор" type="number" required/>
+                    <flux:input wire:model="warehouse_name" label="Наименование склада" type="number" required/>
                     <flux:select variant="combobox" placeholder="Выберите ваш склад поставщика..." label="Склад"
                                  wire:model="supplier_warehouse_id">
 
@@ -26,7 +26,7 @@
                     <flux:table :paginate="$this->warehouses">
                         <flux:columns>
                             <flux:column>Склад</flux:column>
-                            <flux:column>Идентификатор</flux:column>
+                            <flux:column>наименование склада</flux:column>
                             <flux:column>Ваш склад поставщика</flux:column>
                             <flux:column>Создан</flux:column>
                         </flux:columns>
@@ -34,7 +34,7 @@
                             @foreach($this->warehouses as $warehouse)
                                 <flux:row :key="$warehouse->getKey()">
                                     <flux:cell>{{$warehouse->name}}</flux:cell>
-                                    <flux:cell>{{$warehouse->warehouse_id}}</flux:cell>
+                                    <flux:cell>{{$warehouse->warehouse_name}}</flux:cell>
                                     <flux:cell>{{$warehouse->supplierWarehouse->name}}</flux:cell>
                                     <flux:cell>{{$warehouse->created_at}}</flux:cell>
                                     <flux:cell align="right">
