@@ -38,7 +38,12 @@ class BergApiTimeIndex extends Component
 
     }
 
-    #[On('delete-time')]
+    public function destroy($id): void
+    {
+        $time = $this->bergApi->times()->findOrFail($id);
+        $time->delete();
+    }
+
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('bergapi::livewire.berg-api-time.berg-api-time-index');

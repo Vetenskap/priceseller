@@ -12,7 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('order_items', function (Blueprint $table) {
-            $table->unsignedBigInteger('multiplicity')->nullable()->default(1);
+            $table->unsignedBigInteger('multiplicity')->after('id');
+            $table->unsignedBigInteger('count')->after('multiplicity');
         });
     }
 

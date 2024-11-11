@@ -6,6 +6,7 @@ use App\Models\Organization;
 use Illuminate\Database\Eloquent\Builder;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Modules\Order\Models\OrderItemWriteOffItemWarehouseStock;
 use Modules\Order\Models\WriteOffItemWarehouseStock;
 
 class WriteOffItemWarehouseStockExport implements FromCollection, WithHeadings
@@ -18,14 +19,16 @@ class WriteOffItemWarehouseStockExport implements FromCollection, WithHeadings
     */
     public function collection()
     {
-        $items = WriteOffItemWarehouseStock::with('itemWarehouseStock')->whereHas('order', function (Builder $builder) {
-            $builder->where('organization_id', $this->organizationId);
+        $items = OrderItemWriteOffItemWarehouseStock::with(['itemWarehouseStock', 'orderItem.order'])->whereHas('orderItem', function (Builder $builder) {
+            $builder->whereHas('order', function (Builder $builder) {
+                $builder->where('organization_id', $this->organizationId);
+            });
         })->get();
 
-        return $items->map(function (WriteOffItemWarehouseStock $stock) {
+        return $items->map(function (OrderItemWriteOffItemWarehouseStock $stock) {
             return [
                 'warehouse_name' => $stock->itemWarehouseStock->warehouse->name,
-                'order_number' => $stock->order->number,
+                'order_number' => $stock->orderItem->order->number,
                 'stock' => $stock->stock,
             ];
         });

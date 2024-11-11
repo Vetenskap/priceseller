@@ -2,7 +2,9 @@
 
 namespace Modules\SamsonApi\Models;
 
+use App\Models\ItemAttribute;
 use App\Models\MainModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SamsonApiItemAdditionalAttributeLink extends MainModel
 {
@@ -13,5 +15,10 @@ class SamsonApiItemAdditionalAttributeLink extends MainModel
         'item_attribute_id',
         'samson_api_id',
     ];
+
+    public function itemAttribute(): BelongsTo
+    {
+        return $this->belongsTo(ItemAttribute::class, 'item_attribute_id', 'id');
+    }
 
 }

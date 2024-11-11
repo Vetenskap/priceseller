@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Item;
 use Illuminate\Console\Command;
+use JetBrains\PhpStorm\NoReturn;
 use Modules\Moysklad\HttpClient\Resources\Context\CompanySettings\PriceType;
 use Modules\Moysklad\HttpClient\Resources\Entities\EntityList;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
@@ -29,7 +30,7 @@ class Test extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    #[NoReturn] public function handle(): void
     {
         dd(collect()->range(500, 1000));
     }

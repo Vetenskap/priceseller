@@ -99,7 +99,17 @@
                                     <flux:error name="form.seller_price_percent"/>
                                 </flux:field>
                             </div>
-                            <flux:input wire:model="form.acquiring" label="Эквайринг"/>
+                            <div>
+                                <flux:field>
+                                    <flux:tooltip content="">
+                                        <flux:label>Эквайринг</flux:label>
+                                    </flux:tooltip>
+
+                                    <flux:input wire:model="form.acquiring" type="number"/>
+
+                                    <flux:error name="form.acquiring"/>
+                                </flux:field>
+                            </div>
                             <div>
                                 <flux:field>
                                     <flux:tooltip content="Считается 5,5 % от цены на сайте">

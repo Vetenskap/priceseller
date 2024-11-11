@@ -16,7 +16,6 @@ class SamsonApiItemAdditionalAttributeLinkIndex extends Component
 
     public SamsonApi $samsonApi;
 
-    #[On('delete-link')]
     public function mount(): void
     {
         $this->form->setSamsonApi($this->samsonApi);
@@ -27,9 +26,10 @@ class SamsonApiItemAdditionalAttributeLinkIndex extends Component
         $this->form->store();
     }
 
-    public function update(): void
+    public function destroy($id): void
     {
-        $this->dispatch('update-link')->component(SamsonApiItemAdditionalAttributeLinkEdit::class);
+        $link = $this->samsonApi->itemAdditionalAttributeLinks()->findOrFail($id);
+        $link->delete();
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application

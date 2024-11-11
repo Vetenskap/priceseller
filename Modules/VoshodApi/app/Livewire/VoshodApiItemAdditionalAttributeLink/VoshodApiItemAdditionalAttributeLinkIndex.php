@@ -16,7 +16,6 @@ class VoshodApiItemAdditionalAttributeLinkIndex extends Component
 
     public VoshodApi $voshodApi;
 
-    #[On('delete-link')]
     public function mount(): void
     {
         $this->form->setVoshodApi($this->voshodApi);
@@ -27,9 +26,10 @@ class VoshodApiItemAdditionalAttributeLinkIndex extends Component
         $this->form->store();
     }
 
-    public function update(): void
+    public function destroy($id): void
     {
-        $this->dispatch('update-link')->component(VoshodApiItemAdditionalAttributeLinkEdit::class);
+        $link = $this->voshodApi->itemAdditionalAttributeLinks()->findOrFail($id);
+        $link->delete();
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application

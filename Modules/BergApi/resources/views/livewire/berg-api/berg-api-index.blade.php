@@ -1,45 +1,24 @@
 <x-layouts.module-index-layout :modules="$modules">
-    <x-layouts.main-container>
-        <x-navigate-pages>
-            <x-links.tab-link href="{{route('bergapi.index', ['page' => 'main'])}}" :active="$page === 'main'">
-                Основное
-            </x-links.tab-link>
-            @if($form->bergApi)
-                <x-links.tab-link href="{{route('bergapi.index', ['page' => 'times'])}}" :active="$page === 'times'">
-                    Время выгрузки
-                </x-links.tab-link>
-                <x-links.tab-link href="{{route('bergapi.index', ['page' => 'warehouses'])}}"
-                                  :active="$page === 'warehouses'">Склады
-                </x-links.tab-link>
-                <x-links.tab-link href="{{route('bergapi.index', ['page' => 'attributes'])}}"
-                                  :active="$page === 'attributes'">Атрибуты
-                </x-links.tab-link>
-            @endif
-        </x-navigate-pages>
-    </x-layouts.main-container>
+    <x-blocks.main-block>
+        <flux:navbar>
+            <flux:navbar.item :href="route('bergapi.index', ['page' => 'main'])" :current="$page === 'main'">Основное</flux:navbar.item>
+            <flux:navbar.item :href="route('bergapi.index', ['page' => 'times'])" :current="$page === 'times'">Время выгрузки</flux:navbar.item>
+            <flux:navbar.item :href="route('bergapi.index', ['page' => 'warehouses'])" :current="$page === 'warehouses'">Склады</flux:navbar.item>
+            <flux:navbar.item :href="route('bergapi.index', ['page' => 'attributes'])" :current="$page === 'attributes'">Атрибуты</flux:navbar.item>
+        </flux:navbar>
+    </x-blocks.main-block>
     @if($page === 'main')
-        <x-layouts.main-container>
-            <x-blocks.main-block>
-                <x-layouts.title name="Основное"/>
-            </x-blocks.main-block>
-            <x-blocks.main-block>
-                <x-success-button wire:click="store">Сохранить</x-success-button>
-            </x-blocks.main-block>
-            <x-blocks.flex-block>
-                <x-dropdowns.dropdown-select
-                    :items="auth()->user()->suppliers->toArray()"
-                    :current-id="$form->supplier_id"
-                    name="supplier"
-                    field="form.supplier_id"
-                >Выберите Поставщика
-                </x-dropdowns.dropdown-select>
-                <x-inputs.input-with-label name="api_key"
-                                           type="text"
-                                           field="form.api_key"
-                >Апи ключ
-                </x-inputs.input-with-label>
-            </x-blocks.flex-block>
-        </x-layouts.main-container>
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
+                <flux:button wire:click="store">Сохранить</flux:button>
+                <flux:select variant="combobox" placeholder="Выберите поставщика..." label="Связанный поставщик" wire:model="form.supplier_id">
+                    @foreach(auth()->user()->suppliers as $supplier)
+                        <flux:option :value="$supplier->getKey()">{{$supplier->name}}</flux:option>
+                    @endforeach
+                </flux:select>
+                <flux:input wire:model="form.api_key" label="Апи ключ"/>
+            </flux:card>
+        </x-blocks.main-block>
     @elseif($page === 'times')
         <livewire:bergapi::berg-api-time.berg-api-time-index :bergApi="$form->bergApi"/>
     @elseif($page === 'warehouses')

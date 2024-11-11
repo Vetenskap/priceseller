@@ -38,7 +38,12 @@ class VoshodApiTimeIndex extends Component
 
     }
 
-    #[On('delete-time')]
+    public function destroy($id): void
+    {
+        $time = $this->voshodApi->times()->findOrFail($id);
+        $time->delete();
+    }
+
     public function render(): Factory|Application|View|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('voshodapi::livewire.voshod-api-time.voshod-api-time-index');

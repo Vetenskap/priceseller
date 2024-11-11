@@ -1,38 +1,40 @@
 <div>
-    <x-layouts.main-container>
-        <x-blocks.main-block>
-            <x-layouts.title name="Добавление нового атрибута"/>
-            <x-information>Вы можете связать свои атрибуты с полями получаемыми из API</x-information>
-        </x-blocks.main-block>
-        <x-blocks.flex-block>
-            <x-dropdowns.dropdown-select name="item_attribute_id"
-                                         :items="auth()->user()->itemAttributes"
-                                         :current-id="$form->item_attribute_id"
-                                         field="form.item_attribute_id"
-            >Выберите атрибут</x-dropdowns.dropdown-select>
-            <x-dropdowns.dropdown-select name="link"
-                                         :items="\Modules\SamsonApi\HttpClient\Resources\Sku::ATTRIBUTES"
-                                         option-value="name"
-                                         option-name="label"
-                                         :current-id="$form->link"
-                                         field="form.link"
-            >Выберите поле из API</x-dropdowns.dropdown-select>
-            <div class="self-center">
-                <x-success-button wire:click="store">Добавить</x-success-button>
-            </div>
-        </x-blocks.flex-block>
-    </x-layouts.main-container>
-    @if($samsonApi->itemAdditionalAttributeLinks->isNotEmpty())
-        <x-layouts.main-container>
-            <x-blocks.main-block>
-                <x-layouts.title name="Список" />
-            </x-blocks.main-block>
-            <x-blocks.main-block>
-                <x-success-button wire:click="update">Сохранить</x-success-button>
-            </x-blocks.main-block>
-            @foreach($samsonApi->itemAdditionalAttributeLinks as $link)
-                <livewire:samsonapi::samson-api-item-additional-attribute-link.samson-api-item-additional-attribute-link-edit :samsonItemLink="$link"
-            @endforeach
-        </x-layouts.main-container>
-    @endif
+    <x-blocks.main-block>
+        <flux:card class="space-y-6">
+            <flux:heading size="xl">Связь нового атрибута</flux:heading>
+            <flux:subheading>Вы можете связать свои атрибуты с полями получаемыми из API</flux:subheading>
+            <flux:select variant="combobox" placeholder="Выберите атрибут..." label="Дополнительный атрибут" wire:model="form.item_attribute_id">
+                @foreach(auth()->user()->itemAttributes as $attribute)
+                    <flux:option :value="$attribute->getKey()">{{$attribute->name}}</flux:option>
+                @endforeach
+            </flux:select>
+            <flux:select variant="combobox" placeholder="Выберите поле из API" label="Поле из API" wire:model="form.link">
+                @foreach(\Modules\SamsonApi\HttpClient\Resources\Sku::ATTRIBUTES as $attribute)
+                    <flux:option :value="$attribute['name']">{{$attribute['label']}}</flux:option>
+                @endforeach
+            </flux:select>
+            <flux:button wire:click="store">Добавить</flux:button>
+        </flux:card>
+    </x-blocks.main-block>
+    <x-blocks.main-block>
+        <flux:card>
+            <flux:table>
+                <flux:columns>
+                    <flux:column>Дополнительный атрибут</flux:column>
+                    <flux:column>Поле из API</flux:column>
+                </flux:columns>
+                <flux:rows>
+                    @foreach($samsonApi->itemAdditionalAttributeLinks as $link)
+                        <flux:row :key="$link->getKey()">
+                            <flux:cell>{{$link->itemAttribute->name}}</flux:cell>
+                            <flux:cell>{{collect(\Modules\SamsonApi\HttpClient\Resources\Sku::ATTRIBUTES)->firstWhere('name', $link->link)['label']}}</flux:cell>
+                            <flux:cell>
+                                <flux:button icon="trash" variant="danger" wire:click="destroy({{$link->getKey()}})" wire:target="destroy({{$link->getKey()}})" />
+                            </flux:cell>
+                        </flux:row>
+                    @endforeach
+                </flux:rows>
+            </flux:table>
+        </flux:card>
+    </x-blocks.main-block>
 </div>

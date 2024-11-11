@@ -2,7 +2,9 @@
 
 namespace Modules\BergApi\Models;
 
+use App\Models\ItemAttribute;
 use App\Models\MainModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class BergApiItemAdditionalAttributeLink extends MainModel
 {
@@ -12,5 +14,10 @@ class BergApiItemAdditionalAttributeLink extends MainModel
         'item_attribute_id',
         'berg_api_id',
     ];
+
+    public function itemAttribute(): BelongsTo
+    {
+        return $this->belongsTo(ItemAttribute::class, 'item_attribute_id', 'id');
+    }
 
 }

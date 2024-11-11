@@ -39,7 +39,12 @@ class SamsonApiTimeIndex extends Component
 
     }
 
-    #[On('delete-time')]
+    public function destroy($id): void
+    {
+        $time = $this->samsonApi->times()->findOrFail($id);
+        $time->delete();
+    }
+
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application
     {
         return view('samsonapi::livewire.samson-api-time.samson-api-time-index');

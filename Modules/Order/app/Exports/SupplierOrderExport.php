@@ -2,12 +2,11 @@
 
 namespace Modules\Order\Exports;
 
-use App\Models\Bundle;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
-use Modules\Order\Models\Order;
+use Modules\Order\Models\OrderItem;
 
 class SupplierOrderExport implements FromCollection, WithHeadings
 {
@@ -26,72 +25,31 @@ class SupplierOrderExport implements FromCollection, WithHeadings
     public function collection()
     {
         /** @var Collection $orders */
-        $orders = Order::whereHas('orderable')
-            ->with('orderable.itemable')
+        $ordersItems = OrderItem::with(['order', 'item'])
             ->where('count', '>', 0)
-            ->where('state', 'new')
-            ->where('organization_id', $this->organizationId)
+            ->whereHas('order', function (Builder $query) {
+                $query
+                    ->where('state', 'new')
+                    ->where('organization_id', $this->organizationId);
+            })
+            ->whereHas('item', function (Builder $query) {
+                $query->where('supplier_id', $this->supplierId);
+            })
             ->get();
 
-        $orders = $orders->map(function (Order $order) {
-            if ($order->orderable->itemable instanceof Bundle) {
-                $items = collect();
+        return $ordersItems->groupBy('item_id')->map(function (Collection $group, string $id) {
 
-                foreach ($order->orderable->itemable->items as $item) {
-                    if ($item->supplier_id === $this->supplierId) {
-                        $items->push($item);
-                    }
-                }
+            $orderItem = $group->first();
 
-                $order->orderable->itemable->items = $items;
-
-                return $order;
-            }
-
-            if ($order->orderable->itemable->supplier_id === $this->supplierId) return $order;
-
-            return null;
-
-        })->filter()->values();
-
-        return $orders->flatMap(function (Order $order) {
-            if ($order->orderable->itemable instanceof Bundle) {
-                return $order->orderable->itemable->items->map(function ($item) use ($order) {
-                    return [
-                        'id' => $item->id,
-                        'name' => $item->name,
-                        'code' => $item->code,
-                        'article' => $item->article,
-                        'brand' => $item->brand,
-                        'count' => $order->count * $item->pivot->multiplicity,
-                        'price' => $order->price,
-                    ];
-                });
-            }
-
-            return [[
-                'id' => $order->orderable->itemable->id,
-                'name' => $order->orderable->itemable->name,
-                'code' => $order->orderable->itemable->code,
-                'article' => $order->orderable->itemable->article,
-                'brand' => $order->orderable->itemable->brand,
-                'count' => $order->count * $order->orderable->itemable->multiplicity,
-                'price' => $order->price,
-            ]];
-        })->groupBy('id')
-            ->map(function ($items, $id) {
-
-                $firstItem = $items->first();
-
-                return [
-                    'name' => $firstItem['name'],
-                    'code' => $firstItem['code'],
-                    'article' => $firstItem['article'],
-                    'brand' => $firstItem['brand'],
-                    'count' => $items->sum('count'),
-                    'price' => $firstItem['price'],
-                ];
-            });
+            return [
+                'name' => $orderItem->item->name,
+                'code' => $orderItem->item->code,
+                'article' => $orderItem->item->article,
+                'brand' => $orderItem->item->brand,
+                'count' => $group->sum('count') * $orderItem->multiplicity,
+                'price' => $orderItem->order->price
+            ];
+        });
     }
 
     public function headings(): array

@@ -46,33 +46,44 @@
             <x-blocks.main-block>
                 <flux:card class="space-y-6">
                     <flux:button wire:click="startAllActions">Выполнить все действия</flux:button>
+                    <flux:separator />
                     <flux:heading size="xl">Ручная выгрузка</flux:heading>
+                    <flux:separator />
                     <flux:button wire:click="getOrders">Получить заказы</flux:button>
                     <flux:subheading>Получить заказы с ОЗОН и ВБ в которых указана данная организация</flux:subheading>
+                    <flux:separator />
                     @if($orders && $orders->count())
                         <flux:button variant="danger" wire:click="clear">Очистить</flux:button>
                         <flux:subheading>При очистке текущие заказы больше не будут учитываться при выгрузке прайса
                         </flux:subheading>
+                        <flux:separator />
                         <flux:button wire:click="writeOffBalance">Списать остатки со складов</flux:button>
                         <flux:subheading>Списать остатки в счёт заказов с указанных выше складов</flux:subheading>
                         @if($writeOff)
-                            <flux:button wire:click="downloadWriteOffBalance">Скачать списанные</flux:button>
-                            <flux:button variant="danger" wire:click="writeOffBalanceRollback">Отменить списание
-                            </flux:button>
+                            <div class="flex gap-6">
+                                <flux:button wire:click="downloadWriteOffBalance">Скачать списанные</flux:button>
+                                <flux:button variant="danger" wire:click="writeOffBalanceRollback">Отменить списание
+                                </flux:button>
+                            </div>
                         @endif
+                        <flux:separator />
                         <flux:button wire:click="purchaseOrder">Сформировать заказы поставщикам</flux:button>
                         <flux:subheading>Сформировать заказы поставщикам в формате EXCEL</flux:subheading>
                         <div class="flex gap-6">
                             @foreach($organization->supplierOrderReports as $report)
-                                <flux:button wire:click="downloadPurchaseOrder({{$report}})" wire:target="downloadPurchaseOrder({{$report}})">{{$report->supplier->name}}
-                                    <flux:badge color="lime">{{$orders->where('orderable.items.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('orderable.items.item.id')->count()}}</flux:badge>
+                                <flux:button wire:click="downloadPurchaseOrder({{$report}})"
+                                             wire:target="downloadPurchaseOrder({{$report}})">{{$report->supplier->name}}
+                                    <flux:badge
+                                        color="lime">{{$ordersItems->where('item.supplier_id', $report->supplier_id)->where('count', '>', 0)->groupBy('item_id')->count()}}</flux:badge>
                                 </flux:button>
                             @endforeach
                         </div>
+                        <flux:separator/>
                         <flux:heading size="xl">Управление кабинетами</flux:heading>
                         <flux:button wire:click="setOrdersState">Поменять статус заказов</flux:button>
                         <flux:subheading>Установить статусы в ОЗОН на "Готово к отгрузке"</flux:subheading>
-                        <flux:button wire:click="writeOffMarketsStocks">Списать остатки с остальных кабинетов</flux:button>
+                        <flux:button wire:click="writeOffMarketsStocks">Списать остатки с остальных кабинетов
+                        </flux:button>
                     @endif
                 </flux:card>
             </x-blocks.main-block>
@@ -98,7 +109,8 @@
                                     <flux:cell>{{$order->orderable->itemable instanceof \App\Models\Bundle ? 'Комплект' : 'Товар'}}</flux:cell>
                                     <flux:cell>
                                         @foreach($order->items as $item)
-                                            <flux:link :href="route('item-edit', ['item' => $item->item->getKey()])">{{$item->item->code}}</flux:link>
+                                            <flux:link
+                                                :href="route('item-edit', ['item' => $item->item->getKey()])">{{$item->item->code}}</flux:link>
                                         @endforeach
                                     </flux:cell>
                                     <flux:cell>{{$order->number}}</flux:cell>

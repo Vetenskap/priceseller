@@ -16,7 +16,6 @@ class BergApiItemAdditionalAttributeLinkIndex extends Component
 
     public BergApi $bergApi;
 
-    #[On('delete-link')]
     public function mount(): void
     {
         $this->form->setBergApi($this->bergApi);
@@ -27,9 +26,10 @@ class BergApiItemAdditionalAttributeLinkIndex extends Component
         $this->form->store();
     }
 
-    public function update(): void
+    public function destroy($id): void
     {
-        $this->dispatch('update-link')->component(BergApiItemAdditionalAttributeLinkEdit::class);
+        $link = $this->bergApi->itemAdditionalAttributeLinks()->findOrFail($id);
+        $link->delete();
     }
 
     public function render(): View|Application|Factory|\Illuminate\View\View|\Illuminate\Contracts\Foundation\Application

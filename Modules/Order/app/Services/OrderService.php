@@ -5,10 +5,8 @@ namespace Modules\Order\Services;
 use Alcohol\ISO4217;
 use App\Models\Bundle;
 use App\Models\Organization;
-use App\Models\OzonItem;
 use App\Models\User;
 use App\Models\Warehouse;
-use App\Models\WbItem;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
@@ -18,8 +16,9 @@ use Modules\Order\Exports\SupplierOrderExport;
 use Modules\Order\HttpClient\WbClient;
 use Modules\Order\HttpClient\OzonClient;
 use Modules\Order\Models\Order;
+use Modules\Order\Models\OrderItem;
+use Modules\Order\Models\OrderItemWriteOffItemWarehouseStock;
 use Modules\Order\Models\SupplierOrderReport;
-use Modules\Order\Models\WriteOffItemWarehouseStock;
 
 class OrderService
 {
@@ -68,7 +67,7 @@ class OrderService
                     $iso4217 = new ISO4217();
 
                     try {
-                        $currency_code = collect($iso4217->getByNumeric((int) $order->get('currencyCode')))->get('alpha3');
+                        $currency_code = collect($iso4217->getByNumeric((int)$order->get('currencyCode')))->get('alpha3');
                     } catch (\DomainException $e) {
                         $currency_code = 'Не определено';
                     }
@@ -86,11 +85,15 @@ class OrderService
                         foreach ($wbItem->itemable->items as $item) {
                             $orderModel->items()->create([
                                 'item_id' => $item->id,
+                                'multiplicity' => $item->pivot->multiplicity,
+                                'count' => $order->get('count'),
                             ]);
                         }
                     } else {
                         $orderModel->items()->create([
                             'item_id' => $wbItem->itemable->id,
+                            'multiplicity' => $wbItem->itemable->multiplicity,
+                            'count' => $order->get('count'),
                         ]);
                     }
 
@@ -143,11 +146,15 @@ class OrderService
                             foreach ($ozonItem->itemable->items as $item) {
                                 $orderModel->items()->create([
                                     'item_id' => $item->id,
+                                    'multiplicity' => $item->pivot->multiplicity,
+                                    'count' => $product->get('quantity'),
                                 ]);
                             }
                         } else {
                             $orderModel->items()->create([
                                 'item_id' => $ozonItem->itemable->id,
+                                'multiplicity' => $ozonItem->itemable->multiplicity,
+                                'count' => $product->get('quantity'),
                             ]);
                         }
 
@@ -165,50 +172,52 @@ class OrderService
     {
         $total = 0;
 
-        $warehouses = collect(Arr::map($warehouses, function ($warehouseId) {
+        $warehouses = collect(Arr::map($warehouses, function ($key, $warehouseId) {
             return Warehouse::findOrFail($warehouseId);
         }));
 
         DB::transaction(function () use ($warehouses, &$total) {
             Order::where('organization_id', $this->organizationId)->whereHas('orderable')->where('state', 'new')->chunk(100, function (Collection $orders) use ($warehouses, &$total) {
                 $orders->each(function (Order $order) use ($warehouses, &$total) {
-                    $warehouses->each(function (Warehouse $warehouse) use ($order, &$total) {
-                        $stock = $warehouse->stocks()->where('item_id', $order->orderable->item_id)->first();
-                        if ($stock && $stock->stock > 0 && $order->count - $order->writeOffStocks->first()?->stock > 0) {
-                            if ($stock->stock - $order->count >= 0) {
+                    $order->items->each(function (OrderItem $item) use ($warehouses, &$total) {
+                        $warehouses->each(function (Warehouse $warehouse) use ($item, &$total) {
+                            $stock = $warehouse->stocks()->where('item_id', $item->item_id)->first();
+                            if ($stock && $stock->stock > 0 && $item->count - $item->writeOffStocks->first()?->stock > 0) {
+                                if ($stock->stock - $item->count >= 0) {
 
-                                $total++;
+                                    $total++;
 
-                                $stock->stock -= $order->count;
-                                if ($writeOff = $order->writeOffStocks()->where('item_warehouse_stock_id', $stock->id)->first()) {
-                                    $writeOff->stock += $order->count;
-                                    $writeOff->save();
+                                    $stock->stock -= $item->count;
+                                    if ($writeOff = $item->writeOffStocks()->where('item_warehouse_stock_id', $stock->id)->first()) {
+                                        $writeOff->stock += $item->count;
+                                        $writeOff->save();
+                                    } else {
+                                        $item->writeOffStocks()->create([
+                                            'stock' => $item->count,
+                                            'item_warehouse_stock_id' => $stock->id,
+                                        ]);
+                                    }
+                                    $item->count = 0;
                                 } else {
-                                    $order->writeOffStocks()->create([
-                                        'stock' => $order->count,
-                                        'item_warehouse_stock_id' => $stock->id,
-                                    ]);
-                                }
-                                $order->count = 0;
-                            } else {
 
-                                $total++;
+                                    $total++;
 
-                                if ($writeOff = $order->writeOffStocks()->where('item_warehouse_stock_id', $stock->id)->first()) {
-                                    $writeOff->stock += $stock->stock;
-                                    $writeOff->save();
-                                } else {
-                                    $order->writeOffStocks()->create([
-                                        'stock' => $stock->stock,
-                                        'item_warehouse_stock_id' => $stock->id,
-                                    ]);
+                                    if ($writeOff = $item->writeOffStocks()->where('item_warehouse_stock_id', $stock->id)->first()) {
+                                        $writeOff->stock += $stock->stock;
+                                        $writeOff->save();
+                                    } else {
+                                        $item->writeOffStocks()->create([
+                                            'stock' => $stock->stock,
+                                            'item_warehouse_stock_id' => $stock->id,
+                                        ]);
+                                    }
+                                    $item->count -= $stock->stock;
+                                    $stock->stock = 0;
                                 }
-                                $order->count -= $stock->stock;
-                                $stock->stock = 0;
+                                $stock->save();
+                                $item->save();
                             }
-                            $stock->save();
-                            $order->save();
-                        }
+                        });
                     });
                 });
             });
@@ -219,19 +228,19 @@ class OrderService
 
     public function writeOffBalanceRollback(): void
     {
-        WriteOffItemWarehouseStock::whereHas('order', function (Builder $query) {
+        OrderItemWriteOffItemWarehouseStock::whereHas('orderItem.order', function (Builder $query) {
             $query->where('organization_id', $this->organizationId);
         })
             ->chunk(100, function (Collection $writeOffStocks) {
-                $writeOffStocks->each(function (WriteOffItemWarehouseStock $writeOffStock) {
+                $writeOffStocks->each(function (OrderItemWriteOffItemWarehouseStock $writeOffStock) {
 
                     $itemWarehouseStock = $writeOffStock->itemWarehouseStock;
                     $itemWarehouseStock->stock = $itemWarehouseStock->stock + $writeOffStock->stock;
-                    $order = $writeOffStock->order;
-                    $order->count += $writeOffStock->stock;
+                    $orderItem = $writeOffStock->orderItem;
+                    $orderItem->count += $writeOffStock->stock;
 
                     $itemWarehouseStock->save();
-                    $order->save();
+                    $orderItem->save();
                     $writeOffStock->delete();
 
                 });
@@ -244,7 +253,9 @@ class OrderService
         $organization->orders()->chunk(100, function (Collection $orders) {
             $orders->each(function (Order $order) {
 
-                $order->writeOffStocks()->delete();
+                $order->items->each(function (OrderItem $item) {
+                    $item->writeOffStocks()->delete();
+                });
                 $order->markAccepted();
             });
         });
@@ -262,12 +273,14 @@ class OrderService
 
         $organization->supplierOrderReports()->delete();
 
-        $organization
-            ->orders()
-            ->with('orderable.itemable')
-            ->where('state', 'new')
+        OrderItem::whereHas('order', function (Builder $query) {
+            $query
+                ->where('state', 'new')
+                ->where('organization_id', $this->organizationId);
+        })
+            ->with('item')
             ->get()
-            ->groupBy('items.supplier_id')
+            ->groupBy('item.supplier_id')
             ->each(function (Collection $hh, string $supplierId) {
 
                 $uuid = Str::uuid();
@@ -287,7 +300,7 @@ class OrderService
         $organization = Organization::find($this->organizationId);
 
         $this->getOrders();
-        $this->writeOffBalance($organization->selectedOrdersWarehouses->map(fn (Warehouse $warehouse) => $warehouse->id)->toArray());
+        $this->writeOffBalance($organization->selectedOrdersWarehouses->map(fn(Warehouse $warehouse) => $warehouse->id)->toArray());
         $this->purchaseOrder();
 
         $ozonService = new OzonOrderService($organization, $this->user);

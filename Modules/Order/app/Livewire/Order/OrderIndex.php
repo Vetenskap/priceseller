@@ -2,7 +2,6 @@
 
 namespace Modules\Order\Livewire\Order;
 
-use App\Livewire\Components\Toast;
 use App\Livewire\ModuleComponent;
 use App\Livewire\Traits\WithJsNotifications;
 use App\Models\Organization;
@@ -18,8 +17,9 @@ use Livewire\WithFileUploads;
 use Modules\Order\Exports\NotChangeOzonStatesExport;
 use Modules\Order\Exports\WriteOffItemWarehouseStockExport;
 use Modules\Order\Imports\NotChangeOzonStatesImport;
+use Modules\Order\Models\OrderItem;
+use Modules\Order\Models\OrderItemWriteOffItemWarehouseStock;
 use Modules\Order\Models\SupplierOrderReport;
-use Modules\Order\Models\WriteOffItemWarehouseStock;
 use Modules\Order\Services\OrderService;
 use Modules\Order\Services\OzonOrderService;
 use Modules\Order\Services\WbOrderService;
@@ -34,6 +34,7 @@ class OrderIndex extends ModuleComponent
 
     public ?Organization $organization = null;
     public ?Collection $orders = null;
+    public ?Collection $ordersItems = null;
 
     #[Session]
     public array $selectedWarehouses = [];
@@ -89,8 +90,15 @@ class OrderIndex extends ModuleComponent
             $this->orders = $this->organization
                 ->orders()
                 ->whereHas('orderable')
-                ->with('orderable.itemable')
+                ->with(['orderable.itemable'])
                 ->where('state', 'new')
+                ->get();
+            $this->ordersItems = OrderItem::whereHas('order', function (Builder $query) {
+                $query
+                    ->where('state', 'new')
+                    ->where('organization_id', $this->organizationId);
+            })
+                ->with('item')
                 ->get();
             $this->selectedWarehouses = $this->organization->selectedOrdersWarehouses->mapWithKeys(fn (Warehouse $selectedWarehouses) => [$selectedWarehouses->id => true])->toArray();
             $this->automatic = $this->organization->automaticUnloadOrder ? boolval($this->organization->automaticUnloadOrder->automatic) : false;
@@ -101,7 +109,7 @@ class OrderIndex extends ModuleComponent
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $total = $service->getOrders();
-        $this->js((new Toast('Успех', 'Успешно получено заказов: ' . $total))->success());
+        \Flux::toast('Успешно получено заказов: ' . $total);
     }
 
     public function selectWarehouse(string $id): void
@@ -119,7 +127,7 @@ class OrderIndex extends ModuleComponent
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $total = $service->writeOffBalance($this->selectedWarehouses);
-        $this->js((new Toast('Успех', 'Списано: ' . $total))->success());
+        \Flux::toast('Списано: ' . $total);
     }
 
     public function downloadWriteOffBalance(): BinaryFileResponse
@@ -152,7 +160,7 @@ class OrderIndex extends ModuleComponent
     {
         $service = new OrderService($this->organizationId, auth()->user());
         $service->writeOffBalanceRollback();
-        $this->js((new Toast('Успех', 'Все остатки возвращены на склад'))->success());
+        \Flux::toast('Все остатки возвращены на склад');
     }
 
     public function writeOffMarketsStocks(): void
@@ -163,7 +171,7 @@ class OrderIndex extends ModuleComponent
         $service = new WbOrderService($this->organization, auth()->user());
         $service->writeOffStocks();
 
-        $this->js((new Toast('Успех', 'Все остатки списаны с кабинетов'))->success());
+        \Flux::toast('Все остатки списаны с кабинетов');
     }
 
     public function setOrdersState(): void
@@ -171,7 +179,7 @@ class OrderIndex extends ModuleComponent
         $service = new OzonOrderService($this->organization, auth()->user());
         $total = $service->setStates();
 
-        $this->js((new Toast('Успех', "Изменён статус у {$total} заказов на Озоне"))->success());
+        \Flux::toast("Изменён статус у {$total} заказов на Озоне");
     }
 
     public function startAllActions(): void
@@ -189,7 +197,7 @@ class OrderIndex extends ModuleComponent
         return view('order::livewire.order.order-index', [
             'organizations' => auth()->user()->organizations,
             'warehouses' => auth()->user()->warehouses,
-            'writeOff' => WriteOffItemWarehouseStock::whereHas('order', function (Builder $query) {
+            'writeOff' => OrderItemWriteOffItemWarehouseStock::whereHas('orderItem.order', function (Builder $query) {
                 $query->where('organization_id', $this->organizationId);
             })->count(),
             'modules' => $this->getEnabledModules()

@@ -1,25 +1,32 @@
 <div>
-    <x-layouts.main-container>
+    @if(!($bergApi->times()->count() >= 3))
         <x-blocks.main-block>
-            <x-layouts.title name="Добавление нового времени выгрузки"/>
+            <flux:card>
+                <flux:input.group>
+                    <flux:input placeholder="Время" type="time" wire:model="time"/>
+
+                    <flux:button icon="plus" wire:click="store">Добавить</flux:button>
+                </flux:input.group>
+            </flux:card>
         </x-blocks.main-block>
-        <x-blocks.flex-block-end>
-            <x-inputs.time-picker name="time" field="time">Время</x-inputs.time-picker>
-            @if(!($bergApi->times()->count() >= 3))
-                <div class="self-center">
-                    <x-success-button wire:click="store">Добавить</x-success-button>
-                </div>
-            @endif
-        </x-blocks.flex-block-end>
-    </x-layouts.main-container>
-    @if($bergApi->times->isNotEmpty())
-        <x-layouts.main-container>
-            <x-blocks.main-block>
-                <x-layouts.title name="Список" />
-            </x-blocks.main-block>
-            @foreach($bergApi->times as $time)
-                <livewire:bergapi::berg-api-time.berg-api-time-edit :berg-api-time="$time" wire:key="{{$time->getKey()}}"/>
-            @endforeach
-        </x-layouts.main-container>
     @endif
+    <x-blocks.main-block>
+        <flux:card>
+            <flux:table>
+                <flux:columns>
+                    <flux:column>Время</flux:column>
+                </flux:columns>
+                <flux:rows>
+                    @foreach($bergApi->times as $time)
+                        <flux:row :key="$time->getKey()">
+                            <flux:cell>{{$time->time}}</flux:cell>
+                            <flux:cell>
+                                <flux:button icon="trash" variant="danger" wire:click="destroy({{$time->getKey()}})" wire:target="destroy({{$time->getKey()}})" />
+                            </flux:cell>
+                        </flux:row>
+                    @endforeach
+                </flux:rows>
+            </flux:table>
+        </flux:card>
+    </x-blocks.main-block>
 </div>

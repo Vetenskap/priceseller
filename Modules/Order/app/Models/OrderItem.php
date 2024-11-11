@@ -5,6 +5,7 @@ namespace Modules\Order\Models;
 use App\Models\Item;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class OrderItem extends Model
 {
@@ -12,6 +13,7 @@ class OrderItem extends Model
         'item_id',
         'order_id',
         'multiplicity',
+        'count'
     ];
 
     public function item(): BelongsTo
@@ -22,6 +24,11 @@ class OrderItem extends Model
     public function order(): BelongsTo
     {
         return $this->belongsTo(Order::class, 'order_id', 'id');
+    }
+
+    public function writeOffStocks(): HasMany
+    {
+        return $this->hasMany(OrderItemWriteOffItemWarehouseStock::class, 'order_item_id', 'id');
     }
 
 }
