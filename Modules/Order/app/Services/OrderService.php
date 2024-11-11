@@ -68,7 +68,7 @@ class OrderService
                     $iso4217 = new ISO4217();
 
                     try {
-                        $currency_code = collect($iso4217->getByNumeric($order->get('currencyCode')))->get('alpha3');
+                        $currency_code = collect($iso4217->getByNumeric((int) $order->get('currencyCode')))->get('alpha3');
                     } catch (\DomainException $e) {
                         $currency_code = 'Не определено';
                     }

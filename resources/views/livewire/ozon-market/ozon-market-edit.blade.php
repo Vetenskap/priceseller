@@ -45,7 +45,7 @@
 
                                 @foreach($this->currentUser()->organizations as $organization)
                                     <flux:option
-                                            :value="$organization->getKey()">{{$organization->name}}</flux:option>
+                                        :value="$organization->getKey()">{{$organization->name}}</flux:option>
                                 @endforeach
                             </flux:select>
                         </div>
@@ -67,31 +67,60 @@
                         </div>
                         <div class="flex gap-6 flex-wrap">
                             <div>
-                                <flux:tooltip content="Итоговая минимальная цена умноженная на этот коэффициент">
-                                    <flux:input wire:model="form.min_price_percent"
-                                                label="Процент увел. мин. цены"/>
-                                </flux:tooltip>
+                                <flux:field>
+                                    <flux:tooltip content="Итоговая минимальная цена умноженная на этот коэффициент">
+                                        <flux:label>Процент увел. мин. цены</flux:label>
+                                    </flux:tooltip>
+
+                                    <flux:input wire:model="form.min_price_percent" type="number"/>
+
+                                    <flux:error name="form.min_price_percent"/>
+                                </flux:field>
                             </div>
                             <div>
-                                <flux:tooltip content="Минимальная цена * %">
-                                    <flux:input wire:model="form.max_price_percent" label="Цена до скидки, %"/>
-                                </flux:tooltip>
+                                <flux:field>
+                                    <flux:tooltip content="Минимальная цена * %">
+                                        <flux:label>Цена до скидки, %</flux:label>
+                                    </flux:tooltip>
+
+                                    <flux:input wire:model="form.max_price_percent" type="number"/>
+
+                                    <flux:error name="form.max_price_percent"/>
+                                </flux:field>
                             </div>
                             <div>
-                                <flux:tooltip content="Минимальная цена * %">
-                                    <flux:input wire:model="form.seller_price_percent" label="Цена продажи, %"/>
-                                </flux:tooltip>
+                                <flux:field>
+                                    <flux:tooltip content="Минимальная цена * %">
+                                        <flux:label>Цена продажи, %</flux:label>
+                                    </flux:tooltip>
+
+                                    <flux:input wire:model="form.seller_price_percent" type="number"/>
+
+                                    <flux:error name="form.seller_price_percent"/>
+                                </flux:field>
                             </div>
                             <flux:input wire:model="form.acquiring" label="Эквайринг"/>
                             <div>
-                                <flux:tooltip content="Считается 5,5 % от цены на сайте">
-                                    <flux:input wire:model="form.last_mile" label="Последняя миля"/>
-                                </flux:tooltip>
+                                <flux:field>
+                                    <flux:tooltip content="Считается 5,5 % от цены на сайте">
+                                        <flux:label>Последняя миля</flux:label>
+                                    </flux:tooltip>
+
+                                    <flux:input wire:model="form.last_mile" type="number"/>
+
+                                    <flux:error name="form.last_mile"/>
+                                </flux:field>
                             </div>
                             <div>
-                                <flux:tooltip content="Берет комиссию мили не выше этой">
-                                    <flux:input wire:model="form.max_mile" label="Максимальная миля"/>
-                                </flux:tooltip>
+                                <flux:field>
+                                    <flux:tooltip content="Берет комиссию мили не выше этой">
+                                        <flux:label>Максимальная миля</flux:label>
+                                    </flux:tooltip>
+
+                                    <flux:input wire:model="form.max_mile" type="number"/>
+
+                                    <flux:error name="form.max_mile"/>
+                                </flux:field>
                             </div>
                         </div>
                     </flux:card>
