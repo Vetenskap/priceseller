@@ -38,13 +38,11 @@
                                 <flux:cell>{{$warehouse->supplierWarehouse->name}}</flux:cell>
                                 <flux:cell>{{$warehouse->created_at}}</flux:cell>
                                 <flux:cell align="right">
-                                    <flux:icon.trash wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
-                                                     wire:loading.remove
-                                                     wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
-                                                     wire:confirm="Вы действительно хотите удалить этот склад?"
-                                                     class="cursor-pointer hover:text-red-400"/>
-                                    <flux:icon.loading wire:loading
-                                                       wire:target="destroy({{ json_encode($warehouse->getKey()) }})"/>
+                                    <flux:button size="sm" variant="danger" icon="trash"
+                                                 wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                 wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                 wire:confirm="Вы действительно хотите удалить этот склад?"
+                                    />
                                 </flux:cell>
                             </flux:row>
                         @endforeach

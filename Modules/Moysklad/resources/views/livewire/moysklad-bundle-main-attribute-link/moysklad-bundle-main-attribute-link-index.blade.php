@@ -64,13 +64,11 @@
                                         <flux:switch :checked="boolval($bundleMainAttributeLink->invert)" disabled/>
                                     </flux:cell>
                                     <flux:cell align="right">
-                                        <flux:icon.trash wire:click="destroy({{ json_encode($bundleMainAttributeLink->getKey()) }})"
-                                                         wire:loading.remove
-                                                         wire:target="destroy({{ json_encode($bundleMainAttributeLink->getKey()) }})"
-                                                         wire:confirm="Вы действительно хотите удалить этот атрибут?"
-                                                         class="cursor-pointer hover:text-red-400"/>
-                                        <flux:icon.loading wire:loading
-                                                           wire:target="destroy({{ json_encode($bundleMainAttributeLink->getKey()) }})"/>
+                                        <flux:button size="sm" variant="danger" icon="trash"
+                                                     wire:click="destroy({{ json_encode($bundleMainAttributeLink->getKey()) }})"
+                                                     wire:target="destroy({{ json_encode($bundleMainAttributeLink->getKey()) }})"
+                                                     wire:confirm="Вы действительно хотите удалить этот атрибут?"
+                                        />
                                     </flux:cell>
                                 </flux:row>
                             @endforeach

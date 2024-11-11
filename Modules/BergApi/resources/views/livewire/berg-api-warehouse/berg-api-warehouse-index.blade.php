@@ -35,7 +35,7 @@
                                 <flux:cell>{{$warehouse->supplierWarehouse->name}}</flux:cell>
                                 <flux:cell>{{$warehouse->created_at}}</flux:cell>
                                 <flux:cell align="right">
-                                    <flux:button icon="trash" variant="danger"
+                                    <flux:button size="sm" icon="trash" variant="danger"
                                                  wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
                                                  wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
                                                  wire:confirm="Вы действительно хотите удалить этот склад?"

@@ -28,8 +28,8 @@
                         <flux:row :key="$link->getKey()">
                             <flux:cell>{{$link->itemAttribute->name}}</flux:cell>
                             <flux:cell>{{collect(\Modules\BergApi\HttpClient\Resources\Resource::ATTRIBUTES)->firstWhere('name', $link->link)['label']}}</flux:cell>
-                            <flux:cell>
-                                <flux:button icon="trash" variant="danger" wire:click="destroy({{$link->getKey()}})" wire:target="destroy({{$link->getKey()}})" />
+                            <flux:cell align="right">
+                                <flux:button size="sm" icon="trash" variant="danger" wire:click="destroy({{$link->getKey()}})" wire:target="destroy({{$link->getKey()}})" />
                             </flux:cell>
                         </flux:row>
                     @endforeach

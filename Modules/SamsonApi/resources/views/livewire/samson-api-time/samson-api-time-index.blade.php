@@ -20,8 +20,8 @@
                     @foreach($samsonApi->times as $time)
                         <flux:row :key="$time->getKey()">
                             <flux:cell>{{$time->time}}</flux:cell>
-                            <flux:cell>
-                                <flux:button icon="trash" variant="danger" wire:click="destroy({{$time->getKey()}})" wire:target="destroy({{$time->getKey()}})" />
+                            <flux:cell align="right">
+                                <flux:button size="sm" icon="trash" variant="danger" wire:click="destroy({{$time->getKey()}})" wire:target="destroy({{$time->getKey()}})" />
                             </flux:cell>
                         </flux:row>
                     @endforeach
