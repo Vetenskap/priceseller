@@ -17,15 +17,15 @@ class BaseSettingsIndex extends BaseComponent
 
     public $enabled_use_buy_price_reserve = false;
 
-    public function mount()
+    public function mount(): void
     {
         $this->user = $this->currentUser();
 
         $this->baseSettings = $this->user->baseSettings;
-        $this->enabled_use_buy_price_reserve = $this->baseSettings->enabled_use_buy_price_reserve ?? false;
+        $this->enabled_use_buy_price_reserve = (bool) $this->baseSettings->enabled_use_buy_price_reserve ?? false;
     }
 
-    public function save()
+    public function save(): void
     {
         if ($this->baseSettings) {
             $baseSettings = $this->baseSettings;

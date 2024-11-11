@@ -1,15 +1,11 @@
 <div>
     <x-layouts.header name="Общие настройки"/>
     <x-layouts.main-container>
-        <x-layouts.actions>
-            <x-success-button wire:click="save">Сохранить</x-success-button>
-        </x-layouts.actions>
-        <x-blocks.flex-block>
-            <x-inputs.switcher :checked="$enabled_use_buy_price_reserve" wire:model="enabled_use_buy_price_reserve"/>
-            <x-layouts.simple-text name="Использовать резервную закупочную цену" />
-        </x-blocks.flex-block>
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
+                <flux:button wire:click="save">Сохранить</flux:button>
+                <flux:switch wire:model="enabled_use_buy_price_reserve" label="Использовать резервную закупочную цену"/>
+            </flux:card>
+        </x-blocks.main-block>
     </x-layouts.main-container>
-    <div wire:loading wire:target="save">
-        <x-loader />
-    </div>
 </div>
