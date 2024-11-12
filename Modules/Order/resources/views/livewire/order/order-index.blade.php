@@ -128,42 +128,14 @@
         @endif
     @endif
     @if($page === 'states')
-        <x-layouts.module-container>
-            <x-blocks.main-block>
-                <x-blocks.main-block>
-                    <x-layouts.title name="Экспорт"/>
-                </x-blocks.main-block>
-                <x-blocks.center-block>
-                    <x-secondary-button wire:click="export">Экспортировать</x-secondary-button>
-                </x-blocks.center-block>
-                <x-blocks.main-block>
-                    <x-layouts.title name="Загрузить товары"/>
-                </x-blocks.main-block>
-                <form wire:submit="import">
-                    <div
-                        x-data="{ uploading: false, progress: 0 }"
-                        x-on:livewire-upload-start="uploading = true"
-                        x-on:livewire-upload-finish="uploading = false"
-                        x-on:livewire-upload-cancel="uploading = false"
-                        x-on:livewire-upload-error="uploading = false"
-                        x-on:livewire-upload-progress="progress = $event.detail.progress"
-                    >
-                        <x-blocks.main-block>
-                            <x-file-input wire:model="file"/>
-                        </x-blocks.main-block>
-
-                        <x-blocks.main-block x-show="uploading">
-                            <x-file-progress x-bind:style="{ width: progress + '%' }"/>
-                        </x-blocks.main-block>
-
-                        @if($file)
-                            <x-blocks.main-block class="text-center">
-                                <x-success-button wire:click="import">Загрузить</x-success-button>
-                            </x-blocks.main-block>
-                        @endif
-                    </div>
-                </form>
-            </x-blocks.main-block>
-        </x-layouts.module-container>
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
+                <flux:heading size="xl">Экспорт</flux:heading>
+                <flux:button>Экспортировать</flux:button>
+                <flux:separator />
+                <flux:heading size="xl">Загрузить товары</flux:heading>
+                <x-file-block action="import" />
+            </flux:card>
+        </x-blocks.main-block>
     @endif
 </x-layouts.module-index-layout>

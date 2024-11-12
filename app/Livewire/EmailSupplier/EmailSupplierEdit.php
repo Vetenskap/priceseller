@@ -33,7 +33,7 @@ class EmailSupplierEdit extends BaseComponent
 
     public function update(): void
     {
-        $this->authorizeForUser($this->user(), 'update', $this->emailSupplier->email);
+        $this->authorizeForUser($this->user(), 'update', $this->emailSupplier->mainEmail);
 
         $this->form->update();
 
@@ -42,7 +42,7 @@ class EmailSupplierEdit extends BaseComponent
 
     public function destroy(): void
     {
-        $this->authorizeForUser($this->user(), 'update', $this->emailSupplier->email);
+        $this->authorizeForUser($this->user(), 'update', $this->emailSupplier->mainEmail);
 
         $this->form->destroy($this->emailSupplier->supplier_id);
     }

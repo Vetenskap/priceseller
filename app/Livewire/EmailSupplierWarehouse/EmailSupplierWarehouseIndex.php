@@ -27,7 +27,7 @@ class EmailSupplierWarehouseIndex extends BaseComponent
 
     public function store(): void
     {
-        $this->authorizeForUser($this->user(), 'update', $this->emailSupplier->email);
+        $this->authorizeForUser($this->user(), 'update', $this->emailSupplier->mainEmail);
 
         $this->form->store();
 

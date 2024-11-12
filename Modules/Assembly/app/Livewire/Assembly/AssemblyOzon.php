@@ -134,12 +134,12 @@ class AssemblyOzon extends BaseComponent
 
     public function loadOrders(): void
     {
-        $list = new PostingUnfulfilledList();
+        $list = new PostingUnfulfilledList($this->warehouse->market->api_key, $this->warehouse->market->client_id);
         $list->setFilterCutoffFrom(now());
         $list->setFilterCutoffTo(now()->addDays(10));
         $list->setWarehouseId([$this->warehouse->warehouse_id]);
 
-        $postings = $list->next($this->warehouse->market->api_key, $this->warehouse->market->client_id);
+        $postings = $list->next();
 
         $this->postings = $postings->map(fn(Posting $posting) => $posting->toCollection($this->warehouse->market));
     }

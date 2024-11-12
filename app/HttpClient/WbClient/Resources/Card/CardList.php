@@ -85,4 +85,44 @@ class CardList
         return $this->cursor_total >= $this->cursor_limit;
     }
 
+    public function setSortAscending(bool $sort_ascending): void
+    {
+        $this->sort_ascending = $sort_ascending;
+    }
+
+    public function setFilterWithPhoto(int $filter_with_photo): void
+    {
+        $this->filter_with_photo = $filter_with_photo;
+    }
+
+    public function setFilterTextSearch(string $filter_text_search): void
+    {
+        $this->filter_text_search = $filter_text_search;
+    }
+
+    public function setFilterTagIds(array $filter_tag_ids): void
+    {
+        $this->filter_tag_ids = $filter_tag_ids;
+    }
+
+    public function setFilterAllowedCategoriesOnly(array $filter_allowed_categories_only): void
+    {
+        $this->filter_allowed_categories_only = $filter_allowed_categories_only;
+    }
+
+    public function setFilterObjectIds(array $filter_object_ids): void
+    {
+        $this->filter_object_ids = $filter_object_ids;
+    }
+
+    public function setFilterBrands(array $filter_brands): void
+    {
+        $this->filter_brands = $filter_brands;
+    }
+
+    public function setFilterImtId(int $filter_imt_id): void
+    {
+        $this->filter_imt_id = $filter_imt_id;
+    }
+
 }

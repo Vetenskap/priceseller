@@ -3,6 +3,7 @@
 namespace App\HttpClient\WbClient;
 
 use App\HttpClient\WbClient\Resources\Card\CardList;
+use App\HttpClient\WbClient\Resources\Order;
 use App\HttpClient\WbClient\Resources\Tariffs\Commission;
 use App\Models\Supplier;
 use App\Services\SupplierReportService;
@@ -22,7 +23,8 @@ class WbClient
 
     CONST RATE_LIMITS = [
         CardList::ENDPOINT => 100,
-        Commission::ENDPOINT => 1
+        Commission::ENDPOINT => 1,
+        Order::ENDPOINT => 300,
     ];
 
     public function __construct(string $api_key)

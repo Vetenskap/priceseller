@@ -2,61 +2,125 @@
 
 namespace App\HttpClient\WbClient\Resources\Card;
 
+use App\Models\WbItem;
+use App\Models\WbMarket;
 use Illuminate\Support\Collection;
 
 class Card
 {
-    protected int $nm_id;
-    protected string $vendor_code;
-    protected int $subject_id;
-    protected string $subject_name;
-    protected Collection $photos;
+    const ATTRIBUTES = [
+        "Основная информация" => [
+            ["name" => "nmID", "label" => "Артикул WB"],
+            ["name" => "imtID", "label" => "ID карточки товара"],
+            ["name" => "nmUUID", "label" => "Внутренний технический ID товара"],
+            ["name" => "subjectID", "label" => "ID предмета"],
+            ["name" => "vendorCode", "label" => "Артикул продавца"],
+            ["name" => "subjectName", "label" => "Название предмета"],
+            ["name" => "brand", "label" => "Бренд"],
+            ["name" => "title", "label" => "Наименование товара"],
+            ["name" => "photos", "label" => "Массив фото"],
+            ["name" => "video", "label" => "URL видео"],
+            ["name" => "characteristics", "label" => "Характеристики"],
+            ["name" => "sizes", "label" => "Размеры товара"],
+            ["name" => "tags", "label" => "Теги"],
+            ["name" => "createdAt", "label" => "Дата создания"],
+            ["name" => "updatedAt", "label" => "Дата изменения"],
+        ],
+        "Габариты упаковки товара, см" => [
+            ["name" => "dimensions_length", "label" => "Длина"],
+            ["name" => "dimensions_width", "label" => "Ширина"],
+            ["name" => "dimensions_height", "label" => "Высота"],
+            ["name" => "dimensions_isValid", "label" => "Потенциальная некорректность габаритов товара"],
+        ]
+    ];
+
+    protected ?int $nmID;
+    protected ?int $imtID;
+    protected ?string $nmUUID;
+    protected ?int $subjectID;
+    protected ?string $vendorCode;
+    protected ?string $subjectName;
+    protected ?string $brand;
+    protected ?string $title;
+    protected ?Collection $photos;
     protected ?string $video;
-    protected Collection $sizes;
-    protected int $dimensions_length;
-    protected int $dimensions_width;
-    protected int $dimensions_height;
-    protected bool $dimensions_isValid;
-    protected Collection $characteristics;
-    protected string $created_at;
-    protected string $updated_at;
+    protected ?int $dimensions_length;
+    protected ?int $dimensions_width;
+    protected ?int $dimensions_height;
+    protected ?bool $dimensions_isValid;
+    protected ?Collection $characteristics;
+    protected ?Collection $sizes;
+    protected ?Collection $tags;
+    protected ?string $createdAt;
+    protected ?string $updatedAt;
+    protected ?WbItem $product;
 
     public function __construct(Collection $card)
     {
-        $this->nm_id = $card->get('nmID');
-        $this->vendor_code = $card->get('vendorCode');
-        $this->subject_id = $card->get('subjectID');
-        $this->subject_name = $card->get('subjectName');
+        $this->nmID = $card->get('nmID');
+        $this->imtID = $card->get('imtID');
+        $this->nmUUID = $card->get('nmUUID');
+        $this->subjectID = $card->get('subjectID');
+        $this->vendorCode = $card->get('vendorCode');
+        $this->subjectName = $card->get('subjectName');
+        $this->brand = $card->get('brand');
+        $this->title = $card->get('title');
         $this->photos = $card->get('photos');
         $this->video = $card->get('video');
-        $this->sizes = $card->get('sizes');
         $this->dimensions_length = $card->get('dimensions')->get('length');
         $this->dimensions_width = $card->get('dimensions')->get('width');
         $this->dimensions_height = $card->get('dimensions')->get('height');
         $this->dimensions_isValid = $card->get('dimensions')->get('isValid');
         $this->characteristics = $card->get('characteristics');
-        $this->created_at = $card->get('createdAt');
-        $this->updated_at = $card->get('updatedAt');
+        $this->sizes = $card->get('sizes');
+        $this->tags = $card->get('tags');
+        $this->createdAt = $card->get('createdAt');
+        $this->updatedAt = $card->get('updatedAt');
     }
 
-    public function getNmId(): int
+    public function loadLink(WbMarket $market): void
     {
-        return $this->nm_id;
+        $this->product = $market->items()->where('nm_id', $this->nmID)->first();
+    }
+
+    public function getNmID(): int
+    {
+        return $this->nmID;
+    }
+
+    public function getImtID(): int
+    {
+        return $this->imtID;
+    }
+
+    public function getNmUUID(): string
+    {
+        return $this->nmUUID;
+    }
+
+    public function getSubjectID(): int
+    {
+        return $this->subjectID;
     }
 
     public function getVendorCode(): string
     {
-        return $this->vendor_code;
-    }
-
-    public function getSubjectId(): int
-    {
-        return $this->subject_id;
+        return $this->vendorCode;
     }
 
     public function getSubjectName(): string
     {
-        return $this->subject_name;
+        return $this->subjectName;
+    }
+
+    public function getBrand(): string
+    {
+        return $this->brand;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->title;
     }
 
     public function getPhotos(): Collection
@@ -64,14 +128,9 @@ class Card
         return $this->photos;
     }
 
-    public function getVideo(): ?string
+    public function getVideo(): string
     {
         return $this->video;
-    }
-
-    public function getSizes(): Collection
-    {
-        return $this->sizes;
     }
 
     public function getDimensionsLength(): int
@@ -99,14 +158,52 @@ class Card
         return $this->characteristics;
     }
 
+    public function getSizes(): Collection
+    {
+        return $this->sizes;
+    }
+
+    public function getTags(): Collection
+    {
+        return $this->tags;
+    }
+
     public function getCreatedAt(): string
     {
-        return $this->created_at;
+        return $this->createdAt;
     }
 
     public function getUpdatedAt(): string
     {
-        return $this->updated_at;
+        return $this->updatedAt;
+    }
+
+    public function toCollection(WbMarket $market): Collection
+    {
+        $this->loadLink($market);
+
+        return collect([
+            "nmID" => $this->nmID,
+            "imtID" => $this->imtID,
+            "nmUUID" => $this->nmUUID,
+            "subjectID" => $this->subjectID,
+            "vendorCode" => $this->vendorCode,
+            "subjectName" => $this->subjectName,
+            "brand" => $this->brand,
+            "title" => $this->title,
+            "photos" => $this->photos,
+            "video" => $this->video,
+            "dimensions_length" => $this->dimensions_length,
+            "dimensions_width" => $this->dimensions_width,
+            "dimensions_height" => $this->dimensions_height,
+            "dimensions_isValid" => $this->dimensions_isValid,
+            "characteristics" => $this->characteristics,
+            "sizes" => $this->sizes,
+            "tags" => $this->tags,
+            "createdAt" => $this->createdAt,
+            "updatedAt" => $this->updatedAt,
+            'product' => $this->product
+        ]);
     }
 
 }

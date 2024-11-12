@@ -5,6 +5,9 @@ namespace Modules\Assembly\Livewire\AssemblyWbCard;
 use App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled\Posting;
 use App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled\Product;
 use App\HttpClient\OzonClient\Resources\ProductInfoAttribute;
+use App\HttpClient\WbClient\Resources\Card\Card;
+use App\HttpClient\WbClient\Resources\Order;
+use App\Livewire\ModuleComponent;
 use App\Models\Item;
 use App\Models\ItemAttribute;
 use App\Models\WbItem;
@@ -12,7 +15,7 @@ use Illuminate\Support\Arr;
 use Livewire\Component;
 use function Modules\Assembly\Livewire\AssemblyOzonCard\addTypeToAttributes;
 
-class AssemblyWbCardIndex extends Component
+class AssemblyWbCardIndex extends ModuleComponent
 {
     public $fields = [];
 
@@ -33,13 +36,8 @@ class AssemblyWbCardIndex extends Component
         $this->fields['Поля товара (связь)'] = Arr::map(WbItem::MAINATTRIBUTES, function ($item) {
             return Arr::add($item, 'type', 'product');
         });
-        $this->fields['Поля заказа'] = addTypeToAttributes(Posting::ATTRIBUTES, 'order');
-        $this->fields['Поля товара (заказ)'] = Arr::map(Product::ATTRIBUTES, function ($item) {
-            return Arr::add($item, 'type', 'order_product');
-        });
-        $this->fields['Атрибуты товара (заказ)'] = Arr::map(ProductInfoAttribute::ATTRIBUTES, function ($item) {
-            return Arr::add($item, 'type', 'order_attribute_product');
-        });
+        $this->fields['Поля заказа'] = addTypeToAttributes(Order::ATTRIBUTES, 'order');
+        $this->fields['Поля товара (заказ)'] = addTypeToAttributes(Card::ATTRIBUTES, 'order_product');
 
         $this->selectedFields = $this->currentUser()
             ->assemblyProductSettings()
@@ -69,14 +67,6 @@ class AssemblyWbCardIndex extends Component
 
         if (!isset($this->mainFields['name_heading'])) {
             $this->mainFields['name_heading'] = [
-                'size_level' => '1',
-                'market' => 'wb',
-                'type' => 'main'
-            ];
-        }
-
-        if (!isset($this->mainFields['button_label'])) {
-            $this->mainFields['button_label'] = [
                 'size_level' => '1',
                 'market' => 'wb',
                 'type' => 'main'

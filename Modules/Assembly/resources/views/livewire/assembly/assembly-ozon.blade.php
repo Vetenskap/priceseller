@@ -1,4 +1,4 @@
-<div>
+<div x-data="{ hrefImg: '' }">
     <div class="py-2">
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class='bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg'>
@@ -11,15 +11,19 @@
                                 <flux:menu.item>
                                     @if($sortDirection === 'desc')
                                         @if($sortBy === $field)
-                                            <flux:button variany="primary" wire:click="sort({{json_encode($field)}})" icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
+                                            <flux:button variany="primary" wire:click="sort({{json_encode($field)}})"
+                                                         icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
                                         @else
-                                            <flux:button wire:click="sort({{json_encode($field)}})" icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
+                                            <flux:button wire:click="sort({{json_encode($field)}})"
+                                                         icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
                                         @endif
                                     @else
                                         @if($sortBy === $field)
-                                            <flux:button variant="primary" wire:click="sort({{json_encode($field)}})" icon-trailing="chevron-up">{{$parameters['label']}}</flux:button>
+                                            <flux:button variant="primary" wire:click="sort({{json_encode($field)}})"
+                                                         icon-trailing="chevron-up">{{$parameters['label']}}</flux:button>
                                         @else
-                                            <flux:button wire:click="sort({{json_encode($field)}})" icon-trailing="chevron-up">{{$parameters['label']}}</flux:button>
+                                            <flux:button wire:click="sort({{json_encode($field)}})"
+                                                         icon-trailing="chevron-up">{{$parameters['label']}}</flux:button>
                                         @endif
                                     @endif
                                 </flux:menu.item>
@@ -41,7 +45,11 @@
                                         </flux:card>
                                         <div class="flex">
                                             <flux:card class="w-1/4 space-y-6 text-center">
-                                                <img src="{{$product['attribute']['images'][0]['file_name'] ?? null}}"/>
+                                                <flux:modal.trigger name="view-img">
+                                                    <img
+                                                        x-on:click="hrefImg = '{{$product['attribute']['images'][0]['file_name'] ?? ''}}'"
+                                                        src="{{$product['attribute']['images'][0]['file_name'] ?? null}}"/>
+                                                </flux:modal.trigger>
                                                 <flux:button variant="danger" size="sm">Пожаловаться</flux:button>
                                             </flux:card>
                                             <flux:card class="space-y-4 w-full">
@@ -58,10 +66,10 @@
                                                         $value = null;
                                                         switch ($parameters['type']) {
                                                             case 'item':
-                                                                $value = $product['product']->ozonitemable[$field];
+                                                                $value = $product['product']->itemable[$field];
                                                                 break;
                                                             case 'attribute_item':
-                                                                $value = $product['product']->ozonitemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
+                                                                $value = $product['product']->itemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
                                                                 break;
                                                             case 'product':
                                                                 $value = $product['product'][$field];
@@ -100,10 +108,10 @@
                                                                 $value = null;
                                                                 switch ($parameters['type']) {
                                                                     case 'item':
-                                                                        $value = (bool) $product['product']->ozonitemable[$field];
+                                                                        $value = (bool) $product['product']->itemable[$field];
                                                                         break;
                                                                     case 'attribute_item':
-                                                                        $value = (bool) $product['product']->ozonitemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
+                                                                        $value = (bool) $product['product']->itemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
                                                                         break;
                                                                     case 'product':
                                                                         $value = (bool) $product['product'][$field];
@@ -148,6 +156,9 @@
             </div>
         </div>
     </div>
+    <flux:modal name="view-img" class="w-full">
+        <img x-bind:src="hrefImg"/>
+    </flux:modal>
     @script
     <script>
         $wire.on('openPdf', (event) => {
