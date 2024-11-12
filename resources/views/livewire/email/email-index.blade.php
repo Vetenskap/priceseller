@@ -9,7 +9,7 @@
 
             <flux:input wire:model="form.name" label="Наименование" badge="обязательное" required/>
             <flux:input wire:model="form.address" label="Адрес" badge="обязательное" type="email" required/>
-            <flux:input wire:model="form.password" label="Адрес" badge="обязательное" type="password" required/>
+            <flux:input wire:model="form.password" label="Пароль" badge="обязательное" type="password" required/>
 
             <div class="flex">
                 <flux:spacer/>
