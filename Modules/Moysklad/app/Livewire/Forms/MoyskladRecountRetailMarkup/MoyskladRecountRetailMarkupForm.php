@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\Moysklad\Livewire\Forms\MoyskladRetailMarkup;
+namespace Modules\Moysklad\Livewire\Forms\MoyskladRecountRetailMarkup;
 
 use Illuminate\Support\Collection;
 use Livewire\Attributes\Validate;

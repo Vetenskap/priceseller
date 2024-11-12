@@ -8,7 +8,7 @@ use Illuminate\Foundation\Application;
 use Illuminate\Support\Collection;
 use Livewire\Component;
 use Modules\Moysklad\HttpClient\Resources\Context\CompanySettings\PriceType;
-use Modules\Moysklad\Livewire\Forms\MoyskladRetailMarkup\MoyskladRecountRetailMarkupForm;
+use Modules\Moysklad\Livewire\Forms\MoyskladRecountRetailMarkup\MoyskladRecountRetailMarkupForm;
 use Modules\Moysklad\Models\Moysklad;
 use Modules\Moysklad\Models\MoyskladRecountRetailMarkup;
 use Modules\Moysklad\Services\MoyskladService;
