@@ -17,7 +17,7 @@ class WbWarehouseSupplier extends MainModel
 
     public function warehouse()
     {
-        return $this->belongsTo(WbWarehouse::class);
+        return $this->belongsTo(WbWarehouse::class, 'wb_warehouse_id', 'id');
     }
 
     public function supplier()
