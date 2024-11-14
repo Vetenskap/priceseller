@@ -135,6 +135,8 @@ class WbClient
 
     public function putStocks(array $data, int $warehouseId, Supplier $supplier): void
     {
+        $data = collect($data);
+
         $limits = 5;
 
         while (RateLimiter::attempts('wb_get_cards_list') >= 300) {
@@ -153,7 +155,7 @@ class WbClient
                 RateLimiter::attempt(
                     'wb_put_stocks',
                     300,
-                    fn() => $this->request->put("https://suppliers-api.wildberries.ru/api/v3/stocks/{$warehouseId}", ['stocks' => $data])->throw()
+                    fn() => $this->request->put("https://suppliers-api.wildberries.ru/api/v3/stocks/{$warehouseId}", ['stocks' => $data->toArray()])->throw()
                 );
 
                 return;
