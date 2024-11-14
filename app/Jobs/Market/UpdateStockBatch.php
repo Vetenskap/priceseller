@@ -32,10 +32,10 @@ class UpdateStockBatch implements ShouldQueue
         $this->items->filter(function (WbItem|OzonItem $item) {
 
             if ($item instanceof WbItem) {
-                $itemable = $item->wbitemable;
+                $itemable = $item->itemable;
                 $type = $item->wbitemable_type;
             } else {
-                $itemable = $item->ozonitemable;
+                $itemable = $item->itemable;
                 $type = $item->ozonitemable_type;
             }
 

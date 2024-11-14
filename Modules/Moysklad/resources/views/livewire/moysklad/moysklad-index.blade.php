@@ -8,17 +8,17 @@
                 <flux:navbar.item :href="route('moysklad.index', ['page' => 'warehouses'])"
                                   :current="$page === 'warehouses'">Склады
                 </flux:navbar.item>
-                <flux:navbar.item :href="route('moysklad.index', ['page' => 'items'])" :current="$page === 'items'">
-                    Товары
-                </flux:navbar.item>
-                <flux:navbar.item :href="route('moysklad.index', ['page' => 'bundles'])" :current="$page === 'bundles'">
-                    Комплекты
-                </flux:navbar.item>
                 <flux:navbar.item :href="route('moysklad.index', ['page' => 'suppliers'])"
                                   :current="$page === 'suppliers'">Поставщики
                 </flux:navbar.item>
                 <flux:navbar.item :href="route('moysklad.index', ['page' => 'organizations'])"
                                   :current="$page === 'organizations'">Организации
+                </flux:navbar.item>
+                <flux:navbar.item :href="route('moysklad.index', ['page' => 'items'])" :current="$page === 'items'">
+                    Товары
+                </flux:navbar.item>
+                <flux:navbar.item :href="route('moysklad.index', ['page' => 'bundles'])" :current="$page === 'bundles'">
+                    Комплекты
                 </flux:navbar.item>
                 <flux:navbar.item :href="route('moysklad.index', ['page' => 'webhooks'])"
                                   :current="$page === 'webhooks'">Вебхуки

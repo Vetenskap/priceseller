@@ -19,6 +19,7 @@
         </flux:select>
 
         <flux:select wire:model.live="form.user_type" placeholder="Выберите тип..." label="Тип">
+            <flux:option value="''">Нет</flux:option>
             @foreach(config('app.attributes_types') as $type)
                 <flux:option :value="$type['name']">{{$type['label']}}</flux:option>
             @endforeach

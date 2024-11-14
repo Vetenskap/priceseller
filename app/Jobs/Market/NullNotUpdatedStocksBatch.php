@@ -32,10 +32,10 @@ class NullNotUpdatedStocksBatch implements ShouldQueue
         $this->items->filter(function (WbWarehouseStock|OzonWarehouseStock $stock) {
 
             if ($stock instanceof WbWarehouseStock) {
-                $itemable = $stock->wbItem->wbitemable;
+                $itemable = $stock->wbItem->itemable;
                 $type = $stock->wbItem->wbitemable_type;
             } else {
-                $itemable = $stock->ozonItem->ozonitemable;
+                $itemable = $stock->ozonItem->itemable;
                 $type = $stock->ozonItem->ozonitemable_type;
             }
 

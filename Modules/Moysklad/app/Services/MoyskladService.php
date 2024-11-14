@@ -215,6 +215,7 @@ class MoyskladService
             $data['ms_uuid'] = $product->id;
             $data['unload_ozon'] = true;
             $data['unload_wb'] = true;
+            $data['buy_price_reserve'] = 0;
 
             foreach ($this->moysklad->itemMainAttributeLinks as $itemMainAttributeLink) {
                 $value = static::getValueFromAttributesAndProduct($itemMainAttributeLink->type, $itemMainAttributeLink->link, $product, $itemMainAttributeLink->user_type, $itemMainAttributeLink->invert, $itemMainAttributeLink->attribute_name);
