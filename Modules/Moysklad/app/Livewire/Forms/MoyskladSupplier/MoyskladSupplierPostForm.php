@@ -23,13 +23,13 @@ class MoyskladSupplierPostForm extends Form
             'moysklad_supplier_uuid' => [
                 'required',
                 'uuid',
-                Rule::unique('moysklad_supplier_suppliers', 'moysklad_supplier_uuid'),
+                'unique:moysklad_supplier_suppliers,moysklad_supplier_uuid',
             ],
             'supplier_id' => [
                 'required',
                 'uuid',
                 'exists:suppliers,id',
-                Rule::unique('moysklad_supplier_suppliers', 'supplier_id'),
+                'unique:moysklad_supplier_suppliers,supplier_id',
             ],
         ];
     }
