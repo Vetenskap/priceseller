@@ -379,7 +379,7 @@ class WbItemPriceService
 
                         if (App::isProduction()) {
                             $wbClient = new WbClient($this->market->api_key);
-                            $wbClient->putStocks($data->values()->all(), $warehouse->warehouse_id, $this->supplier);
+                            $wbClient->putStocks($data->values(), $warehouse->warehouse_id, $this->supplier);
                         }
 
                     });

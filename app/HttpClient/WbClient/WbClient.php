@@ -133,10 +133,8 @@ class WbClient
         return $this->request->get('https://suppliers-api.wildberries.ru/api/v3/warehouses')->throw()->collect();
     }
 
-    public function putStocks(array $data, int $warehouseId, Supplier $supplier): void
+    public function putStocks(Collection $data, int $warehouseId, Supplier $supplier): void
     {
-        $data = collect($data);
-
         logger($data->toArray());
 
         $limits = 5;
