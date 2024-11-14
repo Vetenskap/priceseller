@@ -195,7 +195,7 @@ class WbClient
 
     }
 
-    public function putPrices(array $data, Supplier $supplier): void
+    public function putPrices(Collection $data, Supplier $supplier): void
     {
 
         while (RateLimiter::attempts('wb_get_cards_list') >= 10) {

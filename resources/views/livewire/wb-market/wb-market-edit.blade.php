@@ -75,7 +75,6 @@
             <flux:tab.panel name="relationships_commissions">
                 <x-marketPages.relationships-commissions :market="$market" :file="$file" market-name="wb"
                                                          sort-by="$sortBy" sort-direction="$sortDirection">
-                    <flux:input wire:model="sales_percent" label="Комиссия" type="number"/>
                     <flux:input wire:model="min_price" label="Минимальная цена продажи" type="number"/>
                     <flux:input wire:model="retail_markup_percent" label="Наценка" type="number"/>
                     <flux:input wire:model="package" label="Упаковка" type="number"/>

@@ -50,9 +50,6 @@ class WbMarketEdit extends BaseComponent
     /** @var TemporaryUploadedFile $file */
     public $file;
 
-    #[Session('WbMarketEdit.sales_percent.{market.id}')]
-    public $sales_percent = null;
-
     #[Session('WbMarketEdit.min_price.{market.id}')]
     public $min_price = null;
 
