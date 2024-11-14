@@ -4,6 +4,12 @@
     <x-blocks.main-block>
         <flux:card class="space-y-6">
             <flux:heading size="xl">Выгрузка товаров с Моего склада</flux:heading>
+            <flux:card>
+                <div class="flex gap-2 items-center">
+                    <flux:badge color="red">Важно!</flux:badge>
+                    <flux:subheading>Необходимо связать поставщиков. Товары с несвязанными поставщиками не будут добавлены</flux:subheading>
+                </div>
+            </flux:card>
             <flux:button wire:click="importApi">Выгрузить по АПИ</flux:button>
         </flux:card>
     </x-blocks.main-block>
