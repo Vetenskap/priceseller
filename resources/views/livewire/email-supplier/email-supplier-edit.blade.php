@@ -16,7 +16,8 @@
                             variant="danger"
                             wire:click="destroy"
                             wire:confirm="Вы действительно хотите удалить этого поставщика с почты?"
-                        >Удалить</flux:button>
+                        >Удалить
+                        </flux:button>
                     </div>
                 @endif
 
@@ -30,7 +31,7 @@
 
                         <flux:tab.panel name="general">
                             <div class="flex gap-12">
-                                <div class="space-y-6">
+                                <div class="space-y-6 w-1/3">
                                     <div>
                                         <flux:heading size="xl">Основная информация</flux:heading>
                                     </div>
@@ -45,13 +46,20 @@
 
                                     <flux:input wire:model="form.email" label="Почта" required/>
                                     <flux:input wire:model="form.filename" label="Наименование файла" required/>
+                                    <flux:card class="flex gap-2">
+                                        <flux:badge color="red" class="h-fit">Важно!</flux:badge>
+                                        <flux:subheading>Чтение прайсов происходит во всех папках. Убедитесь, что все
+                                            старые прайсы имеют статус "прочитано"
+                                        </flux:subheading>
+                                    </flux:card>
                                 </div>
                                 <div class="space-y-6">
                                     <div>
                                         <flux:heading size="xl">Информация по файлу</flux:heading>
                                     </div>
 
-                                    <flux:input wire:model="form.header_article" label="Артикул" type="number" required/>
+                                    <flux:input wire:model="form.header_article" label="Артикул" type="number"
+                                                required/>
                                     <flux:input wire:model="form.header_price" label="Цена" type="number" required/>
                                     <flux:input wire:model="form.header_count" label="Остаток" type="number" required/>
                                     <flux:input wire:model="form.header_brand" label="Бренд" type="number"/>
@@ -60,10 +68,12 @@
                             </div>
                         </flux:tab.panel>
                         <flux:tab.panel name="warehouses">
-                            <livewire:email-supplier-warehouse.email-supplier-warehouse-index :email-supplier="$emailSupplier"/>
+                            <livewire:email-supplier-warehouse.email-supplier-warehouse-index
+                                :email-supplier="$emailSupplier"/>
                         </flux:tab.panel>
                         <flux:tab.panel name="stocks-values">
-                            <livewire:email-supplier-stock-value.email-supplier-stock-value-index :email-supplier="$emailSupplier"/>
+                            <livewire:email-supplier-stock-value.email-supplier-stock-value-index
+                                :email-supplier="$emailSupplier"/>
                         </flux:tab.panel>
                     </flux:tab-group>
                 </flux:card>

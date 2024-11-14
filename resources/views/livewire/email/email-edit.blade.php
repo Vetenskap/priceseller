@@ -43,14 +43,18 @@
             </x-blocks.main-block>
 
             <flux:tab.panel name="general">
-                <x-blocks.main-block class="max-w-fit">
-                    <flux:switch wire:model="form.open" label="Включен"/>
+                <x-blocks.main-block>
+                    <flux:card class="space-y-6">
+                        <div class="flex">
+                            <flux:switch wire:model="form.open" label="Включен"/>
+                        </div>
+                        <div class="flex gap-6">
+                            <flux:input wire:model="form.name" label="Наименование" required/>
+                            <flux:input wire:model="form.address" label="Адрес" type="email" required/>
+                            <flux:input wire:model="form.password" label="Пароль" type="password" required/>
+                        </div>
+                    </flux:card>
                 </x-blocks.main-block>
-                <div class="flex p-6 gap-6">
-                    <flux:input wire:model="form.name" label="Наименование" required/>
-                    <flux:input wire:model="form.address" label="Адрес" type="email" required/>
-                    <flux:input wire:model="form.password" label="Пароль" type="password" required/>
-                </div>
             </flux:tab.panel>
             <flux:tab.panel name="suppliers">
                 <livewire:email-supplier.email-supplier-index :email="$email"/>

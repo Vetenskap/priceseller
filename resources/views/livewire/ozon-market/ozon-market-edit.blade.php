@@ -68,7 +68,7 @@
                         <div class="flex gap-6 flex-wrap">
                             <div>
                                 <flux:field>
-                                    <flux:tooltip content="Итоговая минимальная цена умноженная на этот коэффициент">
+                                    <flux:tooltip content="Итоговая минимальная цена умноженная на этот процент">
                                         <flux:label>Процент увел. мин. цены</flux:label>
                                     </flux:tooltip>
 
@@ -143,13 +143,39 @@
             <flux:tab.panel name="relationships_commissions">
                 <x-marketPages.relationships-commissions :items="$this->items" :market="$market" :file="$file"
                                                          sort-by="$sortBy" sort-direction="$sortDirection">
-                    <flux:tooltip content="Какой процент добавить к цене закупки для получения чистой прибыли">
-                        <flux:input wire:model="min_price_percent" label="Минимальная цена, %" type="number"/>
-                    </flux:tooltip>
-                    <flux:tooltip content="Ниже этой цены в маркет не выгрузится">
-                        <flux:input wire:model="min_price" label="Минимальная цена продажи" type="number"/>
-                    </flux:tooltip>
-                    <flux:input wire:model="shipping_processing" label="Обработка отправления" type="number"/>
+                    <div>
+                        <flux:field>
+                            <flux:tooltip content="Какой процент добавить к цене закупки для получения чистой прибыли">
+                                <flux:label>Минимальная цена, %</flux:label>
+                            </flux:tooltip>
+
+                            <flux:input wire:model="min_price_percent" type="number"/>
+
+                            <flux:error name="min_price_percent"/>
+                        </flux:field>
+                    </div>
+                    <div>
+                        <flux:field>
+                            <flux:tooltip content="Ниже этой цены в маркет не выгрузится">
+                                <flux:label>Минимальная цена продажи</flux:label>
+                            </flux:tooltip>
+
+                            <flux:input wire:model="min_price" type="number"/>
+
+                            <flux:error name="min_price"/>
+                        </flux:field>
+                    </div>
+                    <div>
+                        <flux:field>
+                            <flux:tooltip content="">
+                                <flux:label>Обработка отправления</flux:label>
+                            </flux:tooltip>
+
+                            <flux:input wire:model="shipping_processing" type="number"/>
+
+                            <flux:error name="shipping_processing"/>
+                        </flux:field>
+                    </div>
                 </x-marketPages.relationships-commissions>
             </flux:tab.panel>
             <flux:tab.panel name="export">
