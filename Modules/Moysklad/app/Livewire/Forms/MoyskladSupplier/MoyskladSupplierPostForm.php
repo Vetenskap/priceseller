@@ -11,7 +11,6 @@ use Modules\Moysklad\Models\MoyskladSupplierSupplier;
 class MoyskladSupplierPostForm extends Form
 {
     public Moysklad $moysklad;
-    public ?MoyskladSupplierSupplier $moyskladSupplier = null;
 
     #[Validate]
     public $moysklad_supplier_uuid;
@@ -24,24 +23,15 @@ class MoyskladSupplierPostForm extends Form
             'moysklad_supplier_uuid' => [
                 'required',
                 'uuid',
-                Rule::unique('moysklad_supplier_suppliers', 'moysklad_supplier_uuid')
-                    ->ignore($this->moyskladSupplier),
+                Rule::unique('moysklad_supplier_suppliers', 'moysklad_supplier_uuid'),
             ],
             'supplier_id' => [
                 'required',
                 'uuid',
                 'exists:suppliers,id',
-                Rule::unique('moysklad_supplier_suppliers', 'supplier_id')
-                    ->ignore($this->moyskladSupplier),
+                Rule::unique('moysklad_supplier_suppliers', 'supplier_id'),
             ],
         ];
-    }
-
-    public function setMoyskladSupplier(MoyskladSupplierSupplier $moyskladSupplier): void
-    {
-        $this->moyskladSupplier = $moyskladSupplier;
-        $this->moysklad_supplier_uuid = $moyskladSupplier->moysklad_supplier_uuid;
-        $this->supplier_id = $moyskladSupplier->supplier_id;
     }
 
     public function setMoysklad(Moysklad $moysklad): void
@@ -53,20 +43,8 @@ class MoyskladSupplierPostForm extends Form
     {
         $this->validate();
 
-        $this->moysklad->suppliers()->create($this->except(['moysklad', 'moyskladSupplier']));
+        $this->moysklad->suppliers()->create($this->except(['moysklad']));
 
         $this->reset(['moysklad_supplier_uuid', 'supplier_id']);
-    }
-
-    public function update(): void
-    {
-        $this->validate();
-
-        $this->moyskladSupplier->update($this->except(['moysklad', 'moyskladSupplier']));
-    }
-
-    public function destroy(): void
-    {
-        $this->moyskladSupplier->delete();
     }
 }

@@ -13,7 +13,7 @@
         </flux:select>
 
         <flux:select variant="combobox" placeholder="Выберите поставщика..." label="Ваш поставщик (Мой склад)"
-                     wire:model="form.moysklad_warehouse_uuid">
+                     wire:model="form.moysklad_supplier_uuid">
 
             @foreach($moyskladSuppliers as $moyskladSupplier)
                 <flux:option :value="$moyskladSupplier['id']">{{$moyskladSupplier['name']}}</flux:option>

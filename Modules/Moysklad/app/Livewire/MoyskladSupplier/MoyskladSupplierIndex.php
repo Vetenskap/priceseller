@@ -38,6 +38,8 @@ class MoyskladSupplierIndex extends Component
     public function store(): void
     {
         $this->form->store();
+
+        \Flux::modal('create-moysklad-supplier')->close();
     }
 
     public function destroy($id): void
