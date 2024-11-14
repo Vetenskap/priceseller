@@ -137,6 +137,8 @@ class WbClient
     {
         $data = collect($data);
 
+        logger($data->toArray());
+
         $limits = 5;
 
         while (RateLimiter::attempts('wb_get_cards_list') >= 300) {
@@ -175,7 +177,7 @@ class WbClient
                         $badItems->each(function (array $badItem) use (&$data, $supplier, $error) {
                             $badItem = collect($badItem);
 
-                            $data = $data->filter(fn (array $item) => $item['sku'] !== $badItem->get('sku'));
+                            $data = $data->filter(fn (array $item) => $item['sku'] !== $badItem->get('sku'))->values();
 
                             SupplierReportService::addLog($supplier, "sku: " . $badItem->get('sku') . " - " . $error->get('message'), 'warning');
                         });
