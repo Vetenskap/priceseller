@@ -8,6 +8,8 @@ use App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled\PostingUnfulfille
 use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithSort;
 use App\Models\OzonWarehouse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class AssemblyOzon extends BaseComponent
@@ -82,8 +84,12 @@ class AssemblyOzon extends BaseComponent
         }
     }
 
-    public function mount()
+    public function mount(Request $request)
     {
+        $status = $request->query('status');
+        $startDate = Carbon::createFromFormat('Y-m-d', $request->input('startDate'));
+        $endDate = Carbon::createFromFormat('Y-m-d', $request->input('endDate'));
+
         $this->fields = $this->currentUser()
             ->assemblyProductSettings()
             ->where('market', 'ozon')
@@ -110,7 +116,7 @@ class AssemblyOzon extends BaseComponent
             ->pluck(null, 'field')
             ->toArray();
 
-        $this->loadOrders();
+        $this->loadOrders($status, $startDate, $endDate);
     }
 
     public function createLabel($postingNumber)
@@ -132,11 +138,12 @@ class AssemblyOzon extends BaseComponent
         }
     }
 
-    public function loadOrders(): void
+    public function loadOrders(string $status, Carbon $startDate, Carbon $endDate): void
     {
         $list = new PostingUnfulfilledList($this->warehouse->market->api_key, $this->warehouse->market->client_id);
-        $list->setFilterCutoffFrom(now());
-        $list->setFilterCutoffTo(now()->addDays(10));
+        $list->setFilterCutoffFrom($startDate);
+        $list->setFilterCutoffTo($endDate);
+        $list->setFilterStatus($status);
         $list->setWarehouseId([$this->warehouse->warehouse_id]);
 
         $postings = $list->next();

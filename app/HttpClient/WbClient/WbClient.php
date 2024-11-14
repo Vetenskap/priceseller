@@ -45,6 +45,13 @@ class WbClient
         });
     }
 
+    public function patch(string $endpoint, array $queryParameters = []): Response
+    {
+        return $this->rateLimit($endpoint, function () use ($endpoint, $queryParameters) {
+            return $this->request->withQueryParameters($queryParameters)->patch($endpoint)->throw();
+        });
+    }
+
     public function delete(string $endpoint): bool
     {
         return $this->rateLimit($endpoint, function () use ($endpoint) {
@@ -52,10 +59,10 @@ class WbClient
         });
     }
 
-    public function post(string $endpoint, array $data): Response
+    public function post(string $endpoint, array $data, array $queryParameters = []): Response
     {
-        return $this->rateLimit($endpoint, function () use ($endpoint, $data) {
-            return $this->request->post($endpoint, $data)->throw();
+        return $this->rateLimit($endpoint, function () use ($endpoint, $data, $queryParameters) {
+            return $this->request->withQueryParameters($queryParameters)->post($endpoint, $data)->throw();
         });
     }
 
@@ -68,15 +75,20 @@ class WbClient
 
     public function rateLimit(string $endpoint, \Closure $closure)
     {
-        while (RateLimiter::attempts($endpoint) >= self::RATE_LIMITS[$endpoint]) {
-            sleep(1);
+        if (isset(self::RATE_LIMITS[$endpoint])) {
+            while (RateLimiter::attempts($endpoint) >= self::RATE_LIMITS[$endpoint]) {
+                sleep(1);
+            }
+
+            return RateLimiter::attempt(
+                $endpoint,
+                self::RATE_LIMITS[$endpoint],
+                fn() => $closure()
+            );
+        } else {
+            return $closure();
         }
 
-        return RateLimiter::attempt(
-            $endpoint,
-            self::RATE_LIMITS[$endpoint],
-            fn() => $closure()
-        );
     }
 
     public function getCardsList($updatedAt = '', $nmId = 0): Collection

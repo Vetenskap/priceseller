@@ -7,8 +7,9 @@ use App\HttpClient\WbClient\Resources\Card\CardList;
 use App\HttpClient\WbClient\WbClient;
 use App\Models\WbMarket;
 use Illuminate\Support\Collection;
+use Livewire\Wireable;
 
-class Order
+class Order implements Wireable
 {
     const ENDPOINT = 'https://marketplace-api.wildberries.ru/api/v3/orders/new';
 
@@ -75,14 +76,15 @@ class Order
     protected ?int $convertedCurrencyCode;
     protected ?int $cargoType;
     protected ?bool $isZeroOrder;
-    protected ?Card $card;
+    protected ?Card $card = null;
+    protected ?Sticker $sticker = null;
 
     public function __construct(Collection $order = null)
     {
         if ($order) {
-            $this->address_fullAddress = $order->get('address')?->get('fullAddress');
-            $this->address_longitude = $order->get('address')?->get('longitude');
-            $this->address_latitude = $order->get('address')?->get('latitude');
+            $this->address_fullAddress = $order->get('address') ? $order->get('address')->get('fullAddress') : $order->get('address_fullAddress');
+            $this->address_longitude = $order->get('address') ? $order->get('address')->get('longitude') : $order->get('address_longitude');
+            $this->address_latitude = $order->get('address') ? $order->get('address')->get('latitude') : $order->get('address_latitude');
             $this->ddate = $order->get('ddate');
             $this->salePrice = $order->get('salePrice');
             $this->dTimeFrom = $order->get('dTimeFrom');
@@ -108,6 +110,12 @@ class Order
             $this->convertedCurrencyCode = $order->get('convertedCurrencyCode');
             $this->cargoType = $order->get('cargoType');
             $this->isZeroOrder = $order->get('isZeroOrder');
+            if ($order->has('card')) {
+                $this->card = $order->get('card');
+            }
+            if ($order->has('sticker')) {
+                $this->sticker = $order->get('sticker');
+            }
         }
     }
 
@@ -116,7 +124,11 @@ class Order
         $list = new CardList($api_key);
         $list->setFilterTextSearch($this->article);
         $cards = $list->next();
-        $this->card = $cards->first();
+        $cards->each(function (Card $card) {
+            if ($card->getVendorCode() === $this->article) {
+                $this->card = $card;
+            }
+        });
     }
 
     public function getNewAll(string $api_key): Collection
@@ -125,7 +137,18 @@ class Order
 
         $response = $client->get(self::ENDPOINT);
 
-        return $response->collect()->toCollectionSpread()->get('orders')->map(fn (Collection $order) => new self($order));
+        return $response->collect()->toCollectionSpread()->get('orders')->map(fn(Collection $order) => new self($order));
+    }
+
+    public static function setDeliveryType($value): string
+    {
+        return match ($value) {
+            "доставка на склад Wildberries" => "fbs",
+            "доставка силами продавца" => "dbs",
+            "экспресс-доставка силами продавца" => "edbs",
+            "доставка курьером WB" => "wbgo",
+            default => null,
+        };
     }
 
     public function getDeliveryType(): string
@@ -139,6 +162,16 @@ class Order
         };
     }
 
+    public static function setCargoType($value): int
+    {
+        return match ($value) {
+            "обычный" => 1,
+            "СГТ (Сверхгабаритный товар)" => 2,
+            "КГТ (Крупногабаритный товар)" => 3,
+            default => null,
+        };
+    }
+
     public function getCargoType(): string
     {
         return match ($this->cargoType) {
@@ -149,11 +182,9 @@ class Order
         };
     }
 
-    public function toCollection(WbMarket $market): Collection
+    public function toLivewire(): array
     {
-        $this->fetchCard($market->api_key);
-
-        return collect([
+        return [
             'address_fullAddress' => $this->address_fullAddress,
             'address_longitude' => $this->address_longitude,
             'address_latitude' => $this->address_latitude,
@@ -182,7 +213,168 @@ class Order
             'convertedCurrencyCode' => $this->convertedCurrencyCode,
             'cargoType' => $this->getCargoType(),
             'isZeroOrder' => $this->isZeroOrder,
-            'card' => $this->card->toCollection($market),
-        ]);
+            'card' => $this->card ? $this->card->toLivewire() : null,
+            'sticker' => $this->sticker ? $this->sticker->toLivewire() : null
+        ];
     }
+
+    public static function fromLivewire($value): Order
+    {
+        $data = collect($value)->toCollectionSpread();
+
+        $data['deliveryType'] = static::setDeliveryType($data['deliveryType']);
+        $data['cargoType'] = static::setCargoType($data['cargoType']);
+
+        if ($data['card']) $data['card'] = new Card($data->get('card'));
+        if ($data['sticker']) $data['sticker'] = new Sticker($data->get('sticker'));
+
+        return new static($data);
+    }
+
+    public function setSticker(Sticker $sticker): void
+    {
+        $this->sticker = $sticker;
+    }
+
+    public function getAddressFullAddress(): ?string
+    {
+        return $this->address_fullAddress;
+    }
+
+    public function getAddressLongitude(): ?float
+    {
+        return $this->address_longitude;
+    }
+
+    public function getAddressLatitude(): ?float
+    {
+        return $this->address_latitude;
+    }
+
+    public function getDdate(): ?string
+    {
+        return $this->ddate;
+    }
+
+    public function getSalePrice(): ?int
+    {
+        return $this->salePrice;
+    }
+
+    public function getDTimeFrom(): ?string
+    {
+        return $this->dTimeFrom;
+    }
+
+    public function getDTimeTo(): ?string
+    {
+        return $this->dTimeTo;
+    }
+
+    public function getRequiredMeta(): ?Collection
+    {
+        return $this->requiredMeta;
+    }
+
+    public function getComment(): ?string
+    {
+        return $this->comment;
+    }
+
+    public function getScanPrice(): ?int
+    {
+        return $this->scanPrice;
+    }
+
+    public function getOrderUid(): ?string
+    {
+        return $this->orderUid;
+    }
+
+    public function getArticle(): ?string
+    {
+        return $this->article;
+    }
+
+    public function getColorCode(): ?string
+    {
+        return $this->colorCode;
+    }
+
+    public function getRid(): ?string
+    {
+        return $this->rid;
+    }
+
+    public function getCreatedAt(): ?string
+    {
+        return $this->createdAt;
+    }
+
+    public function getOffices(): ?Collection
+    {
+        return $this->offices;
+    }
+
+    public function getSkus(): ?Collection
+    {
+        return $this->skus;
+    }
+
+    public function getId(): ?int
+    {
+        return $this->id;
+    }
+
+    public function getWarehouseId(): ?int
+    {
+        return $this->warehouseId;
+    }
+
+    public function getNmId(): ?int
+    {
+        return $this->nmId;
+    }
+
+    public function getChrtId(): ?int
+    {
+        return $this->chrtId;
+    }
+
+    public function getPrice(): ?int
+    {
+        return $this->price;
+    }
+
+    public function getConvertedPrice(): ?int
+    {
+        return $this->convertedPrice;
+    }
+
+    public function getCurrencyCode(): ?int
+    {
+        return $this->currencyCode;
+    }
+
+    public function getConvertedCurrencyCode(): ?int
+    {
+        return $this->convertedCurrencyCode;
+    }
+
+    public function getIsZeroOrder(): ?bool
+    {
+        return $this->isZeroOrder;
+    }
+
+    public function getCard(): ?Card
+    {
+        return $this->card;
+    }
+
+    public function getSticker(): ?Sticker
+    {
+        return $this->sticker;
+    }
+
+
 }

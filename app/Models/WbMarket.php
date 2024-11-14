@@ -5,9 +5,11 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Modules\Assembly\Models\AssemblyWbSupply;
 use Opcodes\LogViewer\Facades\Cache;
 
 class WbMarket extends MainModel
@@ -37,6 +39,11 @@ class WbMarket extends MainModel
     public function items()
     {
         return $this->hasMany(WbItem::class);
+    }
+
+    public function supplies(): HasMany
+    {
+        return $this->hasMany(AssemblyWbSupply::class, 'wb_market_id', 'id');
     }
 
     public function itemsImportReports()

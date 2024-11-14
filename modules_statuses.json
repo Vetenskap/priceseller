@@ -7,5 +7,6 @@
     "BergApi": true,
     "SimalandApi": true,
     "EditorContent": true,
-    "Assembly": true
+    "Assembly": true,
+    "OrderProcess": true
 }

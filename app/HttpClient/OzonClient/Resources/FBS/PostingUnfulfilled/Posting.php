@@ -8,6 +8,19 @@ use Illuminate\Support\Collection;
 
 class Posting
 {
+    const STATUSES = [
+        ["value" => "acceptance_in_progress", "label" => "идёт приёмка"],
+        ["value" => "awaiting_approve", "label" => "ожидает подтверждения"],
+        ["value" => "awaiting_packaging", "label" => "ожидает упаковки"],
+        ["value" => "awaiting_registration", "label" => "ожидает регистрации"],
+        ["value" => "awaiting_deliver", "label" => "ожидает отгрузки"],
+        ["value" => "arbitration", "label" => "арбитраж"],
+        ["value" => "client_arbitration", "label" => "клиентский арбитраж доставки"],
+        ["value" => "delivering", "label" => "доставляется"],
+        ["value" => "driver_pickup", "label" => "у водителя"],
+        ["value" => "not_accepted", "label" => "не принят на сортировочном центре"],
+    ];
+
     const ATTRIBUTES = [
         'Основная информация' => [
             ['name' => 'available_actions', 'label' => 'Доступные действия и информация об отправлении'],

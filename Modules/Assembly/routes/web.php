@@ -17,5 +17,7 @@ use Modules\Assembly\Http\Controllers\AssemblyController;
 Route::prefix('modules')->group( function () {
     Route::get('/assembly', \Modules\Assembly\Livewire\Assembly\AssemblyIndex::class)->name('assembly.index');
     Route::get('/assembly/ozon/{warehouse}', \Modules\Assembly\Livewire\Assembly\AssemblyOzon::class)->name('assembly.ozon');
-    Route::get('/assembly/wb/{warehouse}', \Modules\Assembly\Livewire\Assembly\AssemblyWb::class)->name('assembly.wb');
+    Route::get('/assembly/wb/{market}', \Modules\Assembly\Livewire\Assembly\AssemblyWb::class)->name('assembly.wb');
+    Route::get('/assembly/wb/supplies/{supply}', \Modules\Assembly\Livewire\Assembly\AssemblyWbSupply::class)->name('assembly.wb.supply');
+    Route::get('/assembly/wb/supplies/{supply}/stickers', [\Modules\Assembly\Http\Controllers\AssemblyWbSupplyStickersController::class, 'index'])->name('assembly.wb.stickers');
 });

@@ -89,6 +89,11 @@ class DatabaseSeeder extends Seeder
                 'value' => 'editorcontent',
                 'type' => 'employee'
             ],
+            [
+                'name' => 'Обработка заказов',
+                'value' => 'orderprocess',
+                'type' => 'employee'
+            ],
         ];
 
         foreach ($permissions as $permission) {
@@ -107,6 +112,7 @@ class DatabaseSeeder extends Seeder
             ['label' => 'Сималенд (апи)', 'name' => 'SimalandApi'],
             ['label' => 'Редактор контента', 'name' => 'EditorContent'],
             ['label' => 'Сборочник', 'name' => 'Assembly'],
+            ['label' => 'Обработка заказов', 'name' => 'OrderProcess'],
         ];
 
         foreach ($modules as $module) {

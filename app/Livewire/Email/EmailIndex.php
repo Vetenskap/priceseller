@@ -25,7 +25,7 @@ class EmailIndex extends BaseComponent
 
     public function mount(): void
     {
-        $this->dirtyEmails = $this->currentUser()->emails->pluck(null, 'id')->toArray();
+        $this->dirtyEmails = $this->currentUser()->emails->mapWithKeys(fn (Email $email) => [$email->id => ['open' => (bool) $email->open]])->toArray();
     }
 
     public function updatedDirtyEmails(): void

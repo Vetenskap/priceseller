@@ -5,8 +5,9 @@ namespace App\HttpClient\WbClient\Resources\Card;
 use App\Models\WbItem;
 use App\Models\WbMarket;
 use Illuminate\Support\Collection;
+use Livewire\Wireable;
 
-class Card
+class Card implements Wireable
 {
     const ATTRIBUTES = [
         "Основная информация" => [
@@ -53,29 +54,34 @@ class Card
     protected ?Collection $tags;
     protected ?string $createdAt;
     protected ?string $updatedAt;
-    protected ?WbItem $product;
+    protected ?WbItem $product = null;
 
-    public function __construct(Collection $card)
+    public function __construct(Collection $card = null)
     {
-        $this->nmID = $card->get('nmID');
-        $this->imtID = $card->get('imtID');
-        $this->nmUUID = $card->get('nmUUID');
-        $this->subjectID = $card->get('subjectID');
-        $this->vendorCode = $card->get('vendorCode');
-        $this->subjectName = $card->get('subjectName');
-        $this->brand = $card->get('brand');
-        $this->title = $card->get('title');
-        $this->photos = $card->get('photos');
-        $this->video = $card->get('video');
-        $this->dimensions_length = $card->get('dimensions')->get('length');
-        $this->dimensions_width = $card->get('dimensions')->get('width');
-        $this->dimensions_height = $card->get('dimensions')->get('height');
-        $this->dimensions_isValid = $card->get('dimensions')->get('isValid');
-        $this->characteristics = $card->get('characteristics');
-        $this->sizes = $card->get('sizes');
-        $this->tags = $card->get('tags');
-        $this->createdAt = $card->get('createdAt');
-        $this->updatedAt = $card->get('updatedAt');
+        if ($card) {
+            $this->nmID = $card->get('nmID');
+            $this->imtID = $card->get('imtID');
+            $this->nmUUID = $card->get('nmUUID');
+            $this->subjectID = $card->get('subjectID');
+            $this->vendorCode = $card->get('vendorCode');
+            $this->subjectName = $card->get('subjectName');
+            $this->brand = $card->get('brand');
+            $this->title = $card->get('title');
+            $this->photos = $card->get('photos');
+            $this->video = $card->get('video');
+            $this->dimensions_length = $card->get('dimensions') ? $card->get('dimensions')->get('length') : $card->get('dimensions_length');
+            $this->dimensions_width = $card->get('dimensions') ? $card->get('dimensions')->get('width') : $card->get('dimensions_width');
+            $this->dimensions_height = $card->get('dimensions') ? $card->get('dimensions')->get('height') : $card->get('dimensions_height');
+            $this->dimensions_isValid = $card->get('dimensions') ? $card->get('dimensions')->get('isValid') : $card->get('dimensions_isValid');
+            $this->characteristics = $card->get('characteristics');
+            $this->sizes = $card->get('sizes');
+            $this->tags = $card->get('tags');
+            $this->createdAt = $card->get('createdAt');
+            $this->updatedAt = $card->get('updatedAt');
+            if ($card->has('product')) {
+                $this->product = $card->get('product');
+            }
+        }
     }
 
     public function loadLink(WbMarket $market): void
@@ -178,11 +184,19 @@ class Card
         return $this->updatedAt;
     }
 
-    public function toCollection(WbMarket $market): Collection
+    public function getDimensionsIsValid(): ?bool
     {
-        $this->loadLink($market);
+        return $this->dimensions_isValid;
+    }
 
-        return collect([
+    public function getProduct(): ?WbItem
+    {
+        return $this->product;
+    }
+
+    public function toLivewire(): array
+    {
+        return [
             "nmID" => $this->nmID,
             "imtID" => $this->imtID,
             "nmUUID" => $this->nmUUID,
@@ -203,7 +217,11 @@ class Card
             "createdAt" => $this->createdAt,
             "updatedAt" => $this->updatedAt,
             'product' => $this->product
-        ]);
+        ];
     }
 
+    public static function fromLivewire($value): Card
+    {
+        return new static(collect($value)->toCollectionSpread());
+    }
 }

@@ -31,10 +31,15 @@
                     </flux:dropdown>
                 </x-blocks.main-block>
                 <x-blocks.main-block>
-                    <flux:modal.trigger name="create-supply">
-                        <flux:button icon="plus">Создать поставку</flux:button>
-                    </flux:modal.trigger>
+                    <flux:button :href="route('assembly.wb.stickers', ['supply' => $supply])" target="_blank">Получить все этикетки</flux:button>
                 </x-blocks.main-block>
+                @if(!$supply->done)
+                    <x-blocks.main-block>
+                        <flux:button variant="danger" wire:confirm="Вы действительно хотите закрыть эту поставку?"
+                                     wire:click="closeSupply">Закрыть поставку
+                        </flux:button>
+                    </x-blocks.main-block>
+                @endif
                 <x-blocks.main-block>
                     @if(count($orders) > 0)
                         <div class="space-y-6 mt-6">
@@ -42,7 +47,7 @@
                                 <flux:card>
                                     <flux:card>
                                         <flux:heading
-                                                :size="match($mainFields['name_heading']['size_level']) { '1' => 'base', '2' => 'lg', '3' => 'xl' }">
+                                            :size="match($mainFields['name_heading']['size_level']) { '1' => 'base', '2' => 'lg', '3' => 'xl' }">
                                             {{$order->getCard()->getTitle()}}
                                         </flux:heading>
                                     </flux:card>
@@ -50,14 +55,21 @@
                                         <flux:card class="w-1/4 space-y-6 text-center">
                                             <flux:modal.trigger name="view-img">
                                                 <img
-                                                        x-on:click="hrefImg = '{{ $order->getCard()->getPhotos()->first()?->get('big') ?? '' }}'"
-                                                        src="{{$order->getCard()->getPhotos()->first()?->get('big') ?? null}}"/>
+                                                    x-on:click="hrefImg = '{{ $order->getCard()->getPhotos()->first()?->get('big') ?? '' }}'"
+                                                    src="{{$order->getCard()->getPhotos()->first()?->get('big') ?? null}}"/>
                                             </flux:modal.trigger>
                                             <flux:button variant="danger" size="sm">Пожаловаться</flux:button>
                                         </flux:card>
                                         <flux:card class="space-y-4 w-full">
-                                            <flux:checkbox label="В поставку"
-                                                           wire:model.live="selectedOrders.{{$order->getId()}}"/>
+                                            <flux:card class="flex justify-center gap-2">
+                                                <div class="self-end">
+                                                    <flux:subheading>{{$order->getSticker()->getPartA()}}</flux:subheading>
+                                                </div>
+                                                <div class="self-center">
+                                                    <flux:heading
+                                                        size="xl">{{$order->getSticker()->getPartB()}}</flux:heading>
+                                                </div>
+                                            </flux:card>
                                             <flux:separator/>
                                             @foreach($fields as $field => $parameters)
                                                 @php
@@ -98,12 +110,12 @@
                                                     <flux:subheading>{{$parameters['label']}}:</flux:subheading>
                                                     @if($parameters['size_level'] < 5)
                                                         <flux:subheading
-                                                                style="color: {{ $parameters['color'] }};"
-                                                                :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$value}}</flux:subheading>
+                                                            style="color: {{ $parameters['color'] }};"
+                                                            :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$value}}</flux:subheading>
                                                     @else
                                                         <flux:heading
-                                                                style="color: {{ $parameters['color'] }};"
-                                                                :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$value}}</flux:heading>
+                                                            style="color: {{ $parameters['color'] }};"
+                                                            :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$value}}</flux:heading>
                                                     @endif
                                                 </div>
                                                 <flux:separator/>
@@ -148,14 +160,14 @@
                                                             @if($value)
                                                                 @if($parameters['size_level'] < 5)
                                                                     <flux:subheading
-                                                                            class="text-nowrap"
-                                                                            style="color: {{ $parameters['color'] }};"
-                                                                            :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$parameters['label']}}</flux:subheading>
+                                                                        class="text-nowrap"
+                                                                        style="color: {{ $parameters['color'] }};"
+                                                                        :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$parameters['label']}}</flux:subheading>
                                                                 @else
                                                                     <flux:heading
-                                                                            class="text-nowrap"
-                                                                            style="color: {{ $parameters['color'] }};"
-                                                                            :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$parameters['label']}}</flux:heading>
+                                                                        class="text-nowrap"
+                                                                        style="color: {{ $parameters['color'] }};"
+                                                                        :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$parameters['label']}}</flux:heading>
                                                                 @endif
                                                             @endif
                                                         </div>
@@ -174,18 +186,5 @@
     </div>
     <flux:modal name="view-img" class="w-full">
         <img x-bind:src="hrefImg"/>
-    </flux:modal>
-    <flux:modal name="create-supply" class="md:w-96 space-y-6">
-        <div>
-            <flux:heading size="lg">Создание поставки</flux:heading>
-            <flux:subheading>Количество товаров: {{count($selectedOrders)}}.</flux:subheading>
-            <flux:error name="selectedOrders" />
-        </div>
-        <flux:input label="Наименование поставки" wire:model="supplyName" required/>
-        <div class="flex">
-            <flux:spacer/>
-
-            <flux:button variant="primary" wire:click="createSupply">Создать поставку</flux:button>
-        </div>
     </flux:modal>
 </div>
