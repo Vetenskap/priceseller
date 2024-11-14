@@ -1,7 +1,7 @@
 <div>
     <x-blocks.main-block>
         <flux:card class="space-y-6">
-            <flux:button>Сохранить</flux:button>
+            <flux:button wire:click="save">Сохранить</flux:button>
             <div class="flex">
                 <flux:switch wire:model="enabled_orders" label="Учитывать заказы при выгрузке"/>
             </div>

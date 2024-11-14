@@ -34,7 +34,7 @@ class MoyskladItemOrderIndex extends Component
 
     public function mount(): void
     {
-        $this->enabled_orders = $this->moysklad->enabled_orders;
+        $this->enabled_orders = (bool) $this->moysklad->enabled_orders;
         $this->clear_order_time = $this->moysklad->clear_order_time;
     }
 

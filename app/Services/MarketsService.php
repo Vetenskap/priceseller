@@ -18,8 +18,6 @@ class MarketsService
             ->where('enabled_update_commissions_in_time', true)
             ->get()
             ->each(function (OzonMarket $market) use ($time) {
-                logger('time - ' . $time->timezone(Helpers::getUserTimeZone($market->user))->format('H:i'));
-                logger('time market - ' . $market->update_commissions_time);
                 if ($market->update_commissions_time === $time->timezone(Helpers::getUserTimeZone($market->user))->format('H:i')) {
                     MarketUpdateApiCommissions::dispatch($market, OzonMarketService::class);
                 }
