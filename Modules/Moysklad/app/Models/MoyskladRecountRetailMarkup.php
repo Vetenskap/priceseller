@@ -2,9 +2,9 @@
 
 namespace Modules\Moysklad\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 
-class MoyskladRecountRetailMarkup extends Model
+class MoyskladRecountRetailMarkup extends MainModel
 {
     protected $fillable = [
         'enabled',

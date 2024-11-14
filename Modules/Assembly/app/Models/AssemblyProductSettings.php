@@ -2,11 +2,9 @@
 
 namespace Modules\Assembly\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
-// use Modules\Assembly\Database\Factories\AssemblyProductSettingsFactory;
+use App\Models\MainModel;
 
-class AssemblyProductSettings extends Model
+class AssemblyProductSettings extends MainModel
 {
     protected $fillable = [
         'field',

@@ -3,11 +3,11 @@
 namespace Modules\Order\Models;
 
 use App\Models\Item;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-class OrderItem extends Model
+class OrderItem extends MainModel
 {
     protected $fillable = [
         'item_id',

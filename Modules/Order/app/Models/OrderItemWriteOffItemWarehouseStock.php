@@ -3,10 +3,10 @@
 namespace Modules\Order\Models;
 
 use App\Models\ItemWarehouseStock;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-class OrderItemWriteOffItemWarehouseStock extends Model
+class OrderItemWriteOffItemWarehouseStock extends MainModel
 {
     protected $fillable = [
         'stock',
