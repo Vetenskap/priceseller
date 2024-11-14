@@ -42,7 +42,7 @@ class ProductInfoPrices
 
         $ozonClient = new OzonClient($market->api_key, $market->client_id);
 
-        return $ozonClient->post(self::ENDPOINT, $data)->toCollectionSpread()->get('result')->get('items')->map(function (Collection $item) {
+        return $ozonClient->post(self::ENDPOINT, $data)->collect()->toCollectionSpread()->get('result')->get('items')->map(function (Collection $item) {
             $productInfoPrices = new self();
             $productInfoPrices->setProductInfoPrices($item);
             return $productInfoPrices;

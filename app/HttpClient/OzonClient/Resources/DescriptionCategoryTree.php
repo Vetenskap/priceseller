@@ -18,7 +18,7 @@ class DescriptionCategoryTree
         $client = new OzonClient($market->api_key, $market->client_id);
         $result = Cache::tags(['ozon', 'market', 'description_category_tree'])->remember('base', now()->addDay(), fn() => $client->post(self::ENDPOINT, [
             'language' => 'DEFAULT'
-        ])->toCollectionSpread()->get('result'));
+        ])->collect()->toCollectionSpread()->get('result'));
 
         $this->setDescriptionCategoryTree($result);
     }

@@ -61,7 +61,7 @@ class DescriptionCategory
             'language' => 'DEFAULT',
         ];
 
-        $result = Cache::tags(['ozon', 'market', 'description', 'category', 'attribute'])->remember(json_encode($data), now()->addDay(), fn() => $client->post(DescriptionCategoryAttribute::ENDPOINT, $data))->toCollectionSpread()->get('result');
+        $result = Cache::tags(['ozon', 'market', 'description', 'category', 'attribute'])->remember(json_encode($data), now()->addDay(), fn() => $client->post(DescriptionCategoryAttribute::ENDPOINT, $data)->collect())->toCollectionSpread()->get('result');
         $attributes = new Collection();
         $result->each(function (Collection $attribute) use ($attributes) {
             $newAttribute = new DescriptionCategoryAttribute();

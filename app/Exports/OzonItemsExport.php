@@ -39,14 +39,14 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
 
         $this->market->items()
             ->orderByDesc('updated_at')
-            ->with('ozonitemable')
+            ->with('itemable')
             ->chunk(1000, function (Collection $items) use (&$allData) {
                 $chunkData = $items->map(function (OzonItem $item) {
                     $main = [
                         'product_id' => $item->product_id,
                         'offer_id' => $item->offer_id,
-                        'item_code' => $item->ozonitemable->code,
-                        'item_type' => $item->ozonitemable->getMorphClass() === 'App\Models\Item' ? 'Товар' : 'Комплект',
+                        'item_code' => $item->itemable->code,
+                        'item_type' => $item->itemable->getMorphClass() === 'App\Models\Item' ? 'Товар' : 'Комплект',
                         'min_price_percent' => $item->min_price_percent,
                         'min_price' => $item->min_price,
                         'shipping_processing' => $item->shipping_processing,
@@ -59,9 +59,9 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
                         'price_max' => $item->price_max,
                         'price_market' => $item->price_market,
                         'count' => $item->count,
-                        'item_price' => $item->ozonitemable->getMorphClass() === 'App\Models\Item' ? $item->ozonitemable->price : $item->ozonitemable->items()->sum('price'),
-                        'item_buy_price_reserv' => $item->ozonitemable->getMorphClass() === 'App\Models\Item' ? $item->ozonitemable->buy_price_reserve : $item->ozonitemable->items()->sum('buy_price_reserve'),
-                        'multiplicity' => $item->ozonitemable->getMorphClass() === 'App\Models\Item' ? $item->ozonitemable->multiplicity : $item->ozonitemable->items()->min('bundle_items.multiplicity'),
+                        'item_price' => $item->itemable->getMorphClass() === 'App\Models\Item' ? $item->itemable->price : $item->itemable->items()->sum('price'),
+                        'item_buy_price_reserv' => $item->itemable->getMorphClass() === 'App\Models\Item' ? $item->itemable->buy_price_reserve : $item->itemable->items()->sum('buy_price_reserve'),
+                        'multiplicity' => $item->itemable->getMorphClass() === 'App\Models\Item' ? $item->itemable->multiplicity : $item->itemable->items()->min('bundle_items.multiplicity'),
                         'updated_at' => $item->updated_at,
                         'created_at' => $item->created_at,
                         'delete' => 'Нет'

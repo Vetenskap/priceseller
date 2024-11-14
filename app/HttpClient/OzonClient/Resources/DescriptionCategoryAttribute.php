@@ -68,7 +68,7 @@ class DescriptionCategoryAttribute
             ];
 
             $client = new OzonClient($market->api_key, $market->client_id);
-            $result = Cache::tags(['ozon', 'market', 'description', 'category', 'attribute', 'value'])->remember(json_encode($data), now()->addDay(), fn() => $client->post(DescriptionCategoryAttributeValue::ENDPOINT, $data))->toCollectionSpread();
+            $result = Cache::tags(['ozon', 'market', 'description', 'category', 'attribute', 'value'])->remember(json_encode($data), now()->addDay(), fn() => $client->post(DescriptionCategoryAttributeValue::ENDPOINT, $data)->collect())->toCollectionSpread();
 
             $dictionary = $result->get('result');
 

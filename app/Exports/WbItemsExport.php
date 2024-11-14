@@ -44,8 +44,8 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
                     $main = [
                         'nmID' => $item->nm_id,
                         'vendor_code' => $item->vendor_code,
-                        'item_code' => $item->wbitemable->code,
-                        'item_type' => $item->wbitemable->getMorphClass() === 'App\Models\Item' ? 'Товар' : 'Комплект',
+                        'item_code' => $item->itemable->code,
+                        'item_type' => $item->itemable->getMorphClass() === 'App\Models\Item' ? 'Товар' : 'Комплект',
                         'sku' => $item->sku,
                         'sales_percent' => $item->sales_percent,
                         'min_price' => $item->min_price,
@@ -55,9 +55,9 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
                         'price' => $item->price,
                         'price_market' => $item->price_market,
                         'count' => $item->count,
-                        'item_price' => $item->wbitemable->getMorphClass() === 'App\Models\Item' ? $item->wbitemable->price : $item->wbitemable->items()->sum('price'),
-                        'item_buy_price_reserve' => $item->wbitemable->getMorphClass() === 'App\Models\Item' ? $item->wbitemable->buy_price_reserve : $item->wbitemable->items()->sum('buy_price_reserve'),
-                        'multiplicity' => $item->wbitemable->getMorphClass() === 'App\Models\Item' ? $item->wbitemable->multiplicity : $item->wbitemable->items()->min('bundle_items.multiplicity'),
+                        'item_price' => $item->itemable->getMorphClass() === 'App\Models\Item' ? $item->itemable->price : $item->itemable->items()->sum('price'),
+                        'item_buy_price_reserve' => $item->itemable->getMorphClass() === 'App\Models\Item' ? $item->itemable->buy_price_reserve : $item->itemable->items()->sum('buy_price_reserve'),
+                        'multiplicity' => $item->itemable->getMorphClass() === 'App\Models\Item' ? $item->itemable->multiplicity : $item->itemable->items()->min('bundle_items.multiplicity'),
                         'updated_at' => $item->updated_at,
                         'created_at' => $item->created_at,
                         'delete' => 'Нет'
