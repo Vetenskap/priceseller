@@ -25,7 +25,7 @@ class SupplierIndex extends BaseComponent
 
     public function mount(): void
     {
-        $this->dirtySuppliers = $this->currentUser()->suppliers->pluck(null, 'id')->toArray();
+        $this->dirtySuppliers = $this->currentUser()->suppliers->mapWithKeys(fn (Supplier $supplier) => [$supplier->id => ['open' => (bool) $supplier->open]])->toArray();
     }
 
     public function updatedDirtySuppliers(): void

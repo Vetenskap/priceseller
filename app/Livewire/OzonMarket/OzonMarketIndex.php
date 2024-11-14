@@ -27,7 +27,7 @@ class OzonMarketIndex extends BaseComponent
 
     public function mount(): void
     {
-        $this->dirtyMarkets = $this->currentUser()->ozonMarkets->pluck(null, 'id')->toArray();
+        $this->dirtyMarkets = $this->currentUser()->ozonMarkets->mapWithKeys(fn(OzonMarket $market) => [$market->getKey() => ['open' => (bool) $market->open]])->toArray();
     }
 
     public function updatedDirtyMarkets(): void

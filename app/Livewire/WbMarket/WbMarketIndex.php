@@ -27,7 +27,7 @@ class WbMarketIndex extends BaseComponent
 
     public function mount(): void
     {
-        $this->dirtyMarkets = $this->currentUser()->wbMarkets->pluck(null, 'id')->toArray();
+        $this->dirtyMarkets = $this->currentUser()->wbMarkets->mapWithKeys(fn (WbMarket $market) => [$market->id => ['open' => (bool) $market->open]])->toArray();
     }
 
     public function updatedDirtyMarkets(): void
