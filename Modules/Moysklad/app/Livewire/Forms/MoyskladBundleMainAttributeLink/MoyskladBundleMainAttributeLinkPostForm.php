@@ -16,7 +16,7 @@ class MoyskladBundleMainAttributeLinkPostForm extends Form
 {
     public Moysklad $moysklad;
     public ?MoyskladBundleMainAttributeLink $moyskladBundleLink = null;
-    public Collection $bundleAttributes;
+    public ?Collection $bundleAttributes = null;
 
     #[Validate]
     public $attribute_name;
@@ -81,11 +81,13 @@ class MoyskladBundleMainAttributeLinkPostForm extends Form
 
     public function setOtherFields(): void
     {
-        $bundleField = $this->bundleAttributes->where('name', $this->link)->first();
-        if (isset($bundleField['type'])) {
-            $this->link_label = $bundleField['label'];
-            $this->link_name = $bundleField['type'] === 'metadata' ? $bundleField['label'] : $bundleField['name'];
-            $this->type = $bundleField['type'];
+        if ($this->bundleAttributes) {
+            $bundleField = $this->bundleAttributes->where('name', $this->link)->first();
+            if (isset($bundleField['type'])) {
+                $this->link_label = $bundleField['label'];
+                $this->link_name = $bundleField['type'] === 'metadata' ? $bundleField['label'] : $bundleField['name'];
+                $this->type = $bundleField['type'];
+            }
         }
     }
 

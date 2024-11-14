@@ -16,7 +16,7 @@ class MoyskladItemMainAttributeLinkPostForm extends Form
 {
     public Moysklad $moysklad;
     public ?MoyskladItemMainAttributeLink $moyskladItemLink = null;
-    public Collection $assortmentAttributes;
+    public ?Collection $assortmentAttributes = null;
 
     #[Validate]
     public $attribute_name;
@@ -81,11 +81,13 @@ class MoyskladItemMainAttributeLinkPostForm extends Form
 
     public function setOtherFields(): void
     {
-        $assortmentField = $this->assortmentAttributes->where('name', $this->link)->first();
-        if (isset($assortmentField['type'])) {
-            $this->link_label = $assortmentField['label'];
-            $this->link_name = $assortmentField['type'] === 'metadata' ? $assortmentField['label'] : $assortmentField['name'];
-            $this->type = $assortmentField['type'];
+        if ($this->assortmentAttributes) {
+            $assortmentField = $this->assortmentAttributes->where('name', $this->link)->first();
+            if (isset($assortmentField['type'])) {
+                $this->link_label = $assortmentField['label'];
+                $this->link_name = $assortmentField['type'] === 'metadata' ? $assortmentField['label'] : $assortmentField['name'];
+                $this->type = $assortmentField['type'];
+            }
         }
     }
 
