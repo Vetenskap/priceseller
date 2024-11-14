@@ -27,9 +27,9 @@ class SupplierPostForm extends Form
     {
         $this->supplier = $supplier;
         $this->name = $supplier->name;
-        $this->open = $supplier->open;
-        $this->use_brand = $supplier->use_brand;
-        $this->unload_without_price = $supplier->unload_without_price;
+        $this->open = (bool) $supplier->open;
+        $this->use_brand = (bool) $supplier->use_brand;
+        $this->unload_without_price = (bool) $supplier->unload_without_price;
     }
 
     public function rules(): array

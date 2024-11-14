@@ -51,8 +51,8 @@
                     <flux:rows>
                         @foreach($this->warehouses as $warehouse)
                             <flux:row :key="$warehouse->getKey()">
-                                <flux:cell>{{collect($moyskladWarehouses)->firstWhere('id', $warehouse->moysklad_warehouse_uuid)['name']}}</flux:cell>
                                 <flux:cell>{{$warehouse->warehouse->name}}</flux:cell>
+                                <flux:cell>{{collect($moyskladWarehouses)->firstWhere('id', $warehouse->moysklad_warehouse_uuid)['name']}}</flux:cell>
                                 <flux:cell align="right">
                                     <flux:button size="sm" variant="danger" icon="trash"
                                                  wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
