@@ -151,6 +151,8 @@
                                 </flux:card>
                             @endforeach
                         </div>
+                    @else
+                        <flux:subheading>Нет заказов</flux:subheading>
                     @endif
                 </x-blocks.main-block>
             </div>

@@ -94,6 +94,41 @@ class DatabaseSeeder extends Seeder
                 'value' => 'orderprocess',
                 'type' => 'employee'
             ],
+            [
+                'name' => 'Мой склад',
+                'value' => 'moysklad',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Заказы',
+                'value' => 'order',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Траст (апи)',
+                'value' => 'trastapi',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Восход (апи)',
+                'value' => 'voshodapi',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Самсон (апи)',
+                'value' => 'samsonapi',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Берг (апи)',
+                'value' => 'bergapi',
+                'type' => 'employee'
+            ],
+            [
+                'name' => 'Сималенд (апи)',
+                'value' => 'simalandapi',
+                'type' => 'employee'
+            ],
         ];
 
         foreach ($permissions as $permission) {

@@ -73,7 +73,7 @@ class BaseComponent extends Component
     public function user(): User|Employee
     {
         if ($this->isEmployee()) {
-            return Auth::guard('employee')->user();  // Вернуть владельца сотрудника
+            return Auth::guard('employee')->user();
         }
 
         return Auth::user();

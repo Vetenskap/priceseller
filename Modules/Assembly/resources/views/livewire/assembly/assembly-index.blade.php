@@ -3,12 +3,14 @@
         <x-blocks.main-block>
             <flux:tabs>
                 <flux:tab name="general" icon="home">Главная</flux:tab>
-                <flux:tab name="settings" icon="wrench-screwdriver">Настройки</flux:tab>
+                @if($this->user()->can('update-assembly'))
+                    <flux:tab name="settings" icon="wrench-screwdriver">Настройки</flux:tab>
+                @endif
             </flux:tabs>
         </x-blocks.main-block>
 
         <flux:tab.panel name="general">
-            @if(auth()->user()->ozonMarkets()->exists())
+            @if($this->currentUser()->ozonMarkets()->exists())
                 <x-blocks.main-block>
                     <flux:card class="space-y-6">
                         <svg width="238" height="32" viewBox="0 0 238 32" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -36,7 +38,7 @@
                             <flux:input label="Начальная дата" type="date" wire:model="startDateOzon"/>
                             <flux:input label="Конечная дата" type="date" wire:model="endDateOzon"/>
                         </div>
-                        @foreach(auth()->user()->ozonMarkets as $market)
+                        @foreach($this->currentUser()->ozonMarkets as $market)
                             <flux:card>
                                 <div class="flex gap-6 items-center">
                                     <flux:heading size="lg">{{$market->name}}</flux:heading>
@@ -51,7 +53,7 @@
                     </flux:card>
                 </x-blocks.main-block>
             @endif
-            @if(auth()->user()->wbMarkets()->exists())
+            @if($this->currentUser()->wbMarkets()->exists())
                 <x-blocks.main-block>
                     <flux:card class="space-y-6">
                         <svg xmlns="http://www.w3.org/2000/svg" width="138" height="20" viewBox="0 0 138 20" fill="none"
@@ -63,7 +65,7 @@
                         <flux:card class="space-y-6">
                             <flux:heading size="xl">Сборочные задания</flux:heading>
                             <flux:card class="flex gap-6">
-                                @foreach(auth()->user()->wbMarkets as $market)
+                                @foreach($this->currentUser()->wbMarkets as $market)
                                     <flux:button
                                         :href="route('assembly.wb', ['market' => $market])" class="!bg-[#6C11C9] !text-white">{{$market->name}}</flux:button>
                                 @endforeach
@@ -71,7 +73,7 @@
                         </flux:card>
                         <flux:card class="space-y-6">
                             <flux:heading size="xl">Поставки</flux:heading>
-                                @foreach(auth()->user()->wbMarkets as $market)
+                                @foreach($this->currentUser()->wbMarkets as $market)
                                 <flux:card class="space-y-6">
                                     <flux:heading size="lg">{{$market->name}}</flux:heading>
                                     @if($market->supplies->isNotEmpty())
@@ -110,8 +112,10 @@
                 </x-blocks.main-block>
             @endif
         </flux:tab.panel>
-        <flux:tab.panel name="settings">
-            <livewire:assembly::assembly-settings.assembly-settings-index/>
-        </flux:tab.panel>
+        @if($this->user()->can('update-assembly'))
+            <flux:tab.panel name="settings">
+                <livewire:assembly::assembly-settings.assembly-settings-index/>
+            </flux:tab.panel>
+        @endif
     </flux:tab.group>
 </x-layouts.module-index-layout>

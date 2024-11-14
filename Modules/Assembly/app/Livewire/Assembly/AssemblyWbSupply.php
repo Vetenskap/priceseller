@@ -127,6 +127,10 @@ class AssemblyWbSupply extends BaseComponent
 
     public function render()
     {
+        if (!$this->user()->can('view-assembly')) {
+            abort(403);
+        }
+
         return view('assembly::livewire.assembly.assembly-wb-supply');
     }
 }

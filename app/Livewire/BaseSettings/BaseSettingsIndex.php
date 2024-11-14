@@ -22,7 +22,7 @@ class BaseSettingsIndex extends BaseComponent
         $this->user = $this->currentUser();
 
         $this->baseSettings = $this->user->baseSettings;
-        $this->enabled_use_buy_price_reserve = (bool) $this->baseSettings->enabled_use_buy_price_reserve ?? false;
+        $this->enabled_use_buy_price_reserve = $this->baseSettings ? (bool) $this->baseSettings->enabled_use_buy_price_reserve : false;
     }
 
     public function save(): void

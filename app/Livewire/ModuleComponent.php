@@ -2,9 +2,12 @@
 
 namespace App\Livewire;
 
+use App\Models\Employee;
 use App\Models\Module;
+use App\Models\Permission;
 use App\Models\UserModule;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class ModuleComponent extends BaseComponent
 {
@@ -38,6 +41,12 @@ class ModuleComponent extends BaseComponent
         $enabledModules = [];
 
         foreach (\Module::allEnabled() as $name => $module) {
+            if (Permission::where('value', Str::lower($name))->exists()) {
+                if ($this->user() instanceof Employee) {
+                    if (!$this->user()->can('view-' . $name)) continue;
+                }
+            }
+
             $enabledModules[] = $name;
         }
 

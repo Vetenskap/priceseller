@@ -132,6 +132,10 @@ class AssemblyWb extends ModuleComponent
 
     public function render()
     {
+        if (!$this->user()->can('view-assembly')) {
+            abort(403);
+        }
+
         return view('assembly::livewire.assembly.assembly-wb');
     }
 }
