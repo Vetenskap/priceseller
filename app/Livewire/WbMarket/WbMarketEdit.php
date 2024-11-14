@@ -220,6 +220,11 @@ class WbMarketEdit extends BaseComponent
 
     public function testStocks(): void
     {
+        if (!count($this->testWarehouses)) {
+            \Flux::toast('Выберите склады', variant: 'danger');
+            return;
+        }
+
         TestStock::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
 
         $this->addJobNotification();
@@ -227,6 +232,11 @@ class WbMarketEdit extends BaseComponent
 
     public function nullStocks(): void
     {
+        if (!count($this->testWarehouses)) {
+            \Flux::toast('Выберите склады', variant: 'danger');
+            return;
+        }
+
         NullStocks::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
 
         $this->addJobNotification();
