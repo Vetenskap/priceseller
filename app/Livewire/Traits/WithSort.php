@@ -15,9 +15,11 @@ trait WithSort
     {
         if ($this->sortBy === $column) {
             $this->sortDirection = $this->sortDirection === 'asc' ? 'desc' : 'asc';
+            $this->updatedSortBy();
         } else {
             $this->sortBy = $column;
             $this->sortDirection = 'asc';
+            $this->updatedSortBy();
         }
     }
 

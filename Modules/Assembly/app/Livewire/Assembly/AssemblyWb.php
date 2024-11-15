@@ -5,6 +5,7 @@ namespace Modules\Assembly\Livewire\Assembly;
 use App\HttpClient\WbClient\Resources\Order;
 use App\Livewire\ModuleComponent;
 use App\Livewire\Traits\WithSort;
+use App\Models\Item;
 use App\Models\WbMarket;
 use Illuminate\Support\Collection;
 use Modules\Assembly\Services\AssemblyWbService;
@@ -47,42 +48,45 @@ class AssemblyWb extends ModuleComponent
     public function updatedSortBy(): void
     {
         if ($this->sortDirection === 'asc') {
-            $this->orders = $this->orders->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                $collection->sortBy($this->sortBy) :
-                $collection->get('card')->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                    $collection->sortBy($this->sortBy) :
-                    $collection->get('product')->sortBy($this->sortBy)
-                )
-            );
+            $this->orders = $this->orders->sortBy(function (Order $order) {
+                try {
+                    return $order->{'get' . \Illuminate\Support\Str::apa($this->sortBy)}($this->currentUser());
+                } catch (\Error $e) {
+                    try {
+                        return $order->getCard()->{'get' . \Illuminate\Support\Str::apa($this->sortBy)}();
+                    } catch (\Error $e) {
+                        if (isset($order->getCard()->getProduct()[$this->sortBy])) {
+                            return $order->getCard()->getProduct()[$this->sortBy];
+                        } else {
+                            if ($order->getCard()->getProduct()->itemable instanceof Item) {
+                                return $order->getCard()->getProduct()->itemable[$this->sortBy];
+                            } else {
+                                return $order->getCard()->getProduct()->itemable->items->sortBy(fn (Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
+                            }
+                        }
+                    }
+                }
+            });
         } else {
-            $this->orders = $this->orders->sortByDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                $collection->sortBy($this->sortBy) :
-                $collection->get('card')->sortByDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                    $collection->sortBy($this->sortBy) :
-                    $collection->get('product')->sortByDesc($this->sortBy)
-                )
-            );
-        }
-    }
-
-    public function updatedSortDirection(): void
-    {
-        if ($this->sortDirection === 'asc') {
-            $this->orders = $this->orders->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                $collection->sortBy($this->sortBy) :
-                $collection->get('card')->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                    $collection->sortBy($this->sortBy) :
-                    $collection->get('product')->sortBy($this->sortBy)
-                )
-            );
-        } else {
-            $this->orders = $this->orders->sortByDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                $collection->sortBy($this->sortBy) :
-                $collection->get('card')->sortByDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                    $collection->sortBy($this->sortBy) :
-                    $collection->get('product')->sortByDesc($this->sortBy)
-                )
-            );
+            $this->orders = $this->orders->sortByDesc(function (Order $order) {
+                try {
+                    return $order->{'get' . \Illuminate\Support\Str::apa($this->sortBy)}($this->currentUser());
+                } catch (\Error $e) {
+                    try {
+                        return $order->getCard()->{'get' . \Illuminate\Support\Str::apa($this->sortBy)}();
+                    } catch (\Error $e) {
+                        if (isset($order->getCard()->getProduct()[$this->sortBy])) {
+                            return $order->getCard()->getProduct()[$this->sortBy];
+                        } else {
+                            if ($order->getCard()->getProduct()->itemable instanceof Item) {
+                                return $order->getCard()->getProduct()->itemable[$this->sortBy];
+                            } else {
+                                return $order->getCard()->getProduct()->itemable->items->sortByDesc(fn (Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
+                            }
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -119,12 +123,14 @@ class AssemblyWb extends ModuleComponent
 
     public function loadOrders(): void
     {
-        $list = new Order();
-        $orders = $list->getNewAll($this->market);
-        $this->orders = $orders->map(function (Order $order) {
-            $order->fetchCard($this->market->api_key);
-            $order->getCard()->loadLink($this->market);
-            return $order;
+        $this->orders = Cache::rememberForever('test', function () {
+            $list = new Order();
+            $orders = $list->getNewAll($this->market);
+            return $orders->map(function (Order $order) {
+                $order->fetchCard($this->market->api_key);
+                $order->getCard()->loadLink($this->market);
+                return $order;
+            });
         });
     }
 

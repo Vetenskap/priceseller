@@ -43,110 +43,128 @@
                                                 {{$product['name']}}
                                             </flux:heading>
                                         </flux:card>
-                                        <div class="flex">
-                                            <flux:card class="w-1/4 space-y-6 text-center">
-                                                <flux:modal.trigger name="view-img">
-                                                    <img
-                                                        x-on:click="hrefImg = '{{$product['attribute']['images'][0]['file_name'] ?? ''}}'"
-                                                        src="{{$product['attribute']['images'][0]['file_name'] ?? null}}"/>
-                                                </flux:modal.trigger>
-                                                <flux:button variant="danger" size="sm">Пожаловаться</flux:button>
-                                            </flux:card>
-                                            <flux:card class="space-y-4 w-full">
-                                                <div class="flex gap-12">
-                                                    <flux:button
-                                                        wire:click="createLabel({{json_encode($posting['posting_number'])}})"
-                                                        wire:target="createLabel({{json_encode($posting['posting_number'])}})"
-                                                        :size="match($mainFields['button_label']['size_level']) { '1' => 'xs', '2' => 'sm', '3' => 'base' }">
-                                                        Получить этикетку
-                                                    </flux:button>
+                                        <flux:card class="space-y-6">
+                                            <div class="w-full flex gap-2">
+                                                <div class="w-1/4 text-center">
+                                                    <flux:modal.trigger name="view-img">
+                                                        <img
+                                                            x-on:click="hrefImg = '{{$product['attribute']['images'][0]['file_name'] ?? ''}}'"
+                                                            src="{{$product['attribute']['images'][0]['file_name'] ?? null}}"/>
+                                                    </flux:modal.trigger>
+                                                    <div class="sm:hidden">
+                                                        <flux:button variant="danger" icon="no-symbol" size="sm"/>
+                                                    </div>
+                                                    <div class="hidden sm:block">
+                                                        <flux:button variant="danger" size="sm">Пожаловаться</flux:button>
+                                                    </div>
                                                 </div>
-                                                @foreach($fields as $field => $parameters)
-                                                    @php
-                                                        $value = null;
-                                                        switch ($parameters['type']) {
-                                                            case 'item':
-                                                                $value = $product['product']->itemable[$field];
-                                                                break;
-                                                            case 'attribute_item':
-                                                                $value = $product['product']->itemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
-                                                                break;
-                                                            case 'product':
-                                                                $value = $product['product'][$field];
-                                                                break;
-                                                            case 'order':
-                                                                $value = $posting[$field];
-                                                                break;
-                                                            case 'order_product':
-                                                                $value = $product[$field];
-                                                                break;
-                                                            case 'order_attribute_product':
-                                                                $value = $product['attribute'][$field];
-                                                                break;
-                                                        }
-                                                        if ($value instanceof \Illuminate\Support\Collection) $value = $value->toJson(JSON_UNESCAPED_UNICODE);
-                                                        if (is_bool($value)) $value = $value ? 'да' : 'нет';
-                                                    @endphp
-                                                    <div class="flex items-end gap-2" wire:key="{{$field}}">
-                                                        <flux:subheading>{{$parameters['label']}}:</flux:subheading>
-                                                        @if($parameters['size_level'] < 5)
-                                                            <flux:subheading
-                                                                style="color: {{ $parameters['color'] }};"
-                                                                :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$value}}</flux:subheading>
-                                                        @else
-                                                            <flux:heading
-                                                                style="color: {{ $parameters['color'] }};"
-                                                                :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$value}}</flux:heading>
+                                                <flux:separator vertical/>
+                                                <div class="space-y-2">
+                                                    <div class="flex gap-12">
+                                                        <flux:button
+                                                            wire:click="createLabel({{json_encode($posting['posting_number'])}})"
+                                                            wire:target="createLabel({{json_encode($posting['posting_number'])}})"
+                                                            :size="match($mainFields['button_label']['size_level']) { '1' => 'xs', '2' => 'sm', '3' => 'base' }">
+                                                            Получить этикетку
+                                                        </flux:button>
+                                                    </div>
+                                                    @foreach($fields as $field => $parameters)
+                                                        @php
+                                                            $value = null;
+                                                            switch ($parameters['type']) {
+                                                                case 'item':
+                                                                    if ($field === 'code') $value = $product['product']->itemable[$field];
+                                                                    if ($product['product']->itemable instanceof \App\Models\Item) {
+                                                                        $value = $product['product']->itemable[$field];
+                                                                    }
+                                                                    break;
+                                                                case 'attribute_item':
+                                                                    $value = $product['product']->itemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
+                                                                    break;
+                                                                case 'product':
+                                                                    $value = $product['product'][$field];
+                                                                    break;
+                                                                case 'order':
+                                                                    $value = $posting[$field];
+                                                                    break;
+                                                                case 'order_product':
+                                                                    $value = $product[$field];
+                                                                    break;
+                                                                case 'order_attribute_product':
+                                                                    $value = $product['attribute'][$field];
+                                                                    break;
+                                                            }
+                                                            if ($value instanceof \Illuminate\Support\Collection) $value = $value->toJson(JSON_UNESCAPED_UNICODE);
+                                                            if (is_bool($value)) $value = $value ? 'да' : 'нет';
+                                                        @endphp
+                                                        @if(
+                                                            ($order->getCard()->getProduct()->itemable instanceof \App\Models\Bundle && $field === 'code') ||
+                                                        ($order->getCard()->getProduct()->itemable instanceof \App\Models\Bundle && $parameters['type'] !== 'item') ||
+                                                        $order->getCard()->getProduct()->itemable instanceof \App\Models\Item
+                                                        )
+
                                                         @endif
-                                                    </div>
-                                                    <flux:separator/>
-                                                @endforeach
-                                                <flux:card>
-                                                    <div class="flex gap-4">
-                                                        @foreach($additionalFields as $field => $parameters)
-                                                            @php
-                                                                $value = null;
-                                                                switch ($parameters['type']) {
-                                                                    case 'item':
-                                                                        $value = (bool) $product['product']->itemable[$field];
-                                                                        break;
-                                                                    case 'attribute_item':
-                                                                        $value = (bool) $product['product']->itemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
-                                                                        break;
-                                                                    case 'product':
-                                                                        $value = (bool) $product['product'][$field];
-                                                                        break;
-                                                                    case 'order':
-                                                                        $value = (bool) $posting[$field];
-                                                                        break;
-                                                                    case 'order_product':
-                                                                        $value = (bool) $product[$field];
-                                                                        break;
-                                                                    case 'order_attribute_product':
-                                                                        $value = (bool) $product['attribute'][$field];
-                                                                        break;
-                                                                }
-                                                            @endphp
-                                                            <div wire:key="{{$field}}">
-                                                                @if($value)
-                                                                    @if($parameters['size_level'] < 5)
-                                                                        <flux:subheading
-                                                                            class="text-nowrap"
-                                                                            style="color: {{ $parameters['color'] }};"
-                                                                            :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$parameters['label']}}</flux:subheading>
-                                                                    @else
-                                                                        <flux:heading
-                                                                            class="text-nowrap"
-                                                                            style="color: {{ $parameters['color'] }};"
-                                                                            :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$parameters['label']}}</flux:heading>
+                                                        <div class="flex items-end gap-2" wire:key="{{$field}}">
+                                                            <flux:subheading>{{$parameters['label']}}:</flux:subheading>
+                                                            @if($parameters['size_level'] < 5)
+                                                                <flux:subheading
+                                                                    style="color: {{ $parameters['color'] }};"
+                                                                    :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$value}}</flux:subheading>
+                                                            @else
+                                                                <flux:heading
+                                                                    style="color: {{ $parameters['color'] }};"
+                                                                    :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$value}}</flux:heading>
+                                                            @endif
+                                                        </div>
+                                                        <flux:separator/>
+                                                    @endforeach
+                                                    <flux:card>
+                                                        <div class="flex gap-4">
+                                                            @foreach($additionalFields as $field => $parameters)
+                                                                @php
+                                                                    $value = null;
+                                                                    switch ($parameters['type']) {
+                                                                        case 'item':
+                                                                            $value = (bool) $product['product']->itemable[$field];
+                                                                            break;
+                                                                        case 'attribute_item':
+                                                                            $value = (bool) $product['product']->itemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
+                                                                            break;
+                                                                        case 'product':
+                                                                            $value = (bool) $product['product'][$field];
+                                                                            break;
+                                                                        case 'order':
+                                                                            $value = (bool) $posting[$field];
+                                                                            break;
+                                                                        case 'order_product':
+                                                                            $value = (bool) $product[$field];
+                                                                            break;
+                                                                        case 'order_attribute_product':
+                                                                            $value = (bool) $product['attribute'][$field];
+                                                                            break;
+                                                                    }
+                                                                @endphp
+                                                                <div wire:key="{{$field}}">
+                                                                    @if($value)
+                                                                        @if($parameters['size_level'] < 5)
+                                                                            <flux:subheading
+                                                                                class="text-nowrap"
+                                                                                style="color: {{ $parameters['color'] }};"
+                                                                                :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$parameters['label']}}</flux:subheading>
+                                                                        @else
+                                                                            <flux:heading
+                                                                                class="text-nowrap"
+                                                                                style="color: {{ $parameters['color'] }};"
+                                                                                :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$parameters['label']}}</flux:heading>
+                                                                        @endif
                                                                     @endif
-                                                                @endif
-                                                            </div>
-                                                        @endforeach
-                                                    </div>
-                                                </flux:card>
-                                            </flux:card>
-                                        </div>
+                                                                </div>
+                                                            @endforeach
+                                                        </div>
+                                                    </flux:card>
+                                                </div>
+                                            </div>
+                                        </flux:card>
                                     @endforeach
                                 </flux:card>
                             @endforeach
