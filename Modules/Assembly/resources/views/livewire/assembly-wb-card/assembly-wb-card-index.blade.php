@@ -61,7 +61,7 @@
                                         <flux:columns>
                                             <flux:column>#</flux:column>
                                             @foreach($selectedFields as $ssfield => $parameters)
-                                                @if(isset($parameters['in_table']))
+                                                @if(isset($parameters['in_table']) && $parameters['in_table'])
                                                     <flux:column>{{$parameters['label']}}</flux:column>
                                                 @endif
                                             @endforeach
@@ -70,7 +70,7 @@
                                             <flux:row>
                                                 <flux:cell>1</flux:cell>
                                                 @foreach($selectedFields as $ssfield => $parameters)
-                                                    @if(isset($parameters['in_table']))
+                                                    @if(isset($parameters['in_table']) && $parameters['in_table'])
                                                         <flux:cell>{{$parameters['label']}}</flux:cell>
                                                     @endif
                                                 @endforeach

@@ -120,7 +120,7 @@
                                                                 <flux:row>
                                                                     <flux:cell>1</flux:cell>
                                                                     @foreach($fields as $field => $parameters)
-                                                                        @if(isset($parameters['in_table']))
+                                                                        @if(isset($parameters['in_table']) && $parameters['in_table'])
                                                                             <flux:cell>{{$item[$field]}}</flux:cell>
                                                                         @endif
                                                                     @endforeach
