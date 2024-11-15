@@ -100,8 +100,8 @@
                                                                 :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$value}}</flux:heading>
                                                         @endif
                                                     </div>
+                                                    <flux:separator/>
                                                 @endif
-                                                <flux:separator/>
                                             @endforeach
                                             @if(!empty(Arr::where($fields, fn($item) => $item['in_table'] ?? false)) && $order->getCard()->getProduct()->itemable instanceof \App\Models\Bundle)
                                                 <flux:card class="space-y-6">
