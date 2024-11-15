@@ -312,7 +312,7 @@ class Order implements Wireable
 
     public function getCreatedAt(User $user): ?string
     {
-        return Carbon::createFromFormat('Y-m-dTH:i:sZ', $this->createdAt)->setTimezone(Helpers::getUserTimeZone($this->user))->format('Y-m-d H:i:s');
+        return Carbon::createFromFormat('Y-m-dTH:i:sZ', $this->createdAt)->setTimezone(Helpers::getUserTimeZone($user))->format('Y-m-d H:i:s');
     }
 
     public static function setCreatedAt($value): string
