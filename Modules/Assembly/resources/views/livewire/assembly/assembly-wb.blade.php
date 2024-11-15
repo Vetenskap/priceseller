@@ -87,27 +87,21 @@
                                                     if ($value instanceof \Illuminate\Support\Collection) $value = $value->toJson(JSON_UNESCAPED_UNICODE);
                                                     if (is_bool($value)) $value = $value ? 'да' : 'нет';
                                                 @endphp
-                                                @if (
-                                                    ($order->getCard()->getProduct()->itemable instanceof \App\Models\Bundle && $field === 'code')
-                                                    ($order->getCard()->getProduct()->itemable instanceof \App\Models\Bundle && $parameters['type'] !== 'item')
+                                                @if(
+                                                    ($order->getCard()->getProduct()->itemable instanceof \App\Models\Bundle && $field === 'code') ||
+                                                    ($order->getCard()->getProduct()->itemable instanceof \App\Models\Bundle && $parameters['type'] !== 'item') ||
                                                     $order->getCard()->getProduct()->itemable instanceof \App\Models\Item
-                                                 )
-                                                    <div class="flex items-end gap-2" wire:key="{{ $field }}">
-                                                        <flux:subheading>{{ $parameters['label'] }}:</flux:subheading>
+                                                )
+                                                    <div class="flex items-end gap-2" wire:key="{{$field}}">
+                                                        <flux:subheading>{{$parameters['label']}}:</flux:subheading>
                                                         @if($parameters['size_level'] < 5)
                                                             <flux:subheading
                                                                 style="color: {{ $parameters['color'] }};"
-                                                                :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }"
-                                                            >
-                                                                {{ $value }}
-                                                            </flux:subheading>
+                                                                :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$value}}</flux:subheading>
                                                         @else
                                                             <flux:heading
                                                                 style="color: {{ $parameters['color'] }};"
-                                                                :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }"
-                                                            >
-                                                                {{ $value }}
-                                                            </flux:heading>
+                                                                :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$value}}</flux:heading>
                                                         @endif
                                                     </div>
                                                     <flux:separator/>
