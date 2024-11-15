@@ -42,7 +42,7 @@
                                 <flux:card>
                                     <flux:card>
                                         <flux:heading
-                                                :size="match($mainFields['name_heading']['size_level']) { '1' => 'base', '2' => 'lg', '3' => 'xl' }">
+                                            :size="match($mainFields['name_heading']['size_level']) { '1' => 'base', '2' => 'lg', '3' => 'xl' }">
                                             {{$order->getCard()->getTitle()}}
                                         </flux:heading>
                                     </flux:card>
@@ -50,8 +50,8 @@
                                         <flux:card class="w-1/4 space-y-6 text-center">
                                             <flux:modal.trigger name="view-img">
                                                 <img
-                                                        x-on:click="hrefImg = '{{ $order->getCard()->getPhotos()->first()?->get('big') ?? '' }}'"
-                                                        src="{{$order->getCard()->getPhotos()->first()?->get('big') ?? null}}"/>
+                                                    x-on:click="hrefImg = '{{ $order->getCard()->getPhotos()->first()?->get('big') ?? '' }}'"
+                                                    src="{{$order->getCard()->getPhotos()->first()?->get('big') ?? null}}"/>
                                             </flux:modal.trigger>
                                             <flux:button variant="danger" size="sm">Пожаловаться</flux:button>
                                         </flux:card>
@@ -64,6 +64,7 @@
                                                     $value = null;
                                                     switch ($parameters['type']) {
                                                         case 'item':
+                                                            if ($field === 'code') $value = $order->getCard()->getProduct()->itemable[$field];
                                                             if ($order->getCard()->getProduct()->itemable instanceof \App\Models\Item) {
                                                                 $value = $order->getCard()->getProduct()->itemable[$field];
                                                             }
@@ -86,20 +87,49 @@
                                                     if ($value instanceof \Illuminate\Support\Collection) $value = $value->toJson(JSON_UNESCAPED_UNICODE);
                                                     if (is_bool($value)) $value = $value ? 'да' : 'нет';
                                                 @endphp
-                                                <div class="flex items-end gap-2" wire:key="{{$field}}">
-                                                    <flux:subheading>{{$parameters['label']}}:</flux:subheading>
-                                                    @if($parameters['size_level'] < 5)
-                                                        <flux:subheading
+                                                @if($order->getCard()->getProduct()->itemable instanceof \App\Models\Item)
+                                                    <div class="flex items-end gap-2" wire:key="{{$field}}">
+                                                        <flux:subheading>{{$parameters['label']}}:</flux:subheading>
+                                                        @if($parameters['size_level'] < 5)
+                                                            <flux:subheading
                                                                 style="color: {{ $parameters['color'] }};"
                                                                 :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$value}}</flux:subheading>
-                                                    @else
-                                                        <flux:heading
+                                                        @else
+                                                            <flux:heading
                                                                 style="color: {{ $parameters['color'] }};"
                                                                 :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$value}}</flux:heading>
-                                                    @endif
-                                                </div>
+                                                        @endif
+                                                    </div>
+                                                @endif
                                                 <flux:separator/>
                                             @endforeach
+                                            @if(!empty(Arr::where($fields, fn($item) => $item['in_table'] ?? false)) && $order->getCard()->getProduct()->itemable instanceof \App\Models\Bundle)
+                                                <flux:card class="space-y-6">
+                                                    <flux:heading size="xl">Состав комплекта</flux:heading>
+                                                    <flux:table>
+                                                        <flux:columns>
+                                                            <flux:column>#</flux:column>
+                                                            @foreach($fields as $field => $parameters)
+                                                                @if(isset($parameters['in_table']) && $parameters['in_table'])
+                                                                    <flux:column>{{$parameters['label']}}</flux:column>
+                                                                @endif
+                                                            @endforeach
+                                                        </flux:columns>
+                                                        <flux:rows>
+                                                            @foreach($order->getCard()->getProduct()->itemable->items as $item)
+                                                                <flux:row>
+                                                                    <flux:cell>1</flux:cell>
+                                                                    @foreach($fields as $field => $parameters)
+                                                                        @if(isset($parameters['in_table']))
+                                                                            <flux:cell>{{$item[$field]}}</flux:cell>
+                                                                        @endif
+                                                                    @endforeach
+                                                                </flux:row>
+                                                            @endforeach
+                                                        </flux:rows>
+                                                    </flux:table>
+                                                </flux:card>
+                                            @endif
                                             <flux:card>
                                                 <div class="flex gap-4">
                                                     @foreach($additionalFields as $field => $parameters)
@@ -132,14 +162,14 @@
                                                             @if($value)
                                                                 @if($parameters['size_level'] < 5)
                                                                     <flux:subheading
-                                                                            class="text-nowrap"
-                                                                            style="color: {{ $parameters['color'] }};"
-                                                                            :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$parameters['label']}}</flux:subheading>
+                                                                        class="text-nowrap"
+                                                                        style="color: {{ $parameters['color'] }};"
+                                                                        :size="match($parameters['size_level']) { '1' => 'sm', '2' => 'default', '3' => 'lg', '4' => 'xl' }">{{$parameters['label']}}</flux:subheading>
                                                                 @else
                                                                     <flux:heading
-                                                                            class="text-nowrap"
-                                                                            style="color: {{ $parameters['color'] }};"
-                                                                            :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$parameters['label']}}</flux:heading>
+                                                                        class="text-nowrap"
+                                                                        style="color: {{ $parameters['color'] }};"
+                                                                        :size="match($parameters['size_level']) { '5' => 'base', '6' => 'lg', '7' => 'xl' }">{{$parameters['label']}}</flux:heading>
                                                                 @endif
                                                             @endif
                                                         </div>
@@ -163,7 +193,7 @@
         <div>
             <flux:heading size="lg">Создание поставки</flux:heading>
             <flux:subheading>Количество товаров: {{count($selectedOrders)}}.</flux:subheading>
-            <flux:error name="selectedOrders" />
+            <flux:error name="selectedOrders"/>
         </div>
         <flux:input label="Наименование поставки" wire:model="supplyName" required/>
         <div class="flex">

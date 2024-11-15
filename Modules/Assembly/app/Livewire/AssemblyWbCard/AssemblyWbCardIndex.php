@@ -39,10 +39,11 @@ class AssemblyWbCardIndex extends ModuleComponent
     public function mount(): void
     {
         $this->fields['Поля товара (ps)'] = Arr::map(Item::MAINATTRIBUTES, function ($item) {
-            return Arr::add($item, 'type', 'item');
+            $item = Arr::add($item, 'type', 'item');
+            return Arr::add($item, 'in_table', true);
         });
         $this->fields['Доп. поля товара (ps)'] = $this->currentUser()->itemAttributes->map(function (ItemAttribute $attribute) {
-            return ['name' => $attribute->id, 'label' => $attribute->name, 'type' => 'attribute_item'];
+            return ['name' => $attribute->id, 'label' => $attribute->name, 'type' => 'attribute_item', 'in_table' => true];
         })->toArray();
         $this->fields['Поля товара (связь)'] = Arr::map(WbItem::MAINATTRIBUTES, function ($item) {
             return Arr::add($item, 'type', 'product');
@@ -93,7 +94,6 @@ class AssemblyWbCardIndex extends ModuleComponent
                 'market' => $parameters['market']
             ], array_merge($parameters, [
                 'field' => $field,
-                'label' => $parameters['label'],
             ]));
         }
 
@@ -112,7 +112,6 @@ class AssemblyWbCardIndex extends ModuleComponent
                 'market' => $parameters['market']
             ], array_merge($parameters, [
                 'field' => $field,
-                'label' => $parameters['label'],
             ]));
         }
     }

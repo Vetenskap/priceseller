@@ -52,8 +52,33 @@
                                                  wire:target="deleteField({{ json_encode($ssfield) }}, {{ json_encode($parameters) }})"
                                                  wire:confirm="Вы действительно хотите удалить это поле? Это действие нельзя будет отменить."/>
                                 </div>
-                                <flux:separator />
+                                <flux:separator/>
                             @endforeach
+                            @if(!empty(Arr::where($selectedFields, fn($item) => $item['in_table'] ?? false)))
+                                <flux:card class="space-y-6">
+                                    <flux:heading size="xl">Состав комплекта</flux:heading>
+                                    <flux:table>
+                                        <flux:columns>
+                                            <flux:column>#</flux:column>
+                                            @foreach($selectedFields as $ssfield => $parameters)
+                                                @if(isset($parameters['in_table']))
+                                                    <flux:column>{{$parameters['label']}}</flux:column>
+                                                @endif
+                                            @endforeach
+                                        </flux:columns>
+                                        <flux:rows>
+                                            <flux:row>
+                                                <flux:cell>1</flux:cell>
+                                                @foreach($selectedFields as $ssfield => $parameters)
+                                                    @if(isset($parameters['in_table']))
+                                                        <flux:cell>{{$parameters['label']}}</flux:cell>
+                                                    @endif
+                                                @endforeach
+                                            </flux:row>
+                                        </flux:rows>
+                                    </flux:table>
+                                </flux:card>
+                            @endif
                             <div>
                                 <flux:dropdown>
                                     <flux:button icon-trailing="chevron-down">Добавить поле</flux:button>

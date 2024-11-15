@@ -16,6 +16,7 @@ class AssemblyProductSettings extends MainModel
         'size_level',
         'index',
         'user_id',
+        'in_table',
     ];
 
     protected $hidden = ['created_at', 'updated_at'];
