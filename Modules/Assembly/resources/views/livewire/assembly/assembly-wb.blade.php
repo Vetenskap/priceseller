@@ -77,18 +77,10 @@
                                                             $value = $product->getCard()->getProduct()[$field];
                                                             break;
                                                         case 'order':
-                                                            try {
                                                                 $value = $order->{'get' . \Illuminate\Support\Str::apa($field)}();
-                                                            } catch (Throwable) {
-                                                                $value = $order->{'is' . \Illuminate\Support\Str::apa($field)}();
-                                                            }
                                                             break;
                                                         case 'order_product':
-                                                            try {
                                                                 $value = $order->getCard()->{'get' . \Illuminate\Support\Str::apa($field)}();
-                                                            } catch (Throwable) {
-                                                                $value = $order->getCard()->{'is' . \Illuminate\Support\Str::apa($field)}();
-                                                            }
                                                             break;
                                                     }
                                                     if ($value instanceof \Illuminate\Support\Collection) $value = $value->toJson(JSON_UNESCAPED_UNICODE);
@@ -128,18 +120,10 @@
                                                                     $value = $product->getCard()->getProduct()[$field];
                                                                     break;
                                                                 case 'order':
-                                                                    try {
                                                                         $value = $order->{'get' . \Illuminate\Support\Str::apa($field)}();
-                                                                    } catch (Throwable) {
-                                                                        $value = $order->{'is' . \Illuminate\Support\Str::apa($field)}();
-                                                                    }
                                                                     break;
                                                                 case 'order_product':
-                                                                    try {
                                                                         $value = $order->getCard()->{'get' . \Illuminate\Support\Str::apa($field)}();
-                                                                    } catch (Throwable) {
-                                                                        $value = $order->getCard()->{'is' . \Illuminate\Support\Str::apa($field)}();
-                                                                    }
                                                                     break;
                                                             }
                                                             $value = (bool) $value
