@@ -77,7 +77,7 @@
                                                             $value = $product->getCard()->getProduct()[$field];
                                                             break;
                                                         case 'order':
-                                                                $value = $order->{'get' . \Illuminate\Support\Str::apa($field)}();
+                                                                $value = $order->{'get' . \Illuminate\Support\Str::apa($field)}($this->currentUser());
                                                             break;
                                                         case 'order_product':
                                                                 $value = $order->getCard()->{'get' . \Illuminate\Support\Str::apa($field)}();

@@ -51,8 +51,6 @@ class Order implements Wireable
         ]
     ];
 
-    protected User $user;
-
     protected ?string $address_fullAddress;
     protected ?float $address_longitude;
     protected ?float $address_latitude;
@@ -120,7 +118,6 @@ class Order implements Wireable
             if ($order->has('sticker')) {
                 $this->sticker = $order->get('sticker');
             }
-            $this->user = $order->get('user');
         }
     }
 
@@ -143,7 +140,6 @@ class Order implements Wireable
         $response = $client->get(self::ENDPOINT);
 
         return $response->collect()->toCollectionSpread()->get('orders')->map(function (Collection $order) use ($market) {
-            $order->put('user', $market->user);
             return new self($order);
         });
     }
@@ -208,7 +204,6 @@ class Order implements Wireable
             'article' => $this->article,
             'colorCode' => $this->colorCode,
             'rid' => $this->rid,
-            'createdAt' => $this->getCreatedAt(),
             'offices' => $this->offices,
             'skus' => $this->skus,
             'id' => $this->id,
@@ -223,7 +218,6 @@ class Order implements Wireable
             'isZeroOrder' => $this->isZeroOrder,
             'card' => $this->card ? $this->card->toLivewire() : null,
             'sticker' => $this->sticker ? $this->sticker->toLivewire() : null,
-            'user' => $this->user
         ];
     }
 
@@ -233,7 +227,6 @@ class Order implements Wireable
 
         $data['deliveryType'] = static::setDeliveryType($data['deliveryType']);
         $data['cargoType'] = static::setCargoType($data['cargoType']);
-        $data['createdAt'] = static::setCreatedAt($data['createdAt']);
 
         if ($data['card']) $data['card'] = new Card($data->get('card'));
         if ($data['sticker']) $data['sticker'] = new Sticker($data->get('sticker'));
@@ -317,9 +310,9 @@ class Order implements Wireable
         return $this->rid;
     }
 
-    public function getCreatedAt(): ?string
+    public function getCreatedAt(User $user): ?string
     {
-        return Carbon::createFromFormat('Y-m-dTH:i:sZ', $this->createdAt)->setTimezone($this->user->timezone)->format('Y-m-d H:i:s');
+        return Carbon::createFromFormat('Y-m-dTH:i:sZ', $this->createdAt)->setTimezone(Helpers::getUserTimeZone($this->user))->format('Y-m-d H:i:s');
     }
 
     public static function setCreatedAt($value): string
