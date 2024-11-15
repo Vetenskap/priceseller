@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\Supplier\PriceUnload;
 use App\Models\WbWarehouseStock;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder;
@@ -27,15 +28,6 @@ class Test extends Command
      */
     public function handle()
     {
-        dd(WbWarehouseStock::query()
-            ->whereHas('wbItem', function (Builder $query) {
-                $query->whereHas('item', function (Builder $query) {
-                    $query
-                        ->where('updated', false)
-                        ->orWhere('unload_wb', false)
-                        ->where('supplier_id', '9c548271-42d2-4c86-bff0-bdb106154757');
-                });
-            })
-            ->get());
+        PriceUnload::dispatch(15, 'users/prices/6736c065aaafa_ipTikula.xlsx');
     }
 }
