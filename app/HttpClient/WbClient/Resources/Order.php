@@ -200,7 +200,7 @@ class Order implements Wireable
             'article' => $this->article,
             'colorCode' => $this->colorCode,
             'rid' => $this->rid,
-            'createdAt' => $this->createdAt,
+            'createdAt' => $this->getCreatedAt(),
             'offices' => $this->offices,
             'skus' => $this->skus,
             'id' => $this->id,
@@ -224,6 +224,7 @@ class Order implements Wireable
 
         $data['deliveryType'] = static::setDeliveryType($data['deliveryType']);
         $data['cargoType'] = static::setCargoType($data['cargoType']);
+        $data['createdAt'] = static::setCreatedAt($data['createdAt']);
 
         if ($data['card']) $data['card'] = new Card($data->get('card'));
         if ($data['sticker']) $data['sticker'] = new Sticker($data->get('sticker'));
@@ -308,7 +309,12 @@ class Order implements Wireable
 
     public function getCreatedAt(): ?string
     {
-        return $this->createdAt;
+        return str_replace(['T', 'Z'], ' ', $this->createdAt);
+    }
+
+    public static function setCreatedAt($value): string
+    {
+        return str_replace(' ', ['T', 'Z'], $value);
     }
 
     public function getOffices(): ?Collection
