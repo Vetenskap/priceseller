@@ -121,7 +121,7 @@ class AssemblyWb extends ModuleComponent
     {
         $this->orders = Cache::rememberForever('test1', function () {
             $list = new Order();
-            $orders = $list->getNewAll($this->market->api_key);
+            $orders = $list->getNewAll($this->market);
             return $orders->map(function(Order $order) {
                 $order->fetchCard($this->market->api_key);
                 $order->getCard()->loadLink($this->market);

@@ -2,10 +2,13 @@
 
 namespace App\HttpClient\WbClient\Resources;
 
+use App\Helpers\Helpers;
 use App\HttpClient\WbClient\Resources\Card\Card;
 use App\HttpClient\WbClient\Resources\Card\CardList;
 use App\HttpClient\WbClient\WbClient;
+use App\Models\User;
 use App\Models\WbMarket;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Livewire\Wireable;
 
@@ -48,6 +51,8 @@ class Order implements Wireable
         ]
     ];
 
+    protected User $user;
+
     protected ?string $address_fullAddress;
     protected ?float $address_longitude;
     protected ?float $address_latitude;
@@ -78,7 +83,6 @@ class Order implements Wireable
     protected ?bool $isZeroOrder;
     protected ?Card $card = null;
     protected ?Sticker $sticker = null;
-
     public function __construct(Collection $order = null)
     {
         if ($order) {
@@ -116,6 +120,7 @@ class Order implements Wireable
             if ($order->has('sticker')) {
                 $this->sticker = $order->get('sticker');
             }
+            $this->user = $order->get('user');
         }
     }
 
@@ -131,13 +136,16 @@ class Order implements Wireable
         });
     }
 
-    public function getNewAll(string $api_key): Collection
+    public function getNewAll(WbMarket $market): Collection
     {
-        $client = new WbClient($api_key);
+        $client = new WbClient($market->api_key);
 
         $response = $client->get(self::ENDPOINT);
 
-        return $response->collect()->toCollectionSpread()->get('orders')->map(fn(Collection $order) => new self($order));
+        return $response->collect()->toCollectionSpread()->get('orders')->map(function (Collection $order) use ($market) {
+            $order->put('user', $market->user);
+            return new self($order);
+        });
     }
 
     public static function setDeliveryType($value): string
@@ -214,7 +222,8 @@ class Order implements Wireable
             'cargoType' => $this->getCargoType(),
             'isZeroOrder' => $this->isZeroOrder,
             'card' => $this->card ? $this->card->toLivewire() : null,
-            'sticker' => $this->sticker ? $this->sticker->toLivewire() : null
+            'sticker' => $this->sticker ? $this->sticker->toLivewire() : null,
+            'user' => $this->user
         ];
     }
 
@@ -228,6 +237,7 @@ class Order implements Wireable
 
         if ($data['card']) $data['card'] = new Card($data->get('card'));
         if ($data['sticker']) $data['sticker'] = new Sticker($data->get('sticker'));
+        if ($data['user']) $data['user'] = User::find($data['user']['id']);
 
         return new static($data);
     }
@@ -309,12 +319,12 @@ class Order implements Wireable
 
     public function getCreatedAt(): ?string
     {
-        return str_replace(['T', 'Z'], ' ', $this->createdAt);
+        return Carbon::createFromFormat('Y-m-dTH:i:sZ', $this->createdAt)->setTimezone(Helpers::getUserTimeZone($this->user))->format('Y-m-d H:i:s');
     }
 
     public static function setCreatedAt($value): string
     {
-        return str_replace(' ', ['T', 'Z'], $value);
+        return Carbon::createFromFormat('Y-m-d H:i:s', $value)->setTimezone('UTC')->format('Y-m-dTH:i:sZ');
     }
 
     public function getOffices(): ?Collection
