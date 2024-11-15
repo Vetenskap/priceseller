@@ -25,6 +25,17 @@ class AssemblyWbCardIndex extends ModuleComponent
 
     public $selectedAdditionalFields = [];
 
+    public function deleteField($field, $parameters): void
+    {
+        $this->currentUser()
+            ->assemblyProductSettings()
+            ->where(array_merge($parameters, ['field' => $field]))
+            ->delete();
+
+        unset($this->selectedFields[$field]);
+        unset($this->selectedAdditionalFields[$field]);
+    }
+
     public function mount(): void
     {
         $this->fields['Поля товара (ps)'] = Arr::map(Item::MAINATTRIBUTES, function ($item) {
