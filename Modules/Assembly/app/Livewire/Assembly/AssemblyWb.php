@@ -61,7 +61,7 @@ class AssemblyWb extends ModuleComponent
                             if ($order->getCard()->getProduct()->itemable instanceof Item) {
                                 return $order->getCard()->getProduct()->itemable[$this->sortBy];
                             } else {
-                                return $order->getCard()->getProduct()->itemable->items->sortBy(fn (Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
+                                return $order->getCard()->getProduct()->itemable->items->sortBy(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
                             }
                         }
                     }
@@ -81,7 +81,7 @@ class AssemblyWb extends ModuleComponent
                             if ($order->getCard()->getProduct()->itemable instanceof Item) {
                                 return $order->getCard()->getProduct()->itemable[$this->sortBy];
                             } else {
-                                return $order->getCard()->getProduct()->itemable->items->sortByDesc(fn (Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
+                                return $order->getCard()->getProduct()->itemable->items->sortByDesc(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
                             }
                         }
                     }
@@ -123,14 +123,12 @@ class AssemblyWb extends ModuleComponent
 
     public function loadOrders(): void
     {
-        $this->orders = Cache::rememberForever('test', function () {
-            $list = new Order();
-            $orders = $list->getNewAll($this->market);
-            return $orders->map(function (Order $order) {
-                $order->fetchCard($this->market->api_key);
-                $order->getCard()->loadLink($this->market);
-                return $order;
-            });
+        $list = new Order();
+        $orders = $list->getNewAll($this->market);
+        $this->orders = $orders->map(function (Order $order) {
+            $order->fetchCard($this->market->api_key);
+            $order->getCard()->loadLink($this->market);
+            return $order;
         });
     }
 
