@@ -87,7 +87,7 @@
                                                     if ($value instanceof \Illuminate\Support\Collection) $value = $value->toJson(JSON_UNESCAPED_UNICODE);
                                                     if (is_bool($value)) $value = $value ? 'да' : 'нет';
                                                 @endphp
-                                                @if($order->getCard()->getProduct()->itemable instanceof \App\Models\Item)
+                                                @if($order->getCard()->getProduct()->itemable instanceof \App\Models\Item || ($parameters['type'] === 'item' && $field === 'code'))
                                                     <div class="flex items-end gap-2" wire:key="{{$field}}">
                                                         <flux:subheading>{{$parameters['label']}}:</flux:subheading>
                                                         @if($parameters['size_level'] < 5)
