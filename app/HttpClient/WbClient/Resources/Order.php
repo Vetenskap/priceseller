@@ -312,12 +312,12 @@ class Order implements Wireable
 
     public function getCreatedAt(User $user): ?string
     {
-        return Carbon::createFromFormat('Y-m-dTH:i:sZ', $this->createdAt)->setTimezone(Helpers::getUserTimeZone($user))->format('Y-m-d H:i:s');
+        return Carbon::parse($this->createdAt)->setTimezone(Helpers::getUserTimeZone($user))->format('Y-m-d H:i:s');
     }
 
     public static function setCreatedAt($value): string
     {
-        return Carbon::createFromFormat('Y-m-d H:i:s', $value)->setTimezone('UTC')->format('Y-m-dTH:i:sZ');
+        return Carbon::createFromFormat('Y-m-d H:i:s', $value)->setTimezone('UTC')->toRfc3339String();
     }
 
     public function getOffices(): ?Collection

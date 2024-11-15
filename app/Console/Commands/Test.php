@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Item;
 use Illuminate\Console\Command;
+use Illuminate\Support\Carbon;
 use JetBrains\PhpStorm\NoReturn;
 use Modules\Moysklad\HttpClient\Resources\Context\CompanySettings\PriceType;
 use Modules\Moysklad\HttpClient\Resources\Entities\EntityList;
@@ -32,6 +33,8 @@ class Test extends Command
      */
     #[NoReturn] public function handle(): void
     {
-        dd(collect()->range(500, 1000));
+        $date = '2024-11-15T10:26:00Z';
+
+        dd(Carbon::parse($date)->format('Y-m-d H:i:s'));
     }
 }
