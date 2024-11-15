@@ -29,7 +29,7 @@
                                 </clipPath>
                             </defs>
                         </svg>
-                        <div class="flex gap-6">
+                        <div class="lg:flex lg:gap-6">
                             <flux:select variant="combobox" placeholder="Выберите статус..." label="Статус сборки" wire:model="statusOzon">
                                 @foreach(\App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled\Posting::STATUSES as $status)
                                     <flux:option :value="$status['value']">{{$status['label']}}</flux:option>
@@ -40,7 +40,7 @@
                         </div>
                         @foreach($this->currentUser()->ozonMarkets as $market)
                             <flux:card>
-                                <div class="flex gap-6 items-center">
+                                <div class="flex max-sm:flex-wrap gap-6 items-center">
                                     <flux:heading size="lg">{{$market->name}}</flux:heading>
                                     @foreach($market->warehouses as $warehouse)
                                         <flux:button
@@ -64,7 +64,7 @@
                         </svg>
                         <flux:card class="space-y-6">
                             <flux:heading size="xl">Сборочные задания</flux:heading>
-                            <flux:card class="flex gap-6">
+                            <flux:card class="flex max-sm:flex-wrap gap-6">
                                 @foreach($this->currentUser()->wbMarkets as $market)
                                     <flux:button
                                         :href="route('assembly.wb', ['market' => $market])" class="!bg-[#6C11C9] !text-white">{{$market->name}}</flux:button>

@@ -144,18 +144,7 @@ class Order implements Wireable
         });
     }
 
-    public static function setDeliveryType($value): string
-    {
-        return match ($value) {
-            "доставка на склад Wildberries" => "fbs",
-            "доставка силами продавца" => "dbs",
-            "экспресс-доставка силами продавца" => "edbs",
-            "доставка курьером WB" => "wbgo",
-            default => null,
-        };
-    }
-
-    public function getDeliveryType(): string
+    public function getDeliveryType(): ?string
     {
         return match ($this->deliveryType) {
             "fbs" => "доставка на склад Wildberries",
@@ -166,17 +155,7 @@ class Order implements Wireable
         };
     }
 
-    public static function setCargoType($value): int
-    {
-        return match ($value) {
-            "обычный" => 1,
-            "СГТ (Сверхгабаритный товар)" => 2,
-            "КГТ (Крупногабаритный товар)" => 3,
-            default => null,
-        };
-    }
-
-    public function getCargoType(): string
+    public function getCargoType(): ?string
     {
         return match ($this->cargoType) {
             1 => "обычный",
@@ -197,7 +176,7 @@ class Order implements Wireable
             'dTimeFrom' => $this->dTimeFrom,
             'dTimeTo' => $this->dTimeTo,
             'requiredMeta' => $this->requiredMeta,
-            'deliveryType' => $this->getDeliveryType(),
+            'deliveryType' => $this->deliveryType,
             'comment' => $this->comment,
             'scanPrice' => $this->scanPrice,
             'orderUid' => $this->orderUid,
@@ -214,10 +193,11 @@ class Order implements Wireable
             'convertedPrice' => $this->convertedPrice,
             'currencyCode' => $this->currencyCode,
             'convertedCurrencyCode' => $this->convertedCurrencyCode,
-            'cargoType' => $this->getCargoType(),
+            'cargoType' => $this->cargoType,
             'isZeroOrder' => $this->isZeroOrder,
             'card' => $this->card ? $this->card->toLivewire() : null,
             'sticker' => $this->sticker ? $this->sticker->toLivewire() : null,
+            'createdAt' => $this->createdAt
         ];
     }
 
@@ -225,12 +205,8 @@ class Order implements Wireable
     {
         $data = collect($value)->toCollectionSpread();
 
-        $data['deliveryType'] = static::setDeliveryType($data['deliveryType']);
-        $data['cargoType'] = static::setCargoType($data['cargoType']);
-
         if ($data['card']) $data['card'] = new Card($data->get('card'));
         if ($data['sticker']) $data['sticker'] = new Sticker($data->get('sticker'));
-        if ($data['user']) $data['user'] = User::find($data['user']['id']);
 
         return new static($data);
     }
@@ -310,14 +286,9 @@ class Order implements Wireable
         return $this->rid;
     }
 
-    public function getCreatedAt(User $user): ?string
+    public function getCreatedAt(User $user): string
     {
         return Carbon::parse($this->createdAt)->setTimezone(Helpers::getUserTimeZone($user))->format('Y-m-d H:i:s');
-    }
-
-    public static function setCreatedAt($value): string
-    {
-        return Carbon::createFromFormat('Y-m-d H:i:s', $value)->setTimezone('UTC')->toRfc3339String();
     }
 
     public function getOffices(): ?Collection
