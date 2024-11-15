@@ -92,13 +92,15 @@ new class extends Component {
                             {{ __('Склады') }}
                         </x-nav-link>
                     @endif
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-basesettings'))
+                        <x-nav-link :href="route('base-settings.index')" :active="request()->routeIs('base-settings.index')"
+                                    wire:navigate.hover>
+                            {{ __('Общие настройки') }}
+                        </x-nav-link>
+                    @endif
                     <x-nav-link :href="route('modules.index')" :active="str_contains(request()->getUri(), 'modules')"
                                 wire:navigate.hover>
                         {{ __('Модули') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('base-settings.index')" :active="request()->routeIs('base-settings.index')"
-                                wire:navigate.hover>
-                        {{ __('Общие настройки') }}
                     </x-nav-link>
                 </div>
             </div>

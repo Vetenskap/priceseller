@@ -129,6 +129,11 @@ class DatabaseSeeder extends Seeder
                 'value' => 'simalandapi',
                 'type' => 'employee'
             ],
+            [
+                'name' => 'Общие настройки',
+                'value' => 'basesettings',
+                'type' => 'employee'
+            ],
         ];
 
         foreach ($permissions as $permission) {

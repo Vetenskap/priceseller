@@ -43,6 +43,10 @@ class BaseSettingsIndex extends BaseComponent
 
     public function render()
     {
+        if (!$this->currentUser()->can('view-basesettings')) {
+            abort(403);
+        }
+
         return view('livewire.base-settings.base-settings-index');
     }
 }
