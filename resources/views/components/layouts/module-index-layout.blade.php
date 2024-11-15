@@ -7,8 +7,6 @@
             <div class="sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 space-y-6">
                     @foreach($modules as $module)
-                        @dump(\Illuminate\Support\Str::lower($module->name))
-                        @dump(config(\Illuminate\Support\Str::lower($module->name)))
                         <flux:card>
                             <div class="flex justify-between">
                                 <a href="{{route(config(\Illuminate\Support\Str::lower($module->name) . ".main_route"))}}"
