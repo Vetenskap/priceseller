@@ -33,8 +33,6 @@ class Test extends Command
      */
     #[NoReturn] public function handle(): void
     {
-        $date = '2024-11-15T10:26:00Z';
 
-        dd(Carbon::parse($date)->format('Y-m-d H:i:s'));
     }
 }

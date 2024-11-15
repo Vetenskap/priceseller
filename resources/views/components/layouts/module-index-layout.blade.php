@@ -2,8 +2,8 @@
 
 <div>
     <x-layouts.header name="Модули"/>
-    <div class="flex p-6 sm:px-6 lg:px-8">
-        <div class="py-6 w-1/3">
+    <div class="md:flex p-6 sm:px-6 lg:px-8">
+        <div class="py-6 xl:w-1/4 lg:w-1/3 md:w-1/2">
             <div class="sm:px-6 lg:px-8">
                 <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 space-y-6">
                     @foreach($modules as $module)
