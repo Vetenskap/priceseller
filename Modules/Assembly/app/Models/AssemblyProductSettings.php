@@ -19,6 +19,10 @@ class AssemblyProductSettings extends MainModel
         'in_table',
     ];
 
+    protected $casts = [
+        'additional' => 'boolean',
+    ];
+
     protected $hidden = ['created_at', 'updated_at'];
 
 }

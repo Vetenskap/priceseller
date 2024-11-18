@@ -40,6 +40,13 @@ class OzonMarket extends MainModel
         'tariff',
     ];
 
+    protected $casts = [
+        'open' => 'boolean',
+        'enabled_price' => 'boolean',
+        'enabled_update_commissions_in_time' => 'boolean',
+        'seller_price' => 'boolean'
+    ];
+
     public function items()
     {
         return $this->hasMany(OzonItem::class);

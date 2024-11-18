@@ -17,4 +17,8 @@ class MoyskladItemMainAttributeLink extends MainModel
         'invert'
     ];
 
+    protected $casts = [
+        'invert' => 'boolean'
+    ];
+
 }

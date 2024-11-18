@@ -22,6 +22,12 @@ class Supplier extends MainModel
         'unload_without_price'
     ];
 
+    protected $casts = [
+        'open' => 'boolean',
+        'use_brand' => 'boolean',
+        'unload_without_price' => 'boolean'
+    ];
+
     public function emails()
     {
         return $this->belongsToMany(Email::class, 'email_suppliers')

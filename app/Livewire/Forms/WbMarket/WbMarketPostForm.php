@@ -58,7 +58,7 @@ class WbMarketPostForm extends Form
     public $update_commissions_time = '00:00';
 
     #[Validate]
-    public $tariff = 'paidStorageKgvp';
+    public $tariff = 'kgvpMarketplace';
 
     public function rules(): array
     {

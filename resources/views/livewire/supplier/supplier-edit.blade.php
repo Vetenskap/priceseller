@@ -1,9 +1,6 @@
 <div>
     <x-layouts.header :name="$supplier->name"/>
     <x-layouts.actions>
-        @if($this->user()->can('update-suppliers'))
-            <flux:button wire:click="update">Сохранить</flux:button>
-        @endif
         @if($this->user()->can('delete-suppliers'))
                 <flux:modal.trigger name="delete-supplier">
                     <flux:button variant="danger">Удалить</flux:button>
@@ -44,16 +41,16 @@
             <flux:tab.panel name="general">
                 <x-blocks.main-block>
                     <flux:card class="space-y-6">
-                        <flux:input wire:model="form.name" label="Наименование" required/>
+                        <flux:input wire:model.live="form.name" label="Наименование" required/>
                         <div class="max-w-fit">
-                            <flux:switch wire:model="form.open" label="Включен" />
+                            <flux:switch wire:model.live="form.open" label="Включен" />
                         </div>
                         <div class="max-w-md">
-                            <flux:switch wire:model="form.use_brand" label="Использовать бренд"
+                            <flux:switch wire:model.live="form.use_brand" label="Использовать бренд"
                             description="При установке этого параметра поиск товаров в базе будет производится с брендом"/>
                         </div>
                         <div class="max-w-md">
-                            <flux:switch wire:model="form.unload_without_price" label="Выгружать без прайса"
+                            <flux:switch wire:model.live="form.unload_without_price" label="Выгружать без прайса"
                             description="При установке этого параметра поставщик больше не будет выгружаться с почты, будут использоваться резервная цена и остатки с ваших складов для выгрузки в кабинеты каждый час"/>
                         </div>
                     </flux:card>
@@ -70,4 +67,7 @@
             </flux:tab.panel>
         </flux:tab-group>
     </x-layouts.main-container>
+    @if($this->user()->can('update-suppliers'))
+        {!! $this->renderSaveButton() !!}
+    @endif
 </div>

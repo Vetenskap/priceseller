@@ -18,4 +18,8 @@ class AutomaticUnloadOrganization extends MainModel
         'organization_id',
     ];
 
+    protected $casts = [
+        'automatic' => 'boolean',
+    ];
+
 }

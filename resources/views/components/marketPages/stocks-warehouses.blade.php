@@ -15,13 +15,13 @@
         <flux:card class="space-y-6">
             <div class="flex">
                 <div class="space-y-6">
-                    <flux:input type="number" wire:model="form.minus_stock" label="Вычесть" />
+                    <flux:input type="number" wire:model.live="form.minus_stock" label="Вычесть" />
                     <flux:heading size="lg">Ставить остаток 1 если</flux:heading>
                     <div class="flex gap-12">
-                        <flux:input type="number" wire:model="form.min" label="Остаток от" />
-                        <flux:input type="number" wire:model="form.max" label="Остаток до" />
+                        <flux:input type="number" wire:model.live="form.min" label="Остаток от" />
+                        <flux:input type="number" wire:model.live="form.max" label="Остаток до" />
                     </div>
-                    <flux:input type="number" wire:model="form.max_count" label="Максимальный остаток" />
+                    <flux:input type="number" wire:model.live="form.max_count" label="Максимальный остаток" />
                 </div>
             </div>
         </flux:card>

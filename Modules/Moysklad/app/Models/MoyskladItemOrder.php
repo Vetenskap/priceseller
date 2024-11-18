@@ -14,6 +14,8 @@ class MoyskladItemOrder extends MainModel
         'new'
     ];
 
+    protected $casts = ['new' => 'boolean'];
+
     public function moysklad(): BelongsTo
     {
         return $this->belongsTo(Moysklad::class);

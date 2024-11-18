@@ -36,6 +36,11 @@ class WbMarket extends MainModel
         'tariff'
     ];
 
+    protected $casts = [
+        'enabled_update_commissions_in_time' => 'boolean',
+        'open' => 'boolean',
+    ];
+
     public function items()
     {
         return $this->hasMany(WbItem::class);

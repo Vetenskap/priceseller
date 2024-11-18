@@ -111,7 +111,7 @@ class OzonMarketPostForm extends Form
         $this->organization_id = $market->organization_id;
         $this->minus_stock = $market->minus_stock;
         $this->enabled_price = $market->enabled_price;
-        $this->enabled_update_commissions_in_time = (bool) $market->enabled_update_commissions_in_time;
+        $this->enabled_update_commissions_in_time = $market->enabled_update_commissions_in_time;
         $this->update_commissions_time = $market->update_commissions_time;
         $this->tariff = $market->tariff;
     }

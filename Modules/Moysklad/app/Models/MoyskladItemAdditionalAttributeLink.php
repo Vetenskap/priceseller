@@ -18,6 +18,10 @@ class MoyskladItemAdditionalAttributeLink extends MainModel
         'invert'
     ];
 
+    protected $casts = [
+        'invert' => 'boolean'
+    ];
+
     public function itemAttribute()
     {
         return $this->belongsTo(ItemAttribute::class);

@@ -11,4 +11,6 @@ class UserModule extends MainModel
         'module_id',
         'user_id',
     ];
+
+    protected $casts = ['enabled' => 'boolean'];
 }

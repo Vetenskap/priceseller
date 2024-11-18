@@ -25,7 +25,9 @@ class Moysklad extends MainModel
     ];
 
     protected $casts = [
-        'price_type_uuids' => 'array'
+        'price_type_uuids' => 'array',
+        'enabled_orders' => 'boolean',
+        'enabled_diff_price' => 'boolean',
     ];
 
     public function warehouses()

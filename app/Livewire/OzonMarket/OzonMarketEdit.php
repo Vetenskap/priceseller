@@ -14,6 +14,7 @@ use App\Livewire\BaseComponent;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSaveButton;
 use App\Livewire\Traits\WithSort;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
@@ -41,7 +42,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 #[Title('ОЗОН')]
 class OzonMarketEdit extends BaseComponent
 {
-    use WithFileUploads, WithFilters, WithSort, WithPagination;
+    use WithFileUploads, WithFilters, WithSort, WithPagination, WithSaveButton;
 
     public $backRoute = 'ozon';
 
@@ -191,6 +192,7 @@ class OzonMarketEdit extends BaseComponent
         $this->form->update();
 
         $this->addSuccessSaveNotification();
+        $this->hideSaveButton();
     }
 
     public function destroy(): void

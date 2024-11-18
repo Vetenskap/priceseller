@@ -21,6 +21,10 @@ class Email extends MainModel
         'open'
     ];
 
+    protected $casts = [
+        'open' => 'boolean'
+    ];
+
     public function suppliers()
     {
         return $this->belongsToMany(Supplier::class, 'email_suppliers')

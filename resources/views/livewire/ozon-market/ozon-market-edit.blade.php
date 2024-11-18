@@ -8,9 +8,6 @@
     </x-notify-top>
     @enderror
     <x-layouts.actions>
-        @if($this->user()->can('update-ozon'))
-            <flux:button wire:click="update">Сохранить</flux:button>
-        @endif
         @if($this->user()->can('delete-ozon'))
             <flux:button variant="danger" wire:click="destroy"
                          wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить
@@ -23,10 +20,10 @@
         <flux:tab.group>
             <x-blocks.main-block>
                 <flux:tabs>
-                    <flux:tab name="general" icon="home">Основное</flux:tab>
+                    <flux:tab name="general" icon="home">Основные</flux:tab>
                     <flux:tab name="prices" icon="currency-dollar">Цены</flux:tab>
-                    <flux:tab name="stocks_warehouses" icon="truck">Остатки и склады</flux:tab>
                     <flux:tab name="relationships_commissions" icon="link">Связи и комиссии</flux:tab>
+                    <flux:tab name="stocks_warehouses" icon="truck">Остатки и склады</flux:tab>
                     <flux:tab name="export" icon="arrow-up-tray">Экспорт</flux:tab>
                     <flux:tab name="actions" icon="plus-circle">Действия</flux:tab>
                 </flux:tabs>
@@ -35,13 +32,13 @@
             <flux:tab.panel name="general">
                 <x-blocks.main-block>
                     <flux:card class="space-y-6">
-                        <flux:switch wire:model="form.open" label="Включить"/>
+                        <flux:switch wire:model.live="form.open" label="Включить"/>
                         <div class="flex gap-12">
-                            <flux:input wire:model="form.name" label="Наименование" required/>
-                            <flux:input wire:model="form.client_id" label="Идентификатор клиента" required/>
-                            <flux:input wire:model="form.api_key" label="АПИ ключ" required/>
+                            <flux:input wire:model.live="form.name" label="Наименование" required/>
+                            <flux:input wire:model.live="form.client_id" label="Идентификатор клиента" required/>
+                            <flux:input wire:model.live="form.api_key" label="АПИ ключ" required/>
                             <flux:select variant="combobox" placeholder="Выберите опцию..."
-                                         label="Организация" wire:model="form.organization_id">
+                                         label="Организация" wire:model.live="form.organization_id">
 
                                 @foreach($this->currentUser()->organizations as $organization)
                                     <flux:option
@@ -55,14 +52,14 @@
             <flux:tab.panel name="prices">
                 <x-blocks.main-block>
                     <flux:card class="space-y-12">
-                        <flux:select wire:model="form.tariff" placeholder="Выберите тариф..." label="Тариф">
+                        <flux:select wire:model.live="form.tariff" placeholder="Выберите тариф..." label="Тариф">
                             <flux:option value="fbs">FBS</flux:option>
                             <flux:option value="fbo">FBO</flux:option>
                         </flux:select>
                         <div class="flex">
                             <div class="flex gap-6">
-                                <flux:switch wire:model="form.seller_price" label="Учитывать цену конкурента"/>
-                                <flux:switch wire:model="form.enabled_price" label="Выгружать цены"/>
+                                <flux:switch wire:model.live="form.seller_price" label="Учитывать цену конкурента"/>
+                                <flux:switch wire:model.live="form.enabled_price" label="Выгружать цены"/>
                             </div>
                         </div>
                         <div class="flex gap-6 flex-wrap">
@@ -72,7 +69,7 @@
                                         <flux:label>Процент увел. мин. цены</flux:label>
                                     </flux:tooltip>
 
-                                    <flux:input wire:model="form.min_price_percent" type="number"/>
+                                    <flux:input wire:model.live="form.min_price_percent" type="number"/>
 
                                     <flux:error name="form.min_price_percent"/>
                                 </flux:field>
@@ -83,7 +80,7 @@
                                         <flux:label>Цена до скидки, %</flux:label>
                                     </flux:tooltip>
 
-                                    <flux:input wire:model="form.max_price_percent" type="number"/>
+                                    <flux:input wire:model.live="form.max_price_percent" type="number"/>
 
                                     <flux:error name="form.max_price_percent"/>
                                 </flux:field>
@@ -94,7 +91,7 @@
                                         <flux:label>Цена продажи, %</flux:label>
                                     </flux:tooltip>
 
-                                    <flux:input wire:model="form.seller_price_percent" type="number"/>
+                                    <flux:input wire:model.live="form.seller_price_percent" type="number"/>
 
                                     <flux:error name="form.seller_price_percent"/>
                                 </flux:field>
@@ -105,7 +102,7 @@
                                         <flux:label>Эквайринг</flux:label>
                                     </flux:tooltip>
 
-                                    <flux:input wire:model="form.acquiring" type="number"/>
+                                    <flux:input wire:model.live="form.acquiring" type="number"/>
 
                                     <flux:error name="form.acquiring"/>
                                 </flux:field>
@@ -116,7 +113,7 @@
                                         <flux:label>Последняя миля</flux:label>
                                     </flux:tooltip>
 
-                                    <flux:input wire:model="form.last_mile" type="number"/>
+                                    <flux:input wire:model.live="form.last_mile" type="number"/>
 
                                     <flux:error name="form.last_mile"/>
                                 </flux:field>
@@ -127,7 +124,7 @@
                                         <flux:label>Максимальная миля</flux:label>
                                     </flux:tooltip>
 
-                                    <flux:input wire:model="form.max_mile" type="number"/>
+                                    <flux:input wire:model.live="form.max_mile" type="number"/>
 
                                     <flux:error name="form.max_mile"/>
                                 </flux:field>
@@ -186,4 +183,7 @@
             </flux:tab.panel>
         </flux:tab-group>
     </x-layouts.main-container>
+    @if($this->user()->can('update-ozon'))
+        {!! $this->renderSaveButton() !!}
+    @endif
 </div>

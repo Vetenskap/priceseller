@@ -18,7 +18,8 @@ class MoyskladWebhookReport extends MainModel
     ];
 
     protected $casts = [
-        'payload' => 'collection'
+        'payload' => 'collection',
+        'status' => 'boolean',
     ];
 
     public function moyskladWebhook()

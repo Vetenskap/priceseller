@@ -6,6 +6,7 @@ use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Supplier\SupplierPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSaveButton;
 use App\Models\Supplier;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -16,7 +17,7 @@ use Maatwebsite\Excel\Facades\Excel;
 #[Title('Поставщики')]
 class SupplierEdit extends BaseComponent
 {
-    use WithJsNotifications, WithFilters;
+    use WithJsNotifications, WithFilters, WithSaveButton;
 
     public $backRoute = 'suppliers.index';
 
@@ -39,6 +40,7 @@ class SupplierEdit extends BaseComponent
         $this->form->update();
 
         $this->addSuccessSaveNotification();
+        $this->hideSaveButton();
     }
 
     public function destroy(): void

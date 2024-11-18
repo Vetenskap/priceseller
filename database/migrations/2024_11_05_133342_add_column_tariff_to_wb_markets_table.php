@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('wb_markets', function (Blueprint $table) {
-            $table->string('tariff')->default('paidStorageKgvp')->after('api_key');
+            $table->string('tariff')->default('kgvpMarketplace')->after('api_key');
         });
     }
 

@@ -15,4 +15,8 @@ class MoyskladRecountRetailMarkup extends MainModel
         'price_type_uuid',
         'moysklad_id',
     ];
+
+    protected $casts = [
+        'enabled' => 'boolean',
+    ];
 }

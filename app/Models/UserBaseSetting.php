@@ -10,4 +10,8 @@ class UserBaseSetting extends MainModel
         'enabled_use_buy_price_reserve',
         'user_id',
     ];
+
+    protected $casts = [
+        'enabled_use_buy_price_reserve' => 'boolean',
+    ];
 }

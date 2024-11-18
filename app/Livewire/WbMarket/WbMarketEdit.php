@@ -14,6 +14,7 @@ use App\Livewire\BaseComponent;
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSaveButton;
 use App\Livewire\Traits\WithSort;
 use App\Models\Supplier;
 use App\Models\WbMarket;
@@ -39,7 +40,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 #[Title('ВБ')]
 class WbMarketEdit extends BaseComponent
 {
-    use WithFileUploads, WithFilters, WithSort, WithPagination;
+    use WithFileUploads, WithFilters, WithSort, WithPagination, WithSaveButton;
 
     public $backRoute = 'wb';
 
@@ -74,13 +75,12 @@ class WbMarketEdit extends BaseComponent
     public function updateUserCommissions(): void
     {
         $this->validate([
-            'sales_percent' => 'nullable|numeric|min:0|max:100',
             'min_price' => 'nullable|numeric|min:0',
             'retail_markup_percent' => 'nullable|numeric|min:0',
             'package' => 'nullable|numeric|min:0',
         ]);
 
-        collect($this->only('sales_percent', 'min_price', 'retail_markup_percent', 'package'))
+        collect($this->only('min_price', 'retail_markup_percent', 'package'))
             ->filter()
             ->each(fn($value, $key) => $this->market->items()->update([$key => $value]));
 
@@ -116,6 +116,7 @@ class WbMarketEdit extends BaseComponent
         $this->form->update();
 
         $this->addSuccessSaveNotification();
+        $this->hideSaveButton();
     }
 
     public function destroy(): void

@@ -33,17 +33,11 @@ new class extends Component {
                                 wire:navigate.hover>
                         {{ __('Главная') }}
                     </x-nav-link>
-                    {{--                    <x-nav-link :href="route('moysklad')" :active="request()->routeIs('moysklad')" wire:navigate.hover>--}}
-                    {{--                        {{ __('Мой склад') }}--}}
-                    {{--                    </x-nav-link>--}}
-                    {{--                    <x-nav-link :href="route('avito')" :active="request()->routeIs('avito')" wire:navigate.hover>--}}
-                    {{--                        {{ __('Авито') }}--}}
-                    {{--                    </x-nav-link>--}}
-                    @if(\App\Helpers\Helpers::currentUser()->can('view-emails'))
-                        <x-nav-link :href="route('emails.index')"
-                                    :active="request()->routeIs('emails.index', 'email.edit')"
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-organizations'))
+                        <x-nav-link :href="route('organizations.index')"
+                                    :active="request()->routeIs('organizations.index')"
                                     wire:navigate.hover>
-                            {{ __('Почта') }}
+                            {{ __('Организации') }}
                         </x-nav-link>
                     @endif
                     @if(\App\Helpers\Helpers::currentUser()->can('view-suppliers'))
@@ -51,6 +45,20 @@ new class extends Component {
                                     :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
                                     wire:navigate.hover>
                             {{ __('Поставщики') }}
+                        </x-nav-link>
+                    @endif
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-emails'))
+                        <x-nav-link :href="route('emails.index')"
+                                    :active="request()->routeIs('emails.index', 'email.edit')"
+                                    wire:navigate.hover>
+                            {{ __('Почта') }}
+                        </x-nav-link>
+                    @endif
+                    @if(\App\Helpers\Helpers::currentUser()->can('view-warehouses'))
+                        <x-nav-link :href="route('warehouses.index')"
+                                    :active="request()->routeIs('warehouses.index', 'warehouses.edit')"
+                                    wire:navigate.hover>
+                            {{ __('Склады') }}
                         </x-nav-link>
                     @endif
                     @if(\App\Helpers\Helpers::currentUser()->can('view-items'))
@@ -78,30 +86,16 @@ new class extends Component {
                             {{ __('ВБ') }}
                         </x-nav-link>
                     @endif
-                    @if(\App\Helpers\Helpers::currentUser()->can('view-organizations'))
-                        <x-nav-link :href="route('organizations.index')"
-                                    :active="request()->routeIs('organizations.index')"
-                                    wire:navigate.hover>
-                            {{ __('Организации') }}
-                        </x-nav-link>
-                    @endif
-                    @if(\App\Helpers\Helpers::currentUser()->can('view-warehouses'))
-                        <x-nav-link :href="route('warehouses.index')"
-                                    :active="request()->routeIs('warehouses.index', 'warehouses.edit')"
-                                    wire:navigate.hover>
-                            {{ __('Склады') }}
-                        </x-nav-link>
-                    @endif
+                    <x-nav-link :href="route('modules.index')" :active="str_contains(request()->getUri(), 'modules')"
+                                wire:navigate.hover>
+                        {{ __('Модули') }}
+                    </x-nav-link>
                     @if(\App\Helpers\Helpers::currentUser()->can('view-basesettings'))
                         <x-nav-link :href="route('base-settings.index')" :active="request()->routeIs('base-settings.index')"
                                     wire:navigate.hover>
                             {{ __('Общие настройки') }}
                         </x-nav-link>
                     @endif
-                    <x-nav-link :href="route('modules.index')" :active="str_contains(request()->getUri(), 'modules')"
-                                wire:navigate.hover>
-                        {{ __('Модули') }}
-                    </x-nav-link>
                 </div>
             </div>
 
@@ -172,11 +166,10 @@ new class extends Component {
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')" wire:navigate>
                 {{ __('Главная') }}
             </x-responsive-nav-link>
-            @if(\App\Helpers\Helpers::currentUser()->can('view-emails'))
-                <x-responsive-nav-link :href="route('emails.index')"
-                                       :active="request()->routeIs('emails.index', 'email.edit')"
-                                       wire:navigate.hover>
-                    {{ __('Почта') }}
+            @if(\App\Helpers\Helpers::currentUser()->can('view-organizations'))
+                <x-responsive-nav-link :href="route('organizations.index')"
+                                       :active="request()->routeIs('organizations.index')" wire:navigate.hover>
+                    {{ __('Организации') }}
                 </x-responsive-nav-link>
             @endif
             @if(\App\Helpers\Helpers::currentUser()->can('view-suppliers'))
@@ -184,6 +177,20 @@ new class extends Component {
                                        :active="request()->routeIs('suppliers.index', 'suppliers.edit')"
                                        wire:navigate.hover>
                     {{ __('Поставщики') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(\App\Helpers\Helpers::currentUser()->can('view-emails'))
+                <x-responsive-nav-link :href="route('emails.index')"
+                                       :active="request()->routeIs('emails.index', 'email.edit')"
+                                       wire:navigate.hover>
+                    {{ __('Почта') }}
+                </x-responsive-nav-link>
+            @endif
+            @if(\App\Helpers\Helpers::currentUser()->can('view-warehouses'))
+                <x-responsive-nav-link :href="route('warehouses.index')"
+                                       :active="request()->routeIs('warehouses.index', 'warehouses.edit')"
+                                       wire:navigate.hover>
+                    {{ __('Склады') }}
                 </x-responsive-nav-link>
             @endif
             @if(\App\Helpers\Helpers::currentUser()->can('view-items'))
@@ -209,19 +216,6 @@ new class extends Component {
                 <x-responsive-nav-link :href="route('wb')" :active="request()->routeIs('wb', 'wb-market-edit')"
                                        wire:navigate.hover>
                     {{ __('ВБ') }}
-                </x-responsive-nav-link>
-            @endif
-            @if(\App\Helpers\Helpers::currentUser()->can('view-organizations'))
-                <x-responsive-nav-link :href="route('organizations.index')"
-                                       :active="request()->routeIs('organizations.index')" wire:navigate.hover>
-                    {{ __('Организации') }}
-                </x-responsive-nav-link>
-            @endif
-            @if(\App\Helpers\Helpers::currentUser()->can('view-warehouses'))
-                <x-responsive-nav-link :href="route('warehouses.index')"
-                                       :active="request()->routeIs('warehouses.index', 'warehouses.edit')"
-                                       wire:navigate.hover>
-                    {{ __('Склады') }}
                 </x-responsive-nav-link>
             @endif
             <x-responsive-nav-link :href="route('modules.index')" :active="str_contains(request()->getUri(), 'modules')"

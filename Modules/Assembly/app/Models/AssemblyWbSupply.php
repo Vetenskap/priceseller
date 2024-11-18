@@ -19,6 +19,10 @@ class AssemblyWbSupply extends Model
         'done'
     ];
 
+    protected $casts = [
+        'done' => 'boolean'
+    ];
+
     public function market(): BelongsTo
     {
         return $this->belongsTo(WbMarket::class, 'wb_market_id', 'id');

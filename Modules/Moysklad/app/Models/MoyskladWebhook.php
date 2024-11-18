@@ -21,6 +21,8 @@ class MoyskladWebhook extends MainModel
         'enabled'
     ];
 
+    protected $casts = ['enabled' => 'boolean'];
+
     public function moysklad()
     {
         return $this->belongsTo(Moysklad::class);

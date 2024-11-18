@@ -37,6 +37,12 @@ class Item extends MainModel
         'buy_price_reserve'
     ];
 
+    protected $casts = [
+        'updated' => 'boolean',
+        'unload_ozon' => 'boolean',
+        'unload_wb' => 'boolean',
+    ];
+
     const MAINATTRIBUTES = [
         [
             'name' => 'article',
