@@ -3,13 +3,14 @@
 namespace Modules\Moysklad\HttpClient\Resources\Webhooks;
 
 use Illuminate\Support\Collection;
+use Modules\Moysklad\HttpClient\Resources\Entities\Bundle\Bundle;
 use Modules\Moysklad\HttpClient\Resources\Entities\CustomerOrder\CustomerOrder;
 use Modules\Moysklad\HttpClient\Resources\Entities\Demand;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 
 class WebhookEvent
 {
-    protected Product|CustomerOrder|Demand $meta;
+    protected Product|CustomerOrder|Demand|Bundle $meta;
     protected string $action;
     protected string $accountId;
     protected ?Collection $updatedFields = null;
@@ -25,6 +26,9 @@ class WebhookEvent
             case 'demand':
                 $metaItem = new Demand();
                 break;
+            case 'bundle':
+                $metaItem = new Bundle();
+                break;
             default:
                 $metaItem = new Product();
                 break;
@@ -38,7 +42,7 @@ class WebhookEvent
         $this->updatedFields = collect($event->get('updatedFields'));
     }
 
-    public function getMeta(): Product|CustomerOrder|Demand
+    public function getMeta(): Product|CustomerOrder|Demand|Bundle
     {
         return $this->meta;
     }

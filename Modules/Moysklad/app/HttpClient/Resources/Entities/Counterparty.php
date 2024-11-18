@@ -8,7 +8,7 @@ class Counterparty extends Entity
 {
     const ENDPOINT = '/entity/counterparty/';
 
-    protected string $name;
+    protected ?string $name = null;
 
     public function __construct(?Collection $counterparty = null)
     {
@@ -27,6 +27,13 @@ class Counterparty extends Entity
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'name' => $this->name
+        ];
     }
 
 

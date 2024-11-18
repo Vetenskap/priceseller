@@ -51,15 +51,14 @@ class ItemService
 
     }
 
-    public function createFromMs(array $data): ?item
+    public function createFromMs(array $data): array|item
     {
         $data = Validator::make($data, static::moyskladImportRules($this->user->id));
 
         $errors = $data->errors();
 
         if ($errors->isNotEmpty()) {
-            logger(json_encode($errors, JSON_UNESCAPED_UNICODE));
-            return null;
+            return $errors->toArray();
         }
 
         $item = $data->validate();

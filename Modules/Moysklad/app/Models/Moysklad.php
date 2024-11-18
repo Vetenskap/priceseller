@@ -30,6 +30,16 @@ class Moysklad extends MainModel
         'enabled_diff_price' => 'boolean',
     ];
 
+    public function apiItemsReports(): HasMany
+    {
+        return $this->hasMany(MoyskladItemApiReport::class);
+    }
+
+    public function apiBundlesReports(): HasMany
+    {
+        return $this->hasMany(MoyskladBundleApiReport::class);
+    }
+
     public function warehouses()
     {
         return $this->hasMany(MoyskladWarehouseWarehouse::class);

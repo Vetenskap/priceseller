@@ -1,9 +1,5 @@
 @if($show)
-    <x-blocks.main-block>
-        <flux:button variant="primary" class="w-full !fixed !bottom-2" wire:click="update">Сохранить</flux:button>
-    </x-blocks.main-block>
+    <flux:button class="w-full !fixed !bottom-2 !bg-[#64cdff]" wire:click="update">Сохранить</flux:button>
 @else
-    <x-blocks.main-block>
-        <flux:button variant="filled" class="w-full !fixed !bottom-2" wire:click="update">Сохранить</flux:button>
-    </x-blocks.main-block>
+    <flux:button variant="filled" class="w-full !fixed !bottom-2" wire:click="update">Сохранить</flux:button>
 @endif

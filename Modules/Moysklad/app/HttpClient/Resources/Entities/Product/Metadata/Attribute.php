@@ -9,10 +9,10 @@ class Attribute
 {
     const ENDPOINT = '/entity/product/metadata/attributes/';
 
-    protected string $id;
-    protected string $name;
-    protected string $type;
-    protected bool|int|float|string|null $value;
+    protected ?string $id = null;
+    protected ?string $name = null;
+    protected ?string $type = null;
+    protected bool|int|float|string|null $value = null;
 
     public function __construct(Collection $attribute)
     {
@@ -51,6 +51,16 @@ class Attribute
                 "mediaType" => "application/json"
             ],
             "name" => $this->name,
+            "value" => $this->value
+        ];
+    }
+
+    public function toArray(): array
+    {
+        return [
+            "id" => $this->id,
+            "name" => $this->name,
+            "type" => $this->type,
             "value" => $this->value
         ];
     }

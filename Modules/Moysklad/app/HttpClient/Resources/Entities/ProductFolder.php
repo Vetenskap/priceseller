@@ -19,4 +19,9 @@ class ProductFolder extends Entity
     {
 
     }
+
+    public function toArray(): array
+    {
+        return [];
+    }
 }

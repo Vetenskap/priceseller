@@ -237,4 +237,35 @@ class Bundle extends Entity
     {
         return $this->components;
     }
+
+    public function toArray(): array
+    {
+        return [
+            'accountId' => $this->accountId,
+            'archived' => $this->archived,
+            'article' => $this->article,
+            'code' => $this->code,
+            'description' => $this->description,
+            'discountProhibited' => $this->discountProhibited,
+            'effectiveVat' => $this->effectiveVat,
+            'effectiveVatEnabled' => $this->effectiveVatEnabled,
+            'externalCode' => $this->externalCode,
+            'name' => $this->name,
+            'partialDisposal' => $this->partialDisposal,
+            'pathName' => $this->pathName,
+            'shared' => $this->shared,
+            'syncId' => $this->syncId,
+            'tnved' => $this->tnved,
+            'updated' => $this->updated->format('Y-m-d H:i:s'), // Преобразование DateTime в строку
+            'useParentVat' => $this->useParentVat,
+            'vat' => $this->vat,
+            'vatEnabled' => $this->vatEnabled,
+            'volume' => $this->volume,
+            'weight' => $this->weight,
+
+            // Преобразование коллекций в массивы
+            'attributes' => $this->attributes?->map(fn (Attribute $attribute) => $attribute->toArray())->toArray(),
+            'components' => $this->components?->map(fn (Component $component) => $component->toArray())->toArray(),
+        ];
+    }
 }

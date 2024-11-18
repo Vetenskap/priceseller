@@ -41,7 +41,7 @@ class MoyskladWarehouseWarehouseService
                     'item_id' => $item->id,
                 ], [
                     'item_id' => $item->id,
-                    'stock' => $report->get('stock')
+                    'stock' => $report->get('stock') > 0 ? $report->get('stock') : 0,
                 ]);
             }
         });

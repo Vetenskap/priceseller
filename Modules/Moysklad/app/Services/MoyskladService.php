@@ -19,8 +19,10 @@ use Modules\Moysklad\HttpClient\Resources\Entities\Product\Organization;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 use Modules\Moysklad\HttpClient\Resources\Entities\Store;
 use Modules\Moysklad\Models\Moysklad;
+use Modules\Moysklad\Models\MoyskladBundleApiReport;
 use Modules\Moysklad\Models\MoyskladBundleMainAttributeLink;
 use Modules\Moysklad\Models\MoyskladItemAdditionalAttributeLink;
+use Modules\Moysklad\Models\MoyskladItemApiReport;
 use Modules\Moysklad\Models\MoyskladItemMainAttributeLink;
 use Modules\Moysklad\Models\MoyskladQuarantine;
 
@@ -137,8 +139,12 @@ class MoyskladService
         return $assortmentAttributes->merge(Bundle::FIELDS);
     }
 
-    public function importApiItems(): void
+    public function importApiItems(MoyskladItemApiReport $report = null): void
     {
+        $updated = 0;
+        $created = 0;
+        $errors = 0;
+
         $offset = Cache::tags(['moysklad', 'product', 'offset'])->get($this->moysklad->id, 0);
 
         $entityList = new EntityList(Product::class, $this->moysklad->api_key, offset: $offset);
@@ -147,7 +153,7 @@ class MoyskladService
 
             $products = $entityList->getNext();
 
-            $products->each(function (Product $product) use (&$dirtyItems) {
+            $products->each(function (Product $product) use (&$dirtyItems, $report, &$updated, &$created, &$errors) {
 
                 /** @var MoyskladItemMainAttributeLink $itemMainAttributeLink */
                 $itemMainAttributeLink = $this->moysklad->itemMainAttributeLinks->where('attribute_name', 'code')->first();
@@ -158,9 +164,50 @@ class MoyskladService
                     ->orWhere('code', $code)
                     ->first()
                 ) {
-                    $this->updateItemFromProduct($product, $item);
+                    if ($error = $this->updateItemFromProduct($product, $item)) {
+                        $errors++;
+                        $report?->items()->create([
+                            'status' => 1,
+                            'message' => 'Ошибка в обновлении товара',
+                            'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
+                            'data' => json_encode($product->toArray(), JSON_UNESCAPED_UNICODE)
+                        ]);
+                    } else {
+                        $updated++;
+                        $report?->items()->create([
+                            'status' => 2,
+                            'message' => 'Товар обновлён',
+                            'exception' => json_encode([]),
+                            'data' => json_encode($product->toArray(), JSON_UNESCAPED_UNICODE)
+                        ]);
+                    }
                 } else {
-                    $this->createItemFromProduct($product);
+                    $error = $this->createItemFromProduct($product);
+                    if (is_string($error)) {
+                        $errors++;
+                        $report?->items()->create([
+                            'status' => 1,
+                            'message' => 'Ошибка в создании товара',
+                            'exception' => json_encode(is_array($error) ? $error : [$error], JSON_UNESCAPED_UNICODE),
+                            'data' => json_encode($product->toArray(), JSON_UNESCAPED_UNICODE)
+                        ]);
+                    } else {
+                        $created++;
+                        $report?->items()->create([
+                            'status' => 0,
+                            'message' => 'Товар создан',
+                            'exception' => json_encode([]),
+                            'data' => json_encode($product->toArray(), JSON_UNESCAPED_UNICODE)
+                        ]);
+                    }
+                }
+
+                if ((!($updated & 1000) || ($created & 1000) || ($errors & 1000))) {
+                    $report?->update([
+                        'updated' => $updated,
+                        'created' => $created,
+                        'errors' => $errors
+                    ]);
                 }
 
             });
@@ -168,10 +215,20 @@ class MoyskladService
             Cache::tags(['moysklad', 'product', 'offset'])->set($this->moysklad->id, $entityList->getOffset(), now()->addDay());
 
         } while ($entityList->hasNext());
+
+        $report?->update([
+            'updated' => $updated,
+            'created' => $created,
+            'errors' => $errors
+        ]);
     }
 
-    public function importApiBundles()
+    public function importApiBundles(MoyskladBundleApiReport $report = null): void
     {
+        $created = 0;
+        $errors = 0;
+        $updated = 0;
+
         $offset = Cache::tags(['moysklad', 'bundle', 'offset'])->get($this->moysklad->id, 0);
 
         $entityList = new EntityList(Bundle::class, $this->moysklad->api_key, offset: $offset, limit: 100, queryParameters: ['expand' => 'components']);
@@ -180,7 +237,7 @@ class MoyskladService
 
             $bundles = $entityList->getNext();
 
-            $bundles->each(function (Bundle $bundle) use (&$dirtyItems) {
+            $bundles->each(function (Bundle $bundle) use (&$dirtyItems, $report, &$updated, &$created, &$errors) {
 
                 /** @var MoyskladBundleMainAttributeLink $bundleMainAttributeLink */
                 $bundleMainAttributeLink = $this->moysklad->bundleMainAttributeLinks->where('attribute_name', 'code')->first();
@@ -191,19 +248,65 @@ class MoyskladService
                     ->orWhere('code', $code)
                     ->first()
                 ) {
-                    $this->updateBundle($bundle, $userBundle);
+                    if ($error = $this->updateBundle($bundle, $userBundle)) {
+                        $errors++;
+                        $report?->items()->create([
+                            'status' => 1,
+                            'message' => 'Ошибка в обновлении товара',
+                            'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
+                            'data' => json_encode($bundle->toArray(), JSON_UNESCAPED_UNICODE)
+                        ]);
+                    } else {
+                        $updated++;
+                        $report?->items()->create([
+                            'status' => 2,
+                            'message' => 'Товар обновлён',
+                            'exception' => json_encode([]),
+                            'data' => json_encode($bundle->toArray(), JSON_UNESCAPED_UNICODE)
+                        ]);
+                    }
                 } else {
-                    $this->createBundle($bundle);
+                    if ($error = $this->createBundle($bundle)) {
+                        $errors++;
+                        $report?->items()->create([
+                            'status' => 1,
+                            'message' => 'Ошибка в создании товара',
+                            'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
+                            'data' => json_encode($bundle->toArray(), JSON_UNESCAPED_UNICODE)
+                        ]);
+                    } else {
+                        $created++;
+                        $report?->items()->create([
+                            'status' => 0,
+                            'message' => 'Товар создан',
+                            'exception' => json_encode([]),
+                            'data' => json_encode($bundle->toArray(), JSON_UNESCAPED_UNICODE)
+                        ]);
+                    }
                 }
 
             });
 
+            if ((!($updated & 1000) || ($created & 1000) || ($errors & 1000))) {
+                $report?->update([
+                    'updated' => $updated,
+                    'created' => $created,
+                    'errors' => $errors
+                ]);
+            }
+
             Cache::tags(['moysklad', 'product', 'offset'])->set($this->moysklad->id, $entityList->getOffset(), now()->addDay());
 
         } while ($entityList->hasNext());
+
+        $report?->update([
+            'updated' => $updated,
+            'created' => $created,
+            'errors' => $errors
+        ]);
     }
 
-    public function createItemFromProduct(Product $product): ?Item
+    public function createItemFromProduct(Product $product): Item|string|array
     {
         $itemService = new ItemService($this->moysklad->user);
 
@@ -242,9 +345,9 @@ class MoyskladService
             }
 
             return $itemService->createFromMs($data);
+        } else {
+            return 'Поставщик не найден';
         }
-
-        return  null;
     }
 
     public function updateItemFromProductWithUpdatedFields(Product $product, Item $item, Collection $updatedFields): void
@@ -281,7 +384,7 @@ class MoyskladService
         });
     }
 
-    public function createBundle(Bundle $bundle): void
+    public function createBundle(Bundle $bundle): ?string
     {
         $data['ms_uuid'] = $bundle->id;
 
@@ -296,8 +399,7 @@ class MoyskladService
         try {
             $userBundle = $this->moysklad->user->bundles()->create($data);
         } catch (\Throwable $e) {
-            report($e);
-            return;
+            return $e->getMessage();
         }
 
         $bundle->getComponents()->each(function (Component $component) use ($userBundle) {
@@ -333,9 +435,11 @@ class MoyskladService
                 }
             }
         });
+
+        return null;
     }
 
-    public function updateBundle(Bundle $bundle, \App\Models\Bundle $userBundle): void
+    public function updateBundle(Bundle $bundle, \App\Models\Bundle $userBundle): ?string
     {
         $userBundle->ms_uuid = $bundle->id;
 
@@ -350,12 +454,11 @@ class MoyskladService
         try {
             $userBundle->save();
         } catch (\Throwable $e) {
-            report($e);
-            return;
+            return $e->getMessage();
         }
 
         $userBundle->items()->each(function (Item $item) use ($bundle, $userBundle) {
-            if (!$bundle->getComponents()->first(fn (Component $component) => $component->getAssortment()->id == $item->ms_uuid)) {
+            if (!$bundle->getComponents()->first(fn(Component $component) => $component->getAssortment()->id == $item->ms_uuid)) {
                 $userBundle->items()->detach($item->id);
             }
         });
@@ -407,9 +510,11 @@ class MoyskladService
             }
 
         });
+
+        return null;
     }
 
-    public function updateItemFromProduct(Product $product, Item $item): void
+    public function updateItemFromProduct(Product $product, Item $item): ?string
     {
         $item->ms_uuid = $product->id;
         $item->unload_wb = true;
@@ -426,8 +531,7 @@ class MoyskladService
         try {
             $item->save();
         } catch (\Throwable $e) {
-            report($e);
-            return;
+            return $e->getMessage();
         }
 
         foreach ($this->moysklad->itemAdditionalAttributeLinks as $itemAdditionalAttributeLink) {
@@ -442,6 +546,8 @@ class MoyskladService
                 ]);
             }
         }
+
+        return null;
 
     }
 
@@ -476,9 +582,9 @@ class MoyskladService
             return $product->{'get' . Str::apa($link)}()->getValue();
         } else if ($link_type === 'main') {
             if ($link_user_type === 'boolean') {
-               $value = boolval($product->{'is' . Str::apa($link)}());
+                $value = boolval($product->{'is' . Str::apa($link)}());
 
-               return $link_invert ? !$value : $value;
+                return $link_invert ? !$value : $value;
             }
             return $product->{'get' . Str::apa($link)}();
         }

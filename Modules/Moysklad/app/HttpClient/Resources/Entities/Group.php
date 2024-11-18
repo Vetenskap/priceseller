@@ -21,4 +21,9 @@ class Group extends Entity
 
     }
 
+    public function toArray(): array
+    {
+        return [];
+    }
+
 }

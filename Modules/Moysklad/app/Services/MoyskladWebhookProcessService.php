@@ -2,6 +2,7 @@
 
 namespace Modules\Moysklad\Services;
 
+use App\Models\Bundle;
 use App\Models\Item;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Str;
@@ -38,6 +39,19 @@ class MoyskladWebhookProcessService
                 break;
             case 'demand':
                 $this->processChangeWarehouseDemand();
+                break;
+            case 'bundle':
+                switch ($this->webhook->action) {
+                    case 'UPDATE':
+                        $this->updateBundle();
+                        break;
+                    case 'CREATE':
+                        $this->createBundle();
+                        break;
+                    case 'DELETE':
+                        $this->deleteBundle();
+                        break;
+                }
                 break;
             case 'product':
                 switch ($this->webhook->action) {
@@ -261,7 +275,7 @@ class MoyskladWebhookProcessService
 
                     if (is_int($retail_markup_percent)) {
 
-                        $salePrice = $product->getSalePrices()->firstWhere(fn (SalePrice $salePrice) => $salePrice->getPriceType()->id === $recountRetailMarkup->price_type_uuid);
+                        $salePrice = $product->getSalePrices()->firstWhere(fn(SalePrice $salePrice) => $salePrice->getPriceType()->id === $recountRetailMarkup->price_type_uuid);
 
                         if ($salePrice) {
                             $salePrice->setValue($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100));
@@ -272,6 +286,44 @@ class MoyskladWebhookProcessService
                 });
 
             }
+
+        });
+    }
+
+    private function updateBundle(): void
+    {
+        $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
+
+            $bundle = $event->getMeta();
+            $bundle->fetch($this->webhook->moysklad->api_key);
+
+            if ($userBundle = Bundle::where('ms_uuid', $bundle->id)->first()) {
+
+                $this->moyskladService->updateBundle($bundle, $userBundle);
+
+            }
+
+        });
+    }
+
+    private function createBundle()
+    {
+        $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
+
+            $bundle = $event->getMeta();
+            $bundle->fetch($this->webhook->moysklad->api_key);
+
+            $this->moyskladService->createBundle($bundle);
+        });
+    }
+
+    private function deleteBundle()
+    {
+        $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
+
+            $bundle = $event->getMeta();
+
+            $this->webhook->moysklad->user->bundles()->where('ms_uuid', $bundle->id)->delete();
 
         });
     }

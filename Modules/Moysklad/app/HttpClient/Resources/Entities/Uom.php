@@ -8,13 +8,13 @@ class Uom extends Entity
 {
     const ENDPOINT = '/entity/uom/';
 
-    protected string $accountId;
+    protected ?string $accountId = null;
     protected ?string $code = null;
     protected ?string $description = null;
-    protected string $externalCode;
-    protected string $name;
-    protected bool $shared;
-    protected string $updated;
+    protected ?string $externalCode = null;
+    protected ?string $name = null;
+    protected ?bool $shared = null;
+    protected ?string $updated = null;
 
     public function __construct(?Collection $uom = null)
     {
@@ -32,6 +32,19 @@ class Uom extends Entity
         $this->name = $uom->get('name');
         $this->shared = $uom->get('shared');
         $this->updated = $uom->get('updated');
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'accountId' => $this->accountId,
+            'code' => $this->code,
+            'description' => $this->description,
+            'externalCode' => $this->externalCode,
+            'name' => $this->name,
+            'shared' => $this->shared,
+            'updated' => $this->updated
+        ];
     }
 
 }

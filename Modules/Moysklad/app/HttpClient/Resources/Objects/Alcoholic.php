@@ -18,4 +18,14 @@ class Alcoholic
         $this->strength = $alcoholic->get('strength');
         $this->volume = $alcoholic->get('volume');
     }
+
+    public function toArray(): array
+    {
+        return [
+            'excised' => $this->excised,
+            'type' => $this->type,
+            'strength' => $this->strength,
+            'volume' => $this->volume
+        ];
+    }
 }

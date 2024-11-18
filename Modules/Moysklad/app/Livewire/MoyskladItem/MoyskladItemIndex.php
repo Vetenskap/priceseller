@@ -33,6 +33,12 @@ class MoyskladItemIndex extends BaseComponent
     public $mainAttributesLinks = [];
     public $additionalAttributesLinks = [];
 
+    public function deleteReport($reportId): void
+    {
+        $report = $this->moysklad->apiItemsReports()->findOrFail($reportId);
+        $report->delete();
+    }
+
     public function save(): void
     {
         foreach ($this->mainAttributesLinks as $attribute => $data) {

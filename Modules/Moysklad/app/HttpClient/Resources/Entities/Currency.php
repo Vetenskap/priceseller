@@ -9,20 +9,20 @@ class Currency extends Entity
 {
     const ENDPOINT = '/entity/currency/';
 
-    protected bool $archived;
-    protected string $code;
-    protected bool $default;
+    protected ?bool $archived = null;
+    protected ?string $code = null;
+    protected ?bool $default = null;
     protected ?string $fullName = null;
-    protected bool $indirect;
-    protected string $isoCode;
+    protected ?bool $indirect = null;
+    protected ?string $isoCode = null;
 
     protected ?float $margin = null;
 
-    protected int $multiplicity;
-    protected string $name;
-    protected float $rate;
-    protected string $rateUpdateType;
-    protected bool $system;
+    protected ?int $multiplicity = null;
+    protected ?string $name = null;
+    protected ?float $rate = null;
+    protected ?string $rateUpdateType = null;
+    protected ?bool $system = null;
 
     public function __construct(?Collection $currency = null)
     {
@@ -59,6 +59,25 @@ class Currency extends Entity
                 "type" => "currency",
                 "mediaType" => "application/json"
             ]
+        ];
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'archived' => $this->archived,
+            'code' => $this->code,
+            'default' => $this->default,
+            'fullName' => $this->fullName,
+            'id' => $this->id,
+            'indirect' => $this->indirect,
+            'isoCode' => $this->isoCode,
+            'margin' => $this->margin,
+            'multiplicity' => $this->multiplicity,
+            'name' => $this->name,
+            'rate' => $this->rate,
+            'rateUpdateType' => $this->rateUpdateType,
+            'system' => $this->system
         ];
     }
 

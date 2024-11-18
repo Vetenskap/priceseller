@@ -3,13 +3,13 @@
 namespace Modules\Moysklad\HttpClient\Resources\Entities\Product\Arrays;
 
 use Illuminate\Support\Collection;
-use Modules\Moysklad\HttpClient\Entities\Uom;
+use Modules\Moysklad\HttpClient\Resources\Entities\Uom;
 
 class Pack
 {
-    public string $id;
-    public int $quantity;
-    public Uom $uom;
+    public ?string $id = null;
+    public ?int $quantity = null;
+    public ?Uom $uom = null;
 
     public function __construct(Collection $pack)
     {
@@ -19,5 +19,14 @@ class Pack
         $uom = new Uom();
         $uom->setId(collect($pack->get('uom'))->toCollectionSpread()->get('meta')->get('href'));
         $this->uom = $uom;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'quantity' => $this->quantity,
+            'uom' => $this->uom?->toArray()
+        ];
     }
 }

@@ -7,8 +7,8 @@ use Modules\Moysklad\HttpClient\Resources\Entities\Currency;
 
 class MinPrice
 {
-    protected float $value;
-    protected Currency $currency;
+    protected ?float $value = null;
+    protected ?Currency $currency = null;
 
     public function __construct(Collection $buyPrice)
     {
@@ -27,6 +27,14 @@ class MinPrice
     public function getCurrency(): Currency
     {
         return $this->currency;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'value' => $this->value,
+            'currency' => $this->currency?->toArray(),
+        ];
     }
 
 }

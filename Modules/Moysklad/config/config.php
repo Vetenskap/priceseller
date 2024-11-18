@@ -35,5 +35,20 @@ return [
             'type' => 'demand',
             'name' => 'Отгрузка (создание)'
         ],
+        [
+            'action' => 'CREATE',
+            'type' => 'bundle',
+            'name' => 'Комплект (создание)'
+        ],
+        [
+            'action' => 'UPDATE',
+            'type' => 'bundle',
+            'name' => 'Комплект (обновление)'
+        ],
+        [
+            'action' => 'DELETE',
+            'type' => 'bundle',
+            'name' => 'Комплект (удаление)'
+        ],
     ]
 ];

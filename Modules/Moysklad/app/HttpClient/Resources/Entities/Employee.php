@@ -21,4 +21,9 @@ class Employee extends Entity
 
     }
 
+    public function toArray(): array
+    {
+        return [];
+    }
+
 }

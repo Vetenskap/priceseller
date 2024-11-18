@@ -9,9 +9,9 @@ use Modules\Moysklad\HttpClient\Resources\Entities\Currency;
 
 class SalePrice
 {
-    protected float $value;
-    protected Currency $currency;
-    protected PriceType $priceType;
+    protected ?float $value = null;
+    protected ?Currency $currency = null;
+    protected ?PriceType $priceType = null;
 
     public function __construct(Collection $salePrice = null)
     {
@@ -61,6 +61,14 @@ class SalePrice
         return $this->value;
     }
 
+    public function toArray(): array
+    {
+        return [
+            "value" => $this->value * 100,
+            "currency" => $this->currency?->toArray(),
+            "priceType" => $this->priceType?->toArray()
+        ];
+    }
 
 
 }

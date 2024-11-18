@@ -4,6 +4,7 @@ namespace App\Livewire\Organization;
 
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Organization\OrganizationPostForm;
+use App\Livewire\Traits\WithSaveButton;
 use App\Models\Organization;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -11,6 +12,8 @@ use Illuminate\Foundation\Application;
 
 class OrganizationEdit extends BaseComponent
 {
+    use WithSaveButton;
+
     public OrganizationPostForm $form;
 
     public Organization $organization;
@@ -27,6 +30,7 @@ class OrganizationEdit extends BaseComponent
         $this->form->update();
 
         $this->addSuccessSaveNotification();
+        $this->hideSaveButton();
     }
 
     public function destroy(): void

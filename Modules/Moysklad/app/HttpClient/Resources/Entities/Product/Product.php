@@ -55,20 +55,20 @@ class Product extends Entity
 
     const ENDPOINT = '/entity/product/';
 
-    protected string $accountId;
-    protected bool $archived;
+    protected ?string $accountId = null;
+    protected ?bool $archived = null;
     protected ?string $article = null;
     protected ?string $code = null;
     protected ?string $description = null;
-    protected bool $discountProhibited;
+    protected ?bool $discountProhibited = null;
     protected ?int $effectiveVat = null;
     protected ?bool $effectiveVatEnabled = null;
-    protected string $externalCode;
+    protected ?string $externalCode = null;
     protected ?bool $isSerialTrackable = null;
     protected ?int $minimumBalance = null;
     protected string $name;
     protected ?bool $partialDisposal = null;
-    protected string $pathName;
+    protected ?string $pathName = null;
 
     // TODO: мой склад enum
     protected ?string $paymentItemType = null;
@@ -81,16 +81,16 @@ class Product extends Entity
     protected ?string $tnved = null;
     // TODO: мой склад enum
     protected ?string $trackingType = null;
-    protected string $updated;
-    protected bool $useParentVat;
-    protected int $variantsCount;
+    protected ?string $updated = null;
+    protected ?bool $useParentVat = null;
+    protected ?int $variantsCount = null;
     protected ?int $vat = null;
     protected ?bool $vatEnabled = null;
     protected ?int $volume = null;
     protected ?int $weight = null;
 
     // Expand
-    protected Group $group;
+    protected ?Group $group = null;
 
     // Expand
     protected ?Employee $owner = null;
@@ -316,6 +316,61 @@ class Product extends Entity
     public function arrayToMassiveUpdate(array $fields = []): array
     {
         return array_merge($this->getMeta(), $this->getMetasToUpdate($fields));
+    }
+
+    /**
+     * Возвращает массив всех свойств объекта.
+     *
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return [
+            'accountId' => $this->accountId,
+            'archived' => $this->archived,
+            'article' => $this->article,
+            'code' => $this->code,
+            'description' => $this->description,
+            'discountProhibited' => $this->discountProhibited,
+            'effectiveVat' => $this->effectiveVat,
+            'effectiveVatEnabled' => $this->effectiveVatEnabled,
+            'externalCode' => $this->externalCode,
+            'isSerialTrackable' => $this->isSerialTrackable,
+            'minimumBalance' => $this->minimumBalance,
+            'name' => $this->name,
+            'partialDisposal' => $this->partialDisposal,
+            'pathName' => $this->pathName,
+            'paymentItemType' => $this->paymentItemType,
+            'ppeType' => $this->ppeType,
+            'shared' => $this->shared,
+            'syncId' => $this->syncId,
+            'taxSystem' => $this->taxSystem,
+            'tnved' => $this->tnved,
+            'trackingType' => $this->trackingType,
+            'updated' => $this->updated,
+            'useParentVat' => $this->useParentVat,
+            'variantsCount' => $this->variantsCount,
+            'vat' => $this->vat,
+            'vatEnabled' => $this->vatEnabled,
+            'volume' => $this->volume,
+            'weight' => $this->weight,
+
+            // Преобразуем объекты и коллекции в массивы
+            'group' => $this->group?->toArray(),
+            'owner' => $this->owner?->toArray(),
+            'productFolder' => $this->productFolder?->toArray(),
+            'supplier' => $this->supplier?->toArray(),
+            'uom' => $this->uom?->toArray(),
+
+            'alcoholic' => $this->alcoholic?->toArray(),
+            'buyPrice' => $this->buyPrice?->toArray(),
+            'minPrice' => $this->minPrice?->toArray(),
+
+            'attributes' => $this->attributes?->map(fn (Attribute $attribute) => $attribute->toArray()),
+            'barcodes' => $this->barcodes?->toArray(),
+            'packs' => $this->packs?->map(fn (Pack $pack) => $pack->toArray()),
+            'salePrices' => $this->salePrices?->map(fn (SalePrice $salePrice) => $salePrice->toArray()),
+        ];
     }
 
     public function getAccountId(): string

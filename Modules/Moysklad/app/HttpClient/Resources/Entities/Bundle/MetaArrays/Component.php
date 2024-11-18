@@ -7,8 +7,8 @@ use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 
 class Component
 {
-    protected Product $assortment;
-    protected int $quantity;
+    protected ?Product $assortment = null;
+    protected ?int $quantity = null;
 
     public function __construct(Collection $component)
     {
@@ -27,6 +27,14 @@ class Component
     public function getQuantity(): int
     {
         return $this->quantity;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'assortment' => $this->assortment->toArray(),
+            'quantity' => $this->quantity
+        ];
     }
 
 }

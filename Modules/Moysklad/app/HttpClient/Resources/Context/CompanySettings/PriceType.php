@@ -10,8 +10,8 @@ class PriceType extends Entity
 {
     const ENDPOINT = '/context/companysettings/pricetype/';
 
-    protected string $name;
-    protected string $externalCode;
+    protected ?string $name = null;
+    protected ?string $externalCode = null;
 
     public function __construct(?Collection $priceType = null)
     {
@@ -58,6 +58,14 @@ class PriceType extends Entity
     public function getExternalCode(): string
     {
         return $this->externalCode;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'name' => $this->name,
+            'externalCode' => $this->externalCode
+        ];
     }
 
 }
