@@ -15,13 +15,13 @@ return new class extends Migration
             $table->id();
             $table->string('id_supply');
             $table->string('name');
-            $table->string('created_at');
-            $table->string('closed_at');
-            $table->string('scan_dt');
+            $table->string('closed_at')->nullable();
+            $table->string('scan_dt')->nullable();
             $table->integer('cargo_type');
-            $table->unsignedInteger('count_orders');
+            $table->unsignedInteger('count_orders')->nullable();
             $table->boolean('done');
             $table->foreignUuid('wb_market_id')->constrained('wb_markets')->cascadeOnDelete();
+            $table->timestamps();
         });
     }
 

@@ -26,6 +26,25 @@ class Supply implements Wireable
         return $response->successful();
     }
 
+    public static function getAll(string $api_key): Collection
+    {
+        $supplies = collect();
+
+        $next = 0;
+
+        do {
+            $client = new WbClient($api_key);
+            $response = $client->get(self::ENDPOINT, ['next' => $next, 'limit' => 1000])->collect()->toCollectionSpread();
+            $next = $response->get('next');
+            $response->get('supplies')->each(function (Collection $supply) use (&$supplies) {
+                $supplies->push(new static($supply));
+            });
+        } while($next);
+
+        return $supplies;
+
+    }
+
     public function fetchOrders(string $api_key): void
     {
         $client = new WbClient($api_key);

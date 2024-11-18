@@ -9,6 +9,16 @@ use Modules\Assembly\Models\AssemblyWbSupply;
 
 class AssemblyWbService
 {
+    public static function loadSupplies(WbMarket $market): void
+    {
+        $supplies = Supply::getAll($market->api_key);
+        $supplies->each(function (Supply $supply) use ($market) {
+            if (!$market->supplies()->where('id_supply', $supply->getId())->exists() && !$supply->isDone()) {
+                $market->supplies()->create($supply->toModel());
+            }
+        });
+    }
+
     public static function createSupply(WbMarket $market, string $name, Collection $orders): void
     {
         $supply = new Supply();

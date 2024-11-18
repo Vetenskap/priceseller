@@ -3,6 +3,7 @@
 namespace Modules\Assembly\Livewire\Assembly;
 
 use App\Livewire\ModuleComponent;
+use Modules\Assembly\Services\AssemblyWbService;
 
 class AssemblyIndex extends ModuleComponent
 {
@@ -14,6 +15,13 @@ class AssemblyIndex extends ModuleComponent
     {
         $this->startDateOzon = now()->format('Y-m-d');
         $this->endDateOzon = now()->format('Y-m-d');
+    }
+
+    public function loadSuppliesWb($marketId)
+    {
+        $market = $this->currentUser()->wbMarkets()->findOrFail($marketId);
+
+        AssemblyWbService::loadSupplies($market);
     }
 
     public function render()

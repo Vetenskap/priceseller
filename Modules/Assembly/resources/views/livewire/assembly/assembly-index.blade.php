@@ -30,7 +30,8 @@
                             </defs>
                         </svg>
                         <div class="lg:flex lg:gap-6">
-                            <flux:select variant="combobox" placeholder="Выберите статус..." label="Статус сборки" wire:model="statusOzon">
+                            <flux:select variant="combobox" placeholder="Выберите статус..." label="Статус сборки"
+                                         wire:model="statusOzon">
                                 @foreach(\App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled\Posting::STATUSES as $status)
                                     <flux:option :value="$status['value']">{{$status['label']}}</flux:option>
                                 @endforeach
@@ -44,7 +45,8 @@
                                     <flux:heading size="lg">{{$market->name}}</flux:heading>
                                     @foreach($market->warehouses as $warehouse)
                                         <flux:button
-                                            :href="route('assembly.ozon', ['warehouse' => $warehouse, 'startDate' => $startDateOzon, 'endDate' => $endDateOzon, 'status' => $statusOzon])" class="!bg-[#005BFF] !text-white">{{$warehouse->name}}</flux:button>
+                                            :href="route('assembly.ozon', ['warehouse' => $warehouse, 'startDate' => $startDateOzon, 'endDate' => $endDateOzon, 'status' => $statusOzon])"
+                                            class="!bg-[#005BFF] !text-white">{{$warehouse->name}}</flux:button>
                                     @endforeach
                                 </div>
                             </flux:card>
@@ -67,15 +69,17 @@
                             <flux:card class="flex max-sm:flex-wrap gap-6">
                                 @foreach($this->currentUser()->wbMarkets as $market)
                                     <flux:button
-                                        :href="route('assembly.wb', ['market' => $market])" class="!bg-[#6C11C9] !text-white">{{$market->name}}</flux:button>
+                                        :href="route('assembly.wb', ['market' => $market])"
+                                        class="!bg-[#6C11C9] !text-white">{{$market->name}}</flux:button>
                                 @endforeach
                             </flux:card>
                         </flux:card>
                         <flux:card class="space-y-6">
                             <flux:heading size="xl">Поставки</flux:heading>
-                                @foreach($this->currentUser()->wbMarkets as $market)
+                            @foreach($this->currentUser()->wbMarkets as $market)
                                 <flux:card class="space-y-6">
                                     <flux:heading size="lg">{{$market->name}}</flux:heading>
+                                    <flux:button wire:click="loadSuppliesWb({{json_encode($market->getKey())}})">Загрузить новые поставки</flux:button>
                                     @if($market->supplies->isNotEmpty())
                                         <flux:table>
                                             <flux:columns>
@@ -89,14 +93,19 @@
                                             <flux:rows>
                                                 @foreach($market->supplies as $supply)
                                                     <flux:row :key="$supply->getKey()">
-                                                        <flux:cell><flux:badge :color="$supply->done ? 'red' : 'lime'">{{$supply->done ? 'Закрыта' : 'Не закрыта'}}</flux:badge></flux:cell>
+                                                        <flux:cell>
+                                                            <flux:badge
+                                                                :color="$supply->done ? 'red' : 'lime'">{{$supply->done ? 'Закрыта' : 'Не закрыта'}}</flux:badge>
+                                                        </flux:cell>
                                                         <flux:cell>{{$supply->name}}</flux:cell>
                                                         <flux:cell>{{$supply->id_supply}}</flux:cell>
                                                         <flux:cell>{{$supply->created_at}}</flux:cell>
                                                         <flux:cell>{{$supply->closed_at}}</flux:cell>
                                                         <flux:cell>{{$supply->scan_dt}}</flux:cell>
                                                         <flux:cell align="right">
-                                                            <flux:button :href="route('assembly.wb.supply', ['supply' => $supply])" size="sm" icon="eye" />
+                                                            <flux:button
+                                                                :href="route('assembly.wb.supply', ['supply' => $supply])"
+                                                                size="sm" icon="eye"/>
                                                         </flux:cell>
                                                     </flux:row>
                                                 @endforeach
@@ -106,7 +115,7 @@
                                         <flux:subheading>Нет поставок</flux:subheading>
                                     @endif
                                 </flux:card>
-                                @endforeach
+                            @endforeach
                         </flux:card>
                     </flux:card>
                 </x-blocks.main-block>

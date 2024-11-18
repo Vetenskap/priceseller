@@ -16,7 +16,8 @@ class AssemblyWbSupply extends Model
         'cargo_type',
         'wb_market_id',
         'count_orders',
-        'done'
+        'done',
+        'updated_at'
     ];
 
     protected $casts = [
