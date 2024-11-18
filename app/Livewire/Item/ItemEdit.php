@@ -6,6 +6,7 @@ use App\Livewire\BaseComponent;
 use App\Livewire\Components\Toast;
 use App\Livewire\Forms\Item\ItemPostForm;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSaveButton;
 use App\Models\Item;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -16,7 +17,7 @@ use Livewire\Attributes\Title;
 #[Title('Товары')]
 class ItemEdit extends BaseComponent
 {
-    use WithJsNotifications;
+    use WithJsNotifications, WithSaveButton;
 
     public ItemPostForm $form;
 
@@ -31,7 +32,7 @@ class ItemEdit extends BaseComponent
         $this->redirect($this->backRoute);
     }
 
-    public function save(): void
+    public function update(): void
     {
         $this->authorizeForUser($this->user(), 'update', $this->item);
 
@@ -41,6 +42,7 @@ class ItemEdit extends BaseComponent
             $this->js((new Toast('Ошибка', $result->get('message')))->danger());
         } else {
             $this->addSuccessSaveNotification();
+            $this->hideSaveButton();
         }
     }
 

@@ -2,9 +2,6 @@
     <x-layouts.header :name="$email->name"/>
 
     <x-layouts.actions>
-        @if($this->user()->can('update-emails'))
-            <flux:button wire:click="update">Сохранить</flux:button>
-        @endif
         @if($this->user()->can('delete-emails'))
                 <flux:modal.trigger name="delete-email">
                     <flux:button variant="danger">Удалить</flux:button>
@@ -46,12 +43,12 @@
                 <x-blocks.main-block>
                     <flux:card class="space-y-6">
                         <div class="flex">
-                            <flux:switch wire:model="form.open" label="Включен"/>
+                            <flux:switch wire:model.live="form.open" label="Включен"/>
                         </div>
                         <div class="flex gap-6">
-                            <flux:input wire:model="form.name" label="Наименование" required/>
-                            <flux:input wire:model="form.address" label="Адрес" type="email" required/>
-                            <flux:input wire:model="form.password" label="Пароль" type="password" required/>
+                            <flux:input wire:model.live="form.name" label="Наименование" required/>
+                            <flux:input wire:model.live="form.address" label="Адрес" type="email" required/>
+                            <flux:input wire:model.live="form.password" label="Пароль" type="password" required/>
                         </div>
                     </flux:card>
                 </x-blocks.main-block>
@@ -61,5 +58,8 @@
             </flux:tab.panel>
         </flux:tab-group>
     </x-layouts.main-container>
+    @if($this->user()->can('update-emails'))
+        {!! $this->renderSaveButton() !!}
+    @endif
 </div>
 

@@ -4,6 +4,7 @@ namespace App\Livewire\Bundle;
 
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\Bundle\BundlePostForm;
+use App\Livewire\Traits\WithSaveButton;
 use App\Models\Bundle;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
@@ -12,6 +13,8 @@ use Livewire\Component;
 
 class BundleEdit extends BaseComponent
 {
+    use WithSaveButton;
+
     public BundlePostForm $form;
 
     public Bundle $bundle;
@@ -23,6 +26,7 @@ class BundleEdit extends BaseComponent
         $this->form->update();
 
         $this->addSuccessSaveNotification();
+        $this->hideSaveButton();
     }
 
     public function destroy(): void

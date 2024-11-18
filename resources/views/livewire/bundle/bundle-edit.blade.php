@@ -1,9 +1,6 @@
 <div>
     <x-layouts.header :name="$bundle->name . ' (' . $bundle->code . ')'"/>
     <x-layouts.actions>
-        @if($this->user()->can('update-bundles'))
-            <flux:button wire:click="update">Сохранить</flux:button>
-        @endif
         @if($this->user()->can('delete-bundles'))
             <flux:button
                 variant="danger"
@@ -25,9 +22,9 @@
             <flux:tab.panel name="general">
                 <x-blocks.main-block>
                     <flux:card class="space-y-6">
-                        <flux:input wire:model="form.name" label="Наименование"/>
-                        <flux:input wire:model="form.code" label="Код" required/>
-                        <flux:input wire:model="form.ms_uuid" label="МС UUID"/>
+                        <flux:input wire:model.live="form.name" label="Наименование"/>
+                        <flux:input wire:model.live="form.code" label="Код" required/>
+                        <flux:input wire:model.live="form.ms_uuid" label="МС UUID"/>
                     </flux:card>
                 </x-blocks.main-block>
             </flux:tab.panel>
@@ -36,4 +33,7 @@
             </flux:tab.panel>
         </flux:tab.group>
     </x-layouts.main-container>
+    @if($this->user()->can('update-bundles'))
+        {!! $this->renderSaveButton() !!}
+    @endif
 </div>

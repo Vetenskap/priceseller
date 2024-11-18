@@ -1,9 +1,6 @@
 <div>
     <x-layouts.header :name="$item->name . ' (' . $item->code . ')'"/>
     <x-layouts.actions>
-        @if($this->user()->can('update-items'))
-            <flux:button wire:click="save">Сохранить</flux:button>
-        @endif
         @if($this->user()->can('delete-items'))
             <flux:button
                     variant="danger"
@@ -28,23 +25,23 @@
                         <div class="flex gap-12">
                             <div class="space-y-6">
                                 <flux:heading size="xl">Основная информация</flux:heading>
-                                <flux:input wire:model="form.name" label="Наименование"/>
-                                <flux:input wire:model="form.code" label="Код" required/>
-                                <flux:input wire:model="form.ms_uuid" label="МС UUID"/>
-                                <flux:input wire:model="form.article" label="Артикул поставщик" required/>
-                                <flux:input wire:model="form.brand" label="Бренд поставщик"/>
-                                <flux:input wire:model="form.multiplicity" label="Кратность отгрузки" type="number"
+                                <flux:input wire:model.live="form.name" label="Наименование"/>
+                                <flux:input wire:model.live="form.code" label="Код" required/>
+                                <flux:input wire:model.live="form.ms_uuid" label="МС UUID"/>
+                                <flux:input wire:model.live="form.article" label="Артикул поставщик" required/>
+                                <flux:input wire:model.live="form.brand" label="Бренд поставщик"/>
+                                <flux:input wire:model.live="form.multiplicity" label="Кратность отгрузки" type="number"
                                             required/>
-                                <flux:input wire:model="form.buy_price_reserve" label="Резервная закупочная цена"
+                                <flux:input wire:model.live="form.buy_price_reserve" label="Резервная закупочная цена"
                                             type="number"/>
                                 <flux:select variant="combobox" placeholder="Выберите поставщика..."
-                                             wire:model="form.supplier_id" label="Поставщик">
+                                             wire:model.live="form.supplier_id" label="Поставщик">
                                     @foreach($this->currentUser()->suppliers as $supplier)
                                         <flux:option value="{{ $supplier->id }}">{{$supplier->name}}</flux:option>
                                     @endforeach
                                 </flux:select>
-                                <flux:switch wire:model="form.unload_wb" label="Выгружать на ВБ"/>
-                                <flux:switch wire:model="form.unload_ozon" label="Выгружать на ОЗОН"/>
+                                <flux:switch wire:model.live="form.unload_wb" label="Выгружать на ВБ"/>
+                                <flux:switch wire:model.live="form.unload_ozon" label="Выгружать на ОЗОН"/>
                             </div>
                             <div class="space-y-6">
                                 <flux:heading size="xl">Дополнительные поля</flux:heading>
@@ -52,7 +49,7 @@
                                     @switch($mainAttribute->type)
                                         @case('boolean')
                                             <div class="flex justify-between items-center">
-                                                <flux:switch wire:model="form.attributes.{{$mainAttribute->id}}"
+                                                <flux:switch wire:model.live="form.attributes.{{$mainAttribute->id}}"
                                                              :label="$mainAttribute->name"/>
                                                 @if($this->user()->can('update-items'))
                                                     <flux:button wire:click="deleteAttribute({{$mainAttribute}})"
@@ -65,7 +62,7 @@
                                             @break
                                         @case('textarea')
                                             <div class="flex justify-between items-end">
-                                                <flux:textarea wire:model="form.attributes.{{$mainAttribute->id}}"
+                                                <flux:textarea wire:model.live="form.attributes.{{$mainAttribute->id}}"
                                                                label="{{$mainAttribute->name}}"/>
                                                 @if($this->user()->can('update-items'))
                                                     <flux:button wire:click="deleteAttribute({{$mainAttribute}})"
@@ -78,7 +75,7 @@
                                             @break
                                         @default
                                             <flux:input.group class="items-end">
-                                                <flux:input wire:model="form.attributes.{{$mainAttribute->id}}"
+                                                <flux:input wire:model.live="form.attributes.{{$mainAttribute->id}}"
                                                             label="{{$mainAttribute->name}}"
                                                             type="{{$mainAttribute->type}}"/>
 
@@ -98,7 +95,7 @@
                                         @case('boolean')
                                             <div class="flex justify-between items-center">
                                                 <flux:switch
-                                                        wire:model="form.attributes.{{$attribute->item_attribute_id}}"
+                                                        wire:model.live="form.attributes.{{$attribute->item_attribute_id}}"
                                                         :label="$attribute->attribute->name"/>
                                                 @if($this->user()->can('update-items'))
                                                     <flux:button wire:click="deleteAttribute({{$attribute->attribute}})"
@@ -111,7 +108,7 @@
                                         @case('textarea')
                                             <div class="flex justify-between items-end">
                                                 <flux:textarea
-                                                        wire:model="form.attributes.{{$attribute->item_attribute_id}}"
+                                                        wire:model.live="form.attributes.{{$attribute->item_attribute_id}}"
                                                         label="{{$attribute->attribute->name}}"/>
                                                 @if($this->user()->can('update-items'))
                                                     <flux:button wire:click="deleteAttribute({{$attribute->attribute}})"
@@ -124,7 +121,7 @@
                                         @default
                                             <flux:input.group class="items-end">
                                                 <flux:input
-                                                        wire:model="form.attributes.{{$attribute->item_attribute_id}}"
+                                                        wire:model.live="form.attributes.{{$attribute->item_attribute_id}}"
                                                         label="{{$attribute->attribute->name}}"
                                                         type="{{$attribute->attribute->type}}"/>
                                                 @if($this->user()->can('update-items'))
@@ -226,4 +223,7 @@
             </flux:tab.panel>
         </flux:tab.group>
     </x-layouts.main-container>
+    @if($this->user()->can('update-items'))
+        {!! $this->renderSaveButton() !!}
+    @endif
 </div>
