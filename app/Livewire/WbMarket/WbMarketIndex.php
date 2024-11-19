@@ -43,7 +43,7 @@ class WbMarketIndex extends BaseComponent
     #[Computed]
     public function markets(): LengthAwarePaginator
     {
-        return $this->tapQuery($this->currentUser()->wbMarkets()->join('organizations', 'wb_markets.organization_id', '=', 'organizations.id'));
+        return $this->tapQuery($this->currentUser()->wbMarkets()->select('wb_markets.*', 'organizations.name as organization_name')->join('organizations', 'wb_markets.organization_id', '=', 'organizations.id'));
 
     }
 

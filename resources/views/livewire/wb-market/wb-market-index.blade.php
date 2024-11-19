@@ -51,7 +51,7 @@
                                 </flux:cell>
 
                                 <flux:cell>
-                                    {{ $market->organization?->name }}
+                                    {{ $market->organization_name }}
                                 </flux:cell>
 
                                 <flux:cell variant="strong">{{ $market->updated_at }}</flux:cell>

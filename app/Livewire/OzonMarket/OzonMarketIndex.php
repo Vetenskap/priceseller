@@ -43,7 +43,7 @@ class OzonMarketIndex extends BaseComponent
     #[Computed]
     public function markets(): LengthAwarePaginator
     {
-        return $this->tapQuery($this->currentUser()->ozonMarkets()->join('organizations', 'ozon_markets.organization_id', '=', 'organizations.id'));
+        return $this->tapQuery($this->currentUser()->ozonMarkets()->select('ozon_markets.*', 'organizations.name AS organization_name')->join('organizations', 'ozon_markets.organization_id', '=', 'organizations.id'));
 
     }
 
