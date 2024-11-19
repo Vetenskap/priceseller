@@ -23,24 +23,6 @@ class OzonMarketIndex extends BaseComponent
 
     public OzonMarketPostForm $form;
 
-    public $dirtyMarkets = [];
-
-    public function mount(): void
-    {
-        $this->dirtyMarkets = $this->currentUser()->ozonMarkets->mapWithKeys(fn(OzonMarket $market) => [$market->getKey() => ['open' => (bool) $market->open]])->toArray();
-    }
-
-    public function updatedDirtyMarkets(): void
-    {
-        collect($this->dirtyMarkets)->each(function ($market, $key) {
-            $marketModel = OzonMarket::findOrFail($key);
-
-            $this->authorizeForUser($this->user(), 'update', $marketModel);
-
-            $marketModel->update($market);
-        });
-    }
-
     public function destroy($id): void
     {
         $market = OzonMarket::findOrFail($id);
@@ -55,7 +37,7 @@ class OzonMarketIndex extends BaseComponent
     #[Computed]
     public function markets(): LengthAwarePaginator
     {
-        return $this->tapQuery($this->currentUser()->ozonMarkets());
+        return $this->tapQuery($this->currentUser()->ozonMarkets()->with('organization'));
 
     }
 

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -33,13 +34,20 @@ class WbMarket extends MainModel
         'minus_stock',
         'enabled_update_commissions_in_time',
         'update_commissions_time',
-        'tariff'
+        'tariff',
+        'enabled_price'
     ];
 
     protected $casts = [
         'enabled_update_commissions_in_time' => 'boolean',
         'open' => 'boolean',
+        'enabled_price' => 'boolean'
     ];
+
+    public function organization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'organization_id', 'id');
+    }
 
     public function items()
     {

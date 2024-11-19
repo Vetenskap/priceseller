@@ -4,6 +4,7 @@ namespace Modules\BergApi\Livewire\BergApi;
 
 use App\Livewire\ModuleComponent;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSaveButton;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -12,7 +13,7 @@ use Modules\BergApi\Models\BergApi;
 
 class BergApiIndex extends ModuleComponent
 {
-    use WithJsNotifications;
+    use WithJsNotifications, WithSaveButton;
 
     public BergApiPostForm $form;
 
@@ -29,7 +30,7 @@ class BergApiIndex extends ModuleComponent
         }
     }
 
-    public function store(): void
+    public function update(): void
     {
         if ($this->form->bergApi) {
             $this->authorize('update', $this->form->bergApi);

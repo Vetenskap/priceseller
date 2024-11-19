@@ -48,14 +48,13 @@
 
                                 <flux:cell variant="strong">{{ $supplier->updated_at }}</flux:cell>
 
-                                @if($this->user()->can('update-suppliers'))
-                                    <flux:cell align="right">
-                                        <flux:switch wire:model.live="dirtySuppliers.{{ $supplier->getKey() }}.open"/>
-                                    </flux:cell>
-                                @endif
+                                <flux:cell align="right">
+                                    <flux:switch :checked="$supplier->open" disabled/>
+                                </flux:cell>
 
                                 <flux:cell align="right">
-                                    <flux:button :href="route('supplier.edit', ['supplier' => $supplier->getKey()])" icon="pencil-square" size="sm"/>
+                                    <flux:button :href="route('supplier.edit', ['supplier' => $supplier->getKey()])"
+                                                 icon="pencil-square" size="sm"/>
                                 </flux:cell>
 
                                 @if($this->user()->can('delete-suppliers'))

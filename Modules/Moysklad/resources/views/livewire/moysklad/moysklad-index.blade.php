@@ -38,17 +38,15 @@
     </x-blocks.main-block>
     @if($page === 'main')
         <x-blocks.main-block>
-            <flux:button wire:click="store">Сохранить</flux:button>
-        </x-blocks.main-block>
-        <x-blocks.main-block>
             <flux:card>
-                <flux:input label="АПИ ключ" wire:model="form.api_key" required/>
+                <flux:input label="АПИ ключ" wire:model.live="form.api_key" required/>
             </flux:card>
         </x-blocks.main-block>
         @if($form->moysklad)
             <livewire:moysklad::moysklad-recount-retail-markup.moysklad-recount-retail-markup-index
                 :moysklad="$form->moysklad"/>
         @endif
+        {!! $this->renderSaveButton() !!}
     @endif
     @if($form->moysklad)
         @if($page === 'warehouses')
@@ -78,11 +76,10 @@
         @if($page === 'quarantine')
             <x-blocks.main-block>
                 <flux:card class="space-y-6">
-                    <flux:button wire:click="store">Сохранить</flux:button>
                     <div class="flex">
                         <div class="space-y-6">
-                            <flux:switch label="Включить карантин" wire:model="form.enabled_diff_price"/>
-                            <flux:input label="Разница между ценами, %" wire:model="form.diff_price"/>
+                            <flux:switch label="Включить карантин" wire:model.live="form.enabled_diff_price"/>
+                            <flux:input label="Разница между ценами, %" wire:model.live="form.diff_price"/>
                         </div>
                     </div>
                 </flux:card>
@@ -144,6 +141,7 @@
                     </flux:table>
                 </flux:card>
             </x-blocks.main-block>
+            {!! $this->renderSaveButton() !!}
         @endif
     @endif
 </x-layouts.module-index-layout>

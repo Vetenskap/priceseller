@@ -199,10 +199,8 @@ class OzonMarketService
 
     public function getWarehouses(): Collection
     {
-        return Cache::tags(['ozon', 'warehouses'])->remember($this->market->id, now()->addHours(8), function (){
-            $client = new OzonClient($this->market->api_key, $this->market->client_id);
-            return $client->getWarehouses();
-        });
+        $client = new OzonClient($this->market->api_key, $this->market->client_id);
+        return $client->getWarehouses();
     }
 
     public static function closeMarkets(User $user)

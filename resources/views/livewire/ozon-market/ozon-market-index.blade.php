@@ -8,7 +8,8 @@
             </div>
 
             <flux:input wire:model="form.name" label="Наименование" required badge="обязательное"/>
-            <flux:input wire:model="form.client_id" label="Идентификатор клиента" type="number" required badge="обязательное"/>
+            <flux:input wire:model="form.client_id" label="Идентификатор клиента" type="number" required
+                        badge="обязательное"/>
             <flux:input wire:model="form.api_key" label="АПИ ключ" required badge="обязательное"/>
 
             <div class="flex">
@@ -34,7 +35,11 @@
                 <flux:table :paginate="$this->markets">
                     <flux:columns>
                         <flux:column sortable :sorted="$sortBy === 'name'" :direction="$sortDirection"
-                                     wire:click="sort('name')">Кабинет</flux:column>
+                                     wire:click="sort('name')">Кабинет
+                        </flux:column>
+                        <flux:column sortable :sorted="$sortBy === 'organization.name'" :direction="$sortDirection"
+                                     wire:click="sort('organization.name')">Организация
+                        </flux:column>
                         <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
                                      wire:click="sort('updated_at')">Последнее обновление
                         </flux:column>
@@ -47,16 +52,19 @@
                                     {{ $market->name }}
                                 </flux:cell>
 
+                                <flux:cell>
+                                    {{ $market->organization->name }}
+                                </flux:cell>
+
                                 <flux:cell variant="strong">{{ $market->updated_at }}</flux:cell>
 
-                                @if($this->user()->can('update-ozon'))
-                                    <flux:cell align="right">
-                                        <flux:switch wire:model.live="dirtyMarkets.{{ $market->getKey() }}.open"/>
-                                    </flux:cell>
-                                @endif
+                                <flux:cell align="right">
+                                    <flux:switch :checked="$market->open" disabled/>
+                                </flux:cell>
 
                                 <flux:cell align="right">
-                                    <flux:button :href="route('ozon-market-edit', ['market' => $market->getKey()])" size="sm" icon="pencil-square" />
+                                    <flux:button :href="route('ozon-market-edit', ['market' => $market->getKey()])"
+                                                 size="sm" icon="pencil-square"/>
                                 </flux:cell>
 
                                 @if($this->user()->can('delete-ozon'))
@@ -64,7 +72,7 @@
                                         <flux:button icon="trash" variant="danger" size="sm"
                                                      wire:click="destroy({{ json_encode($market->getKey()) }})"
                                                      wire:target="destroy({{ json_encode($market->getKey()) }})"
-                                                     wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены." />
+                                                     wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены."/>
                                     </flux:cell>
                                 @endif
 

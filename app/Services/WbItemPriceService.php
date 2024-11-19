@@ -388,6 +388,11 @@ class WbItemPriceService
 
     public function unloadAllPrices(): void
     {
+        if (!$this->market->enabled_price) {
+            SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: пропускаем выгрузку цен в кабинет");
+            return;
+        }
+
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: выгрузка цен в кабинет");
 
         $this->market

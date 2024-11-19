@@ -4,6 +4,7 @@ namespace Modules\SamsonApi\Livewire\SamsonApi;
 
 use App\Livewire\ModuleComponent;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSaveButton;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -12,7 +13,7 @@ use Modules\SamsonApi\Models\SamsonApi;
 
 class SamsonApiIndex extends ModuleComponent
 {
-    use WithJsNotifications;
+    use WithJsNotifications, WithSaveButton;
 
     public SamsonApiPostForm $form;
 
@@ -29,7 +30,7 @@ class SamsonApiIndex extends ModuleComponent
         }
     }
 
-    public function store(): void
+    public function update(): void
     {
         if ($this->form->samsonApi) {
             $this->authorize('update', $this->form->samsonApi);

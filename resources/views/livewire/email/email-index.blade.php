@@ -51,15 +51,14 @@
 
                                 <flux:cell variant="strong">{{ $email->updated_at }}</flux:cell>
 
-                                @if($this->user()->can('update-emails'))
-                                    <flux:cell align="right">
-                                        <flux:switch wire:model.live="dirtyEmails.{{ $email->id }}.open"/>
-                                    </flux:cell>
-                                @endif
+                                <flux:cell align="right">
+                                    <flux:switch :checked="$email->open" disabled/>
+                                </flux:cell>
 
                                 @if($this->user()->can('view-emails'))
                                     <flux:cell align="right">
-                                        <flux:button :href="route('email.edit', ['email' => $email->getKey()])" icon="pencil-square" size="sm" />
+                                        <flux:button :href="route('email.edit', ['email' => $email->getKey()])"
+                                                     icon="pencil-square" size="sm"/>
                                     </flux:cell>
                                 @endif
 

@@ -3,33 +3,44 @@
         <div class="max-w-full mx-auto sm:px-6 lg:px-8">
             <div class='bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg'>
                 <x-blocks.main-block>
-                    <flux:dropdown>
-                        <flux:button icon-trailing="chevron-down">Сортировка</flux:button>
+                    <flux:card class="space-y-6">
+                        <flux:accordion>
+                            <flux:accordion.item>
+                                <flux:accordion.heading>Сортировка</flux:accordion.heading>
 
-                        <flux:menu>
-                            @foreach(array_merge($fields, $additionalFields) as $field => $parameters)
-                                <flux:menu.item>
-                                    @if($sortDirection === 'desc')
-                                        @if($sortBy === $field)
-                                            <flux:button variany="primary" wire:click="sort({{json_encode($field)}})"
-                                                         icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
-                                        @else
-                                            <flux:button wire:click="sort({{json_encode($field)}})"
-                                                         icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
-                                        @endif
-                                    @else
-                                        @if($sortBy === $field)
-                                            <flux:button variant="primary" wire:click="sort({{json_encode($field)}})"
-                                                         icon-trailing="chevron-up">{{$parameters['label']}}</flux:button>
-                                        @else
-                                            <flux:button wire:click="sort({{json_encode($field)}})"
-                                                         icon-trailing="chevron-up">{{$parameters['label']}}</flux:button>
-                                        @endif
-                                    @endif
-                                </flux:menu.item>
-                            @endforeach
-                        </flux:menu>
-                    </flux:dropdown>
+                                <flux:accordion.content>
+                                    <div class="lg:flex gap-6 mt-6">
+                                        @foreach(array_merge($fields, $additionalFields) as $field => $parameters)
+                                            @if($field === $sortBy)
+                                                @if($sortDirection === 'desc')
+                                                    <div>
+                                                        <flux:button class="!w-full"
+                                                                     wire:target="sort({{json_encode($field)}})"
+                                                                     wire:click="sort({{json_encode($field)}})"
+                                                                     icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
+                                                    </div>
+                                                @else
+                                                    <div>
+                                                        <flux:button class="!w-full"
+                                                                     wire:target="sort({{json_encode($field)}})"
+                                                                     wire:click="sort({{json_encode($field)}})"
+                                                                     icon-trailing="chevron-up">{{$parameters['label']}}</flux:button>
+                                                    </div>
+                                                @endif
+                                            @else
+                                                <div>
+                                                    <flux:button class="!w-full"
+                                                                 wire:target="sort({{json_encode($field)}})"
+                                                                 wire:click="sort({{json_encode($field)}})"
+                                                                 icon-trailing="chevron-down">{{$parameters['label']}}</flux:button>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    </div>
+                                </flux:accordion.content>
+                            </flux:accordion.item>
+                        </flux:accordion>
+                    </flux:card>
                 </x-blocks.main-block>
                 <x-blocks.main-block>
                     @if(count($postings) > 0)

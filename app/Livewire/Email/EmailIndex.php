@@ -21,24 +21,6 @@ class EmailIndex extends BaseComponent
 
     public EmailPostForm $form;
 
-    public $dirtyEmails = [];
-
-    public function mount(): void
-    {
-        $this->dirtyEmails = $this->currentUser()->emails->mapWithKeys(fn (Email $email) => [$email->id => ['open' => (bool) $email->open]])->toArray();
-    }
-
-    public function updatedDirtyEmails(): void
-    {
-        collect($this->dirtyEmails)->each(function ($email, $key) {
-            $emailModel = Email::findOrFail($key);
-
-            $this->authorizeForUser($this->user(), 'update', $emailModel);
-
-            $emailModel->update($email);
-        });
-    }
-
     public function destroy($id): void
     {
         $this->form->setEmail(Email::findOrFail($id));

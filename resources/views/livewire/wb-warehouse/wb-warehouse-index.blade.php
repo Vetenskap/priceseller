@@ -5,7 +5,9 @@
             @if($this->user()->can('update-wb'))
                 <flux:input.group>
                     <flux:select variant="combobox" placeholder="Выберите склад..."
-                                 wire:model="selectedWarehouse">
+                                 wire:model="selectedWarehouse" wire:click="getWarehouses">
+                        <flux:icon.loading wire:loading
+                                           wire:target="getWarehouses"/>
                         @foreach($apiWarehouses as $apiWarehouse)
                             <flux:option :value="$apiWarehouse['id']">{{$apiWarehouse['name']}}</flux:option>
                         @endforeach

@@ -5,16 +5,29 @@ namespace App\Livewire\WbWarehouse;
 use App\Livewire\BaseComponent;
 use App\Models\WbMarket;
 use App\Models\WbWarehouse;
+use App\Services\WbMarketService;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
+use Illuminate\Http\Client\RequestException;
+use Illuminate\Support\Collection;
+use Illuminate\Support\MessageBag;
 
 class WbWarehouseIndex extends BaseComponent
 {
     public WbMarket $market;
-    public $apiWarehouses;
+    public $apiWarehouses = [];
 
     public $selectedWarehouse = null;
+
+    public function getWarehouses(): void
+    {
+        if (!$this->apiWarehouses) {
+            $service = new WbMarketService($this->market);
+
+            $this->apiWarehouses = $service->getWarehouses();
+        }
+    }
 
     public function store(): void
     {

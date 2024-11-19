@@ -135,7 +135,7 @@
             </flux:tab.panel>
             <flux:tab.panel name="stocks_warehouses">
                 <x-marketPages.stocks-warehouses :market="$market"/>
-                <livewire:ozon-warehouse.ozon-warehouse-index :market="$market" :api-warehouses="$this->apiWarehouses"/>
+                <livewire:ozon-warehouse.ozon-warehouse-index :market="$market" />
             </flux:tab.panel>
             <flux:tab.panel name="relationships_commissions">
                 <x-marketPages.relationships-commissions :items="$this->items" :market="$market" :file="$file"

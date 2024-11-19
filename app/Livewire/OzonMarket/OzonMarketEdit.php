@@ -158,33 +158,6 @@ class OzonMarketEdit extends BaseComponent
 
     }
 
-    public function getWarehouses(): Collection
-    {
-        try {
-            $service = new OzonMarketService($this->market);
-            return $service->getWarehouses();
-        } catch (RequestException $e) {
-            if ($e->response->unauthorized()) {
-                $this->setErrorBag(new MessageBag([
-                    'error' => 'Не верно ведён АПИ ключ или Идентификатор клиента',
-                    'form.client_id' => 'Не верно ведён Идентификатор клиента',
-                    'form.api_key' => 'Не верно ведён АПИ ключ',
-                ]));
-            } else {
-                $this->setErrorBag(new MessageBag([
-                    'error' => 'Неизвестная ошибка от сервера ОЗОН',
-                ]));
-            }
-            return collect();
-        }
-    }
-
-    #[Computed]
-    public function apiWarehouses(): Collection
-    {
-        return $this->getWarehouses();
-    }
-
     public function update(): void
     {
         $this->authorizeForUser($this->user(), 'update', $this->market);

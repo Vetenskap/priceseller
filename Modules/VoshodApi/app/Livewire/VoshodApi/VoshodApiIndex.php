@@ -4,6 +4,7 @@ namespace Modules\VoshodApi\Livewire\VoshodApi;
 
 use App\Livewire\ModuleComponent;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSaveButton;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -12,7 +13,7 @@ use Modules\VoshodApi\Models\VoshodApi;
 
 class VoshodApiIndex extends ModuleComponent
 {
-    use WithJsNotifications;
+    use WithJsNotifications, WithSaveButton;
 
     public VoshodApiPostForm $form;
 
@@ -29,7 +30,7 @@ class VoshodApiIndex extends ModuleComponent
         }
     }
 
-    public function store(): void
+    public function update(): void
     {
         if ($this->form->voshodApi) {
             $this->authorize('update', $this->form->voshodApi);

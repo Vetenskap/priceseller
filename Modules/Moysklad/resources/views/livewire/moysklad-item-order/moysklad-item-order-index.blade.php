@@ -1,9 +1,8 @@
 <div>
     <x-blocks.main-block>
         <flux:card class="space-y-6">
-            <flux:button wire:click="save">Сохранить</flux:button>
             <div class="flex">
-                <flux:switch wire:model="enabled_orders" label="Учитывать заказы при выгрузке"/>
+                <flux:switch wire:model.live="enabled_orders" label="Учитывать заказы при выгрузке"/>
             </div>
         </flux:card>
     </x-blocks.main-block>
@@ -14,7 +13,7 @@
             <flux:heading size="lg">Автоматическое очищение</flux:heading>
             <flux:subheading>Вы можете добавить срок жизни заказа, после его истечения заказ не будет учитываться
             </flux:subheading>
-            <flux:input type="number" label="Время в минутах" wire:model="clear_order_time"/>
+            <flux:input type="number" label="Время в минутах" wire:model.live="clear_order_time"/>
         </flux:card>
     </x-blocks.main-block>
     <x-blocks.main-block>
@@ -28,4 +27,5 @@
             @endif
         </flux:card>
     </x-blocks.main-block>
+    {!! $this->renderSaveButton() !!}
 </div>

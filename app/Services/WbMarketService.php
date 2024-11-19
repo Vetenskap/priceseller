@@ -169,12 +169,7 @@ class WbMarketService
     {
         $client = new WbClient($this->market->api_key);
 
-        return Cache::tags(['wb', 'warehouses'])
-            ->remember(
-                $this->market->id,
-                now()->addHours(8),
-                fn() => $client->getWarehouses()
-            );
+        return $client->getWarehouses();
 
     }
 

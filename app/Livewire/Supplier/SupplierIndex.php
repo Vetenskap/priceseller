@@ -21,25 +21,6 @@ class SupplierIndex extends BaseComponent
 
     public SupplierPostForm $form;
 
-    public $dirtySuppliers = [];
-
-    public function mount(): void
-    {
-        $this->dirtySuppliers = $this->currentUser()->suppliers->mapWithKeys(fn (Supplier $supplier) => [$supplier->id => ['open' => (bool) $supplier->open]])->toArray();
-    }
-
-    public function updatedDirtySuppliers(): void
-    {
-        collect($this->dirtySuppliers)->each(function ($supplier, $key) {
-
-            $supplierModel = Supplier::findOrFail($key);
-
-            $this->authorizeForUser($this->user(), 'update', $supplierModel);
-
-            $supplierModel->update($supplier);
-        });
-    }
-
     public function edit($id): void
     {
         $this->redirect(route('supplier.edit', ['supplier' => $id]));

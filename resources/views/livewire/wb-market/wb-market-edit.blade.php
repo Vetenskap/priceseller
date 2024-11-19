@@ -50,6 +50,9 @@
             <flux:tab.panel name="prices">
                 <x-blocks.main-block>
                     <flux:card class="space-y-12">
+                        <div class="flex">
+                            <flux:switch wire:model.live="form.enabled_price" label="Выгружать цены"/>
+                        </div>
                         <flux:select wire:model.live="form.tariff" placeholder="Выберите тариф..." label="Тариф">
                             @foreach(\App\HttpClient\WbClient\Resources\Tariffs\Commission::TARRIFS as $tariff)
                                 <flux:option :value="$tariff['name']">{{$tariff['label']}}</flux:option>
@@ -67,7 +70,7 @@
             </flux:tab.panel>
             <flux:tab.panel name="stocks_warehouses">
                 <x-marketPages.stocks-warehouses :market="$market"/>
-                <livewire:wb-warehouse.wb-warehouse-index :market="$market" :api-warehouses="$this->apiWarehouses"/>
+                <livewire:wb-warehouse.wb-warehouse-index :market="$market" />
             </flux:tab.panel>
             <flux:tab.panel name="relationships_commissions">
                 <x-marketPages.relationships-commissions :market="$market" :file="$file" market-name="wb"

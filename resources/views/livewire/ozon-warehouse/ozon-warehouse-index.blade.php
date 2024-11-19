@@ -5,8 +5,9 @@
             @if($this->user()->can('update-ozon'))
                 <flux:input.group>
                     <flux:select variant="combobox" placeholder="Выберите склад..."
-                                 wire:model="selectedWarehouse">
-
+                                 wire:model="selectedWarehouse" wire:click="getWarehouses">
+                        <flux:icon.loading wire:loading
+                                           wire:target="getWarehouses"/>
                         @foreach($apiWarehouses as $apiWarehouse)
                             <flux:option :value="$apiWarehouse['warehouse_id']">{{$apiWarehouse['name']}}</flux:option>
                         @endforeach

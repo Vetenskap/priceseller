@@ -5,6 +5,7 @@ namespace Modules\Moysklad\Livewire\Moysklad;
 use App\Livewire\ModuleComponent;
 use App\Livewire\Traits\WithFilters;
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSaveButton;
 use App\Livewire\Traits\WithSort;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
@@ -22,7 +23,7 @@ use Modules\Moysklad\Services\MoyskladService;
 
 class MoyskladIndex extends ModuleComponent
 {
-    use WithFileUploads, WithSort, WithPagination, WithFilters;
+    use WithFileUploads, WithSort, WithPagination, WithFilters, WithSaveButton;
 
     public MoyskladPostForm $form;
 

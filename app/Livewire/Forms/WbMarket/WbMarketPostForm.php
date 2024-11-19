@@ -60,6 +60,9 @@ class WbMarketPostForm extends Form
     #[Validate]
     public $tariff = 'kgvpMarketplace';
 
+    #[Validate]
+    public $enabled_price = false;
+
     public function rules(): array
     {
         return [
@@ -85,6 +88,7 @@ class WbMarketPostForm extends Form
             'enabled_update_commissions_in_time' => ['nullable', 'boolean'],
             'update_commissions_time' => ['nullable', 'string', 'date_format:H:i'],
             'tariff' => ['nullable', 'string'],
+            'enabled_price' => ['nullable', 'boolean'],
         ];
     }
 
@@ -106,6 +110,7 @@ class WbMarketPostForm extends Form
         $this->enabled_update_commissions_in_time = (bool) $market->enabled_update_commissions_in_time;
         $this->update_commissions_time = $market->update_commissions_time;
         $this->tariff = $market->tariff;
+        $this->enabled_price = $market->enabled_price;
     }
 
     public function store(): void

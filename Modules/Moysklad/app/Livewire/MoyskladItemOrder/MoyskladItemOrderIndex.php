@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\Livewire\MoyskladItemOrder;
 
 use App\Livewire\Traits\WithJsNotifications;
+use App\Livewire\Traits\WithSaveButton;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
 use Illuminate\Foundation\Application;
@@ -14,7 +15,7 @@ use Modules\Moysklad\Services\MoyskladWebhookService;
 
 class MoyskladItemOrderIndex extends Component
 {
-    use WithJsNotifications;
+    use WithJsNotifications, WithSaveButton;
 
     public Moysklad $moysklad;
 

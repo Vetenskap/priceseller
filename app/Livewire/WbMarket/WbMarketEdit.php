@@ -167,33 +167,6 @@ class WbMarketEdit extends BaseComponent
         );
     }
 
-    public function getWarehouses(): Collection
-    {
-        $service = new WbMarketService($this->market);
-
-        try {
-            return $service->getWarehouses();
-        } catch (RequestException $e) {
-            if ($e->response->unauthorized()) {
-                $this->setErrorBag(new MessageBag([
-                    'error' => 'Не верно ведён АПИ ключ',
-                    'form.api_key' => 'Не верно ведён АПИ ключ'
-                ]));
-            } else {
-                $this->setErrorBag(new MessageBag([
-                    'error' => 'Неизвестная ошибка от сервера ВБ',
-                ]));
-            }
-            return collect();
-        }
-    }
-
-    #[Computed]
-    public function apiWarehouses(): Collection
-    {
-        return $this->getWarehouses();
-    }
-
     public function clearRelationships(): void
     {
         $service = new WbMarketService($this->market);

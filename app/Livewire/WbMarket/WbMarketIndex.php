@@ -23,24 +23,6 @@ class WbMarketIndex extends BaseComponent
 
     public WbMarketPostForm $form;
 
-    public $dirtyMarkets= [];
-
-    public function mount(): void
-    {
-        $this->dirtyMarkets = $this->currentUser()->wbMarkets->mapWithKeys(fn (WbMarket $market) => [$market->id => ['open' => (bool) $market->open]])->toArray();
-    }
-
-    public function updatedDirtyMarkets(): void
-    {
-        collect($this->dirtyMarkets)->each(function ($market, $key) {
-            $marketModel = WbMarket::findOrFail($key);
-
-            $this->authorizeForUser($this->user(), 'update', $marketModel);
-
-            $marketModel->update($market);
-        });
-    }
-
     public function destroy($id): void
     {
         $market = WbMarket::findOrFail($id);
@@ -55,7 +37,7 @@ class WbMarketIndex extends BaseComponent
     #[Computed]
     public function markets(): LengthAwarePaginator
     {
-        return $this->tapQuery($this->currentUser()->wbMarkets());
+        return $this->tapQuery($this->currentUser()->wbMarkets()->with('organization'));
 
     }
 
