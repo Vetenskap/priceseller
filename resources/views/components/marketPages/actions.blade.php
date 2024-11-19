@@ -29,11 +29,12 @@
                                         wire:model.live="testWarehouses.{{$supplier->getKey()}}.userWarehouses">Только ваши
                                         склады
                                     </flux:menu.checkbox>
+                                @else
+                                    @foreach($supplier->warehouses as $warehouse)
+                                        <flux:menu.checkbox
+                                            wire:model.live="testWarehouses.{{$supplier->getKey()}}.{{$warehouse->getKey()}}">{{$warehouse->name}}</flux:menu.checkbox>
+                                    @endforeach
                                 @endif
-                                @foreach($supplier->warehouses as $warehouse)
-                                    <flux:menu.checkbox
-                                        wire:model.live="testWarehouses.{{$supplier->getKey()}}.{{$warehouse->getKey()}}">{{$warehouse->name}}</flux:menu.checkbox>
-                                @endforeach
                             </flux:menu.group>
                         @endforeach
                     </flux:menu>
