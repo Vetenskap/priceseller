@@ -22,20 +22,22 @@
                     <flux:button icon-trailing="chevron-down">Склады</flux:button>
 
                     <flux:menu>
-                        @foreach($market->suppliers() as $supplier)
-                            <flux:menu.group :heading="$supplier->name">
-                                @if($supplier->warehouses->isEmpty())
-                                    <flux:menu.checkbox
-                                        wire:model.live="testWarehouses.{{$supplier->getKey()}}.userWarehouses">Только ваши
-                                        склады
-                                    </flux:menu.checkbox>
-                                @else
-                                    @foreach($supplier->warehouses as $warehouse)
+                        @foreach($market->warehouses as $warehouse)
+                            @foreach($warehouse->suppliers as $supplier)
+                                <flux:menu.group :heading="$supplier->name">
+                                    @if($supplier->warehouses->isEmpty())
                                         <flux:menu.checkbox
-                                            wire:model.live="testWarehouses.{{$supplier->getKey()}}.{{$warehouse->getKey()}}">{{$warehouse->name}}</flux:menu.checkbox>
-                                    @endforeach
-                                @endif
-                            </flux:menu.group>
+                                            wire:model.live="testWarehouses.{{$supplier->getKey()}}.userWarehouses">Только ваши
+                                            склады
+                                        </flux:menu.checkbox>
+                                    @else
+                                        @foreach($supplier->warehouses as $warehouse)
+                                            <flux:menu.checkbox
+                                                wire:model.live="testWarehouses.{{$supplier->getKey()}}.{{$warehouse->getKey()}}">{{$warehouse->name}}</flux:menu.checkbox>
+                                        @endforeach
+                                    @endif
+                                </flux:menu.group>
+                            @endforeach
                         @endforeach
                     </flux:menu>
                 </flux:dropdown>
