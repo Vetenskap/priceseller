@@ -37,8 +37,8 @@
                         <flux:column sortable :sorted="$sortBy === 'name'" :direction="$sortDirection"
                                      wire:click="sort('name')">Кабинет
                         </flux:column>
-                        <flux:column sortable :sorted="$sortBy === 'organizations.name'" :direction="$sortDirection"
-                                     wire:click="sort('organizations.name')">Организация
+                        <flux:column sortable :sorted="$sortBy === 'organization.name'" :direction="$sortDirection"
+                                     wire:click="sort('organization.name')">Организация
                         </flux:column>
                         <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
                                      wire:click="sort('updated_at')">Последнее обновление

@@ -11,6 +11,7 @@ use App\Services\UsersPermissionsService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
@@ -37,7 +38,11 @@ class WbMarketIndex extends BaseComponent
     #[Computed]
     public function markets(): LengthAwarePaginator
     {
-        return $this->tapQuery($this->currentUser()->wbMarkets()->with('organization'));
+        return $this->tapQuery($this->currentUser()->wbMarkets()->whereHas('organization', function (Builder $query) {
+            $query->when(str_contains('organization', $this->sortBy), function (Builder $query) {
+                $query->where(str_replace('organization.', '', $this->sortBy));
+            });
+        }));
 
     }
 
