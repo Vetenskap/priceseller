@@ -11,6 +11,7 @@ use App\Services\UsersPermissionsService;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Contracts\View\Factory;
 use Illuminate\Contracts\View\View;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Application;
 use Livewire\Attributes\Computed;
 use Livewire\Attributes\Title;
