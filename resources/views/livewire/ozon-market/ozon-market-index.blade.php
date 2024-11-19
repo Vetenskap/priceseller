@@ -34,14 +34,14 @@
             @if($this->markets->count() > 0)
                 <flux:table :paginate="$this->markets">
                     <flux:columns>
-                        <flux:column sortable :sorted="$sortBy === 'name'" :direction="$sortDirection"
-                                     wire:click="sort('name')">Кабинет
+                        <flux:column sortable :sorted="$sortBy === 'ozon_markets.name'" :direction="$sortDirection"
+                                     wire:click="sort('ozon_markets.name')">Кабинет
                         </flux:column>
                         <flux:column sortable :sorted="$sortBy === 'organizations.name'" :direction="$sortDirection"
                                      wire:click="sort('organizations.name')">Организация
                         </flux:column>
-                        <flux:column sortable :sorted="$sortBy === 'updated_at'" :direction="$sortDirection"
-                                     wire:click="sort('updated_at')">Последнее обновление
+                        <flux:column sortable :sorted="$sortBy === 'ozon_markets.updated_at'" :direction="$sortDirection"
+                                     wire:click="sort('ozon_markets.updated_at')">Последнее обновление
                         </flux:column>
                     </flux:columns>
 

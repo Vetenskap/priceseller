@@ -24,6 +24,11 @@ class OzonMarketIndex extends BaseComponent
 
     public OzonMarketPostForm $form;
 
+    public function mount()
+    {
+        $this->sortBy = 'ozon_markets.updated_at';
+    }
+
     public function destroy($id): void
     {
         $market = OzonMarket::findOrFail($id);

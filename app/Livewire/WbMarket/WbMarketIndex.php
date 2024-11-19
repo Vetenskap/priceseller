@@ -24,6 +24,11 @@ class WbMarketIndex extends BaseComponent
 
     public WbMarketPostForm $form;
 
+    public function mount()
+    {
+        $this->sortBy = 'wb_markets.updated_at';
+    }
+
     public function destroy($id): void
     {
         $market = WbMarket::findOrFail($id);
