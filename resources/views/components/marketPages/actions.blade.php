@@ -33,7 +33,7 @@
                                     @else
                                         @foreach($supplier->warehouses as $warehouse)
                                             <flux:menu.checkbox
-                                                wire:model.live="testWarehouses.{{$supplier->getKey()}}.{{$warehouse->getKey()}}">{{$warehouse->name}}</flux:menu.checkbox>
+                                                wire:model.live="testWarehouses.{{$supplier->getKey()}}.{{$warehouse->supplierWarehouse->getKey()}}">{{$warehouse->supplierWarehouse->name}}</flux:menu.checkbox>
                                         @endforeach
                                     @endif
                                 </flux:menu.group>
