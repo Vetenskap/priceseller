@@ -52,7 +52,7 @@
             <flux:tab.panel name="prices">
                 <x-blocks.main-block>
                     <flux:card class="space-y-12">
-                        <flux:select wire:model.live="form.tariff" placeholder="Выберите тариф..." label="Тариф">
+                        <flux:select wire:model.live="form.tariff" placeholder="Выберите схему работы..." label="Схема работы">
                             <flux:option value="fbs">FBS</flux:option>
                             <flux:option value="fbo">FBO</flux:option>
                         </flux:select>

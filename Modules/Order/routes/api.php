@@ -14,6 +14,6 @@ use Modules\Order\Http\Controllers\OrderController;
  *
 */
 
-Route::middleware(['auth:sanctum'])->prefix('v1')->group(function () {
-    Route::apiResource('order', OrderController::class)->names('order');
+Route::prefix('modules')->group(function () {
+    Route::post('orders/ozon/webhooks/{webhook}', [\Modules\Order\Http\Controllers\OrderOzonWebhookController::class, 'index'])->name('orders.ozon.webhooks')->whereUuid('webhook');
 });

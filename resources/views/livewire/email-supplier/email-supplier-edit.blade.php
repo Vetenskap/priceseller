@@ -31,7 +31,7 @@
 
                         <flux:tab.panel name="general">
                             <div class="flex gap-12">
-                                <div class="space-y-6 w-1/3">
+                                <div class="space-y-6 w-1/2">
                                     <div>
                                         <flux:heading size="xl">Основная информация</flux:heading>
                                     </div>
@@ -45,25 +45,37 @@
                                     </flux:select>
 
                                     <flux:input wire:model="form.email" label="Почта" required/>
-                                    <flux:input wire:model="form.filename" label="Наименование файла" required/>
+                                    <flux:input wire:model="form.filename" label="Наименование вложения" required/>
                                     <flux:card class="flex gap-2">
                                         <flux:badge color="red" class="h-fit">Важно!</flux:badge>
                                         <flux:subheading>Чтение прайсов происходит во всех папках. Убедитесь, что все
-                                            старые прайсы имеют статус "прочитано"
+                                            старые прайсы имеют статус "прочитано".
                                         </flux:subheading>
                                     </flux:card>
                                 </div>
-                                <div class="space-y-6">
+                                <div class="space-y-6 w-1/2">
                                     <div>
                                         <flux:heading size="xl">Информация по файлу</flux:heading>
                                     </div>
 
-                                    <flux:input wire:model="form.header_article" label="Артикул" type="number"
+                                    <flux:input wire:model="form.header_article" label="Артикул поставщика" type="number"
                                                 required/>
                                     <flux:input wire:model="form.header_price" label="Цена" type="number" required/>
                                     <flux:input wire:model="form.header_count" label="Остаток" type="number" required/>
-                                    <flux:input wire:model="form.header_brand" label="Бренд" type="number"/>
+                                    <flux:input wire:model="form.header_brand" label="Бренд поставщика" type="number"/>
+                                    <flux:card class="flex gap-2">
+                                        <flux:badge color="red" class="h-fit">Важно!</flux:badge>
+                                        <flux:subheading>Обязательное поле если в поставщике выбран параметр "использовать бренд".</flux:subheading>
+                                    </flux:card>
                                     <flux:input wire:model="form.header_warehouse" label="Склад" type="number"/>
+                                    <flux:card class="flex gap-2">
+                                        <flux:badge color="red" class="h-fit">Важно!</flux:badge>
+                                        <flux:subheading>Если в прайсе не указаны склады, то оставьте поле пустым. Будет
+                                            автоматически использоваться первый привязанный склад для загрузки остатков.
+                                            Для этого во вкладке "Склады" привяжите хотя бы один склад. В противном
+                                            случае остатки не будут выгружены.
+                                        </flux:subheading>
+                                    </flux:card>
                                 </div>
                             </div>
                         </flux:tab.panel>

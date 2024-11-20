@@ -101,7 +101,7 @@ class EmailSupplierPostForm extends Form
     {
         $this->validate();
 
-        $this->emailSupplier->update($this->except(['mainEmail', 'emailSupplier']));
+        $this->emailSupplier->update(collect($this->except(['mainEmail', 'emailSupplier']))->map(fn ($value, $key) => $value ? $value : null)->toArray());
 
     }
 

@@ -53,7 +53,7 @@
                         <div class="flex">
                             <flux:switch wire:model.live="form.enabled_price" label="Выгружать цены"/>
                         </div>
-                        <flux:select wire:model.live="form.tariff" placeholder="Выберите тариф..." label="Тариф">
+                        <flux:select wire:model.live="form.tariff" placeholder="Выберите схему работы..." label="Схема работы">
                             @foreach(\App\HttpClient\WbClient\Resources\Tariffs\Commission::TARRIFS as $tariff)
                                 <flux:option :value="$tariff['name']">{{$tariff['label']}}</flux:option>
                             @endforeach

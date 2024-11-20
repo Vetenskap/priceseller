@@ -7,6 +7,9 @@
             <flux:navbar.item :href="route('orders.index', ['page' => 'states'])"
                               :current="$page === 'states'">Не менять статус
             </flux:navbar.item>
+            <flux:navbar.item :href="route('orders.index', ['page' => 'ozonsettings'])"
+                              :current="$page === 'ozonsettings'">Настройки ОЗОН
+            </flux:navbar.item>
         </flux:navbar>
     </x-blocks.main-block>
     @if($page === 'main')
@@ -135,6 +138,35 @@
                 <flux:separator />
                 <flux:heading size="xl">Загрузить товары</flux:heading>
                 <x-file-block action="import" />
+            </flux:card>
+        </x-blocks.main-block>
+    @endif
+    @if($page === 'ozonsettings')
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
+                <flux:heading size="xl">Вебхуки</flux:heading>
+                <flux:card>
+                    <flux:accordion>
+                        <flux:accordion.item>
+                            <flux:accordion.heading>Первичное подключение пуш-уведомлений</flux:accordion.heading>
+
+                            <flux:accordion.content>
+                                Ознакомиться с настройкой можно <flux:link href="https://docs.ozon.ru/api/seller/#tag/push_start">здесь</flux:link>
+                            </flux:accordion.content>
+                        </flux:accordion.item>
+                    </flux:accordion>
+                </flux:card>
+                @foreach($this->currentuser()->ozonMarkets as $market)
+                    <flux:card class="flex gap-6 justify-between items-center">
+                        <flux:heading class="lg">{{$market->name}}</flux:heading>
+                        @if($market->webhook()->exists())
+                            <flux:input :value="route('api.orders.ozon.webhooks', ['webhook' => $market->webhook])" disabled />
+                            <flux:button wire:click="deleteWebhook({{json_encode($market->getKey())}})" icon="trash" variant="danger" wire:target="deleteWebhook({{json_encode($market->getKey())}})"/>
+                        @else
+                            <flux:button wire:click="createWebhook({{json_encode($market->getKey())}})" wire:target="createWebhook({{json_encode($market->getKey())}})">Создать ссылку</flux:button>
+                        @endif
+                    </flux:card>
+                @endforeach
             </flux:card>
         </x-blocks.main-block>
     @endif

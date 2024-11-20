@@ -7,9 +7,11 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Collection;
+use Modules\Order\Models\OrderOzonWebhook;
 use Opcodes\LogViewer\Facades\Cache;
 
 class OzonMarket extends MainModel
@@ -102,5 +104,10 @@ class OzonMarket extends MainModel
     public function clearSuppliersCache(): void
     {
         Cache::tags(['ozon', 'market', 'suppliers'])->forget($this->id);
+    }
+
+    public function webhook(): HasOne
+    {
+        return $this->hasOne(OrderOzonWebhook::class, 'ozon_market_id', 'id');
     }
 }

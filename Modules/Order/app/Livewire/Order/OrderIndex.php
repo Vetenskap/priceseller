@@ -45,6 +45,27 @@ class OrderIndex extends ModuleComponent
 
     public $automatic;
 
+    public function createWebhook($ozonMarketId): void
+    {
+        $market = $this->currentUser()->ozonMarkets()->findOrFail($ozonMarketId);
+
+        if ($market->webhook) {
+            \Flux::toast('Ссылка уже создана', 'Ошибка', variant: 'danger');
+            return;
+        }
+
+        $market->webhook()->create();
+
+    }
+
+    public function deleteWebhook($ozonMarketId): void
+    {
+        $market = $this->currentUser()->ozonMarkets()->findOrFail($ozonMarketId);
+
+        $market->webhook()->delete();
+
+    }
+
     public function updatedAutomatic(): void
     {
         $this->organization->automaticUnloadOrder()->updateOrCreate([
