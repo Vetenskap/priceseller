@@ -23,11 +23,13 @@ class Import implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $uniqueFor = 600;
+
     /**
      * Create a new job instance.
      */
     public function __construct(public string $uuid, public string $ext, public OzonMarket|WbMarket|User|Warehouse $model, public string $service)
     {
+        ItemsImportReportService::new($this->model, $this->uuid);
     }
 
     /**
@@ -35,32 +37,28 @@ class Import implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        if (ItemsImportReportService::new($this->model, $this->uuid)) {
-            if (class_exists($this->service)) {
+        if (class_exists($this->service)) {
 
-                /** @var ItemService|OzonMarketService|WbMarketService|WarehouseService $service */
-                $service = new $this->service($this->model);
+            /** @var ItemService|OzonMarketService|WbMarketService|WarehouseService $service */
+            $service = new $this->service($this->model);
 
-                if (method_exists($service, 'importItems')) {
+            if (method_exists($service, 'importItems')) {
 
-                    $result = $service->importItems($this->uuid, $this->ext);
+                $result = $service->importItems($this->uuid, $this->ext);
 
-                    ItemsImportReportService::success(
-                        model: $this->model,
-                        correct: $result->get('correct', 0),
-                        error: $result->get('error', 0),
-                        updated: $result->get('updated', 0),
-                        deleted: $result->get('deleted', 0),
-                        uuid: $this->uuid
-                    );
-                } else {
-                    $this->fail('Method not found');
-                }
+                ItemsImportReportService::success(
+                    model: $this->model,
+                    correct: $result->get('correct', 0),
+                    error: $result->get('error', 0),
+                    updated: $result->get('updated', 0),
+                    deleted: $result->get('deleted', 0),
+                    uuid: $this->uuid
+                );
             } else {
-                $this->fail('Service not found: ' . $this->service);
+                $this->fail('Method not found');
             }
         } else {
-            $this->fail('Job is already in process');
+            $this->fail('Service not found: ' . $this->service);
         }
     }
 

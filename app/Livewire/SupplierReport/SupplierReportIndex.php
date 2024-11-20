@@ -14,6 +14,13 @@ class SupplierReportIndex extends BaseComponent
 
     public Supplier $supplier;
 
+    public function getListeners(): array
+    {
+        return [
+            'echo:notification.' . $this->currentUser()->id . ',.notify' => 'render',
+        ];
+    }
+
     public $sortBy = 'updated_at';
     public $sortDirection = 'desc';
 

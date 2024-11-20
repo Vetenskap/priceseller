@@ -20,6 +20,7 @@ class BundlesExport implements ShouldQueue, ShouldBeUnique
 
     public function __construct(public User $user)
     {
+        BundlesExportReportService::new($this->user);
     }
 
     /**
@@ -27,11 +28,9 @@ class BundlesExport implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        if (BundlesExportReportService::new($this->user)) {
-            $service = new BundleService($this->user);
-            $uuid = $service->exportItems();
-            BundlesExportReportService::success($this->user, $uuid);
-        }
+        $service = new BundleService($this->user);
+        $uuid = $service->exportItems();
+        BundlesExportReportService::success($this->user, $uuid);
     }
 
     public function failed(): void

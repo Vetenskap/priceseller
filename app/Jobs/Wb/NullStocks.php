@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Wb;
 
+use App\Events\NotificationEvent;
 use App\Models\MarketActionReport;
 use App\Models\Supplier;
 use App\Models\User;
@@ -53,6 +54,8 @@ class NullStocks implements ShouldQueue
             'status' => 0,
             'message' => 'Успех'
         ]);
+
+        event(new NotificationEvent($this->market->user_id, $this->market->name, 'Остатки обнулены', 0));
     }
 
     public function uniqueId(): string
@@ -66,5 +69,7 @@ class NullStocks implements ShouldQueue
             'status' => 1,
             'message' => 'Ошибка'
         ]);
+
+        event(new NotificationEvent($this->market->user_id, $this->market->name, 'Ошибка в обнулении остатков', 1));
     }
 }

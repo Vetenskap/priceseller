@@ -40,6 +40,9 @@
                             <flux:input label="Конечная дата" type="date" wire:model="endDateOzon"/>
                         </div>
                         @foreach($this->currentUser()->ozonMarkets as $market)
+                            @if($market->$warehouse->isNotEmpty())
+
+                            @endif
                             <flux:card>
                                 <div class="flex max-sm:flex-wrap gap-6 items-center">
                                     <flux:heading size="lg">{{$market->name}}</flux:heading>

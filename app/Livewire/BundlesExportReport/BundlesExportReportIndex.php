@@ -18,6 +18,13 @@ class BundlesExportReportIndex extends BaseComponent
 {
     use WithSort, WithPagination;
 
+    public function getListeners(): array
+    {
+        return [
+            'echo:notification.' . $this->currentUser()->id . ',.notify' => 'render',
+        ];
+    }
+
     public function export(): void
     {
         if (!$this->user()->can('view-bundles')) {

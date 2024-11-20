@@ -24,6 +24,13 @@ class BundlesImportReportIndex extends BaseComponent
 {
     use WithSort, WithPagination, WithFileUploads;
 
+    public function getListeners(): array
+    {
+        return [
+            'echo:notification.' . $this->currentUser()->id . ',.notify' => 'render',
+        ];
+    }
+
     public $file;
 
     public function downloadTemplate(): BinaryFileResponse

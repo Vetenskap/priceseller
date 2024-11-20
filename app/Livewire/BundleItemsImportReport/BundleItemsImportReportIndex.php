@@ -25,6 +25,13 @@ class BundleItemsImportReportIndex extends BaseComponent
 
     public $file;
 
+    public function getListeners(): array
+    {
+        return [
+            'echo:notification.' . $this->currentUser()->id . ',.notify' => 'render',
+        ];
+    }
+
     public function destroy($id): void
     {
         if (!$this->user()->can('update-bundles')) {

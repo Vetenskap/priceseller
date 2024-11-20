@@ -2,9 +2,11 @@
 
 namespace App\Console\Commands;
 
+use App\Events\NotificationEvent;
 use App\Models\Item;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Str;
 use JetBrains\PhpStorm\NoReturn;
 use Modules\Moysklad\HttpClient\Resources\Context\CompanySettings\PriceType;
 use Modules\Moysklad\HttpClient\Resources\Entities\EntityList;
@@ -33,6 +35,7 @@ class Test extends Command
      */
     #[NoReturn] public function handle(): void
     {
-
+        sleep(10);
+        event(new NotificationEvent(10, 'Поставщик выгружен', 'Поставщик выгружен', 0));
     }
 }

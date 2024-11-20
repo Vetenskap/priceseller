@@ -3,7 +3,6 @@
 namespace App\Services\Bundle;
 
 use App\Events\NotificationEvent;
-use App\Events\ReportEvent;
 use App\Models\BundleItemsExportReport;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -45,12 +44,6 @@ class BundleItemsExportReportService
                 'message' => 'В процессе'
             ]);
 
-            try {
-                event(new ReportEvent($user->id));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
             return true;
         }
     }
@@ -65,7 +58,7 @@ class BundleItemsExportReportService
             ]);
 
             try {
-                event(new NotificationEvent($user->id, 'Объект: комплекты', 'Экспорт завершен', 0));
+                event(new NotificationEvent($user->id, 'Комплекты', 'Экспорт завершен', 0));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -85,7 +78,7 @@ class BundleItemsExportReportService
             ]);
 
             try {
-                event(new NotificationEvent($user->id, 'Объект: комплекты', 'Ошибка при экспорте', 1));
+                event(new NotificationEvent($user->id, 'Комплекты', 'Ошибка при экспорте', 1));
             } catch (\Throwable $e) {
                 report($e);
             }

@@ -17,11 +17,13 @@ class Import implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $uniqueFor = 600;
+
     /**
      * Create a new job instance.
      */
     public function __construct(public User $user, public string $uuid)
     {
+        WarehouseItemsImportReportService::newOrFail($this->user, $this->uuid);
     }
 
     /**
@@ -29,11 +31,9 @@ class Import implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        if (WarehouseItemsImportReportService::newOrFail($this->user, $this->uuid)) {
-            $import = new WarehousesStocksImport($this->user);
-            \Excel::import($import, 'users/warehouses/' . $this->uuid . '.xlsx');
-            WarehouseItemsImportReportService::success($this->user, $import->correct, $import->error);
-        }
+        $import = new WarehousesStocksImport($this->user);
+        \Excel::import($import, 'users/warehouses/' . $this->uuid . '.xlsx');
+        WarehouseItemsImportReportService::success($this->user, $import->correct, $import->error);
     }
 
     public function failed(\Throwable $e): void

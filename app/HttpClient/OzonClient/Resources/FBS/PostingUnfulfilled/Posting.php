@@ -5,8 +5,9 @@ namespace App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled;
 use App\Models\OzonMarket;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
+use Livewire\Wireable;
 
-class Posting
+class Posting implements Wireable
 {
     const STATUSES = [
         ["value" => "acceptance_in_progress", "label" => "идёт приёмка"],
@@ -459,8 +460,8 @@ class Posting
         $this->requirements_products_requiring_jw_uin = $posting->get('requirements')?->get('products_requiring_jw_uin');
         $this->requirements_products_requiring_rnpt = $posting->get('requirements')?->get('products_requiring_rnpt');
 
-        $this->products = $posting->get('products')->map(function (Collection $product) {
-            return new Product($product);
+        $this->products = $posting->get('products')->map(function (Collection|array $product) {
+            return new Product(collect($product)->toCollectionSpread());
         });
     }
 
@@ -590,12 +591,10 @@ class Posting
         };
     }
 
-
-
-    public function toCollection(OzonMarket $market): Collection
+    public function toLivewire(): array
     {
-        return collect([
-            'available_actions' => $this->getAvailableActions(),
+        return [
+            'available_actions' => $this->available_actions,
             'delivering_date' => $this->delivering_date,
             'in_process_at' => $this->in_process_at,
             'is_express' => $this->is_express,
@@ -605,11 +604,11 @@ class Posting
             'order_number' => $this->order_number,
             'parent_posting_number' => $this->parent_posting_number,
             'posting_number' => $this->posting_number,
-            'prr_option' => $this->getPrrOption(),
+            'prr_option' => $this->prr_option,
             'shipment_date' => $this->shipment_date,
-            'status' => $this->getStatus(),
-            'substatus' => $this->getSubstatus(),
-            'tpl_integration_type' => $this->getTplIntegrationType(),
+            'status' => $this->status,
+            'substatus' => $this->substatus,
+            'tpl_integration_type' => $this->tpl_integration_type,
             'tracking_number' => $this->tracking_number,
             'addressee_name' => $this->addressee_name,
             'addressee_phone' => $this->addressee_phone,
@@ -631,7 +630,7 @@ class Posting
             'cancellation_cancel_reason' => $this->cancellation_cancel_reason,
             'cancellation_cancel_reason_id' => $this->cancellation_cancel_reason_id,
             'cancellation_cancellation_initiator' => $this->cancellation_cancellation_initiator,
-            'cancellation_cancellation_type' => $this->getCancellationCancellationType(),
+            'cancellation_cancellation_type' => $this->cancellation_cancellation_type,
             'cancellation_cancelled_after_ship' => $this->cancellation_cancelled_after_ship,
             'customer_address_address_tail' => $this->customer_address_address_tail,
             'customer_address_city' => $this->customer_address_city,
@@ -671,13 +670,362 @@ class Posting
             'requirements_products_requiring_mandatory_mark' => $this->requirements_products_requiring_mandatory_mark,
             'requirements_products_requiring_jw_uin' => $this->requirements_products_requiring_jw_uin,
             'requirements_products_requiring_rnpt' => $this->requirements_products_requiring_rnpt,
-            'products' => $this->products->map(function (Product $product) use ($market) {
-                $product->loadLink($market);
-                $product->fetchAttribute($market);
-                return $product->toCollection();
-            })
-        ]);
+            'products' => $this->products->map(fn (Product $product) => $product->toLiveWire()),
+        ];
     }
 
+    public static function fromLivewire($value)
+    {
+        return new self(collect($value)->toCollectionSpread());
+    }
 
+    public function getDeliveringDate()
+    {
+        return $this->delivering_date;
+    }
+
+    public function getInProcessAt()
+    {
+        return $this->in_process_at;
+    }
+
+    public function getIsExpress()
+    {
+        return $this->is_express;
+    }
+
+    public function getIsMultibox()
+    {
+        return $this->is_multibox;
+    }
+
+    public function getMultiBoxQty()
+    {
+        return $this->multi_box_qty;
+    }
+
+    public function getOrderId()
+    {
+        return $this->order_id;
+    }
+
+    public function getOrderNumber()
+    {
+        return $this->order_number;
+    }
+
+    public function getParentPostingNumber()
+    {
+        return $this->parent_posting_number;
+    }
+
+    public function getPostingNumber()
+    {
+        return $this->posting_number;
+    }
+
+    public function getShipmentDate()
+    {
+        return $this->shipment_date;
+    }
+
+    public function getTrackingNumber()
+    {
+        return $this->tracking_number;
+    }
+
+    public function getAddresseeName(): null
+    {
+        return $this->addressee_name;
+    }
+
+    public function getAddresseePhone(): null
+    {
+        return $this->addressee_phone;
+    }
+
+    public function getAnalyticsDataCity(): null
+    {
+        return $this->analytics_data_city;
+    }
+
+    public function getAnalyticsDataDeliveryDateBegin(): null
+    {
+        return $this->analytics_data_delivery_date_begin;
+    }
+
+    public function getAnalyticsDataDeliveryDateEnd(): null
+    {
+        return $this->analytics_data_delivery_date_end;
+    }
+
+    public function getAnalyticsDataDeliveryType(): null
+    {
+        return $this->analytics_data_delivery_type;
+    }
+
+    public function getAnalyticsDataIsLegal(): null
+    {
+        return $this->analytics_data_is_legal;
+    }
+
+    public function getAnalyticsDataIsPremium(): null
+    {
+        return $this->analytics_data_is_premium;
+    }
+
+    public function getAnalyticsDataPaymentTypeGroupName(): null
+    {
+        return $this->analytics_data_payment_type_group_name;
+    }
+
+    public function getAnalyticsDataRegion(): null
+    {
+        return $this->analytics_data_region;
+    }
+
+    public function getAnalyticsDataTplProvider(): null
+    {
+        return $this->analytics_data_tpl_provider;
+    }
+
+    public function getAnalyticsDataTplProviderId(): null
+    {
+        return $this->analytics_data_tpl_provider_id;
+    }
+
+    public function getAnalyticsDataWarehouse(): null
+    {
+        return $this->analytics_data_warehouse;
+    }
+
+    public function getAnalyticsDataWarehouseId(): null
+    {
+        return $this->analytics_data_warehouse_id;
+    }
+
+    public function getBarcodesLowerBarcode(): null
+    {
+        return $this->barcodes_lower_barcode;
+    }
+
+    public function getBarcodesUpperBarcode(): null
+    {
+        return $this->barcodes_upper_barcode;
+    }
+
+    public function getCancellationAffectCancellationRating(): null
+    {
+        return $this->cancellation_affect_cancellation_rating;
+    }
+
+    public function getCancellationCancelReason(): null
+    {
+        return $this->cancellation_cancel_reason;
+    }
+
+    public function getCancellationCancelReasonId(): null
+    {
+        return $this->cancellation_cancel_reason_id;
+    }
+
+    public function getCancellationCancellationInitiator(): null
+    {
+        return $this->cancellation_cancellation_initiator;
+    }
+
+    public function getCancellationCancelledAfterShip(): null
+    {
+        return $this->cancellation_cancelled_after_ship;
+    }
+
+    public function getCustomerAddressAddressTail(): null
+    {
+        return $this->customer_address_address_tail;
+    }
+
+    public function getCustomerAddressCity(): null
+    {
+        return $this->customer_address_city;
+    }
+
+    public function getCustomerAddressComment(): null
+    {
+        return $this->customer_address_comment;
+    }
+
+    public function getCustomerAddressCountry(): null
+    {
+        return $this->customer_address_country;
+    }
+
+    public function getCustomerAddressDistrict(): null
+    {
+        return $this->customer_address_district;
+    }
+
+    public function getCustomerAddressLatitude(): null
+    {
+        return $this->customer_address_latitude;
+    }
+
+    public function getCustomerAddressLongitude(): null
+    {
+        return $this->customer_address_longitude;
+    }
+
+    public function getCustomerAddressProviderPvzCode(): null
+    {
+        return $this->customer_address_provider_pvz_code;
+    }
+
+    public function getCustomerAddressPvzCode(): null
+    {
+        return $this->customer_address_pvz_code;
+    }
+
+    public function getCustomerAddressRegion(): null
+    {
+        return $this->customer_address_region;
+    }
+
+    public function getCustomerAddressZipCode(): null
+    {
+        return $this->customer_address_zip_code;
+    }
+
+    public function getCustomerCustomerId(): null
+    {
+        return $this->customer_customer_id;
+    }
+
+    public function getCustomerName(): null
+    {
+        return $this->customer_name;
+    }
+
+    public function getCustomerPhone(): null
+    {
+        return $this->customer_phone;
+    }
+
+    public function getDeliveryMethodId(): null
+    {
+        return $this->delivery_method_id;
+    }
+
+    public function getDeliveryMethodName(): null
+    {
+        return $this->delivery_method_name;
+    }
+
+    public function getDeliveryMethodTplProvider(): null
+    {
+        return $this->delivery_method_tpl_provider;
+    }
+
+    public function getDeliveryMethodTplProviderId(): null
+    {
+        return $this->delivery_method_tpl_provider_id;
+    }
+
+    public function getDeliveryMethodWarehouse(): null
+    {
+        return $this->delivery_method_warehouse;
+    }
+
+    public function getDeliveryMethodWarehouseId(): null
+    {
+        return $this->delivery_method_warehouse_id;
+    }
+
+    public function getFinancialDataClusterFrom(): null
+    {
+        return $this->financial_data_cluster_from;
+    }
+
+    public function getFinancialDataClusterTo(): null
+    {
+        return $this->financial_data_cluster_to;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemDelivToCustomer(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_deliv_to_customer;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemDirectFlowTrans(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_direct_flow_trans;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemDropoffFf(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_dropoff_ff;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemDropoffPvz(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_dropoff_pvz;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemDropoffSc(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_dropoff_sc;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemFulfillment(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_fulfillment;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemPickup(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_pickup;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemReturnAfterDelivToCustomer(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_return_after_deliv_to_customer;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemReturnFlowTrans(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_return_flow_trans;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemReturnNotDelivToCustomer(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_return_not_deliv_to_customer;
+    }
+
+    public function getFinancialDataPostingServicesMarketplaceServiceItemReturnPartGoodsCustomer(): null
+    {
+        return $this->financial_data_posting_services_marketplace_service_item_return_part_goods_customer;
+    }
+
+    public function getRequirementsProductsRequiringGtd(): null
+    {
+        return $this->requirements_products_requiring_gtd;
+    }
+
+    public function getRequirementsProductsRequiringCountry(): null
+    {
+        return $this->requirements_products_requiring_country;
+    }
+
+    public function getRequirementsProductsRequiringMandatoryMark(): null
+    {
+        return $this->requirements_products_requiring_mandatory_mark;
+    }
+
+    public function getRequirementsProductsRequiringJwUin(): null
+    {
+        return $this->requirements_products_requiring_jw_uin;
+    }
+
+    public function getRequirementsProductsRequiringRnpt(): null
+    {
+        return $this->requirements_products_requiring_rnpt;
+    }
 }

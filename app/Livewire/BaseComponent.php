@@ -15,14 +15,6 @@ class BaseComponent extends Component
 {
     use WithJsNotifications;
 
-    public function getListeners()
-    {
-        return [
-            'echo:notification.' . $this->currentUser()->id . ',.notify' => 'notification',
-//            'echo:report.' . $this->currentUser()->id . ',.event' => '$refresh'
-        ];
-    }
-
     public function checkTtlJob($lockKey, $class): bool
     {
         $ttl = Redis::ttl('laravel_unique_job:' . $class . ':' . $lockKey);
@@ -33,21 +25,6 @@ class BaseComponent extends Component
         } else {
             $this->addJobNotification();
             return true;
-        }
-    }
-
-    public function notification($event)
-    {
-        switch ($event['status']) {
-            case 0:
-                \Flux::toast($event['message'], $event['title']);
-                break;
-            case 1:
-                \Flux::toast($event['message'], $event['title']);
-                break;
-            case 2:
-                \Flux::toast($event['message'], $event['title']);
-                break;
         }
     }
 

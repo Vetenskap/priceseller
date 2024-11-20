@@ -14,7 +14,7 @@ class AssemblyIndex extends ModuleComponent
     public function mount()
     {
         $this->startDateOzon = now()->format('Y-m-d');
-        $this->endDateOzon = now()->format('Y-m-d');
+        $this->endDateOzon = now()->addYear()->format('Y-m-d');
     }
 
     public function loadSuppliesWb($marketId)

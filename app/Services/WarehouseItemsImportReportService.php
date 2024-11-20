@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Events\ReportEvent;
 use App\Events\NotificationEvent;
 use App\Models\User;
 use App\Models\WarehousesItemsImportReport;
@@ -27,12 +26,6 @@ class WarehouseItemsImportReportService
                 'uuid' => $uuid,
             ]);
 
-            try {
-                event(new ReportEvent($model->id));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
             return true;
         }
     }
@@ -46,34 +39,11 @@ class WarehouseItemsImportReportService
                 'error' => $error,
             ]);
 
-            try {
-                event(new ReportEvent($model->id));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
             return true;
         } else {
             return false;
         }
     }
-
-//    public static function addBadItem(User $model, int $row, string $attribute, array $errors, array $values): bool
-//    {
-//        if ($report = static::get($model)) {
-//
-//            $report->badItems()->create([
-//                'row' => $row,
-//                'attribute' => $attribute,
-//                'errors' => json_encode($errors),
-//                'values' => json_encode($values),
-//            ]);
-//
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
 
     public static function success(User $model, int $correct, int $error, ?string $uuid = null): bool
     {
@@ -92,7 +62,7 @@ class WarehouseItemsImportReportService
 
 
             try {
-                event(new NotificationEvent($model->id, 'Объект: склады', 'Импорт завершен', 0));
+                event(new NotificationEvent($model->id, 'Склады', 'Импорт завершен', 0));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -112,7 +82,7 @@ class WarehouseItemsImportReportService
             ]);
 
             try {
-                event(new NotificationEvent($model->id, 'Объект: склады', 'Ошибка при импорте', 1));
+                event(new NotificationEvent($model->id, 'Склады', 'Ошибка при импорте', 1));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -135,7 +105,7 @@ class WarehouseItemsImportReportService
                     ]);
 
                     try {
-                        event(new NotificationEvent($report->user_id, 'Объект: склады', 'Вышло время импорта', 1));
+                        event(new NotificationEvent($report->user_id, 'Склады', 'Вышло время импорта', 1));
                     } catch (\Throwable $e) {
                         report($e);
                     }

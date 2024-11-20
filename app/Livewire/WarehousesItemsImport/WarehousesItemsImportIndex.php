@@ -23,6 +23,13 @@ class WarehousesItemsImportIndex extends BaseComponent
 {
     use WithFileUploads, WithSort, WithPagination;
 
+    public function getListeners(): array
+    {
+        return [
+            'echo:notification.' . $this->currentUser()->id . ',.notify' => 'render',
+        ];
+    }
+
     public $file;
 
     public User $model;

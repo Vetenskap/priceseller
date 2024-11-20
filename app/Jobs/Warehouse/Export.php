@@ -18,11 +18,13 @@ class Export implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $uniqueFor = 600;
+
     /**
      * Create a new job instance.
      */
     public function __construct(public User $user)
     {
+        WarehouseItemsExportReportService::newOrFail($this->user);
     }
 
     /**
@@ -30,11 +32,9 @@ class Export implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        if (WarehouseItemsExportReportService::newOrFail($this->user)) {
-            $uuid = Str::uuid();
-            \Excel::store(new WarehousesStocksExport($this->user), 'users/warehouses/' . $uuid . '.xlsx', 'public');
-            WarehouseItemsExportReportService::success($this->user, $uuid);
-        }
+        $uuid = Str::uuid();
+        \Excel::store(new WarehousesStocksExport($this->user), 'users/warehouses/' . $uuid . '.xlsx', 'public');
+        WarehouseItemsExportReportService::success($this->user, $uuid);
     }
 
     public function failed(\Throwable $e): void

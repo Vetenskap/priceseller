@@ -28,6 +28,13 @@ class ItemsImportReportIndex extends BaseComponent
 
     public User|WbMarket|OzonMarket|Warehouse $model;
 
+    public function getListeners(): array
+    {
+        return [
+            'echo:notification.' . $this->currentUser()->id . ',.notify' => 'render',
+        ];
+    }
+
     #[Computed]
     public function itemsImportReports(): LengthAwarePaginator
     {

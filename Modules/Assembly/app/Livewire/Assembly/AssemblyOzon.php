@@ -5,12 +5,15 @@ namespace Modules\Assembly\Livewire\Assembly;
 use App\HttpClient\OzonClient\OzonClient;
 use App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled\Posting;
 use App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled\PostingUnfulfilledList;
+use App\HttpClient\OzonClient\Resources\FBS\PostingUnfulfilled\Product;
 use App\Livewire\BaseComponent;
 use App\Livewire\Traits\WithSort;
+use App\Models\Item;
 use App\Models\OzonWarehouse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Str;
 
 class AssemblyOzon extends BaseComponent
 {
@@ -29,58 +32,75 @@ class AssemblyOzon extends BaseComponent
     public function updatedSortBy(): void
     {
         if ($this->sortDirection === 'asc') {
-            $this->postings = $this->postings->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                $collection->sortBy($this->sortBy) :
-                $collection->get('products')->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                    $collection->sortBy($this->sortBy) :
-                    ($collection->get('product')->get($this->sortBy) ?
-                        $collection->get('product')->sortBy($this->sortBy) :
-                        ($collection->get('attribute')->get($this->sortBy) ?
-                            $collection->get('attribute')->sortBy($this->sortBy) :
-                            $collection->get('product')->get('ozonitemable')->sortBy($this->sortBy)))
-                )
-            );
-        } else {
-            $this->postings = $this->postings->sortDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                $collection->sortBy($this->sortBy) :
-                $collection->get('products')->sortDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                    $collection->sortBy($this->sortBy) :
-                    ($collection->get('product')->get($this->sortBy) ?
-                        $collection->get('product')->sortDesc($this->sortBy) :
-                        ($collection->get('attribute')->get($this->sortBy) ?
-                            $collection->get('attribute')->sortDesc($this->sortBy) :
-                            $collection->get('product')->get('ozonitemable')->sortDesc($this->sortBy)))
-                )
-            );
-        }
-    }
+            $this->postings = $this->postings->sortBy(function (Posting $posting) {
+                try {
+                    return $posting->{Str::camel('get' . $this->sortBy)}();
+                } catch (\Error $e) {
+                    try {
+                        return $posting->getProducts()->sortBy(fn (Product $product) => $product->{Str::camel('get' . $this->sortBy)}())->first()->{Str::camel('get' . $this->sortBy)}();
+                    } catch (\Error $e) {
 
-    public function updatedSortDirection()
-    {
-        if ($this->sortDirection === 'asc') {
-            $this->postings = $this->postings->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                $collection->sortBy($this->sortBy) :
-                $collection->get('products')->sortBy(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                    $collection->sortBy($this->sortBy) :
-                    ($collection->get('product')->get($this->sortBy) ?
-                        $collection->get('product')->sortBy($this->sortBy) :
-                        ($collection->get('attribute')->get($this->sortBy) ?
-                            $collection->get('attribute')->sortBy($this->sortBy) :
-                            $collection->get('product')->get('ozonitemable')->sortBy($this->sortBy)))
-                    )
-            );
+                        try {
+                            return $posting->getProducts()->sortBy(fn (Product $product) => $product->getAttribute()->{Str::camel('get' . $this->sortBy)}())->first()->getAttribute()->{Str::camel('get' . $this->sortBy)}();
+                        } catch (\Error $e) {
+                            if ($posting->getProducts()->first(fn (Product $product) => $product->getProduct()[$this->sortBy])) {
+                                return $posting->getProducts()->sortBy(fn (Product $product) => $product->getProduct()[$this->sortBy])->first()[$this->sortBy];
+                            } else {
+
+                                /** @var Product $product */
+                                $product = $posting->getProducts()->sortBy(function (Product $product) {
+                                    if ($product->getProduct()->itemable instanceof Item) {
+                                        return $product->getProduct()->itemable[$this->sortBy];
+                                    } else {
+                                        return $product->getProduct()->itemable->items->sortBy(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
+                                    }
+                                })->first();
+
+                                if ($product->getProduct()->itemable instanceof Item) {
+                                    return $product->getProduct()->itemable[$this->sortBy];
+                                } else {
+                                    return $product->getProduct()->itemable->items->first()[$this->sortBy];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         } else {
-            $this->postings = $this->postings->sortDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                $collection->sortBy($this->sortBy) :
-                $collection->get('products')->sortDesc(fn(Collection $collection) => $collection->get($this->sortBy) ?
-                    $collection->sortBy($this->sortBy) :
-                    ($collection->get('product')->get($this->sortBy) ?
-                        $collection->get('product')->sortDesc($this->sortBy) :
-                        ($collection->get('attribute')->get($this->sortBy) ?
-                            $collection->get('attribute')->sortDesc($this->sortBy) :
-                            $collection->get('product')->get('ozonitemable')->sortDesc($this->sortBy)))
-                )
-            );
+            $this->postings = $this->postings->sortByDesc(function (Posting $posting) {
+                try {
+                    return $posting->{Str::camel('get' . $this->sortBy)}();
+                } catch (\Error $e) {
+                    try {
+                        return $posting->getProducts()->sortByDesc(fn (Product $product) => $product->{Str::camel('get' . $this->sortBy)}())->first()->{Str::camel('get' . $this->sortBy)}();
+                    } catch (\Error $e) {
+
+                        try {
+                            return $posting->getProducts()->sortByDesc(fn (Product $product) => $product->getAttribute()->{Str::camel('get' . $this->sortBy)}())->first()->getAttribute()->{Str::camel('get' . $this->sortBy)}();
+                        } catch (\Error $e) {
+                            if ($posting->getProducts()->first(fn (Product $product) => $product->getProduct()[$this->sortBy])) {
+                                return $posting->getProducts()->sortByDesc(fn (Product $product) => $product->getProduct()[$this->sortBy])->first()[$this->sortBy];
+                            } else {
+
+                                /** @var Product $product */
+                                $product = $posting->getProducts()->sortByDesc(function (Product $product) {
+                                    if ($product->getProduct()->itemable instanceof Item) {
+                                        return $product->getProduct()->itemable[$this->sortBy];
+                                    } else {
+                                        return $product->getProduct()->itemable->items->sortByDesc(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
+                                    }
+                                })->first();
+
+                                if ($product->getProduct()->itemable instanceof Item) {
+                                    return $product->getProduct()->itemable[$this->sortBy];
+                                } else {
+                                    return $product->getProduct()->itemable->items->first()[$this->sortBy];
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         }
     }
 
@@ -148,7 +168,7 @@ class AssemblyOzon extends BaseComponent
 
         $postings = $list->next();
 
-        $this->postings = $postings->map(fn(Posting $posting) => $posting->toCollection($this->warehouse->market));
+        $this->postings = $postings;
     }
 
     public function render()

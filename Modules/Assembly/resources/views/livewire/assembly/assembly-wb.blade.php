@@ -96,10 +96,10 @@
                                                             $value = $product->getCard()->getProduct()[$field];
                                                             break;
                                                         case 'order':
-                                                                $value = $order->{'get' . \Illuminate\Support\Str::apa($field)}($this->currentUser());
+                                                                $value = $order->{\Illuminate\Support\Str::camel('get' . $field)}();
                                                             break;
                                                         case 'order_product':
-                                                                $value = $order->getCard()->{'get' . \Illuminate\Support\Str::apa($field)}();
+                                                                $value = $order->getCard()->{\Illuminate\Support\Str::camel('get' . $field)}();
                                                             break;
                                                     }
                                                     if ($value instanceof \Illuminate\Support\Collection) $value = $value->toJson(JSON_UNESCAPED_UNICODE);
@@ -144,10 +144,10 @@
                                                                 $value = $product->getCard()->getProduct()[$field];
                                                                 break;
                                                             case 'order':
-                                                                    $value = $order->{'get' . \Illuminate\Support\Str::apa($field)}();
+                                                                    $value = $order->{\Illuminate\Support\Str::camel('get' . $field)}();
                                                                 break;
                                                             case 'order_product':
-                                                                    $value = $order->getCard()->{'get' . \Illuminate\Support\Str::apa($field)}();
+                                                                    $value = $order->getCard()->{\Illuminate\Support\Str::camel('get' . $field)}();
                                                                 break;
                                                         }
                                                         $value = (bool) $value

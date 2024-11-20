@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Events\ReportEvent;
 use App\Events\NotificationEvent;
 use App\Models\User;
 use App\Models\WarehousesItemsExportReport;
@@ -27,12 +26,6 @@ class WarehouseItemsExportReportService
                 'message' => 'В процессе'
             ]);
 
-            try {
-                event(new ReportEvent($model->id));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
             return true;
         }
     }
@@ -47,7 +40,7 @@ class WarehouseItemsExportReportService
             ]);
 
             try {
-                event(new NotificationEvent($model->id, 'Объект: склады', 'Экспорт завершен', 0));
+                event(new NotificationEvent($model->id, 'Склады', 'Экспорт завершен', 0));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -67,7 +60,7 @@ class WarehouseItemsExportReportService
             ]);
 
             try {
-                event(new NotificationEvent($model->id, 'Объект: склады', 'Ошибка при экспорте', 1));
+                event(new NotificationEvent($model->id, 'Склады', 'Ошибка при экспорте', 1));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -90,7 +83,7 @@ class WarehouseItemsExportReportService
                     ]);
 
                     try {
-                        event(new NotificationEvent($report->user_id, 'Объект: склады', 'Вышло время экспорта', 1));
+                        event(new NotificationEvent($report->user_id, 'Склады', 'Вышло время экспорта', 1));
                     } catch (\Throwable $e) {
                         report($e);
                     }

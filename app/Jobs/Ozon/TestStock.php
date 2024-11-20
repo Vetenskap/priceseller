@@ -2,6 +2,7 @@
 
 namespace App\Jobs\Ozon;
 
+use App\Events\NotificationEvent;
 use App\Models\MarketActionReport;
 use App\Models\OzonMarket;
 use App\Models\Supplier;
@@ -56,6 +57,8 @@ class TestStock implements ShouldQueue
             'status' => 0,
             'message' => 'Успех'
         ]);
+
+        event(new NotificationEvent($this->market->user_id, $this->market->name, 'Остатки перерасчитаны', 0));
     }
 
     public function uniqueId(): string
@@ -69,5 +72,7 @@ class TestStock implements ShouldQueue
             'status' => 1,
             'message' => 'Ошибка'
         ]);
+
+        event(new NotificationEvent($this->market->user_id, $this->market->name, 'Ошибка в перерасчете остатков', 1));
     }
 }

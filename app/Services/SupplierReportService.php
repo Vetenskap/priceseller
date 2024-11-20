@@ -3,13 +3,10 @@
 namespace App\Services;
 
 use App\Events\NotificationEvent;
-use App\Events\ReportEvent;
-use App\Events\Supplier\SupplierReportChangeMessage;
 use App\Models\Supplier;
 use App\Models\SupplierReport;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
-use Mockery\Exception;
 
 class SupplierReportService
 {
@@ -55,12 +52,6 @@ class SupplierReportService
             $report->message = $message;
             $report->save();
 
-            try {
-                event(new ReportEvent($supplier->user_id));
-            } catch (\Throwable) {
-
-            }
-
             static::addLog($supplier, $message);
 
             return true;
@@ -78,6 +69,12 @@ class SupplierReportService
             $report->status = 0;
             $report->save();
 
+            try {
+                event(new NotificationEvent($supplier->user_id, $supplier->name, 'Поставщик успешно выгружен' . ($message ? ': ' . $message : ''), 0));
+            } catch (\Throwable $e) {
+                report($e);
+            }
+
             return true;
         }
 
@@ -93,6 +90,12 @@ class SupplierReportService
             $report->message = 'Ошибка в выгрузке' . ($message ? ': ' . $message : '');
             $report->status = 1;
             $report->save();
+
+            try {
+                event(new NotificationEvent($supplier->user_id, $supplier->name, 'Ошибка в выгрузке' . ($message ? ': ' . $message : ''), 1));
+            } catch (\Throwable $e) {
+                report($e);
+            }
 
             return true;
         }
@@ -115,9 +118,9 @@ class SupplierReportService
                     ]);
 
                     try {
-                        event(new NotificationEvent($report->supplier->user_id, 'Объект: ' . $report->supplier->name, 'Вышло время выгрузки', 1));
-                    } catch (\Throwable) {
-
+                        event(new NotificationEvent($report->supplier->user_id, $report->supplier->name, 'Вышло время выгрузки', 1));
+                    } catch (\Throwable $e) {
+                        report($e);
                     }
                 });
             });

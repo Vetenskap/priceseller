@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Events\ReportEvent;
 use App\Events\NotificationEvent;
 use App\Models\ItemsImportReport;
 use App\Models\OzonMarket;
@@ -11,7 +10,6 @@ use App\Models\Warehouse;
 use App\Models\WbMarket;
 use App\Services\Item\ItemService;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 
 class ItemsImportReportService
@@ -41,12 +39,6 @@ class ItemsImportReportService
                 'uuid' => $uuid,
             ]);
 
-            try {
-                event(new ReportEvent($model->user_id ?? $model->id));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
             return true;
         }
     }
@@ -61,12 +53,6 @@ class ItemsImportReportService
                 'updated' => $updated,
                 'deleted' => $deleted,
             ]);
-
-            try {
-                event(new ReportEvent($model->user_id ?? $model->id));
-            } catch (\Throwable $e) {
-                report($e);
-            }
 
             return true;
         } else {
@@ -95,8 +81,6 @@ class ItemsImportReportService
     {
         if ($report = static::get($model)) {
 
-            Log::debug('Отчёт найден, обновляем');
-
             $report->correct = $correct;
             $report->error = $error;
             $report->updated = $updated;
@@ -110,11 +94,8 @@ class ItemsImportReportService
 
             $report->save();
 
-            Log::debug('Отправляем уведомление');
-
-
             try {
-                event(new NotificationEvent($model->user_id ?? $model->id, 'Объект: ' . $model->name, 'Импорт завершен', 0));
+                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Импорт завершен', 0));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -134,7 +115,7 @@ class ItemsImportReportService
             ]);
 
             try {
-                event(new NotificationEvent($model->user_id ?? $model->id, 'Объект: ' . $model->name, 'Ошибка при импорте', 1));
+                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Ошибка при импорте', 1));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -157,7 +138,7 @@ class ItemsImportReportService
                     ]);
 
                     try {
-                        event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, 'Объект: ' . $report->reportable->name, 'Вышло время импорта', 1));
+                        event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, $report->reportable->name, 'Вышло время импорта', 1));
                     } catch (\Throwable $e) {
                         report($e);
                     }

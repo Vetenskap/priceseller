@@ -27,6 +27,7 @@ class Export implements ShouldQueue, ShouldBeUnique
 
     public function __construct(public OzonMarket|WbMarket|User|Warehouse $model, public string $service)
     {
+        ItemsExportReportService::new($this->model);
     }
 
     /**
@@ -34,23 +35,19 @@ class Export implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        if (ItemsExportReportService::new($this->model)) {
-            if (class_exists($this->service)) {
+        if (class_exists($this->service)) {
 
-                /** @var ItemService|OzonMarketService|WbMarketService|WarehouseService $service */
-                $service = new $this->service($this->model);
-                if (method_exists($service, 'exportItems')) {
-                    $uuid = $service->exportItems();
+            /** @var ItemService|OzonMarketService|WbMarketService|WarehouseService $service */
+            $service = new $this->service($this->model);
+            if (method_exists($service, 'exportItems')) {
+                $uuid = $service->exportItems();
 
-                    ItemsExportReportService::success($this->model, $uuid);
-                } else {
-                    $this->fail('Method not found: ' . $this->service);
-                }
+                ItemsExportReportService::success($this->model, $uuid);
             } else {
-                $this->fail('Class not found: ' . $this->service);
+                $this->fail('Method not found: ' . $this->service);
             }
         } else {
-            $this->fail('Job is already in progress');
+            $this->fail('Class not found: ' . $this->service);
         }
     }
 

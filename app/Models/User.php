@@ -265,4 +265,9 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
     {
         return $this->hasMany(AssemblyProductSettings::class);
     }
+
+    public function notifications(): HasMany
+    {
+        return $this->hasMany(Notification::class);
+    }
 }

@@ -17,11 +17,13 @@ class BundlesImport implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $uniqueFor = 600;
+
     /**
      * Create a new job instance.
      */
     public function __construct(public string $uuid, public string $ext, public User $user)
     {
+        BundlesImportReportService::new($this->user, $this->uuid);
     }
 
     /**
@@ -29,19 +31,17 @@ class BundlesImport implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        if (BundlesImportReportService::new($this->user, $this->uuid)) {
-            $service = new BundleService($this->user);
-            $result = $service->importItems($this->uuid, $this->ext);
+        $service = new BundleService($this->user);
+        $result = $service->importItems($this->uuid, $this->ext);
 
-            BundlesImportReportService::success(
-                user: $this->user,
-                correct: $result->get('correct', 0),
-                error: $result->get('error', 0),
-                updated: $result->get('updated', 0),
-                deleted: $result->get('deleted', 0),
-                uuid: $this->uuid
-            );
-        }
+        BundlesImportReportService::success(
+            user: $this->user,
+            correct: $result->get('correct', 0),
+            error: $result->get('error', 0),
+            updated: $result->get('updated', 0),
+            deleted: $result->get('deleted', 0),
+            uuid: $this->uuid
+        );
     }
 
     public function failed(): void

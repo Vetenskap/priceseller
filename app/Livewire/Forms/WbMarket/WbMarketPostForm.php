@@ -61,7 +61,7 @@ class WbMarketPostForm extends Form
     public $tariff = 'kgvpMarketplace';
 
     #[Validate]
-    public $enabled_price = false;
+    public $enabled_price = true;
 
     public function rules(): array
     {

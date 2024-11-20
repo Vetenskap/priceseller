@@ -22,6 +22,13 @@ class WarehousesItemsExportIndex extends BaseComponent
 
     public User $model;
 
+    public function getListeners(): array
+    {
+        return [
+            'echo:notification.' . $this->currentUser()->id . ',.notify' => 'render',
+        ];
+    }
+
     public function download($id): BinaryFileResponse
     {
 

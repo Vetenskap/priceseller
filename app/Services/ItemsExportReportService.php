@@ -2,7 +2,6 @@
 
 namespace App\Services;
 
-use App\Events\ReportEvent;
 use App\Events\NotificationEvent;
 use App\Models\ItemsExportReport;
 use App\Models\OzonMarket;
@@ -77,12 +76,6 @@ class ItemsExportReportService
                 'message' => 'В процессе'
             ]);
 
-            try {
-                event(new ReportEvent($model->user_id ?? $model->id));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
             return true;
         }
     }
@@ -97,7 +90,7 @@ class ItemsExportReportService
             ]);
 
             try {
-                event(new NotificationEvent($model->user_id ?? $model->id, 'Объект: ' . $model->name, 'Экспорт завершен', 0));
+                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Экспорт завершен', 0));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -117,7 +110,7 @@ class ItemsExportReportService
             ]);
 
             try {
-                event(new NotificationEvent($model->user_id ?? $model->id, 'Объект: ' . $model->name, 'Ошибка при экспорте', 1));
+                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Ошибка при экспорте', 1));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -140,7 +133,7 @@ class ItemsExportReportService
                     ]);
 
                     try {
-                        event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, 'Объект: ' . $report->reportable->name, 'Вышло время экспорта', 1));
+                        event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, $report->reportable->name, 'Вышло время экспорта', 1));
                     } catch (\Throwable $e) {
                         report($e);
                     }

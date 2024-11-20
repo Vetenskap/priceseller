@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('wb_markets', function (Blueprint $table) {
-            $table->boolean('enabled_price')->nullable()->default(false)->after('minus_stock');
+            $table->boolean('enabled_price')->nullable()->default(true)->after('minus_stock');
         });
     }
 

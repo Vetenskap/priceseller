@@ -3,7 +3,6 @@
 namespace App\Services\Bundle;
 
 use App\Events\NotificationEvent;
-use App\Events\ReportEvent;
 use App\Models\BundleItemsImportReport;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
@@ -35,12 +34,6 @@ class BundleItemsImportReportService
                 'uuid' => $uuid,
             ]);
 
-            try {
-                event(new ReportEvent($user->id));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
             return true;
         }
     }
@@ -56,34 +49,11 @@ class BundleItemsImportReportService
                 'deleted' => $deleted,
             ]);
 
-            try {
-                event(new ReportEvent($user->id));
-            } catch (\Throwable $e) {
-                report($e);
-            }
-
             return true;
         } else {
             return false;
         }
     }
-
-//    public static function addBadItem(User $user, int $row, string $attribute, array $errors, array $values): bool
-//    {
-//        if ($report = static::get($user)) {
-//
-//            $report->badItems()->create([
-//                'row' => $row,
-//                'attribute' => $attribute,
-//                'errors' => json_encode($errors),
-//                'values' => json_encode($values),
-//            ]);
-//
-//            return true;
-//        } else {
-//            return false;
-//        }
-//    }
 
     public static function success(User $user, int $correct, int $error, int $updated, int $deleted = 0, ?string $uuid = null): bool
     {
@@ -103,7 +73,7 @@ class BundleItemsImportReportService
 
 
             try {
-                event(new NotificationEvent($user->id, 'Объект: комплекты', 'Импорт завершен', 0));
+                event(new NotificationEvent($user->id, 'Комплекты', 'Импорт завершен', 0));
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -123,7 +93,7 @@ class BundleItemsImportReportService
             ]);
 
             try {
-                event(new NotificationEvent($user->id, 'Объект: комплекты', 'Ошибка при импорте', 1));
+                event(new NotificationEvent($user->id, 'Комплекты', 'Ошибка при импорте', 1));
             } catch (\Throwable $e) {
                 report($e);
             }

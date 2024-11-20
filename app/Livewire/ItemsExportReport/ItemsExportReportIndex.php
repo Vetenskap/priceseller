@@ -28,6 +28,13 @@ class ItemsExportReportIndex extends BaseComponent
     public $sortBy = 'updated_at';
     public $sortDirection = 'desc';
 
+    public function getListeners(): array
+    {
+        return [
+            'echo:notification.' . $this->currentUser()->id . ',.notify' => 'render',
+        ];
+    }
+
     public function sort($column): void
     {
         if ($this->sortBy === $column) {

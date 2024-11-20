@@ -5,8 +5,9 @@ namespace App\HttpClient\OzonClient\Resources;
 use App\HttpClient\OzonClient\OzonClient;
 use App\Models\OzonMarket;
 use Illuminate\Support\Collection;
+use Livewire\Wireable;
 
-class ProductInfoAttribute
+class ProductInfoAttribute implements Wireable
 {
     const ENDPOINT = '/v3/products/info/attributes';
 
@@ -34,6 +35,11 @@ class ProductInfoAttribute
     protected string $description;
 
     protected Collection $images;
+
+    public function __construct(Collection $productInfoAttribute = null)
+    {
+        if ($productInfoAttribute) $this->setProductInfoAttribute($productInfoAttribute);
+    }
 
     public function setProductInfoAttribute(Collection $productInfoAttribute): void
     {
@@ -77,10 +83,9 @@ class ProductInfoAttribute
         $this->setProductInfoAttribute($response);
     }
 
-
-    public function toCollection(): Collection
+    public function toLivewire(): array
     {
-        return collect([
+        return [
             'id' => $this->id,
             'barcode' => $this->barcode,
             'category_id' => $this->category_id,
@@ -92,8 +97,80 @@ class ProductInfoAttribute
             'dimension_unit' => $this->dimension_unit,
             'weight' => $this->weight,
             'weight_unit' => $this->weight_unit,
-            'images' => $this->images->toArray(),
+            'images' => $this->images,
             'description' => $this->description
-        ]);
+        ];
     }
+
+    public static function fromLivewire($value)
+    {
+        return new self(collect($value)->toCollectionSpread());
+    }
+
+    public function getId(): int
+    {
+        return $this->id;
+    }
+
+    public function getBarcode(): string
+    {
+        return $this->barcode;
+    }
+
+    public function getCategoryId(): string
+    {
+        return $this->category_id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getOfferId(): string
+    {
+        return $this->offer_id;
+    }
+
+    public function getHeight(): int
+    {
+        return $this->height;
+    }
+
+    public function getDepth(): int
+    {
+        return $this->depth;
+    }
+
+    public function getWidth(): int
+    {
+        return $this->width;
+    }
+
+    public function getDimensionUnit(): string
+    {
+        return $this->dimension_unit;
+    }
+
+    public function getWeight(): int
+    {
+        return $this->weight;
+    }
+
+    public function getWeightUnit(): string
+    {
+        return $this->weight_unit;
+    }
+
+    public function getDescription(): string
+    {
+        return $this->description;
+    }
+
+    public function getImages(): Collection
+    {
+        return $this->images;
+    }
+
+
 }
