@@ -45,4 +45,11 @@ class StocksAll
     {
         return $this->stocks;
     }
+
+    public function toArray(): array
+    {
+        return [
+            'stocks' => $this->stocks->toArray(),
+        ];
+    }
 }

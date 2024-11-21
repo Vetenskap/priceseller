@@ -82,6 +82,10 @@ class MoyskladWebhookProcessService
     {
         $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
 
+            Log::info('Moysklad webhook change warehouse demand', [
+                'event' => $event->toArray()
+            ]);
+
             /** @var Demand $demand */
             $demand = $event->getMeta();
             $demand->fetch($this->webhook->moysklad->api_key);
@@ -104,14 +108,16 @@ class MoyskladWebhookProcessService
 
     private function processChangeWarehouseOrder()
     {
-        logger('Задержка');
-        sleep(10);
-        logger('Начали');
 
         $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
 
             $order = $event->getMeta();
             $order->fetch($this->webhook->moysklad->api_key, ['expand' => 'positions']);
+
+            Log::info('Moysklad webhook change warehouse order', [
+                'event' => $event->toArray(),
+                'order' => $order->toArray()
+            ]);
 
             if ($order->getProject()?->id === 'b4a96157-5f23-11ed-0a80-030b00027f77' && $order->getStore()->id !== 'c20b3e0e-599d-11ed-0a80-060900042d3e' && $order->getAgent()->id === 'e835186b-50f2-11ec-0a80-00190020f74e') {
 
@@ -122,13 +128,11 @@ class MoyskladWebhookProcessService
                 ]);
                 $stocksAll->fetchStocks($this->webhook->moysklad->api_key);
 
-                logger('filter=product=' . MoyskladClient::BASEURL . Product::ENDPOINT . $position->getAssortment()->id . ';' . 'store=' . MoyskladClient::BASEURL . Store::ENDPOINT . '64232c0a-9a30-11ed-0a80-098900246f45');
-                logger('stocks');
-                logger($stocksAll->getStocks());
+                Log::info('Moysklad webhook change warehouse order stocks', [
+                    'stocksAll' => $stocksAll->toArray()
+                ]);
 
                 $stocksAll->getStocks()->get('rows')->each(function (Collection $stock) use ($order, $stocksAll) {
-                    logger('stock');
-                    logger($stock);
                     if (intval($stock->get('quantity')) < 0) {
                         $order->put($this->webhook->moysklad->api_key, [
                             'store' => [
