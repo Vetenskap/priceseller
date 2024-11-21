@@ -12,27 +12,23 @@ Schedule::call(function () {
                 $token = str_replace('/start ', '', $update['message']['text']);
                 $chatId = $update['message']['chat']['id'];
 
-                // Найти токен в базе
                 $link = \App\Models\TelegramLink::where('token', $token)->first();
 
                 if (!$link) {
                     continue;
                 }
 
-                // Проверить, не истёк ли токен
                 if (\Illuminate\Support\Carbon::now()->greaterThan($link->expires_at)) {
                     continue;
                 }
 
-                // Связать chat_id с пользователем
                 \App\Models\UserNotification::create([
                     'user_id' => $link->user_id,
                     'telegram_chat_id' => $chatId,
                 ]);
 
-                $link->user->notify(new \App\Notifications\TestTelegramNotification('Телеграм успешно связан'));
+                $link->user->notify(new \App\Notifications\UserNotification('Телеграм', 'Успешно связан!'));
 
-                // Удалить токен, чтобы он не использовался повторно
                 $link->delete();
             }
         }
