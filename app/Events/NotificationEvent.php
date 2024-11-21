@@ -2,7 +2,9 @@
 
 namespace App\Events;
 
+use App\Helpers\Helpers;
 use App\Models\Notification;
+use App\Models\User;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
@@ -16,12 +18,13 @@ class NotificationEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public int $userId, public string $title, public string $message, public int $status)
+    public function __construct(public int $userId, public string $title, public string $message, public int $status, public ?string $href = null)
     {
         Notification::create([
             'user_id' => $this->userId,
-            'message' => $this->message,
-            'status' => $this->status
+            'message' => "[" . now()->setTimezone(Helpers::getUserTimeZone(User::findOrFail($this->userId))) . "] (" . $this->title . ")" . $this->message,
+            'status' => $this->status,
+            'href' => $this->href
         ]);
     }
 

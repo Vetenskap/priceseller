@@ -22,12 +22,14 @@ Schedule::call(function () {
                     continue;
                 }
 
-                \App\Models\UserNotification::create([
-                    'user_id' => $link->user_id,
-                    'telegram_chat_id' => $chatId,
-                ]);
+                if (!$link->user->userNotification()->exists()) {
+                    \App\Models\UserNotification::create([
+                        'user_id' => $link->user_id,
+                        'telegram_chat_id' => $chatId,
+                    ]);
 
-                $link->user->notify(new \App\Notifications\UserNotification('Телеграм', 'Успешно связан!'));
+                    $link->user->notify(new \App\Notifications\UserNotification('Телеграм', 'Успешно связан!'));
+                }
 
                 $link->delete();
             }

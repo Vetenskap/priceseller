@@ -96,7 +96,7 @@ class ItemsImportReportService
             $report->save();
 
             try {
-                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Импорт завершен', 0));
+                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Импорт завершен', 0, route('items-import-report-edit', ['report' => $report])));
 
                 $user = $model->user ?? $model;
 
@@ -126,7 +126,7 @@ class ItemsImportReportService
             ]);
 
             try {
-                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Ошибка при импорте', 1));
+                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Ошибка при импорте', 1, route('items-import-report-edit', ['report' => $report])));
 
                 $user = $model->user ?? $model;
 
@@ -159,7 +159,7 @@ class ItemsImportReportService
                     ]);
 
                     try {
-                        event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, $report->reportable->name, 'Вышло время импорта', 1));
+                        event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, $report->reportable->name, 'Вышло время импорта', 1, route('items-import-report-edit', ['report' => $report])));
 
                         $user = $report->reportable->user ?? $report->reportable;
 
