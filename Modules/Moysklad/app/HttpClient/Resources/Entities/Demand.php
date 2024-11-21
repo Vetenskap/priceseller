@@ -34,5 +34,13 @@ class Demand extends Entity
         return $this->customerOrder;
     }
 
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'customerOrder' => $this->customerOrder->toArray()
+        ];
+    }
+
 
 }

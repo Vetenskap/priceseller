@@ -188,11 +188,22 @@ class WbItemPriceService
 
             if (!$unload_wb) {
 
-                $itemIds = $wbItem->wbitemable_type === 'App\Models\Item' ? [$wbItem->wbitemable_id] : $wbItem->itemable->items->pluck('id')->toArray();
+                if ($wbItem->wbitemable_type === 'App\Models\Item') {
+                    $myWarehousesStocks = $warehouse->userWarehouses->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($wbItem) {
+                        return $userWarehouse->warehouse->stocks()->where('item_id', $wbItem->wbitemable_id)->first()->stock;
+                    })->sum();
+                } else {
 
-                $myWarehousesStocks = $warehouse->userWarehouses->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($wbItem, $itemIds) {
-                    return $userWarehouse->warehouse->stocks()->whereIn('item_id', $itemIds)->get()->map(fn(ItemWarehouseStock $stock) => $stock->stock)->sum();
-                })->sum();
+                    $myWarehousesStocks = $wbItem->itemable->items->map(function (Item $item) use ($warehouse) {
+                        return $warehouse->userWarehouses()->whereHas('warehouse', function (Builder $query) use ($item) {
+                            $query->whereHas('stocks', function (Builder $query) use ($item) {
+                                $query->where('item_id', $item->id);
+                            });
+                        })->get()->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($item) {
+                            return $userWarehouse->warehouse->stocks()->where('item_id', $item->id)->first()->stock / $item->pivot->multiplicity;
+                        });
+                    })->sum();
+                }
 
                 if ($wbItem->wbitemable_type === 'App\Models\Item') {
                     $new_count = $wbItem->itemable->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock');

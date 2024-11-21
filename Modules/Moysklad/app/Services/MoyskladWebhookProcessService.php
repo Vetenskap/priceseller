@@ -5,6 +5,7 @@ namespace Modules\Moysklad\Services;
 use App\Models\Bundle;
 use App\Models\Item;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\Moysklad\HttpClient\MoyskladClient;
 use Modules\Moysklad\HttpClient\Resources\Entities\CustomerOrder\MetaArrays\Position;
@@ -183,6 +184,11 @@ class MoyskladWebhookProcessService
             $updatedFieldsAdditional = $event->getUpdatedFields()->intersect($this->webhook->moysklad->itemAdditionalAttributeLinks->pluck('link_name'));
             $updatedFields = $updatedFieldsMain->merge($updatedFieldsAdditional);
 
+            Log::info('Moysklad webhook update item', [
+                'updatedFields' => $updatedFields->toArray(),
+                'event' => $event->toArray()
+            ]);
+
             if ($updatedFields) {
 
                 $product = $event->getMeta();
@@ -217,7 +223,10 @@ class MoyskladWebhookProcessService
             $product = $event->getMeta();
             $product->fetch($this->webhook->moysklad->api_key);
 
-            $this->moyskladService->createItemFromProduct($product);
+            $error = $this->moyskladService->createItemFromProduct($product);
+            if (!($error instanceof Item)) {
+                throw new \Exception($error);
+            }
         });
 
     }

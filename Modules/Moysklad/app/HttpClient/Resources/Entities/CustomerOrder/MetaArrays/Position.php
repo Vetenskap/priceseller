@@ -85,6 +85,21 @@ class Position
         return $this->reserve;
     }
 
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'accountId' => $this->accountId,
+            'quantity' => $this->quantity,
+            'price' => $this->price,
+            'discount' => $this->discount,
+            'vat' => $this->vat,
+            'vatEnabled' => $this->vatEnabled,
+            'assortment' => $this->assortment,
+            'shipped' => $this->shipped,
+            'reserve' => $this->reserve
+        ];
+    }
 
 
 }

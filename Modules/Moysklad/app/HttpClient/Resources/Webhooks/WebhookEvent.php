@@ -62,5 +62,13 @@ class WebhookEvent
         return $this->updatedFields;
     }
 
-
+    public function toArray(): array
+    {
+        return [
+            'meta' => $this->meta->toArray(),
+            'action' => $this->action,
+            'accountId' => $this->accountId,
+            'updatedFields' => $this->updatedFields?->toArray(),
+        ];
+    }
 }

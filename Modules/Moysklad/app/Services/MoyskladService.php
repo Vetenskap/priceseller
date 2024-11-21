@@ -363,8 +363,7 @@ class MoyskladService
                 try {
                     $item->save();
                 } catch (\Throwable $e) {
-                    report($e);
-                    return;
+                    throw new \Exception($e);
                 }
             }
 

@@ -96,4 +96,15 @@ class CustomerOrder extends Entity
         return $this->agent;
     }
 
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'positions' => $this->positions?->map(fn (Position $position) => $position->toArray())->toArray(),
+            'project' => $this->project?->toArray(),
+            'store' => $this->store?->toArray(),
+            'agent' => $this->agent->toArray(),
+        ];
+    }
+
 }
