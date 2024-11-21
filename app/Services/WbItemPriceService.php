@@ -190,7 +190,8 @@ class WbItemPriceService
 
                 if ($wbItem->wbitemable_type === 'App\Models\Item') {
                     $myWarehousesStocks = $warehouse->userWarehouses->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($wbItem) {
-                        return $userWarehouse->warehouse->stocks()->where('item_id', $wbItem->wbitemable_id)->first()->stock;
+                        $stock = $userWarehouse->warehouse->stocks()->where('item_id', $wbItem->wbitemable_id)->first();
+                        return $stock ? $stock->stock : 0;
                     })->sum();
                 } else {
 
@@ -200,7 +201,8 @@ class WbItemPriceService
                                 $query->where('item_id', $item->id);
                             });
                         })->get()->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($item) {
-                            return $userWarehouse->warehouse->stocks()->where('item_id', $item->id)->first()->stock / $item->pivot->multiplicity;
+                            $stock = $userWarehouse->warehouse->stocks()->where('item_id', $item->id)->first();
+                            return $stock ? $stock->stock / $item->pivot->multiplicity : 0;
                         });
                     })->sum();
                 }
