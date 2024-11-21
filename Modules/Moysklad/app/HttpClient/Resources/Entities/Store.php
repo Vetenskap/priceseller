@@ -8,7 +8,7 @@ class Store extends Entity
 {
     const ENDPOINT = '/entity/store/';
 
-    public string $name;
+    public ?string $name = null;
 
     public function __construct(?Collection $store = null)
     {
