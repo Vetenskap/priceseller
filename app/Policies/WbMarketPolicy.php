@@ -30,6 +30,7 @@ class WbMarketPolicy
 
     public function create(User|Employee $user): bool
     {
+
         if ($user instanceof Employee) {
             return $user->can('create-wb');
         }

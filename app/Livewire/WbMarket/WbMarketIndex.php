@@ -49,6 +49,13 @@ class WbMarketIndex extends BaseComponent
 
     public function store(): void
     {
+        $maxMarkets = $this->currentUser()->maxAllowedMarkets('wb');
+
+        if ($this->currentUser()->wbMarkets()->count() >= $maxMarkets) {
+            \Flux::toast('Вы достигли лимита кабинетов для вашей подписки.', variant: 'danger');
+            return;
+        }
+
         $this->authorizeForUser($this->user(), 'create', WbMarket::class);
 
         if (!UsersPermissionsService::checkWbPremission($this->currentUser())) {

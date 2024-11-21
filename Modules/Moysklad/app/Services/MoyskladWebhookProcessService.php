@@ -193,17 +193,21 @@ class MoyskladWebhookProcessService
                 'event' => $event->toArray()
             ]);
 
-            if ($updatedFields) {
+            $product = $event->getMeta();
 
-                $product = $event->getMeta();
-                $product->fetch($this->webhook->moysklad->api_key);
-
-                if ($item = Item::where('ms_uuid', $product->id)->first()) {
-
-                    $this->moyskladService->updateItemFromProductWithUpdatedFields($product, $item, $updatedFields);
+            if (!Item::where('ms_uuid', $product->id)->exists()) {
+                $error = $this->moyskladService->createItemFromProduct($product);
+                if (!($error instanceof Item)) {
+                    throw new \Exception($error);
+                }
+            } else {
+                if ($updatedFields) {
+                    if ($item = Item::where('ms_uuid', $product->id)->first()) {
+                        $product->fetch($this->webhook->moysklad->api_key);
+                        $this->moyskladService->updateItemFromProductWithUpdatedFields($product, $item, $updatedFields);
+                    }
 
                 }
-
             }
 
         });

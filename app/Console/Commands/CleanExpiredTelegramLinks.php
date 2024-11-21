@@ -13,7 +13,7 @@ class CleanExpiredTelegramLinks extends Command
      *
      * @var string
      */
-    protected $signature = 'app:clean-expired-telegram-links';
+    protected $signature = 'clean:telegram-links';
 
     /**
      * The console command description.

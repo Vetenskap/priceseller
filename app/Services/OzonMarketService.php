@@ -202,43 +202,4 @@ class OzonMarketService
         $client = new OzonClient($this->market->api_key, $this->market->client_id);
         return $client->getWarehouses();
     }
-
-    public static function closeMarkets(User $user)
-    {
-        $count = $user->ozonMarkets()->count();
-
-        if ($count > 0 && !$user->isOzonFiveSub() && !$user->isOzonTenSub()) {
-
-            $user->ozonMarkets()->where('close', false)->orderBy('created_at')->get()->each(function (OzonMarket $market) {
-                $market->close = true;
-                $market->open = false;
-                $market->save();
-            });
-
-        } else {
-
-            $user->ozonMarkets()->orderBy('created_at')->get()->take(5)->where('close', true)->each(function (OzonMarket $market) {
-                $market->close = false;
-                $market->save();
-            });
-
-        }
-
-        if ($count > 5 && !$user->isOzonTenSub()) {
-
-            $user->ozonMarkets()->orderBy('created_at')->get()->skip(5)->where('close', false)->each(function (OzonMarket $market) {
-                $market->close = true;
-                $market->open = false;
-                $market->save();
-            });
-
-        } else {
-
-            $user->ozonMarkets()->orderBy('created_at')->get()->skip(5)->where('close', true)->each(function (OzonMarket $market) {
-                $market->close = false;
-                $market->save();
-            });
-
-        }
-    }
 }

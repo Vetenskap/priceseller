@@ -17,12 +17,8 @@ class BusinessLogicService
         User::whereHas('emails', function (Builder $query) {
             $query->where('open', true);
         })->chunk(5, function (Collection $users) {
-            $users->each(function (User $user) {
-                if (App::isLocal()) {
-                    CheckEmails::dispatchIf($user->isAdmin(), $user);
-                } else {
-                    CheckEmails::dispatchIf($user->isSub() || $user->isAdmin(), $user);
-                }
+            $users->filter(fn(User $user) => $user->isSub() || $user->isAdmin())->each(function (User $user) {
+                CheckEmails::dispatch($user);
             });
         });
 
@@ -32,7 +28,7 @@ class BusinessLogicService
             Supplier::where('open', true)
                 ->where('unload_without_price', true)
                 ->chunk(5, function (Collection $suppliers) {
-                    $suppliers->each(function (Supplier $supplier) {
+                    $suppliers->filter(fn (Supplier $supplier) => $supplier->user->isSub() || $supplier->user->isAdmin())->each(function (Supplier $supplier) {
                         SupplierService::setAllItemsUpdated($supplier);
                         MarketsUnload::dispatch($supplier->user, $supplier);
                     });

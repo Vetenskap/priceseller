@@ -186,43 +186,4 @@ class WbMarketService
         return $totalDeleted;
 
     }
-
-    public static function closeMarkets(User $user)
-    {
-        $count = $user->wbMarkets()->count();
-
-        if ($count > 0 && !$user->isWbFiveSub() && !$user->isWbTenSub()) {
-
-            $user->wbMarkets()->where('close', false)->orderBy('created_at')->get()->each(function (WbMarket $market) {
-                $market->close = true;
-                $market->open = false;
-                $market->save();
-            });
-
-        } else {
-
-            $user->wbMarkets()->orderBy('created_at')->get()->take(5)->where('close', true)->each(function (WbMarket $market) {
-                $market->close = false;
-                $market->save();
-            });
-
-        }
-
-        if ($count > 5 && !$user->isWbTenSub()) {
-
-            $user->wbMarkets()->orderBy('created_at')->get()->skip(5)->where('close', false)->each(function (WbMarket $market) {
-                $market->close = true;
-                $market->open = false;
-                $market->save();
-            });
-
-        } else {
-
-            $user->wbMarkets()->orderBy('created_at')->get()->skip(5)->where('close', true)->each(function (WbMarket $market) {
-                $market->close = false;
-                $market->save();
-            });
-
-        }
-    }
 }

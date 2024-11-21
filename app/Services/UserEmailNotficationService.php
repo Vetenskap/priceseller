@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Permission;
 use App\Models\User;
 use App\Notifications\SubscriptionExpires;
+use App\Notifications\UserNotification;
 
 class UserEmailNotficationService
 {
@@ -17,7 +18,7 @@ class UserEmailNotficationService
     {
         $permissions = $this->user->permissions()->wherePivot('expires', '>', now())->wherePivot('expires', '<', now()->addDays(3))->get();
         $permissions->each(function (Permission $permission) {
-            $this->user->notify(new SubscriptionExpires($permission, $permission->pivot->expires));
+            $this->user->notify(new UserNotification('Ваша подписка истекает', 'Ваша подписка: [' . $permission->name . '] истекает через 3 дня. Успейте продлить'));
         });
     }
 }

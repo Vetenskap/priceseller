@@ -49,6 +49,13 @@ class OzonMarketIndex extends BaseComponent
 
     public function store(): void
     {
+        $maxMarkets = $this->currentUser()->maxAllowedMarkets('ozon');
+
+        if ($this->currentUser()->ozonMarkets()->count() >= $maxMarkets) {
+            \Flux::toast('Вы достигли лимита кабинетов для вашей подписки.', variant: 'danger');
+            return;
+        }
+
         $this->authorizeForUser($this->user(), 'create', OzonMarket::class);
 
         if (!UsersPermissionsService::checkOzonPermission($this->currentUser())) {
