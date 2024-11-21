@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\NotificationEvent;
 use App\Models\Supplier;
 use App\Models\SupplierReport;
+use App\Notifications\UserNotification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -71,6 +72,16 @@ class SupplierReportService
 
             try {
                 event(new NotificationEvent($supplier->user_id, $supplier->name, 'Поставщик успешно выгружен' . ($message ? ': ' . $message : ''), 0));
+
+                $user = $supplier->user;
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'supplier'))->exists()
+                ) {
+                    $user->notify(new UserNotification($supplier->name, 'Поставщик успешно выгружен' . ($message ? ': ' . $message : '')));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -93,6 +104,16 @@ class SupplierReportService
 
             try {
                 event(new NotificationEvent($supplier->user_id, $supplier->name, 'Ошибка в выгрузке' . ($message ? ': ' . $message : ''), 1));
+
+                $user = $supplier->user;
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'supplier'))->exists()
+                ) {
+                    $user->notify(new UserNotification($supplier->name, 'Ошибка в выгрузке' . ($message ? ': ' . $message : '')));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -119,6 +140,16 @@ class SupplierReportService
 
                     try {
                         event(new NotificationEvent($report->supplier->user_id, $report->supplier->name, 'Вышло время выгрузки', 1));
+
+                        $user = $report->supplier->user;
+
+                        if (
+                            $user->userNotification &&
+                            $user->userNotification->enabled_telegram &&
+                            $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'supplier'))->exists()
+                        ) {
+                            $user->notify(new UserNotification($report->supplier->name, 'Вышло время выгрузки'));
+                        }
                     } catch (\Throwable $e) {
                         report($e);
                     }

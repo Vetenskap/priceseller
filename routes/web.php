@@ -53,6 +53,8 @@ Route::middleware(['dynamic.auth:web,employee'])->group(function () {
 
     Route::get('/modules', ModuleIndex::class)->name('modules.index');
 
+    Route::get('/notifications', \App\Livewire\UserNotification\UserNotificationIndex::class)->name('notifications.index');
+
 });
 
 Route::get('/privacy-policy', function () {

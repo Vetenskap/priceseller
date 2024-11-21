@@ -5,6 +5,7 @@ namespace App\Services\Bundle;
 use App\Events\NotificationEvent;
 use App\Models\BundlesImportReport;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Illuminate\Support\Facades\Storage;
 
 class BundlesImportReportService
@@ -75,6 +76,14 @@ class BundlesImportReportService
 
             try {
                 event(new NotificationEvent($user->id, 'Комплекты', 'Импорт завершен', 0));
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
+                ) {
+                    $user->notify(new UserNotification('Комплекты', 'Импорт завершен'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -95,6 +104,14 @@ class BundlesImportReportService
 
             try {
                 event(new NotificationEvent($user->id, 'Комплекты', 'Ошибка при импорте', 1));
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
+                ) {
+                    $user->notify(new UserNotification('Комплекты', 'Ошибка при импорте'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }

@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Module;
+use App\Models\NotificationAction;
 use App\Models\Permission;
 use Illuminate\Database\Seeder;
 
@@ -162,6 +163,30 @@ class DatabaseSeeder extends Seeder
                 'name' => $module['name'],
                 'label' => $module['label']
             ]);
+        }
+
+        $notificationActions = [
+            [
+                'name' => 'import',
+                'label' => 'Импорт',
+                'description' => 'Отправлять уведомление об завершении/ошибки любого импорта',
+            ],
+            [
+                'name' => 'export',
+                'label' => 'Экспорт',
+                'description' => 'Отправлять уведомление об завершении/ошибки любого экспорта',
+            ],
+            [
+                'name' => 'supplier',
+                'label' => 'Выгрузка поставщика',
+                'description' => 'Отправлять уведомление об окончании/ошибки выгрузки поставщика',
+            ]
+        ];
+
+        foreach ($notificationActions as $notificationAction) {
+            NotificationAction::updateOrCreate([
+                'name' => $notificationAction['name'],
+            ], $notificationAction);
         }
 
     }

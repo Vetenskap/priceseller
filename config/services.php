@@ -31,4 +31,9 @@ return [
         ],
     ],
 
+    'telegram-bot-api' => [
+        'token' => env('TELEGRAM_BOT_TOKEN', 'YOUR BOT TOKEN HERE'),
+        'link' => env('TELEGRAM_BOT_LINK', 'YOUR BOT TOKEN HERE'),
+    ],
+
 ];

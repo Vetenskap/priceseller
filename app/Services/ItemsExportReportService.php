@@ -8,11 +8,13 @@ use App\Models\OzonMarket;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WbMarket;
+use App\Notifications\UserNotification;
 use App\Services\Item\ItemService;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\Relations\MorphToMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use LaravelIdea\Helper\App\Models\_IH_ItemsExportReport_QB;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -91,6 +93,16 @@ class ItemsExportReportService
 
             try {
                 event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Экспорт завершен', 0));
+
+                $user = $model->user ?? $model;
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
+                ) {
+                    $user->notify(new UserNotification($model->name, 'Экспорт завершен'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -111,6 +123,16 @@ class ItemsExportReportService
 
             try {
                 event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Ошибка при экспорте', 1));
+
+                $user = $model->user ?? $model;
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
+                ) {
+                    $user->notify(new UserNotification($model->name, 'Ошибка при экспорте'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -134,6 +156,16 @@ class ItemsExportReportService
 
                     try {
                         event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, $report->reportable->name, 'Вышло время экспорта', 1));
+
+                        $user = $report->reportable->user ?? $report->reportable;
+
+                        if (
+                            $user->userNotification &&
+                            $user->userNotification->enabled_telegram &&
+                            $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
+                        ) {
+                            $user->notify(new UserNotification($report->reportable->name, 'Вышло время экспорта'));
+                        }
                     } catch (\Throwable $e) {
                         report($e);
                     }

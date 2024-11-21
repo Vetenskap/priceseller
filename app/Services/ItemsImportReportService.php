@@ -8,6 +8,7 @@ use App\Models\OzonMarket;
 use App\Models\User;
 use App\Models\Warehouse;
 use App\Models\WbMarket;
+use App\Notifications\UserNotification;
 use App\Services\Item\ItemService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
@@ -96,6 +97,16 @@ class ItemsImportReportService
 
             try {
                 event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Импорт завершен', 0));
+
+                $user = $model->user ?? $model;
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
+                ) {
+                    $user->notify(new UserNotification($model->name, 'Импорт завершен'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -116,6 +127,16 @@ class ItemsImportReportService
 
             try {
                 event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Ошибка при импорте', 1));
+
+                $user = $model->user ?? $model;
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
+                ) {
+                    $user->notify(new UserNotification($model->name, 'Ошибка при импорте'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -139,6 +160,16 @@ class ItemsImportReportService
 
                     try {
                         event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, $report->reportable->name, 'Вышло время импорта', 1));
+
+                        $user = $report->reportable->user ?? $report->reportable;
+
+                        if (
+                            $user->userNotification &&
+                            $user->userNotification->enabled_telegram &&
+                            $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
+                        ) {
+                            $user->notify(new UserNotification($report->reportable->name, 'Вышло время импорта'));
+                        }
                     } catch (\Throwable $e) {
                         report($e);
                     }

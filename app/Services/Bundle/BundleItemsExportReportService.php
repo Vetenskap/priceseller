@@ -5,6 +5,7 @@ namespace App\Services\Bundle;
 use App\Events\NotificationEvent;
 use App\Models\BundleItemsExportReport;
 use App\Models\User;
+use App\Notifications\UserNotification;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -59,6 +60,14 @@ class BundleItemsExportReportService
 
             try {
                 event(new NotificationEvent($user->id, 'Комплекты', 'Экспорт завершен', 0));
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
+                ) {
+                    $user->notify(new UserNotification('Комплекты', 'Экспорт завершен'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -79,6 +88,14 @@ class BundleItemsExportReportService
 
             try {
                 event(new NotificationEvent($user->id, 'Комплекты', 'Ошибка при экспорте', 1));
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
+                ) {
+                    $user->notify(new UserNotification('Комплекты', 'Ошибка при экспорте'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }

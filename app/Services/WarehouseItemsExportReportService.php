@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\NotificationEvent;
 use App\Models\User;
 use App\Models\WarehousesItemsExportReport;
+use App\Notifications\UserNotification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -30,9 +31,9 @@ class WarehouseItemsExportReportService
         }
     }
 
-    public static function success(User $model, $uuid = null): bool
+    public static function success(User $user, $uuid = null): bool
     {
-        if ($report = static::get($model)) {
+        if ($report = static::get($user)) {
             $report->update([
                 'uuid' => $uuid,
                 'status' => 0,
@@ -40,7 +41,15 @@ class WarehouseItemsExportReportService
             ]);
 
             try {
-                event(new NotificationEvent($model->id, 'Склады', 'Экспорт завершен', 0));
+                event(new NotificationEvent($user->id, 'Склады', 'Экспорт завершен', 0));
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
+                ) {
+                    $user->notify(new UserNotification('Склады', 'Экспорт завершен'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -51,16 +60,24 @@ class WarehouseItemsExportReportService
         }
     }
 
-    public static function error(User $model): bool
+    public static function error(User $user): bool
     {
-        if ($report = static::get($model)) {
+        if ($report = static::get($user)) {
             $report->update([
                 'status' => 1,
                 'message' => 'Ошибка при экспорте'
             ]);
 
             try {
-                event(new NotificationEvent($model->id, 'Склады', 'Ошибка при экспорте', 1));
+                event(new NotificationEvent($user->id, 'Склады', 'Ошибка при экспорте', 1));
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
+                ) {
+                    $user->notify(new UserNotification('Склады', 'Ошибка при экспорте'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -84,6 +101,16 @@ class WarehouseItemsExportReportService
 
                     try {
                         event(new NotificationEvent($report->user_id, 'Склады', 'Вышло время экспорта', 1));
+
+                        $user = $report->user;
+
+                        if (
+                            $user->userNotification &&
+                            $user->userNotification->enabled_telegram &&
+                            $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
+                        ) {
+                            $user->notify(new UserNotification('Склады', 'Вышло время экспорта'));
+                        }
                     } catch (\Throwable $e) {
                         report($e);
                     }

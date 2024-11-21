@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Events\NotificationEvent;
 use App\Models\User;
 use App\Models\WarehousesItemsImportReport;
+use App\Notifications\UserNotification;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
 
@@ -45,9 +46,9 @@ class WarehouseItemsImportReportService
         }
     }
 
-    public static function success(User $model, int $correct, int $error, ?string $uuid = null): bool
+    public static function success(User $user, int $correct, int $error, ?string $uuid = null): bool
     {
-        if ($report = static::get($model)) {
+        if ($report = static::get($user)) {
 
             $report->correct = $correct;
             $report->error = $error;
@@ -62,7 +63,15 @@ class WarehouseItemsImportReportService
 
 
             try {
-                event(new NotificationEvent($model->id, 'Склады', 'Импорт завершен', 0));
+                event(new NotificationEvent($user->id, 'Склады', 'Импорт завершен', 0));
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
+                ) {
+                    $user->notify(new UserNotification('Склады', 'Импорт завершен'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -73,16 +82,24 @@ class WarehouseItemsImportReportService
         }
     }
 
-    public static function error(User $model): bool
+    public static function error(User $user): bool
     {
-        if ($report = static::get($model)) {
+        if ($report = static::get($user)) {
             $report->update([
                 'status' => 1,
                 'message' => 'Ошибка при импорте'
             ]);
 
             try {
-                event(new NotificationEvent($model->id, 'Склады', 'Ошибка при импорте', 1));
+                event(new NotificationEvent($user->id, 'Склады', 'Ошибка при импорте', 1));
+
+                if (
+                    $user->userNotification &&
+                    $user->userNotification->enabled_telegram &&
+                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
+                ) {
+                    $user->notify(new UserNotification('Склады', 'Ошибка при импорте'));
+                }
             } catch (\Throwable $e) {
                 report($e);
             }
@@ -106,6 +123,16 @@ class WarehouseItemsImportReportService
 
                     try {
                         event(new NotificationEvent($report->user_id, 'Склады', 'Вышло время импорта', 1));
+
+                        $user = $report->user;
+
+                        if (
+                            $user->userNotification &&
+                            $user->userNotification->enabled_telegram &&
+                            $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
+                        ) {
+                            $user->notify(new UserNotification('Склады', 'Вышло время импорта'));
+                        }
                     } catch (\Throwable $e) {
                         report($e);
                     }
