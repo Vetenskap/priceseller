@@ -190,9 +190,9 @@ class MoyskladWebhookProcessService
             $updatedFields = $updatedFieldsMain->merge($updatedFieldsAdditional);
 
             $product = $event->getMeta();
+            $product->fetch($this->webhook->moysklad->api_key);
 
             if (!Item::where('ms_uuid', $product->id)->exists()) {
-                $product->fetch($this->webhook->moysklad->api_key);
 
                 Log::info('Moysklad webhook create/update item', [
                     'event' => $event->toArray()
