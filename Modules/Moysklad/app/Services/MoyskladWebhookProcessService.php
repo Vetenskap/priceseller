@@ -213,7 +213,7 @@ class MoyskladWebhookProcessService
                     'itemable_type' => get_class($error)
                 ]);
             } else {
-                if ($updatedFields) {
+                if ($updatedFields->isNotEmpty()) {
                     if ($item = Item::where('ms_uuid', $product->id)->first()) {
                         $product->fetch($this->webhook->moysklad->api_key);
 
@@ -241,6 +241,10 @@ class MoyskladWebhookProcessService
                         throw new \Exception('Товар не найден');
                     }
 
+                } else {
+                    $this->report->update([
+                        'action' => 'Нет нужных полей для обновления товара',
+                    ]);
                 }
             }
 
