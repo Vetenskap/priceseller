@@ -37,12 +37,12 @@ class Bundle extends MainModel
 
     public function ozonItems(): MorphMany
     {
-        return $this->morphMany(OzonItem::class, 'itemable');
+        return $this->morphMany(OzonItem::class, 'ozonitemable');
     }
 
     public function wbItems(): MorphMany
     {
-        return $this->morphMany(WbItem::class, 'itemable');
+        return $this->morphMany(WbItem::class, 'wbitemable');
     }
 
     public function moyskladWebhookReports(): MorphMany

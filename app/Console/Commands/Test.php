@@ -3,10 +3,12 @@
 namespace App\Console\Commands;
 
 use App\Events\NotificationEvent;
+use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\User;
 use App\Notifications\TestTelegramNotification;
 use App\Notifications\UserNotification;
+use App\Services\WbItemPriceService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Notification;
@@ -40,13 +42,11 @@ class Test extends Command
      */
     #[NoReturn] public function handle(): void
     {
-        $user = User::find(10);
-        if (
-            $user->userNotification &&
-            $user->userNotification->enabled_telegram &&
-            $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
-        ) {
-            $user->notify(new UserNotification('тест', 'Экспорт завершен'));
-        }
+        $item = Item::where('code', '1000155КТ')->first();
+        $bundle = Bundle::where('code', '1000155')->first();
+        $wbItem = $bundle->wbItems()->first();
+
+        $service = new WbItemPriceService($item->supplier, $wbItem->market, []);
+        $service->recountStockWbItem($wbItem);
     }
 }

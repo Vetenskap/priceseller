@@ -137,12 +137,12 @@ class Item extends MainModel
 
     public function ozonItems()
     {
-        return $this->morphMany(OzonItem::class, 'itemable');
+        return $this->morphMany(OzonItem::class, 'ozonitemable');
     }
 
     public function wbItems()
     {
-        return $this->morphMany(WbItem::class, 'itemable');
+        return $this->morphMany(WbItem::class, 'wbitemable');
     }
 
     public function moyskladWebhookReports(): MorphMany

@@ -206,7 +206,7 @@ class WbItemPriceService
                         })->get()->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($item) {
                             $stock = $userWarehouse->warehouse->stocks()->where('item_id', $item->id)->first();
                             return $stock ? $stock->stock / $item->pivot->multiplicity : 0;
-                        });
+                        })->sum();
                     })->sum();
                 }
 
