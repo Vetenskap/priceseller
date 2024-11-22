@@ -204,7 +204,7 @@ class MoyskladWebhookProcessService
                     $this->report->update([
                         'action' => 'Товар не создан',
                     ]);
-                    throw new \Exception($error);
+                    throw new \Exception(is_string($error) ? $error : json_encode($error, JSON_UNESCAPED_UNICODE));
                 }
 
                 $this->report->update([
@@ -278,7 +278,7 @@ class MoyskladWebhookProcessService
                 $this->report->update([
                     'action' => 'Товар не создан',
                 ]);
-                throw new \Exception($error);
+                throw new \Exception(is_string($error) ? $error : json_encode($error, JSON_UNESCAPED_UNICODE));
             }
 
             $this->report->update([
