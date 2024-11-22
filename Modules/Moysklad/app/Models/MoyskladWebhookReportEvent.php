@@ -15,4 +15,8 @@ class MoyskladWebhookReportEvent extends MainModel
         'exception',
         'status'
     ];
+
+    protected $casts = [
+        'status' => 'boolean'
+    ];
 }
