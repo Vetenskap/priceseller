@@ -1,5 +1,6 @@
 <div>
     @if($this->reports->count() > 0)
+        <flux:button wire:click="repeatAll">Повторить попытку обработки всех необратанных</flux:button>
         <flux:table :paginate="$this->reports">
             <flux:columns>
                 <flux:column sortable :sorted="$sortBy === 'status'" :direction="$sortDirection"

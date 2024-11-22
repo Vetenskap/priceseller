@@ -23,6 +23,16 @@ class MoyskladWebhookReportIndex extends Component
         return $this->tapQuery($this->webhook->reports());
     }
 
+    public function repeatAll(): void
+    {
+        foreach ($this->webhook->reports()->where('status', true)->get() as $report) {
+            MoyskladWebhookProcess::dispatch($report->payload, $report->moyskladWebhook);
+            $report->delete();
+        }
+
+        \Flux::toast('Все необратанные вебхуки отправлены на повторную обработку');
+    }
+
     public function repeat($id): void
     {
         $report = MoyskladWebhookReport::find($id);
