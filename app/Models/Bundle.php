@@ -4,6 +4,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
+use Modules\Moysklad\Models\MoyskladWebhookReport;
 
 class Bundle extends MainModel
 {
@@ -33,13 +35,18 @@ class Bundle extends MainModel
         ],
     ];
 
-    public function ozonItems()
+    public function ozonItems(): MorphMany
     {
-        return $this->morphMany(OzonItem::class, 'ozonitemable');
+        return $this->morphMany(OzonItem::class, 'itemable');
     }
 
-    public function wbItems()
+    public function wbItems(): MorphMany
     {
-        return $this->morphMany(WbItem::class, 'wbitemable');
+        return $this->morphMany(WbItem::class, 'itemable');
+    }
+
+    public function moyskladWebhookReports(): MorphMany
+    {
+        return $this->morphMany(MoyskladWebhookReport::class, 'itemable');
     }
 }

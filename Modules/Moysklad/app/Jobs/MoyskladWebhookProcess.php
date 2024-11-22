@@ -36,9 +36,9 @@ class MoyskladWebhookProcess implements ShouldQueue
     public function handle(): void
     {
         if ($this->webhook->type === 'warehouses') {
-            $service = new MoyskladWebhookProcessService(new WebhookStockPost($this->apiWebhook), $this->webhook);
+            $service = new MoyskladWebhookProcessService(new WebhookStockPost($this->apiWebhook), $this->webhook, $this->report);
         } else {
-            $service = new MoyskladWebhookProcessService(new WebhookPost($this->apiWebhook), $this->webhook);
+            $service = new MoyskladWebhookProcessService(new WebhookPost($this->apiWebhook), $this->webhook, $this->report);
         }
 
         $service->process();

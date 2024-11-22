@@ -11,6 +11,10 @@
                 <flux:column sortable :sorted="$sortBy === 'exception'" :direction="$sortDirection"
                              wire:click="sort('exception')">Ошибка
                 </flux:column>
+                <flux:column sortable :sorted="$sortBy === 'action'" :direction="$sortDirection"
+                             wire:click="sort('action')">Событие
+                </flux:column>
+                <flux:column>Товар/Комплект</flux:column>
                 <flux:column sortable :sorted="$sortBy === 'created_at'" :direction="$sortDirection"
                              wire:click="sort('created_at')">Дата начала обработки
                 </flux:column>
@@ -31,6 +35,12 @@
                         </flux:cell>
                         <flux:cell>
                             <flux:textarea readonly>{{$report->exception}}</flux:textarea>
+                        </flux:cell>
+                        <flux:cell>{{$report->action}}</flux:cell>
+                        <flux:cell>
+                            @if($report->itemable)
+                                <flux:link :href="$report->itemable instanceof \App\Models\Item ? route('item-edit', ['item' => $report->itemable]) : route('bundle-edit', ['bundle' => $report->itemable])">{{$report->itemable->code}}</flux:link>
+                            @endif
                         </flux:cell>
                         <flux:cell>{{$report->created_at}}</flux:cell>
                         <flux:cell>{{$report->updated_at}}</flux:cell>

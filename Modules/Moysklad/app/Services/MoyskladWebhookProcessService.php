@@ -21,12 +21,13 @@ use Modules\Moysklad\Models\MoyskladOrderUuid;
 use Modules\Moysklad\Models\MoyskladRecountRetailMarkup;
 use Modules\Moysklad\Models\MoyskladWarehouseWarehouse;
 use Modules\Moysklad\Models\MoyskladWebhook;
+use Modules\Moysklad\Models\MoyskladWebhookReport;
 
 class MoyskladWebhookProcessService
 {
     public MoyskladService $moyskladService;
 
-    public function __construct(public WebhookPost|WebhookStockPost $apiWebhook, public MoyskladWebhook $webhook)
+    public function __construct(public WebhookPost|WebhookStockPost $apiWebhook, public MoyskladWebhook $webhook, public MoyskladWebhookReport $report)
     {
         $this->moyskladService = new MoyskladService($this->webhook->moysklad);
     }
@@ -200,8 +201,17 @@ class MoyskladWebhookProcessService
 
                 $error = $this->moyskladService->createItemFromProduct($product);
                 if (!($error instanceof Item)) {
+                    $this->report->update([
+                        'action' => 'Товар не создан',
+                    ]);
                     throw new \Exception($error);
                 }
+
+                $this->report->update([
+                    'action' => 'Товар создан',
+                    'itemable_id' => $error->getKey(),
+                    'itemable_type' => get_class($error)
+                ]);
             } else {
                 if ($updatedFields) {
                     if ($item = Item::where('ms_uuid', $product->id)->first()) {
@@ -212,7 +222,23 @@ class MoyskladWebhookProcessService
                             'event' => $event->toArray()
                         ]);
 
-                        $this->moyskladService->updateItemFromProductWithUpdatedFields($product, $item, $updatedFields);
+                        $error = $this->moyskladService->updateItemFromProductWithUpdatedFields($product, $item, $updatedFields);
+                        if ($error) {
+                            $this->report->update([
+                                'action' => 'Товар не обновлен ' . $updatedFields->toJson(),
+                                'itemable_id' => $item->getKey(),
+                                'itemable_type' => get_class($item)
+                            ]);
+                            throw new \Exception($error);
+                        }
+
+                        $this->report->update([
+                            'action' => 'Товар обновлен ' . $updatedFields->toJson(),
+                            'itemable_id' => $item->getKey(),
+                            'itemable_type' => get_class($item)
+                        ]);
+                    } else {
+                        throw new \Exception('Товар не найден');
                     }
 
                 }
@@ -245,8 +271,17 @@ class MoyskladWebhookProcessService
 
             $error = $this->moyskladService->createItemFromProduct($product);
             if (!($error instanceof Item)) {
+                $this->report->update([
+                    'action' => 'Товар не создан',
+                ]);
                 throw new \Exception($error);
             }
+
+            $this->report->update([
+                'action' => 'Товар создан',
+                'itemable_id' => $error->getKey(),
+                'itemable_type' => get_class($error)
+            ]);
         });
 
     }
@@ -266,6 +301,13 @@ class MoyskladWebhookProcessService
                         'item_id' => $item->id,
                         'orders' => $position->getQuantity()
                     ]);
+                    $this->report->update([
+                        'action' => 'Для товара установлен заказ',
+                        'itemable_id' => $item->getKey(),
+                        'itemable_type' => get_class($item)
+                    ]);
+                } else {
+                    throw new \Exception('Товар не найден');
                 }
             });
 
@@ -328,7 +370,21 @@ class MoyskladWebhookProcessService
 
             if ($userBundle = Bundle::where('ms_uuid', $bundle->id)->first()) {
 
-                $this->moyskladService->updateBundle($bundle, $userBundle);
+                $error = $this->moyskladService->updateBundle($bundle, $userBundle);
+                if ($error) {
+                    $this->report->update([
+                        'action' => 'Комлект не обновлен',
+                        'itemable_id' => $userBundle->getKey(),
+                        'itemable_type' => get_class($userBundle)
+                    ]);
+                    throw new \Exception($error);
+                }
+
+                $this->report->update([
+                    'action' => 'Комлект обновлен',
+                    'itemable_id' => $userBundle->getKey(),
+                    'itemable_type' => get_class($userBundle)
+                ]);
 
             }
 
@@ -342,7 +398,19 @@ class MoyskladWebhookProcessService
             $bundle = $event->getMeta();
             $bundle->fetch($this->webhook->moysklad->api_key);
 
-            $this->moyskladService->createBundle($bundle);
+            $error = $this->moyskladService->createBundle($bundle);
+            if (is_string($error)) {
+                $this->report->update([
+                    'action' => 'Комлект не создан',
+                ]);
+                throw new \Exception($error);
+            }
+
+            $this->report->update([
+                'action' => 'Комлект создан',
+                'itemable_id' => $error->getKey(),
+                'itemable_type' => get_class($error)
+            ]);
         });
     }
 

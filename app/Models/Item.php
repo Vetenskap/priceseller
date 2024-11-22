@@ -10,10 +10,12 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Carbon;
 use Modules\Moysklad\Models\MoyskladItemOrder;
 use Modules\Moysklad\Models\MoyskladQuarantine;
+use Modules\Moysklad\Models\MoyskladWebhookReport;
 
 class Item extends MainModel
 {
@@ -135,12 +137,17 @@ class Item extends MainModel
 
     public function ozonItems()
     {
-        return $this->morphMany(OzonItem::class, 'ozonitemable');
+        return $this->morphMany(OzonItem::class, 'itemable');
     }
 
     public function wbItems()
     {
-        return $this->morphMany(WbItem::class, 'wbitemable');
+        return $this->morphMany(WbItem::class, 'itemable');
+    }
+
+    public function moyskladWebhookReports(): MorphMany
+    {
+        return $this->morphMany(MoyskladWebhookReport::class, 'itemable');
     }
 
     public function supplierWarehouseStocks(): HasMany

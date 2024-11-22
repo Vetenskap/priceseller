@@ -3,6 +3,8 @@
 namespace Modules\Moysklad\Models;
 
 use App\Models\MainModel;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MoyskladWebhookReport extends MainModel
 {
@@ -15,6 +17,9 @@ class MoyskladWebhookReport extends MainModel
         'moysklad_webhook_id',
         'payload',
         'exception',
+        'action',
+        'itemable_id',
+        'itemable_type',
     ];
 
     protected $casts = [
@@ -22,9 +27,14 @@ class MoyskladWebhookReport extends MainModel
         'status' => 'boolean',
     ];
 
-    public function moyskladWebhook()
+    public function moyskladWebhook(): BelongsTo
     {
         return $this->belongsTo(MoyskladWebhook::class, 'moysklad_webhook_id', 'id');
+    }
+
+    public function itemable(): MorphTo
+    {
+        return $this->morphTo('itemable', 'itemable_type', 'itemable_id');
     }
 
 }

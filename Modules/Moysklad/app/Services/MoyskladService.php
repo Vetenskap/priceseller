@@ -350,7 +350,7 @@ class MoyskladService
         }
     }
 
-    public function updateItemFromProductWithUpdatedFields(Product $product, Item $item, Collection $updatedFields): void
+    public function updateItemFromProductWithUpdatedFields(Product $product, Item $item, Collection $updatedFields): ?string
     {
         $updatedFields->each(function (string $updatedField) use ($product, $item) {
 
@@ -363,7 +363,7 @@ class MoyskladService
                 try {
                     $item->save();
                 } catch (\Throwable $e) {
-                    throw new \Exception($e);
+                    return $e->getMessage();
                 }
             }
 
@@ -381,9 +381,11 @@ class MoyskladService
             }
 
         });
+
+        return null;
     }
 
-    public function createBundle(Bundle $bundle): ?string
+    public function createBundle(Bundle $bundle): string|\App\Models\Bundle
     {
         $data['ms_uuid'] = $bundle->id;
 
@@ -435,7 +437,7 @@ class MoyskladService
             }
         });
 
-        return null;
+        return $userBundle;
     }
 
     public function updateBundle(Bundle $bundle, \App\Models\Bundle $userBundle): ?string
