@@ -25,7 +25,7 @@ class MoyskladWebhookReportIndex extends Component
 
     public function repeatAll(): void
     {
-        foreach ($this->webhook->reports()->where('status', true)->get() as $report) {
+        foreach ($this->webhook->reports->filter(fn (MoyskladWebhookReport $report) => $report->events()->where('status', true)->count() !== $report->events->count() && $report->events->count()) as $report) {
             MoyskladWebhookProcess::dispatch($report->payload, $report->moyskladWebhook);
             $report->delete();
         }
@@ -37,7 +37,7 @@ class MoyskladWebhookReportIndex extends Component
     {
         $report = MoyskladWebhookReport::find($id);
 
-        if (!$report->status) {
+        if ($report->events()->where('status', true)->count() === $report->events->count() && $report->events->count()) {
             abort(403);
         }
 

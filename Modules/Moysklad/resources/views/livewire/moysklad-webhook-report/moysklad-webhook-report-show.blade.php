@@ -38,7 +38,7 @@
                         @foreach($this->events as $event)
                             <flux:row :key="$event->getKey()">
                                 <flux:cell>
-                                    <flux:badge size="sm" :color="$report->status ? 'lime' : 'red'">
+                                    <flux:badge size="sm" :color="$report->status ? 'red' : 'lime'">
                                         {{$event->message}}
                                     </flux:badge>
                                 </flux:cell>

@@ -46,7 +46,7 @@ class Test extends Command
         $bundle = Bundle::where('code', '1000155')->first();
         $wbItem = $bundle->wbItems()->first();
 
-        $service = new WbItemPriceService($item->supplier, $wbItem->market, []);
+        $service = new WbItemPriceService($item->supplier, $wbItem->market, [$item->supplier->warehouses->first()->id]);
         $service->recountStockWbItem($wbItem);
     }
 }
