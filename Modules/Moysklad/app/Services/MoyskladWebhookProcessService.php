@@ -202,7 +202,7 @@ class MoyskladWebhookProcessService
                 if (!($error instanceof Item)) {
                     $this->report->events()->create([
                         'status' => false,
-                        'event' => $event->toArray(),
+                        'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                         'message' => 'Товар не создан',
                         'exception' => json_encode(is_string($error) ? [$error] : $error, JSON_UNESCAPED_UNICODE),
                         'itemable_id' => null,
@@ -213,7 +213,7 @@ class MoyskladWebhookProcessService
 
                 $this->report->events()->create([
                     'status' => true,
-                    'event' => $event->toArray(),
+                    'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                     'message' => 'Товар создан',
                     'exception' => [],
                     'itemable_id' => $error->getKey(),
@@ -233,7 +233,7 @@ class MoyskladWebhookProcessService
                         if ($error) {
                             $this->report->events()->create([
                                 'status' => false,
-                                'event' => $event->toArray(),
+                                'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                                 'message' => 'Товар не обновлен',
                                 'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
                                 'itemable_id' => $item->getKey(),
@@ -244,7 +244,7 @@ class MoyskladWebhookProcessService
 
                         $this->report->events()->create([
                             'status' => true,
-                            'event' => $event->toArray(),
+                            'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                             'message' => 'Товар обновлен ' . $updatedFields->toJson(),
                             'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                             'itemable_id' => $item->getKey(),
@@ -253,7 +253,7 @@ class MoyskladWebhookProcessService
                     } else {
                         $this->report->events()->create([
                             'status' => false,
-                            'event' => $event->toArray(),
+                            'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                             'message' => 'Товар не найден',
                             'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                             'itemable_id' => null,
@@ -264,7 +264,7 @@ class MoyskladWebhookProcessService
                 } else {
                     $this->report->events()->create([
                         'status' => false,
-                        'event' => $event->toArray(),
+                        'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                         'message' => 'Нет нужных полей для обновления товара',
                         'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                         'itemable_id' => null,
@@ -302,7 +302,7 @@ class MoyskladWebhookProcessService
             if (!($error instanceof Item)) {
                 $this->report->events()->create([
                     'status' => false,
-                    'event' => $event->toArray(),
+                    'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                     'message' => 'Товар не создан',
                     'exception' => json_encode(is_string($error) ? [$error] : $error, JSON_UNESCAPED_UNICODE),
                     'itemable_id' => null,
@@ -313,7 +313,7 @@ class MoyskladWebhookProcessService
 
             $this->report->events()->create([
                 'status' => true,
-                'event' => $event->toArray(),
+                'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                 'message' => 'Товар создан',
                 'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                 'itemable_id' => $error->getKey(),
@@ -340,7 +340,7 @@ class MoyskladWebhookProcessService
                     ]);
                     $this->report->events()->create([
                         'status' => true,
-                        'event' => $event->toArray(),
+                        'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                         'message' => 'Для товара установлен заказ',
                         'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                         'itemable_id' => $item->getKey(),
@@ -349,7 +349,7 @@ class MoyskladWebhookProcessService
                 } else {
                     $this->report->events()->create([
                         'status' => false,
-                        'event' => $event->toArray(),
+                        'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                         'message' => 'Товар не найден',
                         'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                         'itemable_id' => null,
@@ -421,7 +421,7 @@ class MoyskladWebhookProcessService
                 if ($error) {
                     $this->report->events()->create([
                         'status' => false,
-                        'event' => $event->toArray(),
+                        'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                         'message' => 'Комлект не обновлен',
                         'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
                         'itemable_id' => $userBundle->getKey(),
@@ -432,7 +432,7 @@ class MoyskladWebhookProcessService
 
                 $this->report->events()->create([
                     'status' => true,
-                    'event' => $event->toArray(),
+                    'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                     'message' => 'Комлект обновлен',
                     'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                     'itemable_id' => $userBundle->getKey(),
@@ -454,7 +454,7 @@ class MoyskladWebhookProcessService
             if (is_string($error)) {
                 $this->report->events()->create([
                     'status' => false,
-                    'event' => $event->toArray(),
+                    'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                     'message' => 'Комлект не создан',
                     'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
                     'itemable_id' => null,
@@ -465,7 +465,7 @@ class MoyskladWebhookProcessService
 
             $this->report->events()->create([
                 'status' => true,
-                'event' => $event->toArray(),
+                'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                 'message' => 'Комлект создан',
                 'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                 'itemable_id' => $error->getKey(),
