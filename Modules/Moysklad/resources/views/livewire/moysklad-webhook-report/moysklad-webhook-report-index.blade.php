@@ -25,7 +25,7 @@
                 @foreach($this->reports as $report)
                     <flux:row :key="$report->getKey()">
                         <flux:cell>
-                            <flux:badge size="sm" :color="$report->events()->where('status', true)->count() === 0 ? 'red' : ($report->events()->where('status', true)->count() === $report->events->count() ? 'lime' : 'yellow')">
+                            <flux:badge size="sm" :color="$report->events()->where('status', true)->count() === 0 ? 'red' : ($report->events()->where('status', true)->count() === $report->events()->count() && $report->events()->count() ? 'lime' : 'yellow')">
                                 {{$report->events()->where('status', true)->count() === 0 ? 'События не обработаны' : ($report->events()->where('status', true)->count() === $report->events->count() && $report->events->count() ? 'Все соыбтия обработаны' : 'Не все события обработаны')}}
                             </flux:badge>
                         </flux:cell>
@@ -39,7 +39,7 @@
                         <flux:cell>{{$report->created_at}}</flux:cell>
                         <flux:cell>{{$report->updated_at}}</flux:cell>
                         <flux:cell>
-                            @if($report->events()->where('status', true)->count() !== $report->events->count())
+                            @if($report->events()->where('status', true)->count() !== $report->events->count() && $report->events()->count())
                                 <flux:tooltip content="Повторить обработку">
                                     <flux:button
                                         icon="arrow-up-tray"
