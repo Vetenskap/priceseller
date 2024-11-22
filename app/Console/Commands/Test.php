@@ -47,6 +47,6 @@ class Test extends Command
         $wbItem = $bundle->wbItems()->first();
 
         $service = new WbItemPriceService($item->supplier, $wbItem->market, [$item->supplier->warehouses->first()->id]);
-        $service->recountStockWbItem($wbItem);
+        $service->updateStock();
     }
 }
