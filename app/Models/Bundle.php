@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Modules\Moysklad\Models\MoyskladWebhookReport;
+use Modules\Moysklad\Models\MoyskladWebhookReportEvent;
 
 class Bundle extends MainModel
 {
@@ -45,8 +46,8 @@ class Bundle extends MainModel
         return $this->morphMany(WbItem::class, 'wbitemable');
     }
 
-    public function moyskladWebhookReports(): MorphMany
+    public function moyskladWebhookReportEvents(): MorphMany
     {
-        return $this->morphMany(MoyskladWebhookReport::class, 'itemable');
+        return $this->morphMany(MoyskladWebhookReportEvent::class, 'itemable');
     }
 }

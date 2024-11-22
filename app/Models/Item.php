@@ -16,6 +16,7 @@ use Illuminate\Support\Carbon;
 use Modules\Moysklad\Models\MoyskladItemOrder;
 use Modules\Moysklad\Models\MoyskladQuarantine;
 use Modules\Moysklad\Models\MoyskladWebhookReport;
+use Modules\Moysklad\Models\MoyskladWebhookReportEvent;
 
 class Item extends MainModel
 {
@@ -145,9 +146,9 @@ class Item extends MainModel
         return $this->morphMany(WbItem::class, 'wbitemable');
     }
 
-    public function moyskladWebhookReports(): MorphMany
+    public function moyskladWebhookReportEvents(): MorphMany
     {
-        return $this->morphMany(MoyskladWebhookReport::class, 'itemable');
+        return $this->morphMany(MoyskladWebhookReportEvent::class, 'itemable');
     }
 
     public function supplierWarehouseStocks(): HasMany

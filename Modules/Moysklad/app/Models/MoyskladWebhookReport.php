@@ -38,9 +38,4 @@ class MoyskladWebhookReport extends MainModel
         return $this->belongsTo(MoyskladWebhook::class, 'moysklad_webhook_id', 'id');
     }
 
-    public function itemable(): MorphTo
-    {
-        return $this->morphTo('itemable', 'itemable_type', 'itemable_id');
-    }
-
 }

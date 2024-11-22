@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\Models;
 
 use App\Models\MainModel;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MoyskladWebhookReportEvent extends MainModel
 {
@@ -19,4 +20,9 @@ class MoyskladWebhookReportEvent extends MainModel
     protected $casts = [
         'status' => 'boolean'
     ];
+
+    public function itemable(): MorphTo
+    {
+        return $this->morphTo('itemable', 'itemable_type', 'itemable_id');
+    }
 }
