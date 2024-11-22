@@ -126,6 +126,9 @@ class WbItemPriceService
         return $wbItem;
     }
 
+    /**
+     * @throws \Exception
+     */
     public function updateStock(): void
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт остатков");

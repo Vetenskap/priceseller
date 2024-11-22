@@ -82,13 +82,14 @@ class MoyskladWebhookProcessService
     {
         $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
 
+            /** @var Demand $demand */
+            $demand = $event->getMeta();
+            $demand->fetch($this->webhook->moysklad->api_key);
+
             Log::info('Moysklad webhook change warehouse demand', [
                 'event' => $event->toArray()
             ]);
 
-            /** @var Demand $demand */
-            $demand = $event->getMeta();
-            $demand->fetch($this->webhook->moysklad->api_key);
             if ($orderUuid = MoyskladOrderUuid::where('moysklad_id', $this->webhook->moysklad_id)->where('uuid', $demand->getCustomerOrder()->id)->first()) {
                 $demand->put($this->webhook->moysklad->api_key, [
                     'store' => [
@@ -188,14 +189,15 @@ class MoyskladWebhookProcessService
             $updatedFieldsAdditional = $event->getUpdatedFields()->intersect($this->webhook->moysklad->itemAdditionalAttributeLinks->pluck('link_name'));
             $updatedFields = $updatedFieldsMain->merge($updatedFieldsAdditional);
 
-            Log::info('Moysklad webhook update item', [
-                'updatedFields' => $updatedFields->toArray(),
-                'event' => $event->toArray()
-            ]);
-
             $product = $event->getMeta();
 
             if (!Item::where('ms_uuid', $product->id)->exists()) {
+                $product->fetch($this->webhook->moysklad->api_key);
+
+                Log::info('Moysklad webhook create/update item', [
+                    'event' => $event->toArray()
+                ]);
+
                 $error = $this->moyskladService->createItemFromProduct($product);
                 if (!($error instanceof Item)) {
                     throw new \Exception($error);
@@ -204,6 +206,12 @@ class MoyskladWebhookProcessService
                 if ($updatedFields) {
                     if ($item = Item::where('ms_uuid', $product->id)->first()) {
                         $product->fetch($this->webhook->moysklad->api_key);
+
+                        Log::info('Moysklad webhook update item', [
+                            'updatedFields' => $updatedFields->toArray(),
+                            'event' => $event->toArray()
+                        ]);
+
                         $this->moyskladService->updateItemFromProductWithUpdatedFields($product, $item, $updatedFields);
                     }
 
@@ -230,6 +238,10 @@ class MoyskladWebhookProcessService
 
             $product = $event->getMeta();
             $product->fetch($this->webhook->moysklad->api_key);
+
+            Log::info('Moysklad webhook create item', [
+                'event' => $event->toArray()
+            ]);
 
             $error = $this->moyskladService->createItemFromProduct($product);
             if (!($error instanceof Item)) {
