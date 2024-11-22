@@ -18,4 +18,5 @@ Route::prefix('modules')->group( function () {
     Route::get('/moysklad/{page?}', \Modules\Moysklad\Livewire\Moysklad\MoyskladIndex::class)->name('moysklad.index');
     Route::get('/moysklad/items/report/{report}', \Modules\Moysklad\Livewire\MoyskladItemReport\MoyskladItemReportShow::class)->name('moysklad.item.reports.show')->whereUuid('report');
     Route::get('/moysklad/bundles/report/{report}', \Modules\Moysklad\Livewire\MoyskladBundleApiReport\MoyskladBundleApiReportShow::class)->name('moysklad.bundle.reports.show')->whereUuid('report');
+    Route::get('/moysklad/webhooks/reports/{report}', \Modules\Moysklad\Livewire\MoyskladWebhookReport\MoyskladWebhookReportShow::class)->name('moysklad.webhooks.reports.show');
 });

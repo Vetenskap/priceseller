@@ -6,7 +6,6 @@ use App\Models\Bundle;
 use App\Models\Item;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
 use Modules\Moysklad\HttpClient\MoyskladClient;
 use Modules\Moysklad\HttpClient\Resources\Entities\CustomerOrder\MetaArrays\Position;
 use Modules\Moysklad\HttpClient\Resources\Entities\Demand;
@@ -201,17 +200,24 @@ class MoyskladWebhookProcessService
 
                 $error = $this->moyskladService->createItemFromProduct($product);
                 if (!($error instanceof Item)) {
-                    $this->report->update([
-                        'action' => 'Товар не создан',
-                        'payload' => $event->toArray()
+                    $this->report->events()->create([
+                        'status' => false,
+                        'event' => $event->toArray(),
+                        'message' => 'Товар не создан',
+                        'exception' => json_encode(is_string($error) ? [$error] : $error, JSON_UNESCAPED_UNICODE),
+                        'itemable_id' => null,
+                        'itemable_type' => null,
                     ]);
-                    throw new \Exception(is_string($error) ? $error : json_encode($error, JSON_UNESCAPED_UNICODE));
+                    return;
                 }
 
-                $this->report->update([
-                    'action' => 'Товар создан',
+                $this->report->events()->create([
+                    'status' => true,
+                    'event' => $event->toArray(),
+                    'message' => 'Товар создан',
+                    'exception' => [],
                     'itemable_id' => $error->getKey(),
-                    'itemable_type' => get_class($error)
+                    'itemable_type' => get_class($error),
                 ]);
             } else {
                 if ($updatedFields->isNotEmpty()) {
@@ -225,30 +231,44 @@ class MoyskladWebhookProcessService
 
                         $error = $this->moyskladService->updateItemFromProductWithUpdatedFields($product, $item, $updatedFields);
                         if ($error) {
-                            $this->report->update([
-                                'action' => 'Товар не обновлен ' . $updatedFields->toJson(),
+                            $this->report->events()->create([
+                                'status' => false,
+                                'event' => $event->toArray(),
+                                'message' => 'Товар не обновлен',
+                                'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
                                 'itemable_id' => $item->getKey(),
-                                'itemable_type' => get_class($item),
-                                'payload' => $event->toArray()
+                                'itemable_type' => get_class($item)
                             ]);
-                            throw new \Exception($error);
+                            return;
                         }
 
-                        $this->report->update([
-                            'action' => 'Товар обновлен ' . $updatedFields->toJson(),
+                        $this->report->events()->create([
+                            'status' => true,
+                            'event' => $event->toArray(),
+                            'message' => 'Товар обновлен ' . $updatedFields->toJson(),
+                            'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                             'itemable_id' => $item->getKey(),
-                            'itemable_type' => get_class($item)
+                            'itemable_type' => get_class($item),
                         ]);
                     } else {
-                        $this->report->update([
-                            'payload' => $event->toArray()
+                        $this->report->events()->create([
+                            'status' => false,
+                            'event' => $event->toArray(),
+                            'message' => 'Товар не найден',
+                            'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
+                            'itemable_id' => null,
+                            'itemable_type' => null,
                         ]);
-                        throw new \Exception('Товар не найден');
                     }
 
                 } else {
-                    $this->report->update([
-                        'action' => 'Нет нужных полей для обновления товара',
+                    $this->report->events()->create([
+                        'status' => false,
+                        'event' => $event->toArray(),
+                        'message' => 'Нет нужных полей для обновления товара',
+                        'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
+                        'itemable_id' => null,
+                        'itemable_type' => null,
                     ]);
                 }
             }
@@ -280,15 +300,22 @@ class MoyskladWebhookProcessService
 
             $error = $this->moyskladService->createItemFromProduct($product);
             if (!($error instanceof Item)) {
-                $this->report->update([
-                    'action' => 'Товар не создан',
-                    'payload' => $event->toArray()
+                $this->report->events()->create([
+                    'status' => false,
+                    'event' => $event->toArray(),
+                    'message' => 'Товар не создан',
+                    'exception' => json_encode(is_string($error) ? [$error] : $error, JSON_UNESCAPED_UNICODE),
+                    'itemable_id' => null,
+                    'itemable_type' => null,
                 ]);
-                throw new \Exception(is_string($error) ? $error : json_encode($error, JSON_UNESCAPED_UNICODE));
+                return;
             }
 
-            $this->report->update([
-                'action' => 'Товар создан',
+            $this->report->events()->create([
+                'status' => true,
+                'event' => $event->toArray(),
+                'message' => 'Товар создан',
+                'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                 'itemable_id' => $error->getKey(),
                 'itemable_type' => get_class($error)
             ]);
@@ -311,16 +338,23 @@ class MoyskladWebhookProcessService
                         'item_id' => $item->id,
                         'orders' => $position->getQuantity()
                     ]);
-                    $this->report->update([
-                        'action' => 'Для товара установлен заказ',
+                    $this->report->events()->create([
+                        'status' => true,
+                        'event' => $event->toArray(),
+                        'message' => 'Для товара установлен заказ',
+                        'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                         'itemable_id' => $item->getKey(),
                         'itemable_type' => get_class($item)
                     ]);
                 } else {
-                    $this->report->update([
-                        'payload' => $event->toArray()
+                    $this->report->events()->create([
+                        'status' => false,
+                        'event' => $event->toArray(),
+                        'message' => 'Товар не найден',
+                        'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
+                        'itemable_id' => null,
+                        'itemable_type' => null
                     ]);
-                    throw new \Exception('Товар не найден');
                 }
             });
 
@@ -385,21 +419,25 @@ class MoyskladWebhookProcessService
 
                 $error = $this->moyskladService->updateBundle($bundle, $userBundle);
                 if ($error) {
-                    $this->report->update([
-                        'action' => 'Комлект не обновлен',
+                    $this->report->events()->create([
+                        'status' => false,
+                        'event' => $event->toArray(),
+                        'message' => 'Комлект не обновлен',
+                        'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
                         'itemable_id' => $userBundle->getKey(),
                         'itemable_type' => get_class($userBundle),
-                        'payload' => $event->toArray()
                     ]);
-                    throw new \Exception($error);
+                    return;
                 }
 
-                $this->report->update([
-                    'action' => 'Комлект обновлен',
+                $this->report->events()->create([
+                    'status' => true,
+                    'event' => $event->toArray(),
+                    'message' => 'Комлект обновлен',
+                    'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                     'itemable_id' => $userBundle->getKey(),
-                    'itemable_type' => get_class($userBundle)
+                    'itemable_type' => get_class($userBundle),
                 ]);
-
             }
 
         });
@@ -414,15 +452,22 @@ class MoyskladWebhookProcessService
 
             $error = $this->moyskladService->createBundle($bundle);
             if (is_string($error)) {
-                $this->report->update([
-                    'action' => 'Комлект не создан',
-                    'payload' => $event->toArray()
+                $this->report->events()->create([
+                    'status' => false,
+                    'event' => $event->toArray(),
+                    'message' => 'Комлект не создан',
+                    'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
+                    'itemable_id' => null,
+                    'itemable_type' => null,
                 ]);
-                throw new \Exception($error);
+                return;
             }
 
-            $this->report->update([
-                'action' => 'Комлект создан',
+            $this->report->events()->create([
+                'status' => true,
+                'event' => $event->toArray(),
+                'message' => 'Комлект создан',
+                'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                 'itemable_id' => $error->getKey(),
                 'itemable_type' => get_class($error)
             ]);

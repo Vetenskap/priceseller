@@ -4,6 +4,7 @@ namespace Modules\Moysklad\Models;
 
 use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MoyskladWebhookReport extends MainModel
@@ -26,6 +27,11 @@ class MoyskladWebhookReport extends MainModel
         'payload' => 'collection',
         'status' => 'boolean',
     ];
+
+    public function events(): HasMany
+    {
+        return $this->hasMany(MoyskladWebhookReportEvent::class, 'moysklad_webhook_report_id', 'id');
+    }
 
     public function moyskladWebhook(): BelongsTo
     {
