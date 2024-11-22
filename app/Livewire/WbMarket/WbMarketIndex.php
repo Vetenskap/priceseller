@@ -27,7 +27,6 @@ class WbMarketIndex extends BaseComponent
     public function mount()
     {
         $this->sortBy = 'wb_markets.updated_at';
-        dd($this->markets());
     }
 
     public function destroy($id): void
