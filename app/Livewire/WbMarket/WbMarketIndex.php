@@ -27,6 +27,7 @@ class WbMarketIndex extends BaseComponent
     public function mount()
     {
         $this->sortBy = 'wb_markets.updated_at';
+        dd($this->markets());
     }
 
     public function destroy($id): void
@@ -43,7 +44,7 @@ class WbMarketIndex extends BaseComponent
     #[Computed]
     public function markets(): LengthAwarePaginator
     {
-        return $this->tapQuery($this->currentUser()->wbMarkets()->select('wb_markets.*', 'organizations.name as organization_name')->join('organizations', 'wb_markets.organization_id', '=', 'organizations.id'));
+        return $this->tapQuery($this->currentUser()->wbMarkets()->select('wb_markets.*', 'organizations.name as organization_name')->leftJoin('organizations', 'wb_markets.organization_id', '=', 'organizations.id'));
 
     }
 
@@ -57,11 +58,6 @@ class WbMarketIndex extends BaseComponent
         }
 
         $this->authorizeForUser($this->user(), 'create', WbMarket::class);
-
-        if (!UsersPermissionsService::checkWbPremission($this->currentUser())) {
-            $this->js((new Toast('Не разрешено', 'Ваша подписка не позволяет добавлять ещё кабинеты'))->warning());
-            return;
-        }
 
         $this->form->store();
 

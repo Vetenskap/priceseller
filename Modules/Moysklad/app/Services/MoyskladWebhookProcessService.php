@@ -203,6 +203,7 @@ class MoyskladWebhookProcessService
                 if (!($error instanceof Item)) {
                     $this->report->update([
                         'action' => 'Товар не создан',
+                        'payload' => $event->toArray()
                     ]);
                     throw new \Exception(is_string($error) ? $error : json_encode($error, JSON_UNESCAPED_UNICODE));
                 }
@@ -227,7 +228,8 @@ class MoyskladWebhookProcessService
                             $this->report->update([
                                 'action' => 'Товар не обновлен ' . $updatedFields->toJson(),
                                 'itemable_id' => $item->getKey(),
-                                'itemable_type' => get_class($item)
+                                'itemable_type' => get_class($item),
+                                'payload' => $event->toArray()
                             ]);
                             throw new \Exception($error);
                         }
@@ -238,6 +240,9 @@ class MoyskladWebhookProcessService
                             'itemable_type' => get_class($item)
                         ]);
                     } else {
+                        $this->report->update([
+                            'payload' => $event->toArray()
+                        ]);
                         throw new \Exception('Товар не найден');
                     }
 
@@ -277,6 +282,7 @@ class MoyskladWebhookProcessService
             if (!($error instanceof Item)) {
                 $this->report->update([
                     'action' => 'Товар не создан',
+                    'payload' => $event->toArray()
                 ]);
                 throw new \Exception(is_string($error) ? $error : json_encode($error, JSON_UNESCAPED_UNICODE));
             }
@@ -297,7 +303,7 @@ class MoyskladWebhookProcessService
             $order = $event->getMeta();
             $order->fetchPositions($this->webhook->moysklad->api_key);
 
-            $order->getPositions()->each(function (Position $position) {
+            $order->getPositions()->each(function (Position $position) use ($event) {
 
                 $item = $this->webhook->moysklad->user->items()->where('ms_uuid', $position->getAssortment()->id)->first();
                 if ($item) {
@@ -311,6 +317,9 @@ class MoyskladWebhookProcessService
                         'itemable_type' => get_class($item)
                     ]);
                 } else {
+                    $this->report->update([
+                        'payload' => $event->toArray()
+                    ]);
                     throw new \Exception('Товар не найден');
                 }
             });
@@ -379,7 +388,8 @@ class MoyskladWebhookProcessService
                     $this->report->update([
                         'action' => 'Комлект не обновлен',
                         'itemable_id' => $userBundle->getKey(),
-                        'itemable_type' => get_class($userBundle)
+                        'itemable_type' => get_class($userBundle),
+                        'payload' => $event->toArray()
                     ]);
                     throw new \Exception($error);
                 }
@@ -406,6 +416,7 @@ class MoyskladWebhookProcessService
             if (is_string($error)) {
                 $this->report->update([
                     'action' => 'Комлект не создан',
+                    'payload' => $event->toArray()
                 ]);
                 throw new \Exception($error);
             }
