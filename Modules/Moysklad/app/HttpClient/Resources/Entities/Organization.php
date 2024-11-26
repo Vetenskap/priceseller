@@ -1,9 +1,8 @@
 <?php
 
-namespace Modules\Moysklad\HttpClient\Resources\Entities\Product;
+namespace Modules\Moysklad\HttpClient\Resources\Entities;
 
 use Illuminate\Support\Collection;
-use Modules\Moysklad\HttpClient\Resources\Entities\Entity;
 
 class Organization extends Entity
 {
