@@ -189,14 +189,14 @@
                                                     @endforeach
                                                 </flux:columns>
                                                 <flux:rows>
-                                                    @foreach($order->getCard()->getProduct()?->itemable->items as $item)
+                                                    @foreach($order->getCard()->getProduct()?->itemable->items as $key => $item)
                                                         <flux:row>
-                                                            <flux:cell>1</flux:cell>
+                                                            <flux:cell>{{$key}}</flux:cell>
                                                             @foreach($fields as $field => $parameters)
                                                                 @if(isset($parameters['in_table']) && $parameters['in_table'])
                                                                     @if($parameters['type'] === 'item_stocks')
                                                                         <flux:cell>{{$item->warehousesStocks()->sum('stock')}}</flux:cell>
-                                                                    @else
+                                                                    @elseif($parameters['in_table'])
                                                                         <flux:cell>{{$item[$field]}}</flux:cell>
                                                                     @endif
                                                                 @endif
