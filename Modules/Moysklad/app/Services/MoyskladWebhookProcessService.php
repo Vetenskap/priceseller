@@ -215,7 +215,7 @@ class MoyskladWebhookProcessService
                     'status' => true,
                     'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
                     'message' => 'Товар создан',
-                    'exception' => [],
+                    'exception' => json_encode([]),
                     'itemable_id' => $error->getKey(),
                     'itemable_type' => get_class($error),
                 ]);
