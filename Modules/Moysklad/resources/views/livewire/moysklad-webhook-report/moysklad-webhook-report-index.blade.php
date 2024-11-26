@@ -29,7 +29,8 @@
                                 {{$report->status ? 'Не обработано' : 'Обработано'}}
                             </flux:badge>
                         </flux:cell>
-                        <flux:cell>{{$report->events()->where('status', true)->count()}}/{{$report->events()->count()}}</flux:cell>
+                        <flux:cell>{{$report->events()->where('status', true)->count()}}
+                            /{{$report->events()->count()}}</flux:cell>
                         <flux:cell>
                             <flux:textarea readonly>{{$report->payload}}</flux:textarea>
                         </flux:cell>
@@ -39,18 +40,17 @@
                         <flux:cell>{{$report->created_at}}</flux:cell>
                         <flux:cell>{{$report->updated_at}}</flux:cell>
                         <flux:cell>
-                            @if($report->status != 0)
-                                <flux:tooltip content="Повторить обработку">
-                                    <flux:button
-                                        icon="arrow-up-tray"
-                                        wire:click="repeat({{json_encode($report->getKey())}})"
-                                        wire:target="repeat({{json_encode($report->getKey())}})"
-                                    />
-                                </flux:tooltip>
-                            @endif
+                            <flux:tooltip content="Повторить обработку">
+                                <flux:button
+                                    icon="arrow-up-tray"
+                                    wire:click="repeat({{json_encode($report->getKey())}})"
+                                    wire:target="repeat({{json_encode($report->getKey())}})"
+                                />
+                            </flux:tooltip>
                         </flux:cell>
                         <flux:cell>
-                            <flux:button icon="eye" size="sm" :href="route('moysklad.webhooks.reports.show', ['report' => $report])"/>
+                            <flux:button icon="eye" size="sm"
+                                         :href="route('moysklad.webhooks.reports.show', ['report' => $report])"/>
                         </flux:cell>
                     </flux:row>
                 @endforeach

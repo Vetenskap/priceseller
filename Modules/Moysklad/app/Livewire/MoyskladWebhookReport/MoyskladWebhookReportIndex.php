@@ -27,10 +27,6 @@ class MoyskladWebhookReportIndex extends Component
     {
         $report = MoyskladWebhookReport::find($id);
 
-        if (!$report->status) {
-            abort(403);
-        }
-
         if ($report->payload->isNotEmpty()) {
             MoyskladWebhookProcess::dispatch($report->payload, $report->moyskladWebhook);
             $report->delete();

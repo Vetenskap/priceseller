@@ -50,8 +50,8 @@
                     <flux:rows>
                         @foreach($this->suppliers as $supplier)
                             <flux:row :key="$supplier->getKey()">
-                                <flux:cell>{{collect($moyskladSuppliers)->firstWhere('id', $supplier->moysklad_supplier_uuid)['name']}}</flux:cell>
                                 <flux:cell>{{$supplier->supplier->name}}</flux:cell>
+                                <flux:cell>{{collect($moyskladSuppliers)->firstWhere('id', $supplier->moysklad_supplier_uuid)['name']}}</flux:cell>
                                 <flux:cell align="right">
                                     <flux:button icon="trash"
                                                  variant="danger"

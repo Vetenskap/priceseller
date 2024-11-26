@@ -30,6 +30,11 @@ class AssemblyIndex extends ModuleComponent
         AssemblyWbService::loadSupplies($market);
     }
 
+    public function ozonBarcodes()
+    {
+        return view('assembly::livewire.assembly.assembly-ozon-barcodes');
+    }
+
     public function render()
     {
         if (!$this->user()->can('view-assembly')) {

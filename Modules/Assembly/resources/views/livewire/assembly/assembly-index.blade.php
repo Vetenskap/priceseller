@@ -40,21 +40,20 @@
                             <flux:input label="Конечная дата" type="date" wire:model="endDateOzon"/>
                         </div>
                         @foreach($this->currentUser()->ozonMarkets as $market)
-                            @if($market->warehouse->isNotEmpty())
-
+                            @if($market->warehouses->isNotEmpty())
+                                <flux:card>
+                                    <div class="flex max-sm:flex-wrap gap-6 items-center">
+                                        <flux:heading size="lg">{{$market->name}}</flux:heading>
+                                        @foreach($market->warehouses as $warehouse)
+                                            <flux:button
+                                                :href="route('assembly.ozon', ['warehouse' => $warehouse, 'startDate' => $startDateOzon, 'endDate' => $endDateOzon, 'status' => $statusOzon])"
+                                                class="!bg-[#005BFF] !text-white">{{$warehouse->name}}</flux:button>
+                                        @endforeach
+                                    </div>
+                                </flux:card>
                             @endif
-                            <flux:card>
-                                <div class="flex max-sm:flex-wrap gap-6 items-center">
-                                    <flux:heading size="lg">{{$market->name}}</flux:heading>
-                                    @foreach($market->warehouses as $warehouse)
-                                        <flux:button
-                                            :href="route('assembly.ozon', ['warehouse' => $warehouse, 'startDate' => $startDateOzon, 'endDate' => $endDateOzon, 'status' => $statusOzon])"
-                                            class="!bg-[#005BFF] !text-white">{{$warehouse->name}}</flux:button>
-                                    @endforeach
-                                </div>
-                            </flux:card>
                         @endforeach
-                        <flux:button>Шрихкоды</flux:button>
+                        <flux:button class="!bg-[#005BFF] !text-white" href="{{route('assembly.ozon.barcodes')}}">Шрихкоды</flux:button>
                     </flux:card>
                 </x-blocks.main-block>
             @endif

@@ -32,6 +32,7 @@ class Counterparty extends Entity
     public function toArray(): array
     {
         return [
+            'id' => $this->id,
             'name' => $this->name
         ];
     }

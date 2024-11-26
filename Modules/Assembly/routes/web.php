@@ -20,4 +20,5 @@ Route::prefix('modules')->group( function () {
     Route::get('/assembly/wb/{market}', \Modules\Assembly\Livewire\Assembly\AssemblyWb::class)->name('assembly.wb');
     Route::get('/assembly/wb/supplies/{supply}', \Modules\Assembly\Livewire\Assembly\AssemblyWbSupply::class)->name('assembly.wb.supply');
     Route::get('/assembly/wb/supplies/{supply}/stickers', [\Modules\Assembly\Http\Controllers\AssemblyWbSupplyStickersController::class, 'index'])->name('assembly.wb.stickers');
+    Route::get('/assembly/barcodes', [\Modules\Assembly\Http\Controllers\AssembltOzonBarcodesController::class, 'index'])->name('assembly.ozon.barcodes');
 });
