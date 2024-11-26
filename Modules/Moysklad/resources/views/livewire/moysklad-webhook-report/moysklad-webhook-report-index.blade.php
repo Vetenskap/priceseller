@@ -21,26 +21,26 @@
                              wire:click="sort('updated_at')">Дата конца обработки
                 </flux:column>
             </flux:columns>
-            <flux:rows class="flex">
+            <flux:rows>
                 @foreach($this->reports as $report)
-                    <flux:row :key="$report->getKey()" class="flex">
-                        <flux:cell class="flex-1">
+                    <flux:row :key="$report->getKey()">
+                        <flux:cell>
                             <flux:badge size="sm" :color="$report->status ? 'red' : 'lime'">
                                 {{$report->status ? 'Не обработано' : 'Обработано'}}
                             </flux:badge>
                         </flux:cell>
-                        <flux:cell class="flex-1">{{$report->events()->where('status', true)->count()}}
+                        <flux:cell>{{$report->events()->where('status', true)->count()}}
                             {{$report->events()->count()}}
                         </flux:cell>
-                        <flux:cell class="flex-1">
+                        <flux:cell>
                             <flux:textarea readonly>{{$report->payload}}</flux:textarea>
                         </flux:cell>
-                        <flux:cell class="flex-1">
+                        <flux:cell>
                             <flux:textarea readonly>{{$report->exception}}</flux:textarea>
                         </flux:cell>
-                        <flux:cell class="flex-1">{{$report->created_at}}</flux:cell>
-                        <flux:cell class="flex-1">{{$report->updated_at}}</flux:cell>
-                        <flux:cell class="flex-1">
+                        <flux:cell>{{$report->created_at}}</flux:cell>
+                        <flux:cell>{{$report->updated_at}}</flux:cell>
+                        <flux:cell>
                             <flux:tooltip content="Повторить обработку">
                                 <flux:button
                                     icon="arrow-up-tray"
@@ -49,7 +49,7 @@
                                 />
                             </flux:tooltip>
                         </flux:cell>
-                        <flux:cell class="flex-1">
+                        <flux:cell>
                             <flux:button icon="eye" size="sm"
                                          :href="route('moysklad.webhooks.reports.show', ['report' => $report])"/>
                         </flux:cell>
