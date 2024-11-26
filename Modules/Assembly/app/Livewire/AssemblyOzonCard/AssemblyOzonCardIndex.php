@@ -51,6 +51,9 @@ class AssemblyOzonCardIndex extends ModuleComponent
             $item = Arr::add($item, 'type', 'item');
             return Arr::add($item, 'in_table', true);
         });
+        $this->fields['Остатки товара со складов (ps)'] = [
+            ['name' => 'all_stocks', 'label' => 'Остатки на складах', 'type' => 'item_stocks', 'in_table' => true]
+        ];
         $this->fields['Доп. поля товара (ps)'] = $this->currentUser()->itemAttributes->map(function (ItemAttribute $attribute) {
             return ['name' => $attribute->id, 'label' => $attribute->name, 'type' => 'attribute_item', 'in_table' => true];
         })->toArray();

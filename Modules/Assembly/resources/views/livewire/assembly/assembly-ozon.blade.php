@@ -89,13 +89,13 @@
                                                                 $value = null;
                                                                 switch ($parameters['type']) {
                                                                     case 'item':
-                                                                        if ($field === 'code') $value = $product->getProduct()->itemable[$field];
-                                                                        if ($product->getProduct()->itemable instanceof \App\Models\Item) {
-                                                                            $value = $product->getProduct()->itemable[$field];
+                                                                        if ($field === 'code') $value = $product->getProduct()?->itemable[$field];
+                                                                        if ($product->getProduct()?->itemable instanceof \App\Models\Item) {
+                                                                            $value = $product->getProduct()?->itemable[$field];
                                                                         }
                                                                         break;
                                                                     case 'attribute_item':
-                                                                        $value = $product->getProduct()->itemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
+                                                                        $value = $product->getProduct()?->itemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
                                                                         break;
                                                                     case 'product':
                                                                         $value = $product->getProduct()[$field];
@@ -109,14 +109,21 @@
                                                                     case 'order_attribute_product':
                                                                         $value = $product->getAttribute()->{\Illuminate\Support\Str::camel('get' . $field)}();
                                                                         break;
+                                                                    case 'item_stocks':
+                                                                        if ($order->getCard()->getProduct()?->itemable instanceof \App\Models\Item) {
+                                                                            $value = $order->getCard()->getProduct()?->itemable->warehousesStocks()->sum('stock');
+                                                                        } else {
+                                                                            $value = $order->getCard()->getProduct()?->itemable->items->min(fn (\App\Models\Item $item) => $item->pivot->multiplicity)->warehousesStocks()->sum('stock');
+                                                                        }
+                                                                        break;
                                                                 }
                                                                 if ($value instanceof \Illuminate\Support\Collection) $value = $value->toJson(JSON_UNESCAPED_UNICODE);
                                                                 if (is_bool($value)) $value = $value ? 'да' : 'нет';
                                                             @endphp
                                                             @if(
-                                                                ($product->getProduct()->itemable instanceof \App\Models\Bundle && $field === 'code') ||
-                                                            ($product->getProduct()->itemable instanceof \App\Models\Bundle && $parameters['type'] !== 'item') ||
-                                                            $product->getProduct()->itemable instanceof \App\Models\Item
+                                                                ($product->getProduct()?->itemable instanceof \App\Models\Bundle && $field === 'code') ||
+                                                            ($product->getProduct()?->itemable instanceof \App\Models\Bundle && $parameters['type'] !== 'item' && $parameters['type'] !== 'item_stocks') ||
+                                                            $product->getProduct()?->itemable instanceof \App\Models\Item
                                                             )
 
                                                             @endif
@@ -141,13 +148,13 @@
                                                                         $value = null;
                                                                         switch ($parameters['type']) {
                                                                             case 'item':
-                                                                                if ($field === 'code') $value = $product->getProduct()->itemable[$field];
-                                                                                if ($product->getProduct()->itemable instanceof \App\Models\Item) {
-                                                                                    $value = $product->getProduct()->itemable[$field];
+                                                                                if ($field === 'code') $value = $product->getProduct()?->itemable[$field];
+                                                                                if ($product->getProduct()?->itemable instanceof \App\Models\Item) {
+                                                                                    $value = $product->getProduct()?->itemable[$field];
                                                                                 }
                                                                                 break;
                                                                             case 'attribute_item':
-                                                                                $value = $product->getProduct()->itemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
+                                                                                $value = $product->getProduct()?->itemable->attributesValues()->where('item_attribute_id', $field)->first()->value;
                                                                                 break;
                                                                             case 'product':
                                                                                 $value = $product->getProduct()[$field];
@@ -183,7 +190,7 @@
                                                         </flux:card>
                                                     </div>
                                                 </div>
-                                                @if(!empty(Arr::where($fields, fn($item) => $item['in_table'] ?? false)) && $order->getCard()->getProduct()->itemable instanceof \App\Models\Bundle)
+                                                @if(!empty(Arr::where($fields, fn($item) => $item['in_table'] ?? false)) && $order->getCard()->getProduct()?->itemable instanceof \App\Models\Bundle)
                                                     <flux:card class="space-y-6">
                                                         <flux:heading size="xl">Состав комплекта</flux:heading>
                                                         <flux:table>
@@ -196,11 +203,13 @@
                                                                 @endforeach
                                                             </flux:columns>
                                                             <flux:rows>
-                                                                @foreach($product->getProduct()->itemable->items as $item)
+                                                                @foreach($product->getProduct()?->itemable->items as $item)
                                                                     <flux:row>
                                                                         <flux:cell>1</flux:cell>
                                                                         @foreach($fields as $field => $parameters)
-                                                                            @if(isset($parameters['in_table']) && $parameters['in_table'])
+                                                                            @if($parameters['type'] === 'item_stocks')
+                                                                                <flux:cell>{{$item->warehousesStocks()->sum('stock')}}</flux:cell>
+                                                                            @else
                                                                                 <flux:cell>{{$item[$field]}}</flux:cell>
                                                                             @endif
                                                                         @endforeach
