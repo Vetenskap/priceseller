@@ -211,7 +211,7 @@
                                             <flux:rows>
                                                 @foreach($order->getCard()->getProduct()?->itemable->items as $key => $item)
                                                     <flux:row>
-                                                        <flux:cell>{{$key}}</flux:cell>
+                                                        <flux:cell>{{$key++}}</flux:cell>
                                                         @foreach($fields as $field => $parameters)
                                                             @if($parameters['type'] === 'item_stocks')
                                                                 <flux:cell>{{$item->warehousesStocks()->sum('stock')}}</flux:cell>
