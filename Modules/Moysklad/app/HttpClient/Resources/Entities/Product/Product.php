@@ -3,11 +3,11 @@
 namespace Modules\Moysklad\HttpClient\Resources\Entities\Product;
 
 use Illuminate\Support\Collection;
-use Modules\Moysklad\HttpClient\MoyskladClient;
 use Modules\Moysklad\HttpClient\Resources\Entities\Counterparty;
 use Modules\Moysklad\HttpClient\Resources\Entities\Employee;
 use Modules\Moysklad\HttpClient\Resources\Entities\Entity;
 use Modules\Moysklad\HttpClient\Resources\Entities\Group;
+use Modules\Moysklad\HttpClient\Resources\Entities\Organization;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Arrays\Pack;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Metadata\Attribute;
 use Modules\Moysklad\HttpClient\Resources\Entities\ProductFolder;
