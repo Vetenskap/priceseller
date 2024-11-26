@@ -107,7 +107,11 @@
                                                         <flux:cell>{{$supply->scan_dt}}</flux:cell>
                                                         <flux:cell align="right">
                                                             <flux:button
-                                                                size="sm" icon="trash" wire:click="destroyWbSupply({{json_encode($supply->getKey())}})" wire:target="destroyWbSupply({{json_encode($supply->getKey())}})"/>
+                                                                size="sm"
+                                                                icon="trash"
+                                                                variant="danger"
+                                                                wire:click="destroyWbSupply({{json_encode($supply->getKey())}})"
+                                                                wire:target="destroyWbSupply({{json_encode($supply->getKey())}})"/>
                                                         </flux:cell>
                                                         <flux:cell align="right">
                                                             <flux:button

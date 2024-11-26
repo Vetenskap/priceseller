@@ -14,10 +14,10 @@ class CustomerOrder extends Entity
 {
     const ENDPOINT = '/entity/customerorder/';
 
-    protected Collection $positions;
+    protected ?Collection $positions = null;
     protected ?Project $project = null;
     protected ?Store $store = null;
-    protected Counterparty $agent;
+    protected ?Counterparty $agent = null;
 
     public function __construct(?Collection $customerOrder = null)
     {
@@ -103,7 +103,7 @@ class CustomerOrder extends Entity
             'positions' => $this->positions?->map(fn (Position $position) => $position->toArray())->toArray(),
             'project' => $this->project?->toArray(),
             'store' => $this->store?->toArray(),
-            'agent' => $this->agent->toArray(),
+            'agent' => $this->agent?->toArray(),
         ];
     }
 
