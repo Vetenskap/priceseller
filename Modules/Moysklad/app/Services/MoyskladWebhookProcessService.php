@@ -246,7 +246,7 @@ class MoyskladWebhookProcessService
                         $this->report->events()->create([
                             'status' => true,
                             'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
-                            'message' => 'Товар обновлен ' . $updatedFields->toJson(),
+                            'message' => 'Товар обновлен ' . $updatedFields->toJson(JSON_UNESCAPED_UNICODE),
                             'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                             'itemable_id' => $item->getKey(),
                             'itemable_type' => get_class($item),
