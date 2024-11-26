@@ -71,7 +71,7 @@ class SupplierReportService
             $report->save();
 
             try {
-                event(new NotificationEvent($supplier->user_id, $supplier->name, 'Поставщик успешно выгружен' . ($message ? ': ' . $message : ''), 0, route('supplier.report.edit', ['report' => $report])));
+                event(new NotificationEvent($supplier->user_id, $supplier->name, 'Поставщик успешно выгружен' . ($message ? ': ' . $message : ''), 0, route('supplier.report.edit', ['supplier' => $report->supplier, 'report' => $report])));
 
                 $user = $supplier->user;
 
@@ -103,7 +103,7 @@ class SupplierReportService
             $report->save();
 
             try {
-                event(new NotificationEvent($supplier->user_id, $supplier->name, 'Ошибка в выгрузке' . ($message ? ': ' . $message : ''), 1, route('supplier.report.edit', ['report' => $report])));
+                event(new NotificationEvent($supplier->user_id, $supplier->name, 'Ошибка в выгрузке' . ($message ? ': ' . $message : ''), 1, route('supplier.report.edit', ['supplier' => $report->supplier, 'report' => $report])));
 
                 $user = $supplier->user;
 
@@ -139,7 +139,7 @@ class SupplierReportService
                     ]);
 
                     try {
-                        event(new NotificationEvent($report->supplier->user_id, $report->supplier->name, 'Вышло время выгрузки', 1, route('supplier.report.edit', ['report' => $report])));
+                        event(new NotificationEvent($report->supplier->user_id, $report->supplier->name, 'Вышло время выгрузки', 1, route('supplier.report.edit', ['supplier' => $report->supplier, 'report' => $report])));
 
                         $user = $report->supplier->user;
 
