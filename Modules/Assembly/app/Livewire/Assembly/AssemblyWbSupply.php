@@ -152,16 +152,14 @@ class AssemblyWbSupply extends BaseComponent
             ->pluck(null, 'field')
             ->toArray();
 
-        $this->orders = Cache::rememberForever('test1', function () use ($wbSupply) {
-            $ordersIds = $wbSupply->getOrders()->map(fn (Order $order) => $order->getId())->toArray();
-            $stickers = Sticker::getFromOrderIds($ordersIds, $this->supply->market->api_key);
+        $ordersIds = $wbSupply->getOrders()->map(fn(Order $order) => $order->getId())->toArray();
+        $stickers = Sticker::getFromOrderIds($ordersIds, $this->supply->market->api_key);
 
-            return $wbSupply->getOrders()->map(function (Order $order) use ($stickers) {
-                $order->fetchCard($this->supply->market->api_key);
-                $order->getCard()->loadLink($this->supply->market);
-                $order->setSticker($stickers->firstWhere(fn (Sticker $sticker) => $sticker->getOrderId() === $order->getId()));
-                return $order;
-            });
+        $this->orders = $wbSupply->getOrders()->map(function (Order $order) use ($stickers) {
+            $order->fetchCard($this->supply->market->api_key);
+            $order->getCard()->loadLink($this->supply->market);
+            $order->setSticker($stickers->firstWhere(fn(Sticker $sticker) => $sticker->getOrderId() === $order->getId()));
+            return $order;
         });
 
     }
