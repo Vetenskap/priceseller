@@ -8,7 +8,7 @@ class Organization extends Entity
 {
     const ENDPOINT = '/entity/organization/';
 
-    protected string $name;
+    protected ?string $name = null;
 
     public function __construct(?Collection $organization = null)
     {
@@ -27,5 +27,13 @@ class Organization extends Entity
     public function getName(): string
     {
         return $this->name;
+    }
+
+    public function toArray(): array
+    {
+        return [
+            'id' => $this->id,
+            'name' => $this->name
+        ];
     }
 }
