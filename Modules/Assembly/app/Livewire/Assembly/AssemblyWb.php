@@ -43,6 +43,9 @@ class AssemblyWb extends ModuleComponent
         ]);
 
         AssemblyWbService::createSupply($this->market, $this->supplyName, collect($this->selectedOrders)->filter()->keys());
+
+        \Flux::modal('create-supply')->close();
+        \Flux::toast('Поставка успешно создана');
     }
 
     public function updatedSortBy(): void

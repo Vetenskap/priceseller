@@ -50,7 +50,7 @@
                 <x-blocks.main-block>
                     @if(count($orders) > 0)
                         @foreach($orders as $order)
-                            <div>
+                            <div wire:key="{{$order->getId()}}">
                                 <flux:card>
                                     <flux:heading
                                             :size="match($mainFields['name_heading']['size_level']) { '1' => 'base', '2' => 'lg', '3' => 'xl' }">

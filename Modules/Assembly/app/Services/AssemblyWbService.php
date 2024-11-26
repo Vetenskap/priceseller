@@ -13,8 +13,10 @@ class AssemblyWbService
     {
         $supplies = Supply::getAll($market->api_key);
         $supplies->each(function (Supply $supply) use ($market) {
-            if (!$market->supplies()->where('id_supply', $supply->getId())->exists() && !$supply->isDone()) {
-                $market->supplies()->create($supply->toModel());
+            if ($modelSupply = $market->supplies()->where('id_supply', $supply->getId())->first()) {
+                $modelSupply->update($supply->toModel());
+            } else {
+                if (!$supply->isDone()) $market->supplies()->create($supply->toModel());
             }
         });
     }
