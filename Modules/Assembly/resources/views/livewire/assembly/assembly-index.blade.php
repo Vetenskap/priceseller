@@ -40,7 +40,7 @@
                             <flux:input label="Конечная дата" type="date" wire:model="endDateOzon"/>
                         </div>
                         @foreach($this->currentUser()->ozonMarkets as $market)
-                            @if($market->$warehouse->isNotEmpty())
+                            @if($market->warehouse->isNotEmpty())
 
                             @endif
                             <flux:card>
