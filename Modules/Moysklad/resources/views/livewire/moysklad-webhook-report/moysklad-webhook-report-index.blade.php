@@ -21,9 +21,9 @@
                              wire:click="sort('updated_at')">Дата конца обработки
                 </flux:column>
             </flux:columns>
-            <flux:rows>
+            <flux:rows class="flex">
                 @foreach($this->reports as $report)
-                    <flux:row :key="$report->getKey()">
+                    <flux:row :key="$report->getKey()" class="flex-1 resize-none">
                         <flux:cell>
                             <flux:badge size="sm" :color="$report->status ? 'red' : 'lime'">
                                 {{$report->status ? 'Не обработано' : 'Обработано'}}

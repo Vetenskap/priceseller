@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use JetBrains\PhpStorm\NoReturn;
 use Modules\Moysklad\HttpClient\Resources\Context\CompanySettings\PriceType;
+use Modules\Moysklad\HttpClient\Resources\Entities\Counterparty;
 use Modules\Moysklad\HttpClient\Resources\Entities\EntityList;
 use Modules\Moysklad\HttpClient\Resources\Entities\Product\Product;
 use Modules\Moysklad\HttpClient\Resources\Objects\SalePrice;
@@ -42,11 +43,9 @@ class Test extends Command
      */
     #[NoReturn] public function handle(): void
     {
-        $item = Item::where('code', '1000155КТ')->first();
-        $bundle = Bundle::where('code', '1000155')->first();
-        $wbItem = $bundle->wbItems()->first();
-
-        $service = new WbItemPriceService($item->supplier, $wbItem->market, [$item->supplier->warehouses->first()->id]);
-        $service->updateStock();
+        $supplier = new Counterparty();
+        $supplier->setId('e63260d3-b767-11ed-0a80-025b00150942');
+        $supplier->fetch('9c040a891e844d8e7f252ebd44c3ef20f71f5786');
+        dd($supplier);
     }
 }

@@ -191,6 +191,7 @@ class MoyskladWebhookProcessService
 
             $product = $event->getMeta();
             $product->fetch($this->webhook->moysklad->api_key);
+            $product->getSupplier()->fetch($this->webhook->moysklad->api_key);
 
             if (!Item::where('ms_uuid', $product->id)->exists()) {
 
