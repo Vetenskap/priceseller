@@ -49,10 +49,18 @@ class AssemblyWbSupply extends BaseComponent
                         if (isset($order->getCard()->getProduct()[$this->sortBy])) {
                             return $order->getCard()->getProduct()[$this->sortBy];
                         } else {
-                            if ($order->getCard()->getProduct()->itemable instanceof Item) {
-                                return $order->getCard()->getProduct()->itemable[$this->sortBy];
+                            if ($this->sortBy === 'all_stocks') {
+                                if ($order->getCard()->getProduct()?->itemable instanceof Item) {
+                                    return $order->getCard()->getProduct()?->itemable->warehousesStocks()->sum('stock');
+                                } else {
+                                    return $order->getCard()->getProduct()?->itemable->items->sortBy(fn(Item $item) => $item->warehousesStocks()->sum('stock'))->first()->warehousesStocks()->sum('stock');
+                                }
+                            }
+
+                            if ($order->getCard()->getProduct()?->itemable instanceof Item) {
+                                return $order->getCard()->getProduct()?->itemable[$this->sortBy];
                             } else {
-                                return $order->getCard()->getProduct()->itemable->items->sortBy(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
+                                return $order->getCard()->getProduct()?->itemable->items->sortBy(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
                             }
                         }
                     }
@@ -69,10 +77,18 @@ class AssemblyWbSupply extends BaseComponent
                         if (isset($order->getCard()->getProduct()[$this->sortBy])) {
                             return $order->getCard()->getProduct()[$this->sortBy];
                         } else {
-                            if ($order->getCard()->getProduct()->itemable instanceof Item) {
-                                return $order->getCard()->getProduct()->itemable[$this->sortBy];
+                            if ($this->sortBy === 'all_stocks') {
+                                if ($order->getCard()->getProduct()?->itemable instanceof Item) {
+                                    return $order->getCard()->getProduct()?->itemable->warehousesStocks()->sum('stock');
+                                } else {
+                                    return $order->getCard()->getProduct()?->itemable->items->sortByDesc(fn(Item $item) => $item->warehousesStocks()->sum('stock'))->first()->warehousesStocks()->sum('stock');
+                                }
+                            }
+
+                            if ($order->getCard()->getProduct()?->itemable instanceof Item) {
+                                return $order->getCard()->getProduct()?->itemable[$this->sortBy];
                             } else {
-                                return $order->getCard()->getProduct()->itemable->items->sortByDesc(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
+                                return $order->getCard()->getProduct()?->itemable->items->sortByDesc(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
                             }
                         }
                     }

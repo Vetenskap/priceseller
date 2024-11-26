@@ -25,6 +25,10 @@ class UserNotificationIndex extends BaseComponent
             $this->userNotification = $this->currentUser()->userNotification;
             $this->actionsIds = $this->userNotification->actions()->where('enabled', true)->pluck('notification_action_id')->toArray();
         }
+
+        if ($link = $this->currentUser()->telegramLinks()->first()) {
+            $this->token = $link->token;
+        }
     }
 
     public function update()
@@ -46,6 +50,11 @@ class UserNotificationIndex extends BaseComponent
     public function createLink()
     {
         $token = Str::uuid()->toString();
+
+        if ($link = $this->currentUser()->telegramLinks()->first()) {
+            $this->addError('telegram_link', 'Вы уже создали ссылку. До создания новой: ' . now()->diff($link->expires_at)->format('%i:%s'));
+            return;
+        }
 
         $this->currentUser()->telegramLinks()->create([
             'token' => $token,

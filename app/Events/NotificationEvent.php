@@ -22,7 +22,7 @@ class NotificationEvent implements ShouldBroadcastNow
     {
         Notification::create([
             'user_id' => $this->userId,
-            'message' => "[" . now()->setTimezone(Helpers::getUserTimeZone(User::findOrFail($this->userId))) . "] (" . $this->title . ")" . $this->message,
+            'message' => "[" . now()->setTimezone(Helpers::getUserTimeZone(User::findOrFail($this->userId))) . "] (" . $this->title . ") " . $this->message,
             'status' => $this->status,
             'href' => $this->href
         ]);

@@ -49,17 +49,25 @@ class AssemblyOzon extends BaseComponent
 
                                 /** @var Product $product */
                                 $product = $posting->getProducts()->sortBy(function (Product $product) {
-                                    if ($product->getProduct()->itemable instanceof Item) {
-                                        return $product->getProduct()->itemable[$this->sortBy];
+                                    if ($product->getProduct()?->itemable instanceof Item) {
+                                        return $product->getProduct()?->itemable[$this->sortBy];
                                     } else {
-                                        return $product->getProduct()->itemable->items->sortBy(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
+                                        return $product->getProduct()?->itemable->items->sortBy(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
                                     }
                                 })->first();
 
-                                if ($product->getProduct()->itemable instanceof Item) {
-                                    return $product->getProduct()->itemable[$this->sortBy];
+                                if ($this->sortBy === 'all_stocks') {
+                                    if ($product->getProduct()?->itemable instanceof Item) {
+                                        return $product->getProduct()?->itemable->warehousesStocks()->sum('stock');
+                                    } else {
+                                        return $product->getProduct()?->itemable->items->sortBy(fn(Item $item) => $item->warehousesStocks()->sum('stock'))->first()->warehousesStocks()->sum('stock');
+                                    }
+                                }
+
+                                if ($product->getProduct()?->itemable instanceof Item) {
+                                    return $product->getProduct()?->itemable[$this->sortBy];
                                 } else {
-                                    return $product->getProduct()->itemable->items->first()[$this->sortBy];
+                                    return $product->getProduct()?->itemable->items->first()[$this->sortBy];
                                 }
                             }
                         }
@@ -84,12 +92,20 @@ class AssemblyOzon extends BaseComponent
 
                                 /** @var Product $product */
                                 $product = $posting->getProducts()->sortByDesc(function (Product $product) {
-                                    if ($product->getProduct()->itemable instanceof Item) {
-                                        return $product->getProduct()->itemable[$this->sortBy];
+                                    if ($product->getProduct()?->itemable instanceof Item) {
+                                        return $product->getProduct()?->itemable[$this->sortBy];
                                     } else {
-                                        return $product->getProduct()->itemable->items->sortByDesc(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
+                                        return $product->getProduct()?->itemable->items->sortByDesc(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
                                     }
                                 })->first();
+
+                                if ($this->sortBy === 'all_stocks') {
+                                    if ($product->getProduct()?->itemable instanceof Item) {
+                                        return $product->getProduct()?->itemable->warehousesStocks()->sum('stock');
+                                    } else {
+                                        return $product->getProduct()?->itemable->items->sortByDesc(fn(Item $item) => $item->warehousesStocks()->sum('stock'))->first()->warehousesStocks()->sum('stock');
+                                    }
+                                }
 
                                 if ($product->getProduct()->itemable instanceof Item) {
                                     return $product->getProduct()->itemable[$this->sortBy];

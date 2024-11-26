@@ -10,6 +10,7 @@
         @else
             <flux:button wire:click="createLink" icon-trailing="plus">Создать ссылку</flux:button>
         @endif
+        <flux:error name="telegram_link" />
     </flux:modal>
 
     <x-layouts.header name="Уведомления"/>
