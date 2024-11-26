@@ -17,6 +17,12 @@ class AssemblyIndex extends ModuleComponent
         $this->endDateOzon = now()->addYear()->format('Y-m-d');
     }
 
+    public function destroyWbSupply($id)
+    {
+        $supply = \Modules\Assembly\Models\AssemblyWbSupply::findOrFail($id);
+        $supply->delete();
+    }
+
     public function loadSuppliesWb($marketId)
     {
         $market = $this->currentUser()->wbMarkets()->findOrFail($marketId);

@@ -124,8 +124,6 @@
                                                     case 'item_stocks':
                                                         if ($order->getCard()->getProduct()?->itemable instanceof \App\Models\Item) {
                                                             $value = $order->getCard()->getProduct()?->itemable->warehousesStocks()->sum('stock');
-                                                        } else {
-                                                            $value = $order->getCard()->getProduct()?->itemable->items->min(fn (\App\Models\Item $item) => $item->pivot->multiplicity)->warehousesStocks()->sum('stock');
                                                         }
                                                         break;
                                                 }
