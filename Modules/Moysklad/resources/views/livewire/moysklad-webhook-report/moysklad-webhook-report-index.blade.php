@@ -30,7 +30,7 @@
                             </flux:badge>
                         </flux:cell>
                         <flux:cell>{{$report->events()->where('status', true)->count()}}
-                            {{$report->events()->count()}}
+                            /{{$report->events()->count()}}
                         </flux:cell>
                         <flux:cell>
                             <flux:textarea readonly>{{$report->payload}}</flux:textarea>
