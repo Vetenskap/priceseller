@@ -13,10 +13,12 @@ class UserNotification extends MainModel
         'enabled_telegram',
         'telegram_chat_id',
         'user_id',
+        'enabled_site',
     ];
 
     protected $casts = [
         'enabled_telegram' => 'boolean',
+        'enabled_site' => 'boolean',
     ];
 
     public function actions(): HasMany

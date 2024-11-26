@@ -5,6 +5,7 @@ namespace App\Models;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -151,6 +152,11 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
     public function userNotification(): HasOne
     {
         return $this->hasOne(UserNotification::class, 'user_id', 'id');
+    }
+
+    public function userNotificationActionEnabled(string $action): ?bool
+    {
+        return $this->userNotification->actions()->whereHas('action', fn (Builder $query) => $query->where('name', $action))->first()?->enabled;
     }
 
     public function getTimeZoneAttribute ($value): string

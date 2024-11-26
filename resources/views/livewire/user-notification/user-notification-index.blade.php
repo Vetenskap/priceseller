@@ -32,6 +32,14 @@
         </x-blocks.main-block>
         <x-blocks.main-block>
             <flux:card class="space-y-6">
+                <flux:heading class="text-center" size="xl">Сайт</flux:heading>
+                <div class="flex">
+                    <flux:switch wire:model.live="enabled_site" label="Уведомления на сайте"/>
+                </div>
+            </flux:card>
+        </x-blocks.main-block>
+        <x-blocks.main-block>
+            <flux:card class="space-y-6">
                 <flux:checkbox.group wire:model.live="actionsIds" label="Уведомления">
                     @foreach(\App\Models\NotificationAction::all() as $action)
                         <flux:checkbox checked

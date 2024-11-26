@@ -99,7 +99,7 @@ class Product extends Entity
     protected ?ProductFolder $productFolder = null;
 
     // Expand
-    protected ?Counterparty $supplier = null;
+    protected Counterparty|Organization|null $supplier = null;
 
     // Expand
     protected ?Uom $uom = null;
@@ -179,9 +179,14 @@ class Product extends Entity
         }
 
         if ($product->has('supplier')) {
-            $counterparty = new Counterparty();
-            $counterparty->setId(collect($product->get('supplier'))->toCollectionSpread()->get('meta')->get('href'));
-            $this->supplier = $counterparty;
+            if (collect($product->get('supplier'))->toCollectionSpread()->get('meta')->get('type') === 'counterparty') {
+                $supplier = new Counterparty();
+            } else {
+                $supplier = new Organization();
+            }
+
+            $supplier->setId(collect($product->get('supplier'))->toCollectionSpread()->get('meta')->get('href'));
+            $this->supplier = $supplier;
         }
 
         if ($product->has('alcoholic')) {
@@ -528,7 +533,7 @@ class Product extends Entity
         return $this->productFolder;
     }
 
-    public function getSupplier(): ?Counterparty
+    public function getSupplier(): Counterparty|Organization|null
     {
         return $this->supplier;
     }

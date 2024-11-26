@@ -70,21 +70,7 @@ class SupplierReportService
             $report->status = 0;
             $report->save();
 
-            try {
-                event(new NotificationEvent($supplier->user_id, $supplier->name, 'Поставщик успешно выгружен' . ($message ? ': ' . $message : ''), 0, route('supplier.report.edit', ['supplier' => $report->supplier, 'report' => $report])));
-
-                $user = $supplier->user;
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'supplier'))->exists()
-                ) {
-                    $user->notify(new UserNotification($supplier->name, 'Поставщик успешно выгружен' . ($message ? ': ' . $message : '')));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($supplier->user_id, $supplier->name, 'Поставщик успешно выгружен' . ($message ? ': ' . $message : ''), 0, route('supplier.report.edit', ['supplier' => $report->supplier, 'report' => $report]), 'supplier');
 
             return true;
         }
@@ -102,21 +88,7 @@ class SupplierReportService
             $report->status = 1;
             $report->save();
 
-            try {
-                event(new NotificationEvent($supplier->user_id, $supplier->name, 'Ошибка в выгрузке' . ($message ? ': ' . $message : ''), 1, route('supplier.report.edit', ['supplier' => $report->supplier, 'report' => $report])));
-
-                $user = $supplier->user;
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'supplier'))->exists()
-                ) {
-                    $user->notify(new UserNotification($supplier->name, 'Ошибка в выгрузке' . ($message ? ': ' . $message : '')));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($supplier->user_id, $supplier->name, 'Ошибка в выгрузке' . ($message ? ': ' . $message : ''), 1, route('supplier.report.edit', ['supplier' => $report->supplier, 'report' => $report]), 'supplier');
 
             return true;
         }
@@ -138,21 +110,8 @@ class SupplierReportService
                         'message' => 'Вышло время выгрузки'
                     ]);
 
-                    try {
-                        event(new NotificationEvent($report->supplier->user_id, $report->supplier->name, 'Вышло время выгрузки', 1, route('supplier.report.edit', ['supplier' => $report->supplier, 'report' => $report])));
+                    NotificationService::send($report->supplier->user_id, $report->supplier->name, 'Вышло время выгрузки', 1, route('supplier.report.edit', ['supplier' => $report->supplier, 'report' => $report]), 'supplier');
 
-                        $user = $report->supplier->user;
-
-                        if (
-                            $user->userNotification &&
-                            $user->userNotification->enabled_telegram &&
-                            $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'supplier'))->exists()
-                        ) {
-                            $user->notify(new UserNotification($report->supplier->name, 'Вышло время выгрузки'));
-                        }
-                    } catch (\Throwable $e) {
-                        report($e);
-                    }
                 });
             });
     }

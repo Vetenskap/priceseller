@@ -61,20 +61,7 @@ class WarehouseItemsImportReportService
 
             $report->save();
 
-
-            try {
-                event(new NotificationEvent($user->id, 'Склады', 'Импорт завершен', 0));
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
-                ) {
-                    $user->notify(new UserNotification('Склады', 'Импорт завершен'));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($user->id, 'Склады', 'Импорт завершен', 0, null, 'import');
 
             return true;
         } else {
@@ -90,19 +77,7 @@ class WarehouseItemsImportReportService
                 'message' => 'Ошибка при импорте'
             ]);
 
-            try {
-                event(new NotificationEvent($user->id, 'Склады', 'Ошибка при импорте', 1));
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
-                ) {
-                    $user->notify(new UserNotification('Склады', 'Ошибка при импорте'));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($user->id, 'Склады', 'Ошибка при импорте', 1, null, 'import');
 
             return true;
         } else {
@@ -121,21 +96,7 @@ class WarehouseItemsImportReportService
                         'message' => 'Вышло время импорта'
                     ]);
 
-                    try {
-                        event(new NotificationEvent($report->user_id, 'Склады', 'Вышло время импорта', 1));
-
-                        $user = $report->user;
-
-                        if (
-                            $user->userNotification &&
-                            $user->userNotification->enabled_telegram &&
-                            $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
-                        ) {
-                            $user->notify(new UserNotification('Склады', 'Вышло время импорта'));
-                        }
-                    } catch (\Throwable $e) {
-                        report($e);
-                    }
+                    NotificationService::send($report->user_id, 'Склады', 'Вышло время импорта', 1, null, 'import');
 
                 });
             });

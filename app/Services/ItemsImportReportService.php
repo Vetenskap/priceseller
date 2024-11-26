@@ -95,21 +95,7 @@ class ItemsImportReportService
 
             $report->save();
 
-            try {
-                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Импорт завершен', 0, route('items-import-report-edit', ['report' => $report])));
-
-                $user = $model->user ?? $model;
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
-                ) {
-                    $user->notify(new UserNotification($model->name, 'Импорт завершен'));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($model->user_id ?? $model->id, $model->name, 'Импорт завершен', 0, route('items-import-report-edit', ['report' => $report]), 'import');
 
             return true;
         } else {
@@ -125,21 +111,7 @@ class ItemsImportReportService
                 'message' => 'Ошибка при импорте'
             ]);
 
-            try {
-                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Ошибка при импорте', 1, route('items-import-report-edit', ['report' => $report])));
-
-                $user = $model->user ?? $model;
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
-                ) {
-                    $user->notify(new UserNotification($model->name, 'Ошибка при импорте'));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($model->user_id ?? $model->id, $model->name, 'Ошибка при импорте', 1, route('items-import-report-edit', ['report' => $report]), 'import');
 
             return true;
         } else {
@@ -158,21 +130,7 @@ class ItemsImportReportService
                         'message' => 'Вышло время импорта'
                     ]);
 
-                    try {
-                        event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, $report->reportable->name, 'Вышло время импорта', 1, route('items-import-report-edit', ['report' => $report])));
-
-                        $user = $report->reportable->user ?? $report->reportable;
-
-                        if (
-                            $user->userNotification &&
-                            $user->userNotification->enabled_telegram &&
-                            $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
-                        ) {
-                            $user->notify(new UserNotification($report->reportable->name, 'Вышло время импорта'));
-                        }
-                    } catch (\Throwable $e) {
-                        report($e);
-                    }
+                    NotificationService::send($report->reportable->user_id ?? $report->reportable->id, $report->reportable->name, 'Вышло время импорта', 1, route('items-import-report-edit', ['report' => $report]), 'import');
 
                 });
             });

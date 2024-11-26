@@ -64,19 +64,21 @@ class MoyskladService
     public function getAllSuppliers(): Collection
     {
         return Cache::tags(['moysklad', 'suppliers'])->remember($this->moysklad->id, now()->addDay(), function () {
-            $entityList = new EntityList(Counterparty::class, $this->moysklad->api_key);
-
             $allSuppliers = collect();
 
-            do {
+            foreach ([Organization::class, Counterparty::class] as $class) {
+                $entityList = new EntityList($class, $this->moysklad->api_key);
 
-                $suppliers = $entityList->getNext()->map(function (Counterparty $supplier) {
-                    return ['id' => $supplier->id, 'name' => $supplier->getName()];
-                });
+                do {
 
-                $allSuppliers = $allSuppliers->merge($suppliers);
+                    $suppliers = $entityList->getNext()->map(function (Counterparty|Organization $supplier) {
+                        return ['id' => $supplier->id, 'name' => $supplier->getName()];
+                    });
 
-            } while ($entityList->hasNext());
+                    $allSuppliers = $allSuppliers->merge($suppliers);
+
+                } while ($entityList->hasNext());
+            }
 
             return $allSuppliers;
         });

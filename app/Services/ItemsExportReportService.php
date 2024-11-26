@@ -91,21 +91,7 @@ class ItemsExportReportService
                 'message' => 'Экспорт завершен'
             ]);
 
-            try {
-                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Экспорт завершен', 0));
-
-                $user = $model->user ?? $model;
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
-                ) {
-                    $user->notify(new UserNotification($model->name, 'Экспорт завершен'));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($model->user_id ?? $model->id, $model->name, 'Экспорт завершен', 0, null, 'export');
 
             return true;
         } else {
@@ -121,21 +107,7 @@ class ItemsExportReportService
                 'message' => 'Ошибка при экспорте'
             ]);
 
-            try {
-                event(new NotificationEvent($model->user_id ?? $model->id, $model->name, 'Ошибка при экспорте', 1));
-
-                $user = $model->user ?? $model;
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
-                ) {
-                    $user->notify(new UserNotification($model->name, 'Ошибка при экспорте'));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($model->user_id ?? $model->id, $model->name, 'Ошибка при экспорте', 1, null, 'export');
 
             return true;
         } else {
@@ -154,21 +126,7 @@ class ItemsExportReportService
                         'message' => 'Вышло время экспорта'
                     ]);
 
-                    try {
-                        event(new NotificationEvent($report->reportable->user_id ?? $report->reportable->id, $report->reportable->name, 'Вышло время экспорта', 1));
-
-                        $user = $report->reportable->user ?? $report->reportable;
-
-                        if (
-                            $user->userNotification &&
-                            $user->userNotification->enabled_telegram &&
-                            $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
-                        ) {
-                            $user->notify(new UserNotification($report->reportable->name, 'Вышло время экспорта'));
-                        }
-                    } catch (\Throwable $e) {
-                        report($e);
-                    }
+                    NotificationService::send($report->reportable->user_id ?? $report->reportable->id, $report->reportable->name, 'Вышло время экспорта', 1, null, 'export');
                 });
             });
     }

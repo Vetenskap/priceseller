@@ -15,6 +15,7 @@ class UserNotificationIndex extends BaseComponent
 
     public ?UserNotification $userNotification = null;
     public $enabled_telegram = false;
+    public $enabled_site = false;
 
     public $actionsIds = [];
 
@@ -22,6 +23,7 @@ class UserNotificationIndex extends BaseComponent
     {
         if ($this->currentUser()->userNotification()->exists()) {
             $this->enabled_telegram = $this->currentUser()->userNotification->enabled_telegram;
+            $this->enabled_site = $this->currentUser()->userNotification->enabled_site;
             $this->userNotification = $this->currentUser()->userNotification;
             $this->actionsIds = $this->userNotification->actions()->where('enabled', true)->pluck('notification_action_id')->toArray();
         }
@@ -33,7 +35,10 @@ class UserNotificationIndex extends BaseComponent
 
     public function update()
     {
-        $this->userNotification->update($this->only('enabled_telegram'));
+        if (!$this->userNotification) {
+            $this->userNotification = $this->currentUser()->userNotification()->create();
+        }
+        $this->userNotification->update($this->only(['enabled_telegram', 'enabled_site']));
         foreach ($this->actionsIds as $actionId) {
             $this->userNotification->actions()->updateOrCreate([
                 'notification_action_id' => $actionId

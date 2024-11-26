@@ -6,6 +6,7 @@ use App\Events\NotificationEvent;
 use App\Models\BundleItemsImportReport;
 use App\Models\User;
 use App\Notifications\UserNotification;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Storage;
 
 class BundleItemsImportReportService
@@ -72,20 +73,7 @@ class BundleItemsImportReportService
 
             $report->save();
 
-
-            try {
-                event(new NotificationEvent($user->id, 'Комплекты', 'Импорт завершен', 0));
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
-                ) {
-                    $user->notify(new UserNotification('Комплекты', 'Импорт завершен'));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($user->id, 'Комплекты', 'Импорт завершен', 0, null, 'import');
 
             return true;
         } else {
@@ -101,19 +89,7 @@ class BundleItemsImportReportService
                 'message' => 'Ошибка при импорте'
             ]);
 
-            try {
-                event(new NotificationEvent($user->id, 'Комплекты', 'Ошибка при импорте', 1));
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'import'))->exists()
-                ) {
-                    $user->notify(new UserNotification('Комплекты', 'Ошибка при импорте'));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($user->id, 'Комплекты', 'Ошибка при импорте', 1, null, 'import');
 
             return true;
         } else {

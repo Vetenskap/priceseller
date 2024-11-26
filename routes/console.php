@@ -2,12 +2,11 @@
 
 use Illuminate\Support\Facades\Schedule;
 
-if (\Illuminate\Support\Facades\App::isProduction())
-{
+if (\Illuminate\Support\Facades\App::isProduction()) {
     Schedule::call(function () {
         $updates = \NotificationChannels\Telegram\TelegramUpdates::create()->get();
 
-        if($updates['ok']) {
+        if ($updates['ok']) {
 
             foreach ($updates['result'] as $update) {
                 if (isset($update['message']['text']) && isset($update['message']['chat'])) {
@@ -24,7 +23,13 @@ if (\Illuminate\Support\Facades\App::isProduction())
                         continue;
                     }
 
-                    if (!$link->user->userNotification()->exists()) {
+                    if ($userNotification = $link->user->userNotification()->first()) {
+                        $userNotification->update([
+                            'telegram_chat_id' => $chatId,
+                        ]);
+
+                        $link->user->notify(new \App\Notifications\UserNotification('Телеграм', 'Успешно связан!'));
+                    } else {
                         \App\Models\UserNotification::create([
                             'user_id' => $link->user_id,
                             'telegram_chat_id' => $chatId,

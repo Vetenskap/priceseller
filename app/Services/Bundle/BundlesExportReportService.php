@@ -6,6 +6,7 @@ use App\Events\NotificationEvent;
 use App\Models\BundlesExportReport;
 use App\Models\User;
 use App\Notifications\UserNotification;
+use App\Services\NotificationService;
 use Illuminate\Support\Facades\Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -58,19 +59,7 @@ class BundlesExportReportService
                 'message' => 'Экспорт завершен'
             ]);
 
-            try {
-                event(new NotificationEvent($user->id, 'Комплекты', 'Экспорт завершен', 0));
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
-                ) {
-                    $user->notify(new UserNotification('Комплекты', 'Экспорт завершен'));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($user->id, 'Комплекты', 'Экспорт завершен', 0, null, 'export');
 
             return true;
         } else {
@@ -86,19 +75,7 @@ class BundlesExportReportService
                 'message' => 'Ошибка при экспорте'
             ]);
 
-            try {
-                event(new NotificationEvent($user->id, 'Комплекты', 'Ошибка при экспорте', 1));
-
-                if (
-                    $user->userNotification &&
-                    $user->userNotification->enabled_telegram &&
-                    $user->userNotification->actions()->where('enabled', true)->whereHas('action', fn ($q) => $q->where('name', 'export'))->exists()
-                ) {
-                    $user->notify(new UserNotification('Комплекты', 'Ошибка при экспорте'));
-                }
-            } catch (\Throwable $e) {
-                report($e);
-            }
+            NotificationService::send($user->id, 'Комплекты', 'Ошибка при экспорте', 1, null, 'export');
 
             return true;
         } else {
