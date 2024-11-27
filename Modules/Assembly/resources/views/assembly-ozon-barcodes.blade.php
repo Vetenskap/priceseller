@@ -8,8 +8,11 @@
     <title>Штрихкоды</title>
     <style>
         .barcode {
-            width: 12cm; height: 7.5cm; text-align: center;
+            width: 12cm;
+            height: 7.5cm;
+            text-align: center;
         }
+
         .info {
             padding-top: 0.5cm
         }
@@ -18,15 +21,17 @@
 <body>
 <div>
     @foreach($barcodes as $index => $barcode)
-        <div wire:key="{{$index}}" class="barcode">
-            <p class="info">{{$barcode['market_name']}}</p>
-            <p>id: {{$barcode['id']}}, Склад: {{$barcode['warehouse']}}</p>
-            <p>Количество отправлений: {{$barcode['postings_count']}}</p>
-            <br/>
-            <img src="data:image/png;base64, {{$barcode['barcode']}}" />
-            <br/>
-            <p>{barcode.barcode_text}</p>
-        </div>
+        @foreach($barcode->get('carriages') as $carriage)
+            <div wire:key="{{$index}}" class="barcode">
+                <p class="info">{{$barcode->get('market')->name}}</p>
+                <p>Склад: {{$carriage->getWarehouseName()}}</p>
+                <p>Количество отправлений: {{$carriage->getCarriagePostingsCount()}}</p>
+                <br/>
+                <img src="data:image/png;base64, {{$barcode->getActBarcode()->getFileContent()}}"/>
+                <br/>
+                <p>{{$barcode->getActBarcode()->getText()}}</p>
+            </div>
+        @endforeach
     @endforeach
 </div>
 </body>

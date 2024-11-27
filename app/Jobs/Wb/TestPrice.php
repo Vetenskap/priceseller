@@ -26,7 +26,7 @@ class TestPrice implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public User $user, public $testWarehouses, public WbMarket $market)
+    public function __construct(public User $user, public WbMarket $market)
     {
         $this->report = $this->market->actionReports()->create([
             'action' => 'Тест цен',
@@ -41,12 +41,8 @@ class TestPrice implements ShouldQueue
     public function handle(): void
     {
         $this->user->suppliers->each(function (Supplier $supplier) {
-            $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn ($value, $key) => $value)->keys()->toArray();
-
-            if ($warehouses) {
-                $service = new WbItemPriceService($supplier, $this->market, $warehouses);
-                $service->updatePrice();
-            }
+            $service = new WbItemPriceService($supplier, $this->market, []);
+            $service->updatePrice();
         });
 
         $this->report->update([

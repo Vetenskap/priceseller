@@ -33,10 +33,10 @@
                             /{{$report->events()->count()}}
                         </flux:cell>
                         <flux:cell>
-                            <flux:textarea readonly>{{$report->payload}}</flux:textarea>
+                            <flux:textarea readonly resize="both">{{$report->payload}}</flux:textarea>
                         </flux:cell>
                         <flux:cell>
-                            <flux:textarea readonly>{{$report->exception}}</flux:textarea>
+                            <flux:textarea readonly resize="both">{{$report->exception}}</flux:textarea>
                         </flux:cell>
                         <flux:cell>{{$report->created_at}}</flux:cell>
                         <flux:cell>{{$report->updated_at}}</flux:cell>

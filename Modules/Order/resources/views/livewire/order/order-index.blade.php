@@ -160,7 +160,7 @@
                     <flux:card class="flex gap-6 justify-between items-center">
                         <flux:heading class="lg">{{$market->name}}</flux:heading>
                         @if($market->webhook()->exists())
-                            <flux:input :value="route('api.orders.ozon.webhooks', ['webhook' => $market->webhook])" disabled />
+                            <flux:input :value="route('api.orders.ozon.webhooks', ['webhook' => $market->webhook])" readonly copyable />
                             <flux:button wire:click="deleteWebhook({{json_encode($market->getKey())}})" icon="trash" variant="danger" wire:target="deleteWebhook({{json_encode($market->getKey())}})"/>
                         @else
                             <flux:button wire:click="createWebhook({{json_encode($market->getKey())}})" wire:target="createWebhook({{json_encode($market->getKey())}})">Создать ссылку</flux:button>

@@ -184,7 +184,7 @@ class WbMarketEdit extends BaseComponent
 
     public function testPrice(): void
     {
-        TestPrice::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
+        TestPrice::dispatch($this->currentUser(), $this->market);
 
         $this->addJobNotification();
     }

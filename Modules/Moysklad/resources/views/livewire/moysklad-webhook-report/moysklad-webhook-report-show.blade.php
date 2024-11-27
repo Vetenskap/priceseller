@@ -42,8 +42,8 @@
                                         {{$event->message}}
                                     </flux:badge>
                                 </flux:cell>
-                                <flux:cell class="flex-1"><flux:textarea readonly>{{$event->event}}</flux:textarea></flux:cell>
-                                <flux:cell class="flex-1"><flux:textarea readonly>{{$event->exception}}</flux:textarea></flux:cell>
+                                <flux:cell class="flex-1"><flux:textarea readonly resize="both">{{$event->event}}</flux:textarea></flux:cell>
+                                <flux:cell class="flex-1"><flux:textarea readonly resize="both">{{$event->exception}}</flux:textarea></flux:cell>
                                 <flux:cell class="flex-1">
                                     @if($report->itemable)
                                         <flux:link :href="$report->itemable instanceof \App\Models\Item ? route('item-edit', ['item' => $report->itemable]) : route('bundle-edit', ['bundle' => $report->itemable])">{{$report->itemable->code}}</flux:link>

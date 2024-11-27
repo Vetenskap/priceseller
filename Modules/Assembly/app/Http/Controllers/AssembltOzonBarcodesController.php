@@ -4,6 +4,8 @@ namespace Modules\Assembly\Http\Controllers;
 
 use App\Helpers\Helpers;
 use App\Http\Controllers\Controller;
+use App\HttpClient\OzonClient\Resources\FBS\CarriageAvailableList;
+use App\Models\OzonMarket;
 use Illuminate\Http\Request;
 
 class AssembltOzonBarcodesController extends Controller
@@ -13,10 +15,15 @@ class AssembltOzonBarcodesController extends Controller
      */
     public function index()
     {
-        $barcodes = collect();
         $user = Helpers::user();
 
-
+        $barcodes = $user->ozonMarkets->map(function (OzonMarket $market) {
+            $result = collect();
+            $carriages = CarriageAvailableList::getAll($market->api_key, $market->client_id);
+            $result = $result->put('carriages', $carriages->filter(fn (CarriageAvailableList $carriage) => $carriage->getCarriageId() && $carriage->getCarriagePostingsCount())->each(fn (CarriageAvailableList $carriage) => $carriage->fetchActBarcode($market->api_key, $market->client_id)));
+            $result = $result->put('market', $market);
+            return $result;
+        });
 
         return view('assembly::assembly-ozon-barcodes', compact('barcodes'));
     }

@@ -3,8 +3,10 @@
 namespace App\Console\Commands;
 
 use App\Events\NotificationEvent;
+use App\HttpClient\OzonClient\Resources\FBS\CarriageAvailableList;
 use App\Models\Bundle;
 use App\Models\Item;
+use App\Models\OzonMarket;
 use App\Models\User;
 use App\Notifications\TestTelegramNotification;
 use App\Notifications\UserNotification;
@@ -43,9 +45,9 @@ class Test extends Command
      */
     #[NoReturn] public function handle(): void
     {
-        $supplier = new Counterparty();
-        $supplier->setId('e63260d3-b767-11ed-0a80-025b00150942');
-        $supplier->fetch('9c040a891e844d8e7f252ebd44c3ef20f71f5786');
-        dd($supplier);
+        $market = OzonMarket::where('user_id', 10)->offset(14)->first();
+        $carriages = CarriageAvailableList::getAll($market->api_key, $market->client_id);
+        $carriages = $carriages->filter(fn (CarriageAvailableList $carriage) => $carriage->getCarriageId() && $carriage->getCarriagePostingsCount())->each(fn (CarriageAvailableList $carriage) => $carriage->fetchActBarcode($market->api_key, $market->client_id));
+        dd($carriages);
     }
 }
