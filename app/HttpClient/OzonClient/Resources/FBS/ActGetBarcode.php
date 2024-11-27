@@ -56,7 +56,7 @@ class ActGetBarcode implements Wireable
 
     public function getFileContent(): ?string
     {
-        return $this->file_content;
+        return base64_encode($this->file_content);
     }
 
     public function getText(): ?string
