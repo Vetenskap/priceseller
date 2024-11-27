@@ -27,7 +27,7 @@
                 <p>Склад: {{$carriage->getWarehouseName()}}</p>
                 <p>Количество отправлений: {{$carriage->getCarriagePostingsCount()}}</p>
                 <br/>
-                <img src="data:image/png;base64, {{$carriage->getActBarcode()->getFileContent()}}"/>
+                <img src="data:image/png;base64,{{$carriage->getActBarcode()->getFileContent()}}"/>
                 <br/>
                 <p>{{$carriage->getActBarcode()->getText()}}</p>
             </div>
