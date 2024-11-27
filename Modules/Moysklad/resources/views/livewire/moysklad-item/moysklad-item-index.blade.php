@@ -22,6 +22,8 @@
                         <flux:column>Обновлено</flux:column>
                         <flux:column>Создано</flux:column>
                         <flux:column>Ошибки</flux:column>
+                        <flux:column>Начало</flux:column>
+                        <flux:column>Конец</flux:column>
                     </flux:columns>
                     <flux:rows>
                         @foreach($moysklad->apiItemsReports as $report)
@@ -32,6 +34,10 @@
                                 <flux:cell>{{$report->updated}}</flux:cell>
                                 <flux:cell>{{$report->created}}</flux:cell>
                                 <flux:cell>{{$report->errors}}</flux:cell>
+                                <flux:cell>{{$report->created_at}}</flux:cell>
+                                <flux:cell>
+                                    {{$report->status === 2 ? '' : $report->updated_at}}
+                                </flux:cell>
                                 <flux:cell>
                                     <flux:button wire:click="deleteReport({{json_encode($report->getKey())}})" variant="danger" size="sm" wire:target="deleteReport({{json_encode($report->getKey())}})" icon="trash"/>
                                 </flux:cell>
