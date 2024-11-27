@@ -16,28 +16,39 @@ use Maatwebsite\Excel\Concerns\WithValidation;
 use Maatwebsite\Excel\Imports\HeadingRowFormatter;
 use Maatwebsite\Excel\Validators\Failure;
 use Modules\Moysklad\Models\Moysklad;
+use Modules\Moysklad\Models\MoyskladItemMainAttributeLink;
 use Modules\Moysklad\Models\MoyskladSupplierSupplier;
+use Modules\Moysklad\Services\MoyskladService;
 
-class MoyskladItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure
+class MoyskladItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithValidation, WithBatchInserts, SkipsEmptyRows, SkipsOnFailure
 {
     public int $correct = 0;
     public int $error = 0;
     public int $updated = 0;
-    public User $user;
-    public Collection $attributes;
     public Collection $suppliers;
+    public Moysklad $moysklad;
+    public Collection $attributes;
+    public array $rules;
 
-    public function __construct(int $userId, Collection $attributes, Moysklad $moysklad)
+    public function __construct(Moysklad $moysklad)
     {
-        $this->user = User::find($userId);
-        $this->attributes = $attributes;
         HeadingRowFormatter::default('slug');
 
+        $moyskladSuppliers = (new MoyskladService($moysklad))->getAllSuppliers();
+
         $suppliers = [];
-        $moysklad->suppliers->each(function (MoyskladSupplierSupplier $supplier) use (&$suppliers) {
-            $suppliers[$supplier->moysklad_supplier_name] = $supplier->supplier;
+        $moysklad->suppliers->each(function (MoyskladSupplierSupplier $supplier) use (&$suppliers, $moyskladSuppliers) {
+            $suppliers[collect($moyskladSuppliers)->firstWhere('id', $supplier->moysklad_supplier_uuid)['name']] = $supplier->supplier;
         });
         $this->suppliers = collect($suppliers);
+        $this->moysklad = $moysklad;
+        $this->attributes = $moysklad->itemMainAttributeLinks->pluck(null, 'attribute_name');
+        $this->rules = [
+            'uuid' => ['required', 'uuid'],
+            $this->generateKey($this->attributes->get('code')) => ['required'],
+            $this->generateKey($this->attributes->get('multiplicity')) => ['required', 'integer', 'min:1'],
+            $this->generateKey($this->attributes->get('article')) => ['required'],
+        ];
     }
 
     /**
@@ -48,6 +59,8 @@ class MoyskladItemsImport implements ToModel, WithHeadingRow, WithChunkReading, 
     public function model(array $row)
     {
         $row = collect($row);
+
+        dd($row);
 
         $supplier = $this->suppliers->get($row->get(Str::slug('Поставщик', '_')));
 
@@ -103,27 +116,39 @@ class MoyskladItemsImport implements ToModel, WithHeadingRow, WithChunkReading, 
         ]);
     }
 
-    public function prepareForValidation($data, $index)
+    public function prepareForValidation($data)
     {
-//        if ($index % 1000 === 0) ItemsImportReportService::flush($this->user, $this->correct, $this->error, $this->updated);
+        $this->attributes->each(function (MoyskladItemMainAttributeLink $link) use (&$data) {
+            $key = $this->generateKey($link);
 
-        $data[$this->attributes->get('multiplicity')] = preg_replace("/[^0-9]/", "", $data[$this->attributes->get('multiplicity')]);
-        $data[$this->attributes->get('unload_wb')] = $data[$this->attributes->get('unload_wb')] === 'Да';
-        $data[$this->attributes->get('unload_ozon')] = $data[$this->attributes->get('unload_ozon')] === 'Да';
+            if ($link->user_type === 'double') {
+                $data[$key] = floatval($data[$key]);
+            } elseif ($link->user_type === 'boolean') {
+                $data[$key] = $link->invert
+                    ? !($data[$key] === 'да')
+                    : ($data[$key] === 'да');
+            } elseif ($link->user_type === 'integer') {
+                $data[$key] = intval($data[$key]);
+            }
+        });
 
         return $data;
     }
 
+    private function generateKey(MoyskladItemMainAttributeLink $link): string
+    {
+        $prefix = $link->type === 'metadata' ? 'dop_pole_' : '';
+        return $prefix . $this->toSlug($link->link_label);
+    }
+
+    public function toSlug($value): string
+    {
+        return Str::slug($value, '_');
+    }
+
     public function rules(): array
     {
-        return [
-            'uuid' => ['required', 'uuid'],
-            $this->attributes->get('code') => ['required'],
-            $this->attributes->get('name') => ['required'],
-            $this->attributes->get('article') => ['required'],
-            $this->attributes->get('brand') => ['nullable'],
-            $this->attributes->get('multiplicity') => ['required', 'integer', 'min:1'],
-        ];
+        return $this->rules;
     }
 
     public function onFailure(Failure ...$failures)
@@ -145,12 +170,12 @@ class MoyskladItemsImport implements ToModel, WithHeadingRow, WithChunkReading, 
 
     public function batchSize(): int
     {
-        return 1000;
+        return 10;
     }
 
     public function chunkSize(): int
     {
-        return 1000;
+        return 10;
     }
 
 }

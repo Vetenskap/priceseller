@@ -66,4 +66,28 @@ class EntityList
         return $this->offset;
     }
 
+    public function getEntityClass(): string
+    {
+        return $this->entityClass;
+    }
+
+    public function getLimit(): int
+    {
+        return $this->limit;
+    }
+
+    public function getSize(): int
+    {
+        return $this->size;
+    }
+
+    public function getApiKey(): string
+    {
+        return $this->apiKey;
+    }
+
+    public function getQueryParameters(): Collection
+    {
+        return $this->queryParameters;
+    }
 }

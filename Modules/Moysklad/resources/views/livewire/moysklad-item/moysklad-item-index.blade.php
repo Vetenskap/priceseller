@@ -10,7 +10,10 @@
                     <flux:subheading>Необходимо связать поставщиков. Товары с несвязанными поставщиками не будут добавлены</flux:subheading>
                 </div>
             </flux:card>
-            <flux:button wire:click="importApi">Выгрузить по АПИ</flux:button>
+            <flux:card class="space-y-6">
+                <flux:heading size="xl">Выгрузка по АПИ</flux:heading>
+                <flux:button wire:click="importApi">Выгрузить по АПИ</flux:button>
+            </flux:card>
             <flux:card class="space-y-6">
                 <flux:heading size="lg">Отчеты</flux:heading>
                 <flux:table>

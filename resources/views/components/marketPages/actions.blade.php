@@ -5,11 +5,11 @@
         <flux:card class="space-y-6">
             <div class="flex gap-6">
                 <flux:button wire:click="testPrice"
-                             wire:confirm="Вы действительно хотите пересчитать цены? Действие происходит в реальном времени, не перезагружайте страницу.">
+                             wire:confirm="Вы действительно хотите пересчитать цены?">
                     Пересчитать цены
                 </flux:button>
                 <flux:button wire:click="testStocks"
-                             wire:confirm="Вы действительно хотите пересчитать остатки? Действие происходит в реальном времени, не перезагружайте страницу.">
+                             wire:confirm="Вы действительно хотите пересчитать остатки?">
                     Пересчитать остатки
                 </flux:button>
                 <flux:button wire:click="nullStocks"

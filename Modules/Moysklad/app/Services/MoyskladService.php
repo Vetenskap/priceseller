@@ -155,7 +155,9 @@ class MoyskladService
 
             $products = $entityList->getNext();
 
-            $products->each(function (Product $product) use (&$dirtyItems, $report, &$updated, &$created, &$errors) {
+            $products->each(function (Product $product) use (&$dirtyItems, $report, &$updated, &$created, &$errors, $entityList) {
+
+                if ($product->isArchived()) return;
 
                 /** @var MoyskladItemMainAttributeLink $itemMainAttributeLink */
                 $itemMainAttributeLink = $this->moysklad->itemMainAttributeLinks->where('attribute_name', 'code')->first();
@@ -208,7 +210,8 @@ class MoyskladService
                     $report?->update([
                         'updated' => $updated,
                         'created' => $created,
-                        'errors' => $errors
+                        'errors' => $errors,
+                        'message' => 'Выгружено: ' . $updated + $created + $errors . '/' . $entityList->getSize()
                     ]);
                 }
 
@@ -221,7 +224,8 @@ class MoyskladService
         $report?->update([
             'updated' => $updated,
             'created' => $created,
-            'errors' => $errors
+            'errors' => $errors,
+            'message' => 'Выгружено: ' . $updated + $created + $errors . '/' . $entityList->getSize()
         ]);
     }
 

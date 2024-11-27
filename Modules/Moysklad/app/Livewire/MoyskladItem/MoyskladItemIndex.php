@@ -27,9 +27,6 @@ class MoyskladItemIndex extends BaseComponent
     public Moysklad $moysklad;
 
     public Collection $assortmentAttributes;
-
-    public $file;
-
     public $mainAttributesLinks = [];
     public $additionalAttributesLinks = [];
 
@@ -80,18 +77,6 @@ class MoyskladItemIndex extends BaseComponent
         }
 
         $this->addSuccessSaveNotification();
-    }
-
-    public function import(): void
-    {
-        $attributes = collect($this->only(['code', 'article', 'brand', 'name', 'multiplicity', 'unload_ozon', 'unload_wb']));
-        $attributes = $attributes->map(function ($value, $key) {
-            $name = collect($this->assortmentAttributes->firstWhere('id', $value))->get('name');
-            return Str::slug(Str::isUuid($value) ? 'Доп. поле: ' . $name : $name, '_');
-        });
-
-        $import = new MoyskladItemsImport(\auth()->user()->id, $attributes, $this->moysklad);
-        \Excel::import($import, $this->file);
     }
 
     public function importApi(): void
