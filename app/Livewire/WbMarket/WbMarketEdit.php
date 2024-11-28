@@ -65,6 +65,9 @@ class WbMarketEdit extends BaseComponent
     #[Session('WbMarketEdit.testWarehouses.{market.id}')]
     public $testWarehouses = [];
 
+    #[Session('WbMarketEdit.exportExtItemFields.{market.id}')]
+    public $exportExtItemFields = [];
+
     #[Computed]
     public function items(): LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator|array
     {
@@ -132,7 +135,7 @@ class WbMarketEdit extends BaseComponent
     {
         $status = $this->checkTtlJob(Export::getUniqueId($this->market), Export::class);
 
-        if ($status) Export::dispatch($this->market, WbMarketService::class);
+        if ($status) Export::dispatch($this->market, WbMarketService::class, $this->exportExtItemFields);
     }
 
     public function import(): void

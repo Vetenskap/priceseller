@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Imports\OzonItemsImport;
+use App\Models\Item;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
 use App\Models\OzonWarehouse;
@@ -21,7 +22,7 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
     public Collection $warehouses;
     public User $user;
 
-    public function __construct(public OzonMarket $market, public bool $template = false)
+    public function __construct(public OzonMarket $market, public bool $template, public array $exportExtItemFields = [])
     {
         $this->warehouses = $this->market->warehouses;
         $this->user = $this->market->user;
@@ -75,6 +76,10 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
                         $main['count_orders'] = $item->orders()->sum('count');
                     }
 
+                    foreach ($this->exportExtItemFields as $exportExtItemField) {
+                        $main['item.' . $exportExtItemField] = $item->itemable->{$exportExtItemField};
+                    }
+
                     return $main;
                 });
 
@@ -90,6 +95,10 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
 
         if (ModuleService::moduleIsEnabled('Order', $this->user)) {
             $main[] = 'Всего заказов';
+        }
+
+        foreach ($this->exportExtItemFields as $exportExtItemField) {
+            $main[] = collect(Item::MAINATTRIBUTES)->where('name', $exportExtItemField)->first()['label'];
         }
 
         return $main;

@@ -25,7 +25,7 @@ class Export implements ShouldQueue, ShouldBeUnique
 
     public int $uniqueFor = 600;
 
-    public function __construct(public OzonMarket|WbMarket|User|Warehouse $model, public string $service)
+    public function __construct(public OzonMarket|WbMarket|User|Warehouse $model, public string $service, public array $exportExtItemFields)
     {
         ItemsExportReportService::new($this->model);
     }
@@ -40,7 +40,7 @@ class Export implements ShouldQueue, ShouldBeUnique
             /** @var ItemService|OzonMarketService|WbMarketService|WarehouseService $service */
             $service = new $this->service($this->model);
             if (method_exists($service, 'exportItems')) {
-                $uuid = $service->exportItems();
+                $uuid = $service->exportItems($this->exportExtItemFields);
 
                 ItemsExportReportService::success($this->model, $uuid);
             } else {

@@ -35,10 +35,10 @@ class OzonMarketService
         ]);
     }
 
-    public function exportItems(): string
+    public function exportItems(array $exportExtItemFields): string
     {
         $uuid = Str::uuid();
-        \Excel::store(new OzonItemsExport($this->market), self::PATH . "$uuid.xlsx", 'public');
+        \Excel::store(new OzonItemsExport($this->market, false, $exportExtItemFields), self::PATH . "$uuid.xlsx", 'public');
         return $uuid;
     }
 

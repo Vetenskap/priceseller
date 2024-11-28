@@ -37,10 +37,10 @@ class WbMarketService
         ]);
     }
 
-    public function exportItems(): string
+    public function exportItems(array $exportExtItemFields): string
     {
         $uuid = Str::uuid();
-        \Excel::store(new WbItemsExport($this->market), self::PATH . "$uuid.xlsx", 'public');
+        \Excel::store(new WbItemsExport($this->market, false, $exportExtItemFields), self::PATH . "$uuid.xlsx", 'public');
         return $uuid;
     }
 

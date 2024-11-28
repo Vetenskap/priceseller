@@ -69,6 +69,9 @@ class OzonMarketEdit extends BaseComponent
     #[Session('OzonMarketEdit.testWarehouses.{market.id}')]
     public $testWarehouses = [];
 
+    #[Session('OzonMarketEdit.exportExtItemFields.{market.id}')]
+    public $exportExtItemFields = [];
+
     #[Computed]
     public function items(): _IH_OzonItem_C|LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator|array
     {
@@ -95,7 +98,7 @@ class OzonMarketEdit extends BaseComponent
     {
         $status = $this->checkTtlJob(Export::getUniqueId($this->market), Export::class);
 
-        if ($status) Export::dispatch($this->market, OzonMarketService::class);
+        if ($status) Export::dispatch($this->market, OzonMarketService::class, $this->exportExtItemFields);
     }
 
     public function downloadTemplate(): BinaryFileResponse
