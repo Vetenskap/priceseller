@@ -3,7 +3,7 @@
         <flux:button
             :icon="$notifications->isNotEmpty() ? 'bell-alert' : 'bell'"
             variant="ghost"
-            :icon-variant="$notifications->isNotEmpty() ? '' : 'outline'"
+            :icon-variant="$notifications->isNotEmpty() ? null : 'outline'"
             size="sm"
         />
 
