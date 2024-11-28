@@ -22,7 +22,7 @@ class Notification extends BaseComponent
         return $this->currentUser()->notifications()->offset($this->offset)->limit(15)->get();
     }
 
-    public function loadMore()
+    public function loadMore(): void
     {
         $this->offset += 15;
         $this->notifications = $this->notifications->merge($this->getNotifications());

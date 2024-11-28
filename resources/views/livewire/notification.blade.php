@@ -6,7 +6,7 @@
             <flux:button icon="bell" variant="ghost" icon-variant="outline" size="sm"/>
         @endif
 
-        <flux:menu>
+        <flux:menu class="h-1/3 overflow-y-scroll">
             @foreach($notifications as $notification)
                 <flux:menu.item :href="$notification->href" :icon="$notification->status === 0 ? 'check-badge' : ($notification->status === 1 ? 'exclamation-triangle' : 'exclamation-circle')">{{$notification->message}}</flux:menu.item>
             @endforeach
