@@ -10,35 +10,45 @@ use Illuminate\Support\Collection;
 class Notification extends BaseComponent
 {
     public Collection $notifications;
-    public $offset = 0;
+    public int $offset = 0;
+    public bool $hasMore = true;
 
     public function mount(): void
     {
-        $this->notifications = $this->getNotifications();
+        $this->notifications = collect();
+        $this->loadMore();
     }
 
-    public function getNotifications(): Collection
+    public function getNotifications(int $offset, int $limit = 15): Collection
     {
-        return $this->currentUser()->notifications()->offset($this->offset)->limit(15)->orderByDesc('created_at')->get();
-    }
-
-    public function existsMore(): bool
-    {
-        return boolval($this->currentUser()->notifications()->offset($this->offset + 15)->limit(15)->orderByDesc('created_at')->count());
+        return $this->currentUser()
+            ->notifications()
+            ->offset($offset)
+            ->limit($limit)
+            ->orderByDesc('created_at')
+            ->get();
     }
 
     public function loadMore(): void
     {
-        if ($this->existsMore()) {
-            $this->offset += 15;
-            $this->notifications = $this->notifications->merge($this->getNotifications());
+        if (!$this->hasMore) {
+            return; // Предотвращает лишние запросы, если больше данных нет
         }
+
+        $newNotifications = $this->getNotifications($this->offset);
+        $this->notifications = $this->notifications->merge($newNotifications);
+        $this->offset += $newNotifications->count();
+
+        // Проверяем, осталось ли больше данных
+        $this->hasMore = $newNotifications->count() === 15;
     }
 
     public function clear(): void
     {
-        $this->notifications->each(fn (\App\Models\Notification $notification) => $notification->delete());
-        $this->notifications = $this->getNotifications();
+        $this->currentUser()->notifications()->delete();
+        $this->notifications = collect();
+        $this->offset = 0;
+        $this->hasMore = false;
     }
 
     public function getListeners(): array
