@@ -46,7 +46,13 @@ class ItemPostForm extends Form
         $this->supplier_id = $item->supplier_id;
         $this->unload_ozon = $item->unload_ozon;
         $this->unload_wb = $item->unload_wb;
-        $this->attributes = $item->attributesValues->pluck('value', 'item_attribute_id')->toArray();
+        $this->attributes = $item->attributesValues->mapWithKeys(function (ItemAttributeValue $attributeValue) {
+            $value = $attributeValue->value;
+            if ($attributeValue->attribute->type === 'boolean') {
+                $value = boolval($value);
+            }
+            return [$attributeValue->item_attribute_id => $value];
+        });
         $this->buy_price_reserve = $item->buy_price_reserve;
     }
 

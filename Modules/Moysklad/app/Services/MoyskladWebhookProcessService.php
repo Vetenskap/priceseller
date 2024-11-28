@@ -193,6 +193,8 @@ class MoyskladWebhookProcessService
             $product->fetch($this->webhook->moysklad->api_key);
             $product->getSupplier()->fetch($this->webhook->moysklad->api_key);
 
+            if ($product->isArchived()) return;
+
             if (!Item::where('ms_uuid', $product->id)->exists()) {
 
                 Log::info('Moysklad webhook create/update item', [
