@@ -60,7 +60,7 @@ class Notification extends BaseComponent
 
     public function notification($event): void
     {
-        $this->notifications = $this->getNotifications();
+        $this->notifications = $this->getNotifications($this->offset);
 
         switch ($event['status']) {
             case 0:
