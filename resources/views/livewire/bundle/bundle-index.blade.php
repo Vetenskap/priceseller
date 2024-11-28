@@ -12,6 +12,16 @@
 
             <flux:tab.panel name="list">
                 <x-blocks.main-block>
+                    <flux:card class="space-y-6">
+                        <flux:heading size="lg">Фильтры</flux:heading>
+                        <div class="flex flex-wrap gap-6">
+                            <flux:input wire:model.live.debounce.2s="filters.name" label="Наименование"/>
+                            <flux:input wire:model.live.debounce.2s="filters.code" label="Код комлекта"/>
+                            <flux:input wire:model.live.debounce.2s="filters.items.code" label="Код товара"/>
+                        </div>
+                    </flux:card>
+                </x-blocks.main-block>
+                <x-blocks.main-block>
                     @if($this->bundles->count() > 0)
                         <flux:table :paginate="$this->bundles">
                             <flux:columns>

@@ -17,7 +17,7 @@ use Livewire\WithPagination;
 #[Title('Комплекты')]
 class BundleIndex extends BaseComponent
 {
-    use WithFilters, WithPagination;
+    use WithFilters, WithPagination, WithFilters;
 
     #[Computed]
     public function bundles(): LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator|array|_IH_Bundle_C
@@ -25,6 +25,7 @@ class BundleIndex extends BaseComponent
         return $this->currentUser()
             ->bundles()
             ->with('items')
+            ->filters()
             ->paginate();
     }
 

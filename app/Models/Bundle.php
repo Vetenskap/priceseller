@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -35,6 +36,21 @@ class Bundle extends MainModel
             'label' => 'Код клиента'
         ],
     ];
+
+    public function scopeFilters(Builder $query)
+    {
+        return $query->when(request('filters.code'), function (Builder $query) {
+            $query->where('code', 'like', '%' . request('filters.code') . '%');
+        })
+            ->when(request('filters.name'), function (Builder $query) {
+                $query->where('name', 'like', '%' . request('filters.name') . '%');
+            })
+            ->when(request('filters.items.code'), function (Builder $query) {
+                $query->whereHas('items', function (Builder $query) {
+                    $query->where('code', 'like', '%' . request('filters.items.code') . '%');
+                });
+            });
+    }
 
     public function ozonItems(): MorphMany
     {
