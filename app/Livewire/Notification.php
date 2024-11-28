@@ -19,12 +19,12 @@ class Notification extends BaseComponent
 
     public function getNotifications(): Collection
     {
-        return $this->currentUser()->notifications()->offset($this->offset)->limit(15)->orderBy('created_at')->get();
+        return $this->currentUser()->notifications()->offset($this->offset)->limit(15)->orderByDesc('created_at')->get();
     }
 
     public function existsMore(): bool
     {
-        return $this->currentUser()->notifications()->offset($this->offset + 15)->limit(15)->orderBy('created_at')->count();
+        return boolval($this->currentUser()->notifications()->offset($this->offset + 15)->limit(15)->orderByDesc('created_at')->count());
     }
 
     public function loadMore(): void
