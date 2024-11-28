@@ -8,8 +8,6 @@ class AvitoIndex extends Component
 {
     public function render()
     {
-        logger('Тест');
-
         return view('livewire.avito.avito-index');
     }
 }

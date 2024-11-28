@@ -15,6 +15,7 @@ use Box\Spout\Reader\Common\Creator\ReaderEntityFactory;
 use Box\Spout\Reader\XLSX\Sheet;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
@@ -48,7 +49,7 @@ class EmailSupplierService
                 $this->xlsxHandle();
             } catch (IOException $e) {
 
-                report($e);
+                Log::warning($e);
 
                 $pathInfo = pathinfo($this->path);
                 $directory = $pathInfo['dirname'];
@@ -71,7 +72,7 @@ class EmailSupplierService
                 $this->importHandle();
             } catch (\TypeError $e) {
 
-                report($e);
+                Log::warning($e);
 
                 $this->anotherHandle();
 

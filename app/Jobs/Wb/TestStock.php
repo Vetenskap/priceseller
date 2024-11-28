@@ -42,11 +42,6 @@ class TestStock implements ShouldQueue
     {
         $this->user->suppliers->each(function (Supplier $supplier) {
 
-            logger('Wb warehouses', [
-                'warehouses' => $this->testWarehouses,
-                'supplier_id' => $supplier->getKey()
-            ]);
-
             $warehouses = collect($this->testWarehouses[$supplier->getKey()] ?? [])->filter(fn($value, $key) => $value)->keys();
 
             if ($warehouses->isNotEmpty()) {

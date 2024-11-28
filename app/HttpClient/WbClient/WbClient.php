@@ -135,8 +135,6 @@ class WbClient
 
     public function putStocks(Collection $data, int $warehouseId, Supplier $supplier): void
     {
-        logger($data->toArray());
-
         $limits = 5;
 
         while (RateLimiter::attempts('wb_get_cards_list') >= 300) {

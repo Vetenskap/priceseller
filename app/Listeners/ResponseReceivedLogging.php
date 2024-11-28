@@ -27,7 +27,7 @@ class ResponseReceivedLogging
                 'response_error_' . $event->request->url() . '_' . $event->response->status(),
                 2000,
                 function () use ($event) {
-                    Log::error('Response is not successful', [
+                    Log::warning('Response is not successful', [
                         'response' => [
                             'status' => $event->response->status(),
                             'body' => $event->response->body(),

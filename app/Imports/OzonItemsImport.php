@@ -172,10 +172,6 @@ class OzonItemsImport implements ToModel, WithHeadingRow, WithChunkReading, With
     public function onError(\Throwable $e)
     {
         $this->error++;
-
-        logger('Товар не создан', [
-            'message' => $e->getMessage()
-        ]);
     }
 
     public function onFailure(Failure ...$failures)

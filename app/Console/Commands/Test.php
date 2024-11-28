@@ -13,6 +13,7 @@ use App\Notifications\UserNotification;
 use App\Services\WbItemPriceService;
 use Illuminate\Console\Command;
 use Illuminate\Support\Carbon;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Str;
 use JetBrains\PhpStorm\NoReturn;
@@ -45,9 +46,5 @@ class Test extends Command
      */
     #[NoReturn] public function handle(): void
     {
-        $market = OzonMarket::where('user_id', 10)->offset(14)->first();
-        $carriages = CarriageAvailableList::getAll($market->api_key, $market->client_id);
-        $carriages = $carriages->filter(fn (CarriageAvailableList $carriage) => $carriage->getCarriageId() && $carriage->getCarriagePostingsCount())->each(fn (CarriageAvailableList $carriage) => $carriage->fetchActBarcode($market->api_key, $market->client_id));
-        dd($carriages);
     }
 }

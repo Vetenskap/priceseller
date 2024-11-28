@@ -295,8 +295,6 @@ class Product extends Entity
             }
         }
 
-        logger('Тест мой склад (обновление товара)', ['data' => $data]);
-
         return $data;
     }
 
