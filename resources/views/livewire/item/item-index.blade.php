@@ -39,6 +39,18 @@
                                     <flux:option :value="$supplier->getKey()">{{$supplier->name}}</flux:option>
                                 @endforeach
                             </flux:select>
+                            @foreach($this->currentUser()->itemAttributes as $attribute)
+                                @if($attribute->type === 'boolean')
+                                    <flux:select variant="combobox" placeholder="Выберите опцию..." label="{{$attribute->name}}"
+                                                 wire:model.live.debounce.2s="filters.attributes.{{$attribute->id}}">
+
+                                        <flux:option value="1">Да</flux:option>
+                                        <flux:option value="0">Нет</flux:option>
+                                    </flux:select>
+                                @else
+                                    <flux:input type="{{$attribute->type}}" wire:model.live.debounce.2s="filters.attributes.{{$attribute->id}}" label="{{$attribute->name}}"/>
+                                @endif
+                            @endforeach
                         </div>
                     </flux:card>
                 </x-blocks.main-block>

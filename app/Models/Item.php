@@ -108,6 +108,13 @@ class Item extends MainModel
             })
             ->when(!is_null(request('filters.updated')), function (Builder $query) {
                 $query->where('updated',  request('filters.updated'));
+            })
+            ->when(request('filters.attributes'), function (Builder $query) {
+                foreach (request('filters.attributes') as $attributeId => $value) {
+                    $query->whereHas('attributesValues', function ($query) use ($attributeId, $value) {
+                        $query->where('item_attribute_id', $attributeId)->where('value', 'like', '%' . $value . '%');
+                    });
+                }
             });
     }
 
