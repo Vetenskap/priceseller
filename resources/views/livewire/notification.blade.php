@@ -10,6 +10,7 @@
             @foreach($notifications as $notification)
                 <flux:menu.item :href="$notification->href" :icon="$notification->status === 0 ? 'check-badge' : ($notification->status === 1 ? 'exclamation-triangle' : 'exclamation-circle')">{{$notification->message}}</flux:menu.item>
             @endforeach
+                <flux:menu.item wire:click="loadMore">Загрузить больше..</flux:menu.item>
 
             <flux:menu.separator />
 

@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 class Notification extends BaseComponent
 {
     public Collection $notifications;
+    public $offset = 0;
 
     public function mount(): void
     {
@@ -18,7 +19,13 @@ class Notification extends BaseComponent
 
     public function getNotifications(): Collection
     {
-        return $this->currentUser()->notifications()->limit(15)->get();
+        return $this->currentUser()->notifications()->offset($this->offset)->limit(15)->get();
+    }
+
+    public function loadMore()
+    {
+        $this->offset += 15;
+        $this->notifications = $this->notifications->merge($this->getNotifications());
     }
 
     public function clear(): void
