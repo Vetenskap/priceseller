@@ -7,6 +7,7 @@ use App\HttpClient\OzonClient\Resources\FBS\CarriageAvailableList;
 use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\OzonMarket;
+use App\Models\Supplier;
 use App\Models\User;
 use App\Notifications\TestTelegramNotification;
 use App\Notifications\UserNotification;
@@ -46,5 +47,8 @@ class Test extends Command
      */
     #[NoReturn] public function handle(): void
     {
+        $user = User::factory()->create();
+        $supplier = Supplier::factory()->create(['user_id' => $user->id]);
+        $item = Item::factory()->create(['user_id' => $user->id, 'supplier_id' => $supplier->id]);
     }
 }

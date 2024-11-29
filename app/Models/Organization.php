@@ -12,6 +12,7 @@ use Modules\Order\Models\SupplierOrderReport;
 
 class Organization extends MainModel
 {
+
     use HasFactory;
     use HasUuids;
 

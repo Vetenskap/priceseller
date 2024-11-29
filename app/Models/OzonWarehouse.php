@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class OzonWarehouse extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [
-        'warehouse_id',
         'name',
         'ozon_market_id',
+        'warehouse_id',
     ];
 
     public function market()

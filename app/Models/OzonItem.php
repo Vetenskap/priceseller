@@ -10,6 +10,7 @@ use Modules\Order\Models\Order;
 
 class OzonItem extends MainModel
 {
+
     use HasFactory;
     use HasUuids;
 
@@ -45,9 +46,8 @@ class OzonItem extends MainModel
         'price_market',
         'count',
         'ozon_market_id',
-        'id',
         'ozonitemable_id',
-        'ozonitemable_type'
+        'ozonitemable_type',
     ];
 
     public function scopeFilters(Builder $query)

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmailPriceItem extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [

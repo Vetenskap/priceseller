@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class EmailSupplierStockValue extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [

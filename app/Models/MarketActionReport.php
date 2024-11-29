@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class MarketActionReport extends MainModel
 {
+    use HasFactory;
+
     protected $fillable = [
         'action',
         'message',

@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Model;
 
 class SupplierReportLog extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [
         'message',
         'supplier_report_id',
-        'level'
+        'level',
     ];
 }

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 
 class BundlesExportReport extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [

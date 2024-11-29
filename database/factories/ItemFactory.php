@@ -22,7 +22,6 @@ class ItemFactory extends Factory
             'price' => $this->faker->randomFloat(),
             'count' => $this->faker->randomNumber(),
             'multiplicity' => $this->faker->randomNumber(),
-            'user_id' => $this->faker->randomNumber(),
             'updated' => $this->faker->boolean(),
             'deleted_at' => Carbon::now(),
             'created_at' => Carbon::now(),
@@ -30,8 +29,6 @@ class ItemFactory extends Factory
             'unload_wb' => $this->faker->boolean(),
             'unload_ozon' => $this->faker->boolean(),
             'buy_price_reserve' => $this->faker->randomFloat(),
-
-            'supplier_id' => Supplier::factory(),
         ];
     }
 }

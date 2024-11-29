@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmailSupplier extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [
@@ -19,7 +20,7 @@ class EmailSupplier extends MainModel
         'header_count',
         'email_id',
         'supplier_id',
-        'header_warehouse'
+        'header_warehouse',
     ];
 
     public function supplier()

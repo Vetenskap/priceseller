@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Email extends MainModel
 {
+
     use HasFactory;
     use HasUuids;
 
@@ -17,8 +18,9 @@ class Email extends MainModel
         'name',
         'address',
         'password',
+        'open',
         'user_id',
-        'open'
+        'deleted_at',
     ];
 
     protected $casts = [

@@ -8,6 +8,7 @@ use Modules\Order\Models\WriteOffItemWarehouseStock;
 
 class ItemWarehouseStock extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [

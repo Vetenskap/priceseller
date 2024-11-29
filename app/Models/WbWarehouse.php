@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Model;
 
 class WbWarehouse extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [
         'name',
         'wb_market_id',
-        'warehouse_id'
+        'warehouse_id',
     ];
 
     public function market()

@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class OzonWarehouseSupplier extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [

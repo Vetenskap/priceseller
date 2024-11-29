@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends MainModel
 {
+
     use HasFactory;
     use HasUuids;
 
@@ -19,7 +20,8 @@ class Supplier extends MainModel
         'open',
         'use_brand',
         'user_id',
-        'unload_without_price'
+        'deleted_at',
+        'unload_without_price',
     ];
 
     protected $casts = [

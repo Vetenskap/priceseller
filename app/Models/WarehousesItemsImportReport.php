@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class WarehousesItemsImportReport extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [

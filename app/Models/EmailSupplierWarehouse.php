@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class EmailSupplierWarehouse extends MainModel
 {
+
     use HasFactory;
 
     public $fillable = [

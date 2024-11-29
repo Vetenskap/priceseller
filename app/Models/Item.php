@@ -20,24 +20,26 @@ use Modules\Moysklad\Models\MoyskladWebhookReportEvent;
 
 class Item extends MainModel
 {
+
     use HasFactory;
     use HasUuids;
 
     protected $fillable = [
+        'ms_uuid',
         'code',
+        'name',
         'supplier_id',
         'article',
         'brand',
-        'user_id',
-        'ms_uuid',
-        'name',
+        'price',
+        'count',
         'multiplicity',
-        'id',
-        'unload_ozon',
+        'user_id',
+        'updated',
+        'deleted_at',
         'unload_wb',
-        'created_at',
-        'updated_at',
-        'buy_price_reserve'
+        'unload_ozon',
+        'buy_price_reserve',
     ];
 
     protected $casts = [

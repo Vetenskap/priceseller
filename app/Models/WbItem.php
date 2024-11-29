@@ -10,6 +10,7 @@ use Modules\Order\Models\Order;
 
 class WbItem extends MainModel
 {
+
     use HasFactory;
     use HasUuids;
 
@@ -22,9 +23,10 @@ class WbItem extends MainModel
         'retail_markup_percent',
         'package',
         'volume',
+        'price',
         'price_market',
+        'count',
         'wb_market_id',
-        'id',
         'wbitemable_id',
         'wbitemable_type',
         'subject_id',

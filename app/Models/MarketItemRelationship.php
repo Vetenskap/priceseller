@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class MarketItemRelationship extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [

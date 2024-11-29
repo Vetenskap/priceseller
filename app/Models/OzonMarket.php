@@ -16,6 +16,7 @@ use Opcodes\LogViewer\Facades\Cache;
 
 class OzonMarket extends MainModel
 {
+
     use HasFactory;
     use HasUuids;
 
@@ -35,6 +36,8 @@ class OzonMarket extends MainModel
         'last_mile',
         'max_mile',
         'user_id',
+        'deleted_at',
+        'close',
         'organization_id',
         'minus_stock',
         'enabled_price',

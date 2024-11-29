@@ -9,6 +9,7 @@ use Modules\Order\Models\WriteOffWarehouseStock;
 
 class Warehouse extends MainModel
 {
+
     use HasFactory;
     use HasUuids;
 

@@ -9,6 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class SupplierWarehouse extends MainModel
 {
+
     use HasFactory, HasUuids;
 
     public $fillable = [

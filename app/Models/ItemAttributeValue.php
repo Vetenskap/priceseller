@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class ItemAttributeValue extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [

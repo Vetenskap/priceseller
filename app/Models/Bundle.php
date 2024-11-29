@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Modules\Moysklad\Models\MoyskladWebhookReport;
@@ -11,7 +12,7 @@ use Modules\Moysklad\Models\MoyskladWebhookReportEvent;
 
 class Bundle extends MainModel
 {
-    use HasUuids;
+    use HasFactory, HasUuids;
 
     public function items(): BelongsToMany
     {
@@ -19,11 +20,10 @@ class Bundle extends MainModel
     }
 
     protected $fillable = [
+        'ms_uuid',
         'code',
         'name',
         'user_id',
-        'ms_uuid',
-        'id'
     ];
 
     const MAINATTRIBUTES = [

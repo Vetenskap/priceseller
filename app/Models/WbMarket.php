@@ -15,6 +15,7 @@ use Opcodes\LogViewer\Facades\Cache;
 
 class WbMarket extends MainModel
 {
+
     use HasFactory;
     use HasUuids;
 
@@ -30,12 +31,14 @@ class WbMarket extends MainModel
         'max',
         'volume',
         'user_id',
+        'deleted_at',
+        'close',
         'organization_id',
         'minus_stock',
         'enabled_update_commissions_in_time',
         'update_commissions_time',
         'tariff',
-        'enabled_price'
+        'enabled_price',
     ];
 
     protected $casts = [

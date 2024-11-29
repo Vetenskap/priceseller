@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class ItemSupplierWarehouseStock extends MainModel
 {
+
     use HasFactory;
 
     public $fillable = [

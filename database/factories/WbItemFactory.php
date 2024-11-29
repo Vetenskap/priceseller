@@ -27,8 +27,6 @@ class WbItemFactory extends Factory
             'count' => $this->faker->randomNumber(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
-            'wbitemable_id' => $this->faker->word(),
-            'wbitemable_type' => $this->faker->word(),
             'subject_id' => $this->faker->randomNumber(),
         ];
     }

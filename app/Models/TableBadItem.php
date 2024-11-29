@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class TableBadItem extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [

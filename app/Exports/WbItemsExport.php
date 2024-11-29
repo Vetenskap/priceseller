@@ -70,7 +70,9 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
                     }
 
                     foreach ($this->exportExtItemFields as $exportExtItemField) {
-                        $main['item.' . $exportExtItemField] = $item->itemable->{$exportExtItemField};
+                        if (isset($item->itemable[$exportExtItemField])) {
+                            $main['item.' . $exportExtItemField] = $item->itemable->{$exportExtItemField};
+                        }
                     }
 
                     return $main;
@@ -91,7 +93,9 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
         }
 
         foreach ($this->exportExtItemFields as $exportExtItemField) {
-            $main[] = collect(Item::MAINATTRIBUTES)->where('name', $exportExtItemField)->first()['label'];
+            if (isset(collect(Item::MAINATTRIBUTES)->where('name', $exportExtItemField)->first()['label'])) {
+                $main[] = collect(Item::MAINATTRIBUTES)->where('name', $exportExtItemField)->first()['label'];
+            }
         }
 
         return $main;

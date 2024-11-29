@@ -9,18 +9,19 @@ use Illuminate\Support\Carbon;
 
 class ItemsImportReport extends MainModel
 {
+
     use HasFactory;
 
     protected $fillable = [
         'correct',
         'error',
-        'updated',
-        'deleted',
-        'uuid',
         'message',
         'status',
+        'uuid',
         'reportable_id',
         'reportable_type',
+        'updated',
+        'deleted',
     ];
 
     public function reportable()

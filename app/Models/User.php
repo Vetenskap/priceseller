@@ -24,6 +24,7 @@ use Modules\VoshodApi\Models\VoshodApi;
 
 class User extends Authenticatable implements MustVerifyEmail, FilamentUser, CanResetPassword
 {
+
     use HasFactory, Notifiable, HasApiTokens;
 
     /**

@@ -9,14 +9,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SupplierReport extends MainModel
 {
+
     use HasFactory;
     use HasUuids;
 
     protected $fillable = [
         'status',
         'message',
+        'path',
         'supplier_id',
-        'path'
     ];
 
     public function supplier(): BelongsTo
