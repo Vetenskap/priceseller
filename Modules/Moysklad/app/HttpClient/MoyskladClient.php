@@ -15,7 +15,7 @@ class MoyskladClient
 
     public function __construct(string $apiKey)
     {
-        $this->request = Http::retry(3, 2000, function (\Exception $exception, PendingRequest $request) {
+        $this->request = Http::retry(3, 5000, function (\Exception $exception, PendingRequest $request) {
             return ($exception instanceof RequestException && $exception->response->tooManyRequests()) || $exception instanceof ConnectionException;
         })
             ->timeout(60)

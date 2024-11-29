@@ -112,6 +112,8 @@ class MoyskladWebhookProcessService
 
         $this->apiWebhook->getEvents()->each(function (WebhookEvent $event) {
 
+            sleep(30);
+
             $order = $event->getMeta();
             $order->fetch($this->webhook->moysklad->api_key, ['expand' => 'positions']);
 
