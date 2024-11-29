@@ -38,9 +38,6 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
         'Новая цена',
         'Цена из маркета',
         'Остаток',
-        'Закупочная цена',
-        'Закупочная цена резерв',
-        'Кратность отгрузки',
         'Обновлено',
         'Создано',
         'Удалить'
