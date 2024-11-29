@@ -85,6 +85,9 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
                                         case 'buy_price_reserve':
                                             $main['item' . $exportExtItemField] = $item->itemable->items->sum(fn (Item $item) => $item->buy_price_reserve * $item->pivot->multiplicity);
                                             break;
+                                        case 'multiplicity':
+                                            $main['item' . $exportExtItemField] = $item->itemable->items->min(fn (Item $item) => $item->pivot->multiplicity);
+                                            break;
                                         default:
                                             $main['item' . $exportExtItemField] = $item->itemable->items->implode(fn (Item $item) => $item->{$exportExtItemField}, ', ');
                                     }
