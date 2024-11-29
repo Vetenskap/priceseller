@@ -80,7 +80,7 @@ class Item extends MainModel
             'label' => 'Закупочная цена резерв'
         ],
         [
-            'name' => 'buy_price',
+            'name' => 'price',
             'label' => 'Закупочная цена'
         ],
     ];
