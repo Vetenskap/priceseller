@@ -6,7 +6,7 @@ use App\Models\UserPermission;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 
-class UserPermissionFactory extends Factory
+class PermissionFactory extends Factory
 {
     protected $model = UserPermission::class;
 

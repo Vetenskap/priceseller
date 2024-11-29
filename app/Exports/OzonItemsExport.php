@@ -3,6 +3,7 @@
 namespace App\Exports;
 
 use App\Imports\OzonItemsImport;
+use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
@@ -74,8 +75,27 @@ class OzonItemsExport implements FromCollection, WithHeadings, WithStyles
                     }
 
                     foreach ($this->exportExtItemFields as $exportExtItemField) {
-                        if (isset($item->itemable[$exportExtItemField])) {
-                            $main['item.' . $exportExtItemField] = $item->itemable->{$exportExtItemField};
+                        if ($item->itemable instanceof Bundle) {
+                            if (isset($item->itemable->items->first()[$exportExtItemField])) {
+                                if ($item->itemable instanceof Bundle) {
+                                    switch ($exportExtItemField) {
+                                        case 'price':
+                                            $main['item' . $exportExtItemField] = $item->itemable->items->sum(fn (Item $item) => $item->price * $item->pivot->multiplicity);
+                                            break;
+                                        case 'buy_price_reserve':
+                                            $main['item' . $exportExtItemField] = $item->itemable->items->sum(fn (Item $item) => $item->buy_price_reserve * $item->pivot->multiplicity);
+                                            break;
+                                        default:
+                                            $main['item' . $exportExtItemField] = $item->itemable->items->implode(fn (Item $item) => $item->{$exportExtItemField}, ', ');
+                                    }
+                                } else {
+
+                                }
+                            }
+                        } else {
+                            if (isset($item->itemable[$exportExtItemField])) {
+                                $main['item' . $exportExtItemField] = $item->itemable[$exportExtItemField];
+                            }
                         }
                     }
 

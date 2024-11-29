@@ -85,7 +85,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
         return $this->permissions()->where('value', 'admin')->where('expires', '>', now())->exists();
     }
 
-    public function hasPermission(string $permissionValue): bool
+    public function existsPermission(string $permissionValue): bool
     {
         return $this->permissions()
             ->where('value', $permissionValue)
@@ -132,7 +132,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
         ];
 
         foreach ($permissionMap[$platform] ?? [] as $permission => $limit) {
-            if ($this->hasPermission($permission)) {
+            if ($this->existsPermission($permission)) {
                 return $limit;
             }
         }

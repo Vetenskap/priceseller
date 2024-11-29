@@ -26,6 +26,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -93,14 +94,16 @@ class AppServiceProvider extends ServiceProvider
             return $user->isAdmin();
         });
 
-        foreach (Permission::where('type', 'employee')->get() as $permission) {
-            foreach (['view', 'create', 'update', 'delete'] as $action) {
-                Gate::define($action .'-' . $permission->value, function (Employee|User $user) use ($permission, $action) {
-                    if ($user instanceof Employee) {
-                        return $user->permissions()->where('value', $permission->value)->first()?->pivot->{$action};
-                    }
-                    return true;
-                });
+        if (Schema::hasColumn('permissions', 'type')) {
+            foreach (Permission::where('type', 'employee')->get() as $permission) {
+                foreach (['view', 'create', 'update', 'delete'] as $action) {
+                    Gate::define($action .'-' . $permission->value, function (Employee|User $user) use ($permission, $action) {
+                        if ($user instanceof Employee) {
+                            return $user->permissions()->where('value', $permission->value)->first()?->pivot->{$action};
+                        }
+                        return true;
+                    });
+                }
             }
         }
     }

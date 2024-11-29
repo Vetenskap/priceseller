@@ -15,4 +15,5 @@ class UserPermission extends MainModel
         'permission_id',
         'expires',
     ];
+
 }
