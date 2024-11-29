@@ -14,6 +14,7 @@ class CustomerOrder extends Entity
 {
     const ENDPOINT = '/entity/customerorder/';
 
+    protected ?string $name = null;
     protected ?Collection $positions = null;
     protected ?Project $project = null;
     protected ?Store $store = null;
@@ -30,6 +31,7 @@ class CustomerOrder extends Entity
     {
         $this->data = $customerOrder;
         $this->id = $customerOrder->get('id');
+        $this->name = $customerOrder->get('name');
 
         if ($customerOrder->has('positions')) {
 
@@ -104,6 +106,7 @@ class CustomerOrder extends Entity
             'project' => $this->project?->toArray(),
             'store' => $this->store?->toArray(),
             'agent' => $this->agent?->toArray(),
+            'name' => $this->name
         ];
     }
 

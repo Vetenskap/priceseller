@@ -79,6 +79,10 @@ class Item extends MainModel
             'name' => 'buy_price_reserve',
             'label' => 'Закупочная цена резерв'
         ],
+        [
+            'name' => 'buy_price',
+            'label' => 'Закупочная цена'
+        ],
     ];
 
     public function supplier()
