@@ -51,17 +51,12 @@ class OzonMarketIndex extends BaseComponent
     {
         $maxMarkets = $this->currentUser()->maxAllowedMarkets('ozon');
 
-        if ($this->currentUser()->ozonMarkets()->count() >= $maxMarkets) {
+        if (!$this->currentUser()->isAdmin() && $this->currentUser()->ozonMarkets()->count() >= $maxMarkets) {
             \Flux::toast('Вы достигли лимита кабинетов для вашей подписки.', variant: 'danger');
             return;
         }
 
         $this->authorizeForUser($this->user(), 'create', OzonMarket::class);
-
-        if (!UsersPermissionsService::checkOzonPermission($this->currentUser())) {
-            $this->js((new Toast('Не разрешено', 'Ваша подписка не позволяет добавлять ещё кабинеты'))->warning());
-            return;
-        }
 
         $this->form->store();
 

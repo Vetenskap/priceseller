@@ -61,7 +61,7 @@ class MoyskladItemOrderIndex extends Component
         ]);
     }
 
-    public function save(): void
+    public function update(): void
     {
         $this->validate();
 

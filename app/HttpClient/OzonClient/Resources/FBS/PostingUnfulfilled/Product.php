@@ -20,15 +20,15 @@ class Product implements Wireable
         ['name' => 'currency_code', 'label' => 'Валюта ваших цен. Совпадает с валютой, которая установлена в настройках личного кабинета'],
     ];
 
-    protected $mandatory_mark;
-    protected $name;
-    protected $offer_id;
-    protected $price;
-    protected $quantity;
-    protected $sku;
-    protected $currency_code;
-    protected OzonItem $product;
-    protected ProductInfoAttribute $attribute;
+    protected $mandatory_mark = null;
+    protected $name = null;
+    protected $offer_id = null;
+    protected $price = null;
+    protected $quantity = null;
+    protected $sku = null;
+    protected $currency_code = null;
+    protected ?OzonItem $product = null;
+    protected ?ProductInfoAttribute $attribute = null;
 
     public function __construct(Collection $product)
     {

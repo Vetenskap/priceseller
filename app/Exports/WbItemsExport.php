@@ -56,9 +56,6 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
                         'price' => $item->price,
                         'price_market' => $item->price_market,
                         'count' => $item->count,
-                        'item_price' => $item->itemable->getMorphClass() === 'App\Models\Item' ? $item->itemable->price : $item->itemable->items()->sum('price'),
-                        'item_buy_price_reserve' => $item->itemable->getMorphClass() === 'App\Models\Item' ? $item->itemable->buy_price_reserve : $item->itemable->items()->sum('buy_price_reserve'),
-                        'multiplicity' => $item->itemable->getMorphClass() === 'App\Models\Item' ? $item->itemable->multiplicity : $item->itemable->items()->min('bundle_items.multiplicity'),
                         'updated_at' => $item->updated_at,
                         'created_at' => $item->created_at,
                         'delete' => 'Нет'

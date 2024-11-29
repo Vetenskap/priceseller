@@ -67,7 +67,7 @@ class MoyskladIndex extends ModuleComponent
         else \Flux::toast('Цена не установлена');
     }
 
-    public function store(): void
+    public function update(): void
     {
         if ($this->form->moysklad) {
             $this->authorize('update', $this->form->moysklad);

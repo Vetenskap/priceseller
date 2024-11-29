@@ -51,7 +51,7 @@ class WbMarketIndex extends BaseComponent
     {
         $maxMarkets = $this->currentUser()->maxAllowedMarkets('wb');
 
-        if ($this->currentUser()->wbMarkets()->count() >= $maxMarkets) {
+        if (!$this->currentUser()->isAdmin() && $this->currentUser()->wbMarkets()->count() >= $maxMarkets) {
             \Flux::toast('Вы достигли лимита кабинетов для вашей подписки.', variant: 'danger');
             return;
         }

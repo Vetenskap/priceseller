@@ -31,6 +31,8 @@ class MoyskladOrganizationIndex extends Component
     public function store(): void
     {
         $this->form->store();
+
+        \Flux::modal('create-moysklad-organization')->close();
     }
 
     public function mount(): void
