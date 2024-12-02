@@ -47,15 +47,9 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
 
                 RateLimiter::attempt('email-unload-' . $supplier->id, 1, function () use ($handler, $supplier) {
                     if (!SupplierReportService::get($supplier)) {
+                        $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
 
-                        $ttl = Redis::ttl('laravel_unique_job:'.PriceUnload::class.':'.PriceUnload::getUniqueId(EmailSupplier::find($supplier->pivot->id)));
-
-                        if (!($ttl > 0)) {
-                            $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
-
-                            PriceUnload::dispatchIf((boolean) $pricePath, $supplier->pivot->id, $pricePath);
-                        }
-
+                        PriceUnload::dispatchIf((boolean)$pricePath, $supplier->pivot->id, $pricePath);
                     }
                 });
 

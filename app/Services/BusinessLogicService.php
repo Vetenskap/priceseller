@@ -29,7 +29,7 @@ class BusinessLogicService
                 ->where('unload_without_price', true)
                 ->chunk(5, function (Collection $suppliers) {
                     $suppliers->filter(fn (Supplier $supplier) => $supplier->user->isSub() || $supplier->user->isAdmin())->each(function (Supplier $supplier) {
-                        SupplierService::setAllItemsUpdated($supplier);
+                        \app(SupplierService::class)->setAllItemsUpdated($supplier);
                         MarketsUnload::dispatch($supplier->user, $supplier);
                     });
                 });

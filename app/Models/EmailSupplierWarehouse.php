@@ -17,6 +17,11 @@ class EmailSupplierWarehouse extends MainModel
         'supplier_warehouse_id',
     ];
 
+    public function emailSupplier(): BelongsTo
+    {
+        return $this->belongsTo(EmailSupplier::class, 'email_supplier_id', 'id');
+    }
+
     public function supplierWarehouse(): BelongsTo
     {
         return $this->belongsTo(SupplierWarehouse::class, 'supplier_warehouse_id', 'id');

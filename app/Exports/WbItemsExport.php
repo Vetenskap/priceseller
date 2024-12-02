@@ -31,8 +31,8 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
 
 
     /**
-    * @return \Illuminate\Support\Collection
-    */
+     * @return \Illuminate\Support\Collection
+     */
     public function collection()
     {
         if ($this->template) return collect();
@@ -73,27 +73,38 @@ class WbItemsExport implements FromCollection, WithHeadings, WithStyles
                     foreach ($this->exportExtItemFields as $exportExtItemField) {
                         if ($item->itemable instanceof Bundle) {
                             if (isset($item->itemable->items->first()[$exportExtItemField])) {
-                                if ($item->itemable instanceof Bundle) {
-                                    switch ($exportExtItemField) {
-                                        case 'price':
-                                            $main['item' . $exportExtItemField] = $item->itemable->items->sum(fn (Item $item) => $item->price * $item->pivot->multiplicity);
-                                            break;
-                                        case 'buy_price_reserve':
-                                            $main['item' . $exportExtItemField] = $item->itemable->items->sum(fn (Item $item) => $item->buy_price_reserve * $item->pivot->multiplicity);
-                                            break;
-                                        case 'multiplicity':
-                                            $main['item' . $exportExtItemField] = $item->itemable->items->min(fn (Item $item) => $item->pivot->multiplicity);
-                                            break;
-                                        default:
-                                            $main['item' . $exportExtItemField] = $item->itemable->items->implode(fn (Item $item) => $item->{$exportExtItemField}, ', ');
-                                    }
-                                } else {
-
+                                switch ($exportExtItemField) {
+                                    case 'price':
+                                        $main['item' . $exportExtItemField] = $item->itemable->items->sum(fn(Item $item) => $item->price * $item->pivot->multiplicity);
+                                        break;
+                                    case 'buy_price_reserve':
+                                        $main['item' . $exportExtItemField] = $item->itemable->items->sum(fn(Item $item) => $item->buy_price_reserve * $item->pivot->multiplicity);
+                                        break;
+                                    case 'multiplicity':
+                                        $main['item' . $exportExtItemField] = $item->itemable->items->min(fn(Item $item) => $item->pivot->multiplicity);
+                                        break;
+                                    case 'unload_ozon':
+                                        $main['item' . $exportExtItemField] = $item->itemable->items->first(fn(Item $item) => $item->unload_ozon) ? 'Да' : 'Нет';
+                                        break;
+                                    case 'unload_wb':
+                                        $main['item' . $exportExtItemField] = $item->itemable->items->first(fn(Item $item) => $item->unload_wb) ? 'Да' : 'Нет';
+                                        break;
+                                    default:
+                                        $main['item' . $exportExtItemField] = $item->itemable->items->implode(fn(Item $item) => $item->{$exportExtItemField}, ', ');
                                 }
                             }
                         } else {
                             if (isset($item->itemable[$exportExtItemField])) {
-                                $main['item' . $exportExtItemField] = $item->itemable[$exportExtItemField];
+                                switch ($exportExtItemField) {
+                                    case 'unload_ozon':
+                                        $main['item' . $exportExtItemField] = $item->itemable->unload_ozon ? 'Да' : 'Нет';
+                                        break;
+                                    case 'unload_wb':
+                                        $main['item' . $exportExtItemField] = $item->itemable->unload_wb ? 'Да' : 'Нет';
+                                        break;
+                                    default:
+                                        $main['item' . $exportExtItemField] = $item->itemable->{$exportExtItemField};
+                                }
                             }
                         }
                     }

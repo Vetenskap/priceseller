@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmailSupplier extends MainModel
@@ -22,6 +23,11 @@ class EmailSupplier extends MainModel
         'supplier_id',
         'header_warehouse',
     ];
+
+    public function email(): BelongsTo
+    {
+        return $this->belongsTo(Email::class, 'email_id', 'id');
+    }
 
     public function supplier()
     {

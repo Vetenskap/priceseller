@@ -33,6 +33,7 @@ class PriceUnload implements ShouldQueue
      */
     public function __construct(public int $emailSupplierId, public string $path)
     {
+
     }
 
     /**
@@ -42,20 +43,22 @@ class PriceUnload implements ShouldQueue
     {
         $emailSupplier = EmailSupplier::findOrFail($this->emailSupplierId);
 
-        if (SupplierReportService::get($emailSupplier->supplier)) {
+        if (app(SupplierReportService::class)->get($emailSupplier->supplier)) {
             return;
         } else {
-            SupplierReportService::new($emailSupplier->supplier, $this->path, "({$emailSupplier->mainEmail->name})");
+            app(SupplierReportService::class)->new($emailSupplier->supplier, $this->path, "({$emailSupplier->mainEmail->name})");
         }
 
-        $service = new EmailSupplierService($emailSupplier, Storage::disk('public')->path($this->path));
-        $service->unload();
+        app(EmailSupplierService::class, [
+            'supplier' => $emailSupplier,
+            'path' => Storage::disk('public')->path($this->path)
+        ])->unload();
 
         $ttl = Redis::ttl('laravel_unique_job:'.MarketsEmailSupplierUnload::class.':'.MarketsEmailSupplierUnload::getUniqueId($emailSupplier));
 
         if ($ttl > 0) {
-            SupplierReportService::addLog($emailSupplier->supplier, 'Кабинеты этого поставщика уже выгружаются или не прошло 10 минут с первой выгрузки. Оставшееся время: ' . $ttl . ' секунд');
-            SupplierReportService::error($emailSupplier->supplier);
+            app(SupplierReportService::class)->addLog($emailSupplier->supplier, 'Кабинеты этого поставщика уже выгружаются или не прошло 10 минут с первой выгрузки. Оставшееся время: ' . $ttl . ' секунд');
+            app(SupplierReportService::class)->error($emailSupplier->supplier);
         } else {
             MarketsEmailSupplierUnload::dispatch($emailSupplier->supplier->user, $emailSupplier);
         }
@@ -65,16 +68,11 @@ class PriceUnload implements ShouldQueue
     public function failed(\Throwable $th): void
     {
         $emailSupplier = EmailSupplier::findOrFail($this->emailSupplierId);
-        SupplierReportService::error($emailSupplier->supplier);
+        app(SupplierReportService::class)->error($emailSupplier->supplier);
     }
 
     public function uniqueId(): string
     {
         return $this->emailSupplierId . "price_unload";
-    }
-
-    public static function getUniqueId(EmailSupplier $emailSupplier): string
-    {
-        return $emailSupplier->id . 'price_unload';
     }
 }

@@ -22,9 +22,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class EmailSupplierService
 {
-    protected Collection $stockValues;
-    protected Collection $warehouses;
-    public int $limitMemory = 10485760000;
+    public Collection $stockValues;
+    public Collection $warehouses;
 
     public function __construct(protected EmailSupplier $supplier, protected string $path)
     {
@@ -84,7 +83,7 @@ class EmailSupplierService
 
     protected function xlsxHandle(): void
     {
-        Helpers::toBatch(function (Batch $batch) {
+        app(Helpers::class)->toBatch(function (Batch $batch) {
             $reader = ReaderEntityFactory::createXLSXReader();
             $reader->open($this->path);
 
@@ -115,7 +114,7 @@ class EmailSupplierService
 
     protected function odsHandle(): void
     {
-        Helpers::toBatch(function (Batch $batch) {
+        app(Helpers::class)->toBatch(function (Batch $batch) {
             $reader = ReaderEntityFactory::createODSReader();
             $reader->open($this->path);
 
@@ -162,7 +161,7 @@ class EmailSupplierService
 
     protected function importHandle(): void
     {
-        Helpers::toBatch(function (Batch $batch) {
+        app(Helpers::class)->toBatch(function (Batch $batch) {
             Excel::import(new SupplierPriceImport($this, $batch), $this->path);
         }, 'email-supplier-unload');
     }
