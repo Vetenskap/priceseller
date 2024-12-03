@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Components\EmailClient\EmailClient;
 use App\Components\EmailClient\EmailHandlerLaravelImap;
+use App\Contracts\PriceProcessingServiceInterface;
 use App\Jobs\Email\CheckEmails;
 use App\Jobs\Export;
 use App\Jobs\Import;
@@ -15,6 +16,7 @@ use App\Services\Item\ItemPriceWithCacheService;
 use App\Services\Item\ItemPriceServiceInterface;
 use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
+use App\Services\PriceProcessingService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;

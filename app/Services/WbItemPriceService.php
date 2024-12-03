@@ -372,6 +372,7 @@ class WbItemPriceService
                     ->with('itemable')
                     ->chunk(1000, function (Collection $items) use ($warehouse) {
 
+                        /** @var Collection $data */
                         $data = $items->filter(function (WbItem $wbItem) {
 
                             if ($wbItem->wbitemable_type === Item::class) {
@@ -393,7 +394,7 @@ class WbItemPriceService
                             ];
                         });
 
-                        if (App::isProduction()) {
+                        if (App::isProduction() && $data->isNotEmpty()) {
                             $wbClient = new WbClient($this->market->api_key);
                             $wbClient->putStocks($data->values(), $warehouse->warehouse_id, $this->supplier);
                         }
@@ -424,6 +425,7 @@ class WbItemPriceService
             ->whereNotNull('nm_id')
             ->chunk(1000, function (Collection $items) {
 
+                /** @var Collection $data */
                 $data = $items->filter(function (WbItem $wbItem) {
 
                     if ($wbItem->wbitemable_type === Item::class) {
@@ -458,7 +460,7 @@ class WbItemPriceService
                     ];
                 });
 
-                if (App::isProduction()) {
+                if (App::isProduction() && $data->isNotEmpty()) {
                     $wbClient = new WbClient($this->market->api_key);
                     $wbClient->putPrices($data->values(), $this->supplier);
                 }

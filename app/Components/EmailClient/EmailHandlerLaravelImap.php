@@ -15,6 +15,7 @@ use Webklex\PHPIMAP\Exceptions\FolderFetchingException;
 use Webklex\PHPIMAP\Exceptions\GetMessagesFailedException;
 use Webklex\PHPIMAP\Exceptions\RuntimeException;
 use Webklex\PHPIMAP\Folder;
+use Webklex\PHPIMAP\Attribute;
 use Webklex\PHPIMAP\Message;
 use Webklex\PHPIMAP\Support\MessageCollection;
 use ZipArchive;
@@ -97,64 +98,67 @@ class EmailHandlerLaravelImap
 
             /** @var Message $message */
             foreach ($this->getUnseenMessagesFromIterator($folder, $supplierEmail) as $message) {
-                if ($message->hasAttachments()) {
 
-                    /** @var Attachment $file */
-                    foreach ($message->getAttachments()->paginate()->getIterator() as $file) {
+                if ($message->getDate()->toDate()->addDay()->greaterThan(now())) {
+                    if ($message->hasAttachments()) {
 
-                        $name = $file->getName();
-                        $ext = '.' . pathinfo($name, PATHINFO_EXTENSION);
-                        $name = str_replace($ext, '', $name);
+                        /** @var Attachment $file */
+                        foreach ($message->getAttachments()->paginate()->getIterator() as $file) {
 
-                        if (!Str::contains($file->getName(), $supplierFilename)) {
-                            continue;
-                        }
+                            $name = $file->getName();
+                            $ext = '.' . pathinfo($name, PATHINFO_EXTENSION);
+                            $name = str_replace($ext, '', $name);
 
-                        if (
-                            !in_array($file->getContentType(), self::TABLE_TYPES) &&
-                            !in_array($file->getContentType(), self::ZIP_TYPES)
-                        ) continue;
-
-                        $fullPath = SupplierService::PATH . uniqid() . '_';
-
-                        $this->storage->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext, $file->getContent());
-
-                        if (in_array($file->getContentType(), self::ZIP_TYPES)) {
-
-                            $zip = new ZipArchive;
-
-                            $res = $zip->open($this->storage->path($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext));
-
-                            if ($res === TRUE) {
-
-                                $nameZip = $zip->getNameIndex(0);
-                                $zipExt = '.' . pathinfo($nameZip, PATHINFO_EXTENSION);
-                                $nameZip = str_replace($zipExt, '', $nameZip);
-
-                                $this->storage->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($nameZip)) . $zipExt, $zip->getFromIndex(0));
-
-                                $zip->close();
-
-                                $this->storage->delete($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext);
-
-                                $fullPath = $fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($nameZip)) . $zipExt;
-
-                            } else {
-                                Context::push('unload', [
-                                    'Ошибка' => 'Ошибка открытия архива',
-                                ]);
+                            if (!Str::contains($file->getName(), $supplierFilename)) {
+                                continue;
                             }
-                        } else {
 
-                            $fullPath = $fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext;
+                            if (
+                                !in_array($file->getContentType(), self::TABLE_TYPES) &&
+                                !in_array($file->getContentType(), self::ZIP_TYPES)
+                            ) continue;
 
+                            $fullPath = SupplierService::PATH . uniqid() . '_';
+
+                            $this->storage->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext, $file->getContent());
+
+                            if (in_array($file->getContentType(), self::ZIP_TYPES)) {
+
+                                $zip = new ZipArchive;
+
+                                $res = $zip->open($this->storage->path($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext));
+
+                                if ($res === TRUE) {
+
+                                    $nameZip = $zip->getNameIndex(0);
+                                    $zipExt = '.' . pathinfo($nameZip, PATHINFO_EXTENSION);
+                                    $nameZip = str_replace($zipExt, '', $nameZip);
+
+                                    $this->storage->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($nameZip)) . $zipExt, $zip->getFromIndex(0));
+
+                                    $zip->close();
+
+                                    $this->storage->delete($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext);
+
+                                    $fullPath = $fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($nameZip)) . $zipExt;
+
+                                } else {
+                                    Context::push('unload', [
+                                        'Ошибка' => 'Ошибка открытия архива',
+                                    ]);
+                                }
+                            } else {
+
+                                $fullPath = $fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext;
+
+                            }
+
+                            $message->setFlag('Seen');
+
+                            return $fullPath;
                         }
 
-                        $message->setFlag('Seen');
-
-                        return $fullPath;
                     }
-
                 }
 
                 unset($message);

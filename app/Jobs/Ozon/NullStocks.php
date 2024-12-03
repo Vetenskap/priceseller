@@ -7,6 +7,7 @@ use App\Models\MarketActionReport;
 use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
+use App\Services\NotificationService;
 use App\Services\OzonItemPriceService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -56,7 +57,7 @@ class NullStocks implements ShouldQueue
             'message' => 'Успех'
         ]);
 
-        event(new NotificationEvent($this->market->user_id, $this->market->name, 'Остатки обнулены', 0));
+        NotificationService::send($this->market->user_id, $this->market->name, 'Остатки обнулены', 0, null, 'export');
     }
 
     public function uniqueId(): string
@@ -71,6 +72,6 @@ class NullStocks implements ShouldQueue
             'message' => 'Ошибка'
         ]);
 
-        event(new NotificationEvent($this->market->user_id, $this->market->name, 'Ошибка в обнулении остатков', 1));
+        NotificationService::send($this->market->user_id, $this->market->name, 'Ошибка в обнулении остатков', 1, null, 'export');
     }
 }

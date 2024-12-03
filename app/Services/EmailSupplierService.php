@@ -25,7 +25,7 @@ class EmailSupplierService
     public Collection $stockValues;
     public Collection $warehouses;
 
-    public function __construct(protected EmailSupplier $supplier, protected string $path)
+    public function __construct(public EmailSupplier $supplier, public string $path)
     {
         $this->stockValues = $this->supplier->stockValues->pluck('value', 'name');
         $this->warehouses = $this->supplier->warehouses->pluck('supplier_warehouse_id', 'value');
@@ -166,14 +166,14 @@ class EmailSupplierService
         }, 'email-supplier-unload');
     }
 
-    protected function nullAllStocks(): void
+    public function nullAllStocks(): void
     {
         $this->supplier->warehouses->each(function (EmailSupplierWarehouse $warehouse) {
             $warehouse->supplierWarehouse->stocks()->update(['stock' => 0]);
         });
     }
 
-    protected function nullUpdated(): void
+    public function nullUpdated(): void
     {
         $this->supplier->supplier->items()->update(['updated' => false]);
     }
@@ -186,78 +186,113 @@ class EmailSupplierService
         $stock = $row->get($this->supplier->header_count - 1);
         $warehouse = $row->get($this->supplier->header_warehouse - 1);
 
-        $itemService = new ItemPriceService($article, $this->supplier->supplier->id);
-        $items = $this->supplier->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
-
-        if (count($items) > 0 && !is_null($article)) {
-
-            /** @var Item $item */
-            foreach ($items as $item) {
-
-                EmailPriceItemService::handleFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock, $item->id);
-
-                if (is_numeric($price) && $price > 0) {
-                    $price = $this->preparePrice($price);
-                    $item->price = $price;
-
-                    $user = $this->supplier->supplier->user;
-                    $moysklad = $user->moysklad;
-                    if (ModuleService::moduleIsEnabled('Moysklad', $user) && $moysklad->enabled_diff_price) {
-                        if (($price + ($price / 100 * $moysklad->diff_price)) < $item->buy_price_reserve || ($price - ($price / 100 * $moysklad->diff_price)) > $item->buy_price_reserve) {
-                            $moysklad->quarantine()->updateOrCreate([
-                                'item_id' => $item->id
-                            ], [
-                                'item_id' => $item->id,
-                                'supplier_buy_price' => $price
-                            ]);
-                        }
-                    }
-
-                }
-
-                $item->updated = true;
-
-                $itemService->save($item);
-
-                if (!is_null($stock) && $stock >= 0) {
-
-                    $stock = $this->prepareStock($stock);
-
-                    if (!is_null($this->supplier->header_warehouse)) {
-
-                        if ($supplier_warehouse_id = $this->warehouses->get($warehouse)) {
-
-                            $item->supplierWarehouseStocks()->updateOrCreate([
-                                'supplier_warehouse_id' => $supplier_warehouse_id,
-                                'item_id' => $item->id
-                            ], [
-                                'supplier_warehouse_id' => $supplier_warehouse_id,
-                                'stock' => $stock
-                            ]);
-
-                        }
-
-                    } else {
-
-                        $supplier_warehouse_id = $this->warehouses->first();
-
-                        $item->supplierWarehouseStocks()->updateOrCreate([
-                            'supplier_warehouse_id' => $supplier_warehouse_id,
-                            'item_id' => $item->id
-                        ], [
-                            'supplier_warehouse_id' => $supplier_warehouse_id,
-                            'stock' => $stock
-                        ]);
-
-                    }
-
-                }
-            }
-
-
-        } else {
-            EmailPriceItemService::handleNotFoundItem($this->supplier->supplier->id, $article, $brand, $price, $stock);
+        if (is_null($article)) {
+            $this->handleNotFound($article, $brand, $price, $stock);
+            return;
         }
+
+        $items = $this->findItems($article, $brand);
+
+        if ($items->isEmpty()) {
+            $this->handleNotFound($article, $brand, $price, $stock);
+            return;
+        }
+
+        foreach ($items as $item) {
+            $this->updateItem($item, $article, $brand, $price, $stock, $warehouse);
+        }
+    }
+
+    protected function findItems(?string $article, ?string $brand): Collection
+    {
+        $itemService = new ItemPriceService($article, $this->supplier->supplier->id);
+
+        return $this->supplier->supplier->use_brand
+            ? $itemService->withBrand($brand)->find()
+            : $itemService->find();
+    }
+
+    protected function handleNotFound(?string $article, ?string $brand, ?string $price, ?string $stock): void
+    {
+        EmailPriceItemService::handleNotFoundItem(
+            $this->supplier->supplier->id,
+            $article,
+            $brand,
+            $price,
+            $stock
+        );
+    }
+
+    protected function updateItem(
+        Item    $item,
+        ?string $article,
+        ?string $brand,
+        ?string $price,
+        ?string $stock,
+        ?string $warehouse
+    ): void
+    {
+        $this->updatePrice($item, $price);
+        $this->updateStock($item, $stock, $warehouse);
+        $item->updated = true;
+
+        $itemService = new ItemPriceService($article, $this->supplier->supplier->id);
+        $itemService->save($item);
+    }
+
+    protected function updatePrice(Item $item, ?string $price): void
+    {
+        if (!is_numeric($price) || $price <= 0) {
+            return;
+        }
+
+        $price = $this->preparePrice($price);
+        $item->price = $price;
+
+        $user = $this->supplier->supplier->user;
+        $moysklad = $user->moysklad;
+
+        if (ModuleService::moduleIsEnabled('Moysklad', $user) && $moysklad->enabled_diff_price) {
+            $this->handlePriceQuarantine($item, $price, $moysklad);
+        }
+    }
+
+    protected function handlePriceQuarantine(Item $item, float $price, $moysklad): void
+    {
+        $diffPrice = $moysklad->diff_price;
+
+        if (($price + ($price / 100 * $diffPrice)) < $item->buy_price_reserve ||
+            ($price - ($price / 100 * $diffPrice)) > $item->buy_price_reserve) {
+        $moysklad->quarantine()->updateOrCreate(
+            ['item_id' => $item->id],
+            ['item_id' => $item->id, 'supplier_buy_price' => $price]
+        );
+    }
+}
+
+    protected function updateStock(Item $item, ?string $stock, ?string $warehouse): void
+    {
+        if (is_null($stock) || $stock < 0) {
+            return;
+        }
+
+        $stock = $this->prepareStock($stock);
+
+        $supplierWarehouseId = $this->resolveWarehouseId($warehouse);
+
+        if ($supplierWarehouseId) {
+            $item->supplierWarehouseStocks()->updateOrCreate(
+                ['supplier_warehouse_id' => $supplierWarehouseId, 'item_id' => $item->id],
+                ['supplier_warehouse_id' => $supplierWarehouseId, 'stock' => $stock]
+            );
+        }
+    }
+
+    protected function resolveWarehouseId(?string $warehouse): ?string
+    {
+        return $this->supplier->header_warehouse
+            ? $this->warehouses->get($warehouse)
+            : $this->warehouses->first();
     }
 
     public function prepareStock(string $stock): int

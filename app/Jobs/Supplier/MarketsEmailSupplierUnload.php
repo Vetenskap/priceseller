@@ -41,27 +41,31 @@ class MarketsEmailSupplierUnload implements ShouldQueue, ShouldBeUnique
             ->get()
             ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $this->emailSupplier->supplier->id)->first());
 
-        $wbMarkets = $this->user->wbMarkets()
-            ->where('open', true)
-            ->where('close', false)
-            ->get()
-            ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $this->emailSupplier->supplier->id)->first());
+//        $wbMarkets = $this->user->wbMarkets()
+//            ->where('open', true)
+//            ->where('close', false)
+//            ->get()
+//            ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $this->emailSupplier->supplier->id)->first());
 
         foreach ($ozonMarkets as $market) {
-            $service = new OzonItemPriceService($this->emailSupplier->supplier, $market, $this->emailSupplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray());
+            $service = app(OzonItemPriceService::class, [
+                'supplier' => $this->emailSupplier->supplier,
+                'market' => $market,
+                'supplierWarehousesIds' => $this->emailSupplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray(),
+            ]);
             $service->updateStock();
             $service->updatePrice();
             $service->unloadAllStocks();
             $service->unloadAllPrices();
         }
 
-        foreach ($wbMarkets as $market) {
-            $service = new WbItemPriceService($this->emailSupplier->supplier, $market, $this->emailSupplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray());
-            $service->updateStock();
-            $service->updatePrice();
-            $service->unloadAllStocks();
-            $service->unloadAllPrices();
-        }
+//        foreach ($wbMarkets as $market) {
+//            $service = new WbItemPriceService($this->emailSupplier->supplier, $market, $this->emailSupplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray());
+//            $service->updateStock();
+//            $service->updatePrice();
+//            $service->unloadAllStocks();
+//            $service->unloadAllPrices();
+//        }
 
         SupplierReportService::success($this->emailSupplier->supplier);
     }

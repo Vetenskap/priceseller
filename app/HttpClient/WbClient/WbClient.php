@@ -144,7 +144,7 @@ class WbClient
 
         while ($limits > 0) {
 
-            if (!$data->count() > 0) return;
+            if ($data->isEmpty()) return;
 
             $limits--;
 

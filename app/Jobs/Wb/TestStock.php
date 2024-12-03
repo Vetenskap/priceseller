@@ -7,6 +7,7 @@ use App\Models\MarketActionReport;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbMarket;
+use App\Services\NotificationService;
 use App\Services\WbItemPriceService;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -57,7 +58,7 @@ class TestStock implements ShouldQueue
             'message' => 'Успех'
         ]);
 
-        event(new NotificationEvent($this->market->user_id, $this->market->name, 'Остатки перерасчитаны', 0));
+        NotificationService::send($this->market->user_id, $this->market->name, 'Остатки перерасчитаны', 0, null, 'export');
     }
 
     public function uniqueId(): string
@@ -72,6 +73,6 @@ class TestStock implements ShouldQueue
             'message' => 'Ошибка'
         ]);
 
-        event(new NotificationEvent($this->market->user_id, $this->market->name, 'Ошибка в перерасчете остатков', 1));
+        NotificationService::send($this->market->user_id, $this->market->name, 'Ошибка в перерасчете остатков', 1, null, 'export');
     }
 }

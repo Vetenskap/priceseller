@@ -24,7 +24,7 @@
                     <flux:card class="flex gap-2">
                         <flux:badge color="red" class="h-fit">Важно!</flux:badge>
                         <flux:subheading>Чтение прайсов происходит во всех папках. Убедитесь, что все
-                            старые прайсы имеют статус "прочитано".
+                            старые прайсы имеют статус "прочитано", даже в корзине.
                         </flux:subheading>
                     </flux:card>
                 </div>

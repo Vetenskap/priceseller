@@ -159,6 +159,7 @@ class OzonItemPriceService
 
     public function updateStock(): void
     {
+        dd('Здесь');
         SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
 
         Helpers::toBatch(function (Batch $batch) {
@@ -386,14 +387,8 @@ class OzonItemPriceService
                     ->with('itemable')
                     ->chunk(100, function (Collection $items) use ($warehouse) {
 
-                        $test = true;
-
-                        $data = $items->filter(function (OzonItem $ozonItem) use (&$test) {
-
-                            if ($test) {
-                                $test = false;
-                                return false;
-                            }
+                        /** @var Collection $data */
+                        $data = $items->filter(function (OzonItem $ozonItem) {
 
                             if ($ozonItem->ozonitemable_type === Item::class) {
                                 if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
@@ -416,7 +411,7 @@ class OzonItemPriceService
                             ];
                         });
 
-                        if (App::isProduction()) {
+                        if (App::isProduction() && $data->isNotEmpty()) {
                             $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
                             $ozonClient->putStocks($data->values()->all(), $this->supplier);
                         }
@@ -450,6 +445,7 @@ class OzonItemPriceService
             ->whereNotNull('min_price_percent')
             ->chunk(1000, function (Collection $items) {
 
+                /** @var Collection $data */
                 $data = $items->filter(function (OzonItem $ozonItem) {
 
                     if ($ozonItem->ozonitemable_type === Item::class) {
@@ -489,7 +485,7 @@ class OzonItemPriceService
                     ];
                 });
 
-                if (App::isProduction()) {
+                if (App::isProduction() && $data->isNotEmpty()) {
                     $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
                     $ozonClient->putPrices($data->values()->all());
                 }
