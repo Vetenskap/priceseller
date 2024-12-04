@@ -159,7 +159,6 @@ class OzonItemPriceService
 
     public function updateStock(): void
     {
-        dd('Здесь');
         SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
 
         Helpers::toBatch(function (Batch $batch) {
