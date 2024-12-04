@@ -22,6 +22,7 @@ class MarketsEmailSupplierUnload implements ShouldQueue, ShouldBeUnique
 
     public int $uniqueFor = 600;
 
+    public int $tries = 1;
     /**
      * Create a new job instance.
      */
@@ -41,11 +42,11 @@ class MarketsEmailSupplierUnload implements ShouldQueue, ShouldBeUnique
             ->get()
             ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $this->emailSupplier->supplier->id)->first());
 
-//        $wbMarkets = $this->user->wbMarkets()
-//            ->where('open', true)
-//            ->where('close', false)
-//            ->get()
-//            ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $this->emailSupplier->supplier->id)->first());
+        $wbMarkets = $this->user->wbMarkets()
+            ->where('open', true)
+            ->where('close', false)
+            ->get()
+            ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $this->emailSupplier->supplier->id)->first());
 
         foreach ($ozonMarkets as $market) {
             $service = app(OzonItemPriceService::class, [
@@ -59,13 +60,13 @@ class MarketsEmailSupplierUnload implements ShouldQueue, ShouldBeUnique
             $service->unloadAllPrices();
         }
 
-//        foreach ($wbMarkets as $market) {
-//            $service = new WbItemPriceService($this->emailSupplier->supplier, $market, $this->emailSupplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray());
-//            $service->updateStock();
-//            $service->updatePrice();
-//            $service->unloadAllStocks();
-//            $service->unloadAllPrices();
-//        }
+        foreach ($wbMarkets as $market) {
+            $service = new WbItemPriceService($this->emailSupplier->supplier, $market, $this->emailSupplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray());
+            $service->updateStock();
+            $service->updatePrice();
+            $service->unloadAllStocks();
+            $service->unloadAllPrices();
+        }
 
         SupplierReportService::success($this->emailSupplier->supplier);
     }

@@ -203,7 +203,7 @@ class EmailSupplierService
         }
     }
 
-    protected function findItems(?string $article, ?string $brand): Collection
+    public function findItems(?string $article, ?string $brand): Collection
     {
         $itemService = new ItemPriceService($article, $this->supplier->supplier->id);
 
@@ -212,7 +212,7 @@ class EmailSupplierService
             : $itemService->find();
     }
 
-    protected function handleNotFound(?string $article, ?string $brand, ?string $price, ?string $stock): void
+    public function handleNotFound(?string $article, ?string $brand, ?string $price, ?string $stock): void
     {
         EmailPriceItemService::handleNotFoundItem(
             $this->supplier->supplier->id,
@@ -223,7 +223,7 @@ class EmailSupplierService
         );
     }
 
-    protected function updateItem(
+    public function updateItem(
         Item    $item,
         ?string $article,
         ?string $brand,
@@ -240,7 +240,7 @@ class EmailSupplierService
         $itemService->save($item);
     }
 
-    protected function updatePrice(Item $item, ?string $price): void
+    public function updatePrice(Item $item, ?string $price): void
     {
         if (!is_numeric($price) || $price <= 0) {
             return;
@@ -257,7 +257,7 @@ class EmailSupplierService
         }
     }
 
-    protected function handlePriceQuarantine(Item $item, float $price, $moysklad): void
+    public function handlePriceQuarantine(Item $item, float $price, $moysklad): void
     {
         $diffPrice = $moysklad->diff_price;
 
@@ -270,7 +270,7 @@ class EmailSupplierService
     }
 }
 
-    protected function updateStock(Item $item, ?string $stock, ?string $warehouse): void
+    public function updateStock(Item $item, ?string $stock, ?string $warehouse): void
     {
         if (is_null($stock) || $stock < 0) {
             return;
@@ -288,7 +288,7 @@ class EmailSupplierService
         }
     }
 
-    protected function resolveWarehouseId(?string $warehouse): ?string
+    public function resolveWarehouseId(?string $warehouse): ?string
     {
         return $this->supplier->header_warehouse
             ? $this->warehouses->get($warehouse)
