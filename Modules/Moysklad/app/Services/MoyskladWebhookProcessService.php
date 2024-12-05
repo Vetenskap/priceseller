@@ -122,12 +122,12 @@ class MoyskladWebhookProcessService
                 'order' => $order->toArray()
             ]);
 
-            if ($order->getProject()?->id === 'b4a96157-5f23-11ed-0a80-030b00027f77' && $order->getStore()->id !== 'c20b3e0e-599d-11ed-0a80-060900042d3e' && $order->getAgent()->id === 'e835186b-50f2-11ec-0a80-00190020f74e') {
+            if ($order->getProject()?->id === 'b4a96157-5f23-11ed-0a80-030b00027f77' && $order->getStore()->id !== '64232c0a-9a30-11ed-0a80-098900246f45' && $order->getAgent()->id === 'e835186b-50f2-11ec-0a80-00190020f74e') {
 
                 /** @var Position $position */
                 $position = $order->getPositions()->first();
                 $stocksAll = new StocksAll([
-                    'filter' => 'product=' . MoyskladClient::BASEURL . Product::ENDPOINT . $position->getAssortment()->id . ';' . 'store=' . MoyskladClient::BASEURL . Store::ENDPOINT . '64232c0a-9a30-11ed-0a80-098900246f45',
+                    'filter' => 'product=' . MoyskladClient::BASEURL . Product::ENDPOINT . $position->getAssortment()->id . ';' . 'store=' . MoyskladClient::BASEURL . Store::ENDPOINT . 'c20b3e0e-599d-11ed-0a80-060900042d3e',
                 ]);
                 $stocksAll->fetchStocks($this->webhook->moysklad->api_key);
 
@@ -136,11 +136,11 @@ class MoyskladWebhookProcessService
                 ]);
 
                 $stocksAll->getStocks()->get('rows')->each(function (Collection $stock) use ($order, $stocksAll) {
-                    if (intval($stock->get('quantity')) < 0) {
+                    if (intval($stock->get('quantity')) <= 0) {
                         $order->put($this->webhook->moysklad->api_key, [
                             'store' => [
                                 'meta' => [
-                                    "href" => MoyskladClient::BASEURL . Store::ENDPOINT . 'c20b3e0e-599d-11ed-0a80-060900042d3e',
+                                    "href" => MoyskladClient::BASEURL . Store::ENDPOINT . '64232c0a-9a30-11ed-0a80-098900246f45',
                                     "metadataHref" => "https://api.moysklad.ru/api/remap/1.2/entity/store/metadata",
                                     "type" => "store",
                                     "mediaType" => "application/json",
