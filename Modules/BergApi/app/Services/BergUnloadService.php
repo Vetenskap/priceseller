@@ -6,6 +6,7 @@ use App\Models\Item;
 use App\Models\User;
 use App\Services\Item\ItemPriceService;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\BergApi\HttpClient\BergApiClient;
 use Modules\BergApi\HttpClient\Resources\Offer;
@@ -38,6 +39,8 @@ class BergUnloadService
                 return ['resource_article' => $item->article, 'brand_name' => $item->brand];
             });
 
+            Log::info('BERG API ITEMS', $data->toArray());
+
             $client = new BergApiClient();
             $result = $client->get(Resource::ENDPOINT, [
                 'key' => $this->bergApi->api_key,
@@ -48,12 +51,19 @@ class BergUnloadService
                 return new Resource($resource);
             });
 
+            Log::info('BERG API RESPONSE DATA', $result->toArray());
+
             /** @var Resource $resource */
             foreach ($resources as $resource) {
+
+                Log::info('BERG API ARTICLE', $resource->getArticle());
 
                 $itemService = new ItemPriceService($resource->getArticle(), $this->bergApi->supplier_id);
                 $items = $this->bergApi->supplier->use_brand ? $itemService->withBrand($resource->getBrandName())->find() : $itemService->find();
                 $price = $resource->getOffers()->firstWhere(fn (Offer $offer) => in_array($offer->getWarehouseId(), $this->bergApi->warehouses->pluck('warehouse_id')->toArray()))?->getPrice();
+
+                Log::info('BERG API PRICE', $price);
+                Log::info('BERG API ITEMS', $items->toArray());
 
                 if ($items && $price) {
 
