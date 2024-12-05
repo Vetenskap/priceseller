@@ -10,6 +10,7 @@ use App\Jobs\MarketUpdateApiCommissions;
 use App\Jobs\Ozon\NullStocks;
 use App\Jobs\Ozon\TestPrice;
 use App\Jobs\Ozon\TestStock;
+use App\Jobs\Ozon\UnloadPrices;
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\OzonMarket\OzonMarketPostForm;
 use App\Livewire\Traits\WithFilters;
@@ -215,6 +216,13 @@ class OzonMarketEdit extends BaseComponent
 
         NullStocks::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
 
-        $this->addSuccessNullStocksNotification();
+        $this->addJobNotification();
+    }
+
+    public function unloadPrices(): void
+    {
+        UnloadPrices::dispatch($this->currentUser(), $this->market);
+
+        $this->addJobNotification();
     }
 }

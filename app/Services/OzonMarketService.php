@@ -116,6 +116,8 @@ class OzonMarketService
 
             $result->get('items')->each(function (array $ozonItem) use ($defaultFields, &$correct, &$error, &$updated, $directLink) {
 
+                if (!$ozonItem) return;
+
                 $commissions = collect($ozonItem['commissions']);
                 $price = collect($ozonItem['price']);
                 $priceIndexes = collect($ozonItem['price_indexes']);

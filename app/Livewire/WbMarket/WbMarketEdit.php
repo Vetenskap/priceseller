@@ -10,6 +10,7 @@ use App\Jobs\MarketUpdateApiCommissions;
 use App\Jobs\Wb\NullStocks;
 use App\Jobs\Wb\TestPrice;
 use App\Jobs\Wb\TestStock;
+use App\Jobs\Wb\UnloadPrices;
 use App\Livewire\BaseComponent;
 use App\Livewire\Forms\WbMarket\WbMarketPostForm;
 use App\Livewire\Traits\WithFilters;
@@ -212,6 +213,13 @@ class WbMarketEdit extends BaseComponent
         }
 
         NullStocks::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
+
+        $this->addJobNotification();
+    }
+
+    public function unloadPrices(): void
+    {
+        UnloadPrices::dispatch($this->currentUser(), $this->market);
 
         $this->addJobNotification();
     }
