@@ -56,13 +56,17 @@ class BergUnloadService
             /** @var Resource $resource */
             foreach ($resources as $resource) {
 
-                Log::info('BERG API ARTICLE', $resource->getArticle());
+                Log::info('BERG API ARTICLE', [
+                    'article' => $resource->getArticle()
+                ]);
 
                 $itemService = new ItemPriceService($resource->getArticle(), $this->bergApi->supplier_id);
                 $items = $this->bergApi->supplier->use_brand ? $itemService->withBrand($resource->getBrandName())->find() : $itemService->find();
                 $price = $resource->getOffers()->firstWhere(fn (Offer $offer) => in_array($offer->getWarehouseId(), $this->bergApi->warehouses->pluck('warehouse_id')->toArray()))?->getPrice();
 
-                Log::info('BERG API PRICE', $price);
+                Log::info('BERG API PRICE', [
+                    'price' => $price
+                ]);
                 Log::info('BERG API ITEMS', $items->toArray());
 
                 if ($items && $price) {
