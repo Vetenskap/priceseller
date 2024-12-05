@@ -62,7 +62,7 @@ class BergUnloadService
 
                 $itemService = new ItemPriceService($resource->getArticle(), $this->bergApi->supplier_id);
                 $items = $this->bergApi->supplier->use_brand ? $itemService->withBrand($resource->getBrandName())->find() : $itemService->find();
-                $price = $resource->getOffers()->firstWhere(fn (Offer $offer) => in_array($offer->getWarehouseId(), $this->bergApi->warehouses->pluck('warehouse_id')->toArray()))?->getPrice();
+                $price = $resource->getOffers()->firstWhere(fn (Offer $offer) => in_array($offer->getWarehouseName(), $this->bergApi->warehouses->pluck('warehouse_name')->toArray()))?->getPrice();
 
                 Log::info('BERG API PRICE', [
                     'price' => $price
