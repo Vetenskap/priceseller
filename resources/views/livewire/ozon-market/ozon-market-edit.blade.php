@@ -146,7 +146,7 @@
                                 <flux:label>Минимальная цена, %</flux:label>
                             </flux:tooltip>
 
-                            <flux:input wire:model="form.min_price_percent_comm" type="number"/>
+                            <flux:input wire:model.live="form.min_price_percent_comm" type="number"/>
 
                             <flux:error name="form.min_price_percent_comm"/>
                         </flux:field>
@@ -157,7 +157,7 @@
                                 <flux:label>Минимальная цена продажи</flux:label>
                             </flux:tooltip>
 
-                            <flux:input wire:model="form.min_price" type="number"/>
+                            <flux:input wire:model.live="form.min_price" type="number"/>
 
                             <flux:error name="form.min_price"/>
                         </flux:field>
@@ -168,7 +168,7 @@
                                 <flux:label>Обработка отправления</flux:label>
                             </flux:tooltip>
 
-                            <flux:input wire:model="form.shipping_processing" type="number"/>
+                            <flux:input wire:model.live="form.shipping_processing" type="number"/>
 
                             <flux:error name="form.shipping_processing"/>
                         </flux:field>
