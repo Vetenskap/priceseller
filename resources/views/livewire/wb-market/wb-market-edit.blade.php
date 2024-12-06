@@ -8,6 +8,9 @@
     </x-notify-top>
     @enderror
     <x-layouts.actions>
+        @if($this->user()->can('update-wb'))
+            <flux:button wire:click="update">Сохранить</flux:button>
+        @endif
         @if($this->user()->can('delete-wb'))
             <flux:button variant="danger" wire:click="destroy"
                          wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить
