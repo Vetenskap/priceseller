@@ -25,7 +25,7 @@
                 <flux:dropdown>
                     <flux:button icon-trailing="chevron-down">Склады</flux:button>
 
-                    <flux:menu>
+                    <flux:menu class="!overflow-y-scroll">
                         @foreach($market->warehouses as $warehouse)
                             @foreach($warehouse->suppliers as $supplier)
                                 <flux:menu.group :heading="$supplier->supplier->name">
