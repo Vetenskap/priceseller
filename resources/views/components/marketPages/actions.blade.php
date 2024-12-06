@@ -45,6 +45,7 @@
                         @endforeach
                     </flux:menu>
                 </flux:dropdown>
+                <flux:error name="form.test_warehouses" />
             </div>
         </flux:card>
     </x-blocks.main-block>

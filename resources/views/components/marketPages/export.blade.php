@@ -12,6 +12,7 @@
                     @endforeach
                 </flux:checkbox.group>
             </flux:card>
+            <flux:error name="form.export_ext_item_fields" />
         </flux:card>
     </x-blocks.main-block>
     <x-blocks.main-block>

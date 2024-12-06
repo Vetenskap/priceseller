@@ -51,8 +51,6 @@ class OzonMarketEdit extends BaseComponent
 
     public OzonMarket $market;
 
-    public int $selectedWarehouse;
-
     /** @var TemporaryUploadedFile $file */
     public $file;
 
