@@ -233,14 +233,18 @@ class WbItemPriceService
                 $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $multiplicity === 1) ? 1 : $new_count;
                 $new_count = ($new_count + $myWarehousesStocks) / $multiplicity;
 
-                if (ModuleService::moduleIsEnabled('Order', $this->user)) {
-                    $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
-                }
+                if ($this->market->enabled_orders) {
 
-                if ($wbItem->wbitemable_type === 'App\Models\Item') {
-                    if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                        $new_count = $new_count - (($wbItem->itemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($wbItem->itemable)->sum('orders') : 0) * $wbItem->itemable->multiplicity);
+                    if (ModuleService::moduleIsEnabled('Order', $this->user)) {
+                        $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
                     }
+
+                    if ($wbItem->wbitemable_type === 'App\Models\Item') {
+                        if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+                            $new_count = $new_count - (($wbItem->itemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($wbItem->itemable)->sum('orders') : 0) * $wbItem->itemable->multiplicity);
+                        }
+                    }
+
                 }
 
                 $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
@@ -345,6 +349,11 @@ class WbItemPriceService
 
     public function unloadAllStocks(): void
     {
+        if (!$this->market->enabled_stocks) {
+            SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: пропускаем выгрузку остатков в кабинет");
+            return;
+        }
+
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: выгрузка остатков в кабинет");
 
         if (!$this->market->warehouses()->count()) {

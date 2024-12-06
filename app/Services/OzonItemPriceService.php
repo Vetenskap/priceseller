@@ -248,14 +248,18 @@ class OzonItemPriceService
                 $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $multiplicity === 1) ? 1 : $new_count;
                 $new_count = ($new_count + $myWarehousesStocks) / $multiplicity;
 
-                if (ModuleService::moduleIsEnabled('Order', $this->user)) {
-                    $new_count = $new_count - ($ozonItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
-                }
+                if ($this->market->enabled_orders) {
 
-                if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
-                    if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                        $new_count = $new_count - (($ozonItem->itemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($ozonItem->itemable)->sum('orders') : 0) * $ozonItem->itemable->multiplicity);
+                    if (ModuleService::moduleIsEnabled('Order', $this->user)) {
+                        $new_count = $new_count - ($ozonItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
                     }
+
+                    if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
+                        if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+                            $new_count = $new_count - (($ozonItem->itemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($ozonItem->itemable)->sum('orders') : 0) * $ozonItem->itemable->multiplicity);
+                        }
+                    }
+
                 }
 
                 $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
@@ -359,12 +363,17 @@ class OzonItemPriceService
 
     public function unloadAllStocks(): void
     {
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: выгрузка остатков в кабинет");
+        if (!$this->market->enabled_stocks) {
+            SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: пропускаем выгрузку остатков в кабинет");
+            return;
+        }
 
         if (!$this->market->warehouses()->count()) {
             SupplierReportService::addLog($this->supplier, "Нет складов. Остатки не выгружены");
             return;
         }
+
+        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: выгрузка остатков в кабинет");
 
         $this->market->warehouses()
             ->whereHas('suppliers', function (Builder $query) {

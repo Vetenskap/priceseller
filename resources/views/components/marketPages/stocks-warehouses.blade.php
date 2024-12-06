@@ -14,6 +14,10 @@
     <x-blocks.main-block>
         <flux:card class="space-y-6">
             <div class="flex">
+                <flux:switch wire:model="form.enabled_stocks" label="Включить выгрузку остатков"/>
+                <flux:switch wire:model="form.enabled_orders" label="Учитывать заказы"/>
+            </div>
+            <div class="flex">
                 <div class="space-y-6">
                     <flux:input type="number" wire:model.live="form.minus_stock" label="Вычесть" />
                     <flux:heading size="lg">Ставить остаток 1 если</flux:heading>

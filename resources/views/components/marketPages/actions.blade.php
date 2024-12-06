@@ -31,13 +31,13 @@
                                 <flux:menu.group :heading="$supplier->supplier->name">
                                     @if($supplier->warehouses->isEmpty())
                                         <flux:menu.checkbox
-                                            wire:model.live="testWarehouses.{{$supplier->supplier->getKey()}}.userWarehouses">Только ваши
+                                            wire:model.live="form.test_warehouses.{{$supplier->supplier->getKey()}}.userWarehouses">Только ваши
                                             склады
                                         </flux:menu.checkbox>
                                     @else
                                         @foreach($supplier->warehouses as $warehouse)
                                             <flux:menu.checkbox
-                                                wire:model.live="testWarehouses.{{$supplier->supplier->getKey()}}.{{$warehouse->supplierWarehouse->getKey()}}">{{$warehouse->supplierWarehouse->name}}</flux:menu.checkbox>
+                                                wire:model.live="form.test_warehouses.{{$supplier->supplier->getKey()}}.{{$warehouse->supplierWarehouse->getKey()}}">{{$warehouse->supplierWarehouse->name}}</flux:menu.checkbox>
                                         @endforeach
                                     @endif
                                 </flux:menu.group>

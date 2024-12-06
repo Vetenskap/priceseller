@@ -44,13 +44,24 @@ class OzonMarket extends MainModel
         'enabled_update_commissions_in_time',
         'update_commissions_time',
         'tariff',
+        'enabled_stocks',
+        'enabled_orders',
+        'export_ext_item_fields',
+        'test_warehouses',
+        'min_price_percent_comm',
+        'min_price',
+        'shipping_processing',
     ];
 
     protected $casts = [
         'open' => 'boolean',
         'enabled_price' => 'boolean',
         'enabled_update_commissions_in_time' => 'boolean',
-        'seller_price' => 'boolean'
+        'seller_price' => 'boolean',
+        'enabled_stocks' => 'boolean',
+        'enabled_orders' => 'boolean',
+        'export_ext_item_fields' => 'array',
+        'test_warehouses' => 'array',
     ];
 
     public function organization(): BelongsTo

@@ -56,22 +56,7 @@ class OzonMarketEdit extends BaseComponent
     /** @var TemporaryUploadedFile $file */
     public $file;
 
-    #[Session('OzonMarketEdit.min_price_percent.{market.id}')]
-    public $min_price_percent = null;
-
-    #[Session('OzonMarketEdit.min_price.{market.id}')]
-    public $min_price = null;
-
-    #[Session('OzonMarketEdit.shipping_processing.{market.id}')]
-    public $shipping_processing = null;
-
     public $directLink = false;
-
-    #[Session('OzonMarketEdit.testWarehouses.{market.id}')]
-    public $testWarehouses = [];
-
-    #[Session('OzonMarketEdit.exportExtItemFields.{market.id}')]
-    public $exportExtItemFields = [];
 
     #[Computed]
     public function items(): _IH_OzonItem_C|LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator|array
@@ -82,13 +67,7 @@ class OzonMarketEdit extends BaseComponent
 
     public function updateUserCommissions(): void
     {
-        $this->validate([
-            'min_price_percent' => 'nullable|numeric|min:0|max:100',
-            'min_price' => 'nullable|numeric|min:0',
-            'shipping_processing' => 'nullable|numeric|min:0',
-        ]);
-
-        collect($this->only('min_price_percent', 'min_price', 'shipping_processing'))
+        collect($this->form->only('min_price_percent_comm', 'min_price', 'shipping_processing'))
             ->filter()
             ->each(fn($value, $key) => $this->market->items()->update([$key => $value]));
 
@@ -99,7 +78,7 @@ class OzonMarketEdit extends BaseComponent
     {
         $status = $this->checkTtlJob(Export::getUniqueId($this->market), Export::class);
 
-        if ($status) Export::dispatch($this->market, OzonMarketService::class, $this->exportExtItemFields);
+        if ($status) Export::dispatch($this->market, OzonMarketService::class, $this->form->export_ext_item_fields);
     }
 
     public function downloadTemplate(): BinaryFileResponse
@@ -130,7 +109,7 @@ class OzonMarketEdit extends BaseComponent
         MarketUpdateApiCommissions::dispatch(
             model: $this->market,
             service: OzonMarketService::class,
-            defaultFields: collect($this->only(['shipping_processing', 'min_price', 'min_price_percent']))->filter()->toArray(),
+            defaultFields: collect($this->form->only(['shipping_processing', 'min_price', 'min_price_percent_comm']))->filter()->toArray(),
         );
 
         $this->addJobNotification();
@@ -139,7 +118,7 @@ class OzonMarketEdit extends BaseComponent
     public function relationshipsAndCommissions(): void
     {
         MarketRelationshipsAndCommissions::dispatch(
-            defaultFields: collect($this->only(['shipping_processing', 'min_price', 'min_price_percent'])),
+            defaultFields: collect($this->form->only(['shipping_processing', 'min_price', 'min_price_percent_comm'])),
             model: $this->market,
             service: OzonMarketService::class,
             directLink: $this->directLink
@@ -197,24 +176,24 @@ class OzonMarketEdit extends BaseComponent
 
     public function testStocks(): void
     {
-        if (!count($this->testWarehouses)) {
+        if (!count($this->form->test_warehouses)) {
             \Flux::toast('Выберите склады', variant: 'danger');
             return;
         }
 
-        TestStock::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
+        TestStock::dispatch($this->currentUser(), $this->form->test_warehouses, $this->market);
 
         $this->addJobNotification();
     }
 
     public function nullStocks(): void
     {
-        if (!count($this->testWarehouses)) {
+        if (!count($this->form->test_warehouses)) {
             \Flux::toast('Выберите склады', variant: 'danger');
             return;
         }
 
-        NullStocks::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
+        NullStocks::dispatch($this->currentUser(), $this->form->test_warehouses, $this->market);
 
         $this->addJobNotification();
     }

@@ -39,12 +39,23 @@ class WbMarket extends MainModel
         'update_commissions_time',
         'tariff',
         'enabled_price',
+        'enabled_stocks',
+        'enabled_orders',
+        'export_ext_item_fields',
+        'test_warehouses',
+        'min_price',
+        'retail_markup_percent',
+        'package',
     ];
 
     protected $casts = [
         'enabled_update_commissions_in_time' => 'boolean',
         'open' => 'boolean',
-        'enabled_price' => 'boolean'
+        'enabled_price' => 'boolean',
+        'enabled_orders' => 'boolean',
+        'enabled_stocks' => 'boolean',
+        'test_warehouses' => 'array',
+        'export_ext_item_fields' => 'array',
     ];
 
     public function organization(): BelongsTo

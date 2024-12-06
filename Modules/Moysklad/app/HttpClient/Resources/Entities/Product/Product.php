@@ -270,7 +270,7 @@ class Product extends Entity
         $data = [];
 
         if (isset($fields['buyPrice'])) {
-            $data[] = $this->buyPrice->getFieldProduct();
+            $data = $this->buyPrice->getFieldProduct();
         } else if (in_array('attributes', $fields)) {
             if (count($fields['attributes']) > 0) {
                 /** @var Attribute $attribute */
