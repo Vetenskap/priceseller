@@ -94,7 +94,7 @@ class MoyskladWebhookProcessService
                 $demand->put($this->webhook->moysklad->api_key, [
                     'store' => [
                         'meta' => [
-                            "href" => MoyskladClient::BASEURL . Store::ENDPOINT . 'c20b3e0e-599d-11ed-0a80-060900042d3e',
+                            "href" => MoyskladClient::BASEURL . Store::ENDPOINT . '64232c0a-9a30-11ed-0a80-098900246f45',
                             "metadataHref" => "https://api.moysklad.ru/api/remap/1.2/entity/store/metadata",
                             "type" => "store",
                             "mediaType" => "application/json",
