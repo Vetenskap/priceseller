@@ -143,6 +143,7 @@ class OzonMarketEdit extends BaseComponent
     {
         $this->authorizeForUser($this->user(), 'update', $this->market);
 
+        logger('Сохраняем');
         $this->form->update();
 
         $this->addSuccessSaveNotification();

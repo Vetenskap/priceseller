@@ -163,6 +163,7 @@ class OzonMarketPostForm extends Form
 
     public function update(): void
     {
+        logger('валидация');
         $this->validate();
 
         $this->market->update($this->except('market'));
