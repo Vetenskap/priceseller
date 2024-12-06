@@ -51,7 +51,7 @@ class PriceUnload implements ShouldQueue
             return;
         }
 
-        MarketsEmailSupplierUnload::dispatch($this->emailSupplier->supplier->user, $this->emailSupplier);
+        MarketsEmailSupplierUnload::dispatch($this->emailSupplier->supplier->user, $this->emailSupplier, $this->report);
 
     }
 

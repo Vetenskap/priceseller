@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Task extends Report
@@ -19,12 +20,17 @@ class Task extends Report
         'message'
     ];
 
+    protected $casts = [
+        'payload' => 'array'
+    ];
+
+    public function logs(): HasMany
+    {
+        return $this->hasMany(TaskLog::class);
+    }
+
     public function taskable(): MorphTo
     {
         return parent::reportable('taskable');
     }
-
-    protected $casts = [
-        'payload' => 'array'
-    ];
 }

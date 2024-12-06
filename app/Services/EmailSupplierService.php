@@ -37,6 +37,7 @@ class EmailSupplierService
     public function unload(): void
     {
         $this->reportContract->changeMessage($this->report, 'Обнуление остатков');
+        $this->reportContract->addLog($this->report, 'Обнуление остатков');
 
         $this->nullUpdated();
         $this->nullAllStocks();

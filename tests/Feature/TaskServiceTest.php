@@ -7,7 +7,9 @@ use App\Contracts\ReportContract;
 use App\Enums\ReportStatus;
 use App\Enums\TaskTypes;
 use App\Models\Report;
+use App\Models\ReportLog;
 use App\Models\Task;
+use App\Models\TaskLog;
 use App\Models\User;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Tests\TestCase;
@@ -25,7 +27,7 @@ class TaskServiceTest extends TestCase
 
         $user = User::factory()->create();
         $this->taskService = app(ReportContract::class);
-        $this->task = $this->taskService->new(TaskTypes::ItemsExport, ['payload' => 'test'], $user);
+        $this->task = $this->taskService->new(TaskTypes::SupplierEmailUnload, ['payload' => 'test'], $user);
     }
 
     public function test_new_task()
@@ -34,13 +36,13 @@ class TaskServiceTest extends TestCase
         $this->assertTrue($this->task->isPending());
         $this->assertDatabaseHas(Task::class, [
             'status' => ReportStatus::pending,
-            'type' => TaskTypes::ItemsExport
+            'type' => TaskTypes::SupplierEmailUnload
         ]);
     }
 
     public function test_failed_task()
     {
-        $status = $this->taskService->failed($this->task, app(NotificationContract::class));
+        $status = $this->taskService->failed($this->task);
 
         $this->assertTrue($this->task->isFailed());
         $this->assertTrue($status);
@@ -48,7 +50,7 @@ class TaskServiceTest extends TestCase
 
     public function test_cancelled_task()
     {
-        $status = $this->taskService->cancelled($this->task, app(NotificationContract::class));
+        $status = $this->taskService->cancelled($this->task);
 
         $this->assertTrue($this->task->isCancelled());
         $this->assertTrue($status);
@@ -56,7 +58,7 @@ class TaskServiceTest extends TestCase
 
     public function test_finished_task()
     {
-        $status = $this->taskService->finished($this->task, app(NotificationContract::class));
+        $status = $this->taskService->finished($this->task);
 
         $this->assertTrue($this->task->isFinished());
         $this->assertTrue($status);
@@ -64,7 +66,7 @@ class TaskServiceTest extends TestCase
 
     public function test_running_task()
     {
-        $status = $this->taskService->running($this->task, app(NotificationContract::class));
+        $status = $this->taskService->running($this->task);
 
         $this->assertTrue($this->task->isRunning());
         $this->assertTrue($status);
@@ -82,6 +84,18 @@ class TaskServiceTest extends TestCase
         $this->assertTrue($status);
         $this->assertDatabaseHas(Task::class, [
             'message' => 'Тестовое сообщение'
+        ]);
+    }
+
+    public function test_add_log_task()
+    {
+        $log = $this->taskService->addLog($this->task, 'Тест', [], 'Тестовое сообщение');
+
+        $this->assertTrue($log instanceof ReportLog);
+        $this->assertDatabaseHas(TaskLog::class, [
+            'message' => 'Тестовое сообщение',
+            'status' => 'Тест',
+            'task_id' => $this->task->id
         ]);
     }
 }

@@ -8,6 +8,7 @@ use App\Enums\ReportStatus;
 use App\Enums\TaskTypes;
 use App\Models\Contracts\Reportable;
 use App\Models\Report;
+use App\Models\ReportLog;
 
 class TaskService implements ReportContract
 {
@@ -94,6 +95,15 @@ class TaskService implements ReportContract
     public function changeMessage(Report $report, string $message): bool
     {
         return $report->update([
+            'message' => $message
+        ]);
+    }
+
+    public function addLog(Report $report, string $message, string $status = null, array $payload = null): ReportLog
+    {
+        return $report->logs()->create([
+            'status' => $status,
+            'payload' => $payload,
             'message' => $message
         ]);
     }

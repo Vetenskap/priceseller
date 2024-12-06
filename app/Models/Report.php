@@ -3,10 +3,16 @@
 namespace App\Models;
 
 use App\Enums\ReportStatus;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class Report extends MainModel
 {
+    public function logs(): HasMany
+    {
+        return $this->hasMany(ReportLog::class);
+    }
+
     public function reportable(string $name): MorphTo
     {
         return $this->morphTo($name);
