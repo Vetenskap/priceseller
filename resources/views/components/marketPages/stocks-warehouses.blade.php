@@ -14,8 +14,8 @@
     <x-blocks.main-block>
         <flux:card class="space-y-6">
             <div class="flex">
-                <flux:switch wire:model="form.enabled_stocks" label="Включить выгрузку остатков"/>
-                <flux:switch wire:model="form.enabled_orders" label="Учитывать заказы"/>
+                <flux:switch wire:model.live="form.enabled_stocks" label="Включить выгрузку остатков"/>
+                <flux:switch wire:model.live="form.enabled_orders" label="Учитывать заказы"/>
             </div>
             <div class="flex">
                 <div class="space-y-6">
