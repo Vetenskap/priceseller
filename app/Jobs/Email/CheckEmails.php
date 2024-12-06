@@ -3,9 +3,12 @@
 namespace App\Jobs\Email;
 
 use App\Components\EmailClient\EmailHandlerLaravelImap;
+use App\Contracts\ReportContract;
+use App\Enums\TaskTypes;
 use App\Jobs\Supplier\PriceUnload;
 use App\Models\Email;
 use App\Models\EmailSupplier;
+use App\Models\Report;
 use App\Models\User;
 use App\Services\SupplierReportService;
 use Illuminate\Bus\Queueable;
@@ -32,6 +35,7 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(public User $user)
     {
+
     }
 
     /**
@@ -49,7 +53,7 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
                     if (!SupplierReportService::get($supplier)) {
                         $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
 
-                        PriceUnload::dispatchIf((boolean)$pricePath, $supplier->pivot->id, $pricePath);
+                        PriceUnload::dispatchIf((boolean)$pricePath, EmailSupplier::findOrFail($supplier->pivot->id), $pricePath);
                     }
                 });
 

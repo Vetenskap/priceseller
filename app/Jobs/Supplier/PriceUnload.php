@@ -2,23 +2,17 @@
 
 namespace App\Jobs\Supplier;
 
+use App\Contracts\ReportContract;
+use App\Enums\TaskTypes;
+use App\Exceptions\ReportCancelled;
 use App\Models\EmailSupplier;
-use App\Models\Supplier;
-use App\Models\User;
+use App\Models\Report;
 use App\Services\EmailSupplierService;
-use App\Services\OzonItemPriceService;
-use App\Services\SupplierReportService;
-use App\Services\WbItemPriceService;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 
 class PriceUnload implements ShouldQueue
@@ -28,12 +22,16 @@ class PriceUnload implements ShouldQueue
     public int $uniqueFor = 600;
     public int $tries = 1;
 
+    public ReportContract $reportContract;
+    public Report $report;
+
     /**
      * Create a new job instance.
      */
-    public function __construct(public int $emailSupplierId, public string $path)
+    public function __construct(public EmailSupplier $emailSupplier, public string $path)
     {
-
+        $this->reportContract = app(ReportContract::class);
+        $this->report = $this->reportContract->new(TaskTypes::SupplierEmailUnload, [], $this->emailSupplier->supplier);
     }
 
     /**
@@ -41,38 +39,29 @@ class PriceUnload implements ShouldQueue
      */
     public function handle(): void
     {
-        $emailSupplier = EmailSupplier::findOrFail($this->emailSupplierId);
+        $this->reportContract->running($this->report);
 
-        if (app(SupplierReportService::class)->get($emailSupplier->supplier)) {
+        try {
+            app(EmailSupplierService::class, [
+                'supplier' => $this->emailSupplier,
+                'path' => Storage::disk('public')->path($this->path),
+                'report' => $this->report
+            ])->unload();
+        } catch (ReportCancelled $e) {
             return;
-        } else {
-            app(SupplierReportService::class)->new($emailSupplier->supplier, $this->path, "({$emailSupplier->mainEmail->name})");
         }
 
-        app(EmailSupplierService::class, [
-            'supplier' => $emailSupplier,
-            'path' => Storage::disk('public')->path($this->path)
-        ])->unload();
-
-        $ttl = Redis::ttl('laravel_unique_job:'.MarketsEmailSupplierUnload::class.':'.MarketsEmailSupplierUnload::getUniqueId($emailSupplier));
-
-        if ($ttl > 0) {
-            app(SupplierReportService::class)->addLog($emailSupplier->supplier, 'Кабинеты этого поставщика уже выгружаются или не прошло 10 минут с первой выгрузки. Оставшееся время: ' . $ttl . ' секунд');
-            app(SupplierReportService::class)->error($emailSupplier->supplier);
-        } else {
-            MarketsEmailSupplierUnload::dispatch($emailSupplier->supplier->user, $emailSupplier);
-        }
+        MarketsEmailSupplierUnload::dispatch($this->emailSupplier->supplier->user, $this->emailSupplier);
 
     }
 
     public function failed(\Throwable $th): void
     {
-        $emailSupplier = EmailSupplier::findOrFail($this->emailSupplierId);
-        app(SupplierReportService::class)->error($emailSupplier->supplier);
+        $this->reportContract->failed($this->report);
     }
 
     public function uniqueId(): string
     {
-        return $this->emailSupplierId . "price_unload";
+        return $this->emailSupplier->id . "price_unload";
     }
 }

@@ -2,8 +2,10 @@
 
 namespace App\Jobs\Supplier;
 
+use App\Contracts\ReportContract;
 use App\Models\EmailSupplier;
 use App\Models\OzonMarket;
+use App\Models\Report;
 use App\Models\User;
 use App\Models\WbMarket;
 use App\Services\OzonItemPriceService;
@@ -23,12 +25,14 @@ class MarketsEmailSupplierUnload implements ShouldQueue, ShouldBeUnique
     public int $uniqueFor = 600;
 
     public int $tries = 1;
+
+    public ReportContract $reportContract;
     /**
      * Create a new job instance.
      */
-    public function __construct(public User $user, public EmailSupplier $emailSupplier)
+    public function __construct(public User $user, public EmailSupplier $emailSupplier, public Report $report)
     {
-
+        $this->reportContract = app(ReportContract::class);
     }
 
     /**
@@ -36,6 +40,10 @@ class MarketsEmailSupplierUnload implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
+        $this->report = $this->report->fresh();
+        if ($this->report->isCancelled()) return;
+        $this->reportContract->changeMessage($this->report, 'Выгрузка в кабинеты');
+
         $ozonMarkets = $this->user->ozonMarkets()
             ->where('open', true)
             ->where('close', false)
@@ -69,20 +77,17 @@ class MarketsEmailSupplierUnload implements ShouldQueue, ShouldBeUnique
         }
 
         SupplierReportService::success($this->emailSupplier->supplier);
+
+        $this->reportContract->finished($this->report);
     }
 
     public function failed(\Throwable $th): void
     {
-        SupplierReportService::error($this->emailSupplier->supplier);
+        $this->reportContract->failed($this->report);
     }
 
     public function uniqueId(): string
     {
         return $this->emailSupplier->id . 'markets_unload';
-    }
-
-    public static function getUniqueId(EmailSupplier $emailSupplier): string
-    {
-        return $emailSupplier->id . 'markets_unload';
     }
 }

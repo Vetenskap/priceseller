@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Enums\ReportStatus;
 use App\Helpers\Helpers;
 use App\Models\Notification;
 use App\Models\User;
@@ -18,7 +19,7 @@ class NotificationEvent implements ShouldBroadcastNow
     /**
      * Create a new event instance.
      */
-    public function __construct(public int $userId, public string $title, public string $message, public int $status, public ?string $href = null)
+    public function __construct(public int $userId, public string $title, public string $message, public ReportStatus $status, public ?string $href = null)
     {
         Notification::create([
             'user_id' => $this->userId,

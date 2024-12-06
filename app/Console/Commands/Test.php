@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Events\NotificationEvent;
 use App\HttpClient\OzonClient\Resources\FBS\CarriageAvailableList;
+use App\Jobs\Email\CheckEmails;
 use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\OzonMarket;
@@ -47,8 +48,6 @@ class Test extends Command
      */
     #[NoReturn] public function handle(): void
     {
-        $user = User::factory()->create();
-        $supplier = Supplier::factory()->create(['user_id' => $user->id]);
-        $item = Item::factory()->create(['user_id' => $user->id, 'supplier_id' => $supplier->id]);
+
     }
 }

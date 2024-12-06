@@ -1,0 +1,33 @@
+<?php
+
+use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
+
+return new class extends Migration
+{
+    /**
+     * Run the migrations.
+     */
+    public function up(): void
+    {
+        Schema::create('tasks', function (Blueprint $table) {
+            $table->uuid('id')->primary();
+            $table->string('type'); // Тип задачи (например, импорт)
+            $table->string('status'); // Статус (pending, running, cancelled, completed)
+            $table->longText('message')->nullable();
+            $table->json('payload')->nullable(); // Данные задачи (если нужно)
+            $table->string('taskable_id')->nullable();
+            $table->string('taskable_type')->nullable();
+            $table->timestamps();
+        });
+    }
+
+    /**
+     * Reverse the migrations.
+     */
+    public function down(): void
+    {
+        Schema::dropIfExists('tasks');
+    }
+};

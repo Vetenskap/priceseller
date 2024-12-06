@@ -2,12 +2,14 @@
 
 namespace App\Services;
 
+use App\Contracts\ReportContract;
 use App\Helpers\Helpers;
 use App\Imports\SupplierPriceImport;
 use App\Jobs\Supplier\ProcessData;
 use App\Models\EmailSupplier;
 use App\Models\EmailSupplierWarehouse;
 use App\Models\Item;
+use App\Models\Report;
 use App\Services\Item\ItemPriceService;
 use Box\Spout\Common\Entity\Row;
 use Box\Spout\Common\Exception\IOException;
@@ -17,28 +19,29 @@ use Illuminate\Bus\Batch;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Process;
-use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Facades\Excel;
 
 class EmailSupplierService
 {
     public Collection $stockValues;
     public Collection $warehouses;
+    public ReportContract $reportContract;
 
-    public function __construct(public EmailSupplier $supplier, public string $path)
+    public function __construct(public EmailSupplier $supplier, public string $path, public Report $report)
     {
         $this->stockValues = $this->supplier->stockValues->pluck('value', 'name');
         $this->warehouses = $this->supplier->warehouses->pluck('supplier_warehouse_id', 'value');
+        $this->reportContract = app(ReportContract::class);
     }
 
     public function unload(): void
     {
-        SupplierReportService::changeMessage($this->supplier->supplier, 'Обнуление остатков');
+        $this->reportContract->changeMessage($this->report, 'Обнуление остатков');
 
         $this->nullUpdated();
         $this->nullAllStocks();
 
-        SupplierReportService::changeMessage($this->supplier->supplier, 'Чтение прайса');
+        $this->reportContract->changeMessage($this->report, 'Чтение прайса');
 
         $ext = pathinfo($this->path, PATHINFO_EXTENSION);
 
@@ -109,7 +112,10 @@ class EmailSupplierService
             }
 
             $reader->close();
-        }, 'email-supplier-unload');
+        }, 'email-supplier-unload', function (): bool {
+            $this->report = $this->report->fresh();
+            return $this->report->isCancelled();
+        });
     }
 
     protected function odsHandle(): void
@@ -140,7 +146,10 @@ class EmailSupplierService
             }
 
             $reader->close();
-        }, 'email-supplier-unload');
+        }, 'email-supplier-unload', function (): bool {
+            $this->report = $this->report->fresh();
+            return $this->report->isCancelled();
+        });
     }
 
     protected function anotherHandle(): void
@@ -156,14 +165,20 @@ class EmailSupplierService
                 });
 
             });
-        }, 'email-supplier-unload');
+        }, 'email-supplier-unload', function (): bool {
+            $this->report = $this->report->fresh();
+            return $this->report->isCancelled();
+        });
     }
 
     protected function importHandle(): void
     {
         app(Helpers::class)->toBatch(function (Batch $batch) {
             Excel::import(new SupplierPriceImport($this, $batch), $this->path);
-        }, 'email-supplier-unload');
+        }, 'email-supplier-unload', function (): bool {
+            $this->report = $this->report->fresh();
+            return $this->report->isCancelled();
+        });
     }
 
     public function nullAllStocks(): void

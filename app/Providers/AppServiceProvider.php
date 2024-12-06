@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App\Components\EmailClient\EmailClient;
 use App\Components\EmailClient\EmailHandlerLaravelImap;
+use App\Contracts\NotificationContract;
 use App\Contracts\PriceProcessingServiceInterface;
+use App\Contracts\ReportContract;
 use App\Jobs\Email\CheckEmails;
 use App\Jobs\Export;
 use App\Jobs\Import;
@@ -16,7 +18,9 @@ use App\Services\Item\ItemPriceWithCacheService;
 use App\Services\Item\ItemPriceServiceInterface;
 use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
+use App\Services\NotificationService;
 use App\Services\PriceProcessingService;
+use App\Services\TaskService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
@@ -39,6 +43,10 @@ class AppServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->bind(EmailClient::class, EmailHandlerLaravelImap::class);
+        $this->app->bind(NotificationContract::class, NotificationService::class);
+        $this->app->bind(ReportContract::class, function ($app) {
+            return new TaskService($app->make(NotificationContract::class));
+        });
     }
 
     /**

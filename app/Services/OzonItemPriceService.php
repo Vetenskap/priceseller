@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Contracts\ReportContract;
 use App\Helpers\Helpers;
 use App\HttpClient\OzonClient\OzonClient;
 use App\Jobs\Market\NullNotUpdatedStocksBatch;
@@ -16,6 +17,7 @@ use App\Models\OzonWarehouseStock;
 use App\Models\OzonWarehouseSupplier;
 use App\Models\OzonWarehouseSupplierWarehouse;
 use App\Models\OzonWarehouseUserWarehouse;
+use App\Models\Report;
 use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Bus\Batch;
@@ -28,15 +30,17 @@ use Modules\Moysklad\Services\MoyskladItemOrderService;
 class OzonItemPriceService
 {
     protected User $user;
+    public ReportContract $reportContract;
 
-    public function __construct(public ?Supplier $supplier = null, public OzonMarket $market, public array $supplierWarehousesIds)
+    public function __construct(public ?Supplier $supplier = null, public OzonMarket $market, public array $supplierWarehousesIds, public Report $report = null)
     {
         $this->user = $this->market->user;
+        $this->reportContract = app(ReportContract::class);
     }
 
     public function updatePrice(): void
     {
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт цен");
+        $this->reportContract->changeMessage($this->report, "Кабинет ОЗОН {$this->market->name}: перерасчёт цен");
 
         $this->market
             ->items()
@@ -159,7 +163,7 @@ class OzonItemPriceService
 
     public function updateStock(): void
     {
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
+        $this->reportContract->changeMessage($this->report, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
 
         Helpers::toBatch(function (Batch $batch) {
             $this->market
@@ -359,12 +363,12 @@ class OzonItemPriceService
 
     public function unloadAllStocks(): void
     {
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: выгрузка остатков в кабинет");
+        $this->reportContract->changeMessage($this->report, "Кабинет ОЗОН {$this->market->name}: выгрузка остатков в кабинет");
 
-        if (!$this->market->warehouses()->count()) {
-            SupplierReportService::addLog($this->supplier, "Нет складов. Остатки не выгружены");
-            return;
-        }
+//        if (!$this->market->warehouses()->count()) {
+//            SupplierReportService::addLog($this->supplier, "Нет складов. Остатки не выгружены");
+//            return;
+//        }
 
         $this->market->warehouses()
             ->whereHas('suppliers', function (Builder $query) {
@@ -379,7 +383,7 @@ class OzonItemPriceService
             ->get()
             ->map(function (OzonWarehouse $warehouse) {
 
-                SupplierReportService::addLog($this->supplier, "Склад {$warehouse->name}: выгрузка остатков");
+//                SupplierReportService::addLog($this->supplier, "Склад {$warehouse->name}: выгрузка остатков");
 
                 $this->market
                     ->items()
@@ -421,12 +425,12 @@ class OzonItemPriceService
 
     public function unloadAllPrices(): void
     {
-        if (!$this->market->enabled_price) {
-            SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: пропускаем выгрузку цен в кабинет");
-            return;
-        }
+//        if (!$this->market->enabled_price) {
+//            SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: пропускаем выгрузку цен в кабинет");
+//            return;
+//        }
 
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: выгрузка цен в кабинет");
+        $this->reportContract->changeMessage($this->report, "Кабинет ОЗОН {$this->market->name}: выгрузка цен в кабинет");
 
         $this->market
             ->items()

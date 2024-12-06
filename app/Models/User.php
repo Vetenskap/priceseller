@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Enums\TaskTypes;
+use App\Models\Contracts\Reportable;
 use Filament\Models\Contracts\FilamentUser;
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
@@ -22,7 +24,7 @@ use Modules\Order\Models\Order;
 use Modules\SamsonApi\Models\SamsonApi;
 use Modules\VoshodApi\Models\VoshodApi;
 
-class User extends Authenticatable implements MustVerifyEmail, FilamentUser, CanResetPassword
+class User extends Authenticatable implements MustVerifyEmail, FilamentUser, CanResetPassword, Reportable
 {
 
     use HasFactory, Notifiable, HasApiTokens;
@@ -155,7 +157,7 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
         return $this->hasOne(UserNotification::class, 'user_id', 'id');
     }
 
-    public function userNotificationActionEnabled(string $action): ?bool
+    public function userNotificationActionEnabled(TaskTypes $action): ?bool
     {
         return $this->userNotification->actions()->whereHas('action', fn (Builder $query) => $query->where('name', $action))->first()?->enabled;
     }
@@ -308,5 +310,20 @@ class User extends Authenticatable implements MustVerifyEmail, FilamentUser, Can
     public function notifications(): HasMany
     {
         return $this->hasMany(Notification::class);
+    }
+
+    public function reports(): MorphMany
+    {
+        return $this->morphMany(Task::class, 'taskable');
+    }
+
+    public function getUserId(): int
+    {
+        return $this->id;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->name;
     }
 }

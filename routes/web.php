@@ -55,6 +55,9 @@ Route::middleware(['dynamic.auth:web,employee'])->group(function () {
 
     Route::get('/notifications', \App\Livewire\UserNotification\UserNotificationIndex::class)->name('notifications.index');
 
+    Route::get('/tasks', \App\Livewire\Task\TaskIndex::class)->name('tasks.index');
+    Route::get('/tasks/{task}', \App\Livewire\Task\TaskEdit::class)->name('tasks.edit')->whereUuid('task');
+
 });
 
 Route::get('/privacy-policy', function () {

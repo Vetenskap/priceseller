@@ -2,18 +2,21 @@
 
 namespace App\Services;
 
+use App\Contracts\NotificationContract;
+use App\Enums\ReportStatus;
+use App\Enums\TaskTypes;
 use App\Events\NotificationEvent;
 use App\Models\User;
 use App\Notifications\UserNotification;
 
-class NotificationService
+class NotificationService implements NotificationContract
 {
-    public static function send(int $userId, string $title, string $message, int $status, ?string $href, string $action): void
+    public function send(int $userId, string $title, string $message, ReportStatus $status, TaskTypes $type, ?string $href): bool
     {
         try {
             $user = User::findOrFail($userId);
 
-            if ($user->userNotificationActionEnabled($action)) {
+            if ($user->userNotificationActionEnabled($type)) {
                 if ($user->userNotification?->enabled_site) {
                     event(new NotificationEvent($userId, $title, $message, $status, $href));
                 }
@@ -25,6 +28,9 @@ class NotificationService
 
         } catch (\Throwable $e) {
             report($e);
+            return false;
         }
+
+        return true;
     }
 }

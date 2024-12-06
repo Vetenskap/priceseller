@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use App\Models\Contracts\Reportable;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-class Supplier extends MainModel
+class Supplier extends MainModel implements Reportable
 {
 
     use HasFactory;
@@ -67,5 +68,15 @@ class Supplier extends MainModel
     public function warehouses(): HasMany
     {
         return $this->hasMany(SupplierWarehouse::class);
+    }
+
+    public function getUserId(): int
+    {
+        return $this->user_id;
+    }
+
+    public function getTitle(): string
+    {
+        return $this->name;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Helpers;
+use App\Exceptions\ReportCancelled;
 use App\Models\Employee;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -45,7 +46,7 @@ class Helpers {
         return Auth::user(); // Обычный пользователь
     }
 
-    static public function toBatch(\Closure $callback, string $queue = 'default', \Closure $progress = null): void
+    static public function toBatch(\Closure $callback, string $queue = 'default', \Closure $cancel = null, \Closure $progress = null): void
     {
         $batch = Bus::batch([])->onQueue($queue)->dispatch();
 
@@ -54,10 +55,15 @@ class Helpers {
         $batch = $batch->fresh();
 
         while (!$batch->finished() && ($batch->pendingJobs > 0)) {
-            if ($batch->cancelled()) throw new \Exception('Batch cancelled!');
+            if ($cancel) {
+                if ($cancel()) {
+                    $batch->cancel();
+                }
+            }
+            $batch = $batch->fresh();
+            if ($batch->cancelled()) throw new ReportCancelled('Batch cancelled!');
             if ($progress) $progress($batch->progress());
             sleep(20);
-            $batch = $batch->fresh();
         }
 
         if (!($batch->totalJobs > 0)) $batch->delete();
