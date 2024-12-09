@@ -21,7 +21,7 @@ class NullNotUpdatedStocksBatch implements ShouldQueue
      */
     public function __construct(public WbItemPriceService|OzonItemPriceService $service, public Collection $items)
     {
-        //
+        $this->queue = 'market-update-stock';
     }
 
     /**

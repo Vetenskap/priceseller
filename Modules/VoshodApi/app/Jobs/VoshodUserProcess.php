@@ -21,7 +21,7 @@ class VoshodUserProcess implements ShouldQueue
      */
     public function __construct(public VoshodApi $voshodApi)
     {
-        //
+        $this->queue = 'email-supplier-unload';
     }
 
     /**

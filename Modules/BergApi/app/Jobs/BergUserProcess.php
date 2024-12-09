@@ -25,7 +25,7 @@ class BergUserProcess implements ShouldQueue
      */
     public function __construct(public BergApi $bergApi)
     {
-        //
+        $this->queue = 'email-supplier-unload';
     }
 
     /**
