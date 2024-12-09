@@ -41,7 +41,7 @@ class OzonItemPriceService
         $this->market
             ->items()
             ->with('itemable')
-            ->chunk(1000, function (Collection $items) {
+            ->chunk(10000, function (Collection $items) {
                 $items->filter(function (OzonItem $ozonItem) {
 
                     if ($ozonItem->ozonitemable_type === Item::class) {
@@ -165,7 +165,7 @@ class OzonItemPriceService
             $this->market
                 ->items()
                 ->with('itemable')
-                ->chunk(1000, function ($items) use ($batch) {
+                ->chunk(10000, function ($items) use ($batch) {
 
                     $items = $items->filter(function (OzonItem $ozonItem) {
 

@@ -39,7 +39,7 @@ class WbItemPriceService
         $this->market
             ->items()
             ->with('itemable')
-            ->chunk(1000, function (Collection $items) {
+            ->chunk(10000, function (Collection $items) {
 
                 $items->filter(function (WbItem $wbItem) {
 
@@ -137,7 +137,7 @@ class WbItemPriceService
             $this->market
                 ->items()
                 ->with('itemable')
-                ->chunk(1000, function (Collection $items) use ($batch) {
+                ->chunk(10000, function (Collection $items) use ($batch) {
 
                     $items = $items->filter(function (WbItem $wbItem) {
 

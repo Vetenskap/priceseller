@@ -42,9 +42,6 @@
                                     {{$log->updated_at}}
                                 </flux:cell>
                                 <flux:cell>
-                                    {{$log->updated_at}}
-                                </flux:cell>
-                                <flux:cell>
                                     {{$log->message}}
                                 </flux:cell>
                             </flux:row>
