@@ -55,6 +55,8 @@ class Helpers {
         $batch = $batch->fresh();
 
         while (!$batch->finished() && ($batch->pendingJobs > 0)) {
+            $batch = $batch->fresh();
+            if ($batch->hasFailures()) throw new \Exception('Batch failed!');
             if ($cancel) {
                 if ($cancel()) {
                     $batch->cancel();
