@@ -10,7 +10,9 @@ class OverAllReport extends BaseComponent
 
     public function mount()
     {
-        $this->reports = $this->currentUser()->suppliers->map(function (Supplier $supplier) {
+        $this->reports = $this->currentUser()->suppliers
+            ->sortByDesc(fn (Supplier $supplier) => $supplier->reports()->orderByDesc('updated_at')->first()?->updated_at)
+            ->map(function (Supplier $supplier) {
             return [
                 'supplier' => $supplier,
                 'report' => $supplier->reports()->orderByDesc('updated_at')->first()
