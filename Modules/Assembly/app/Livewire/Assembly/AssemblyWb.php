@@ -4,16 +4,13 @@ namespace Modules\Assembly\Livewire\Assembly;
 
 use App\HttpClient\WbClient\Resources\Order;
 use App\Livewire\ModuleComponent;
-use App\Livewire\Traits\WithSort;
 use App\Models\Item;
 use App\Models\WbMarket;
 use Illuminate\Support\Collection;
 use Modules\Assembly\Services\AssemblyWbService;
-use Opcodes\LogViewer\Facades\Cache;
 
 class AssemblyWb extends ModuleComponent
 {
-    use WithSort;
 
     public $fields = [];
 
@@ -48,65 +45,38 @@ class AssemblyWb extends ModuleComponent
         \Flux::toast('Поставка успешно создана');
     }
 
-    public function updatedSortBy(): void
+    public function sort(): void
     {
-        if ($this->sortDirection === 'asc') {
-            $this->orders = $this->orders->sortBy(function (Order $order) {
-                try {
-                    return $order->{'get' . \Illuminate\Support\Str::apa($this->sortBy)}($this->currentUser());
-                } catch (\Error $e) {
-                    try {
-                        return $order->getCard()->{'get' . \Illuminate\Support\Str::apa($this->sortBy)}();
-                    } catch (\Error $e) {
-                        if (isset($order->getCard()->getProduct()[$this->sortBy])) {
-                            return $order->getCard()->getProduct()[$this->sortBy];
-                        } else {
-                            if ($this->sortBy === 'all_stocks') {
-                                if ($order->getCard()->getProduct()?->itemable instanceof Item) {
-                                    return $order->getCard()->getProduct()?->itemable->warehousesStocks()->sum('stock');
-                                } else {
-                                    return $order->getCard()->getProduct()?->itemable->items->sortBy(fn(Item $item) => $item->warehousesStocks()->sum('stock'))->first()->warehousesStocks()->sum('stock');
-                                }
-                            }
+        $this->orders = $this->orders->sort(function (Order $a, Order $b) {
+            // 1. Сортировка по наличию остатка (stock > 0 первыми)
+            $stockA = $this->getStock($a);
+            $stockB = $this->getStock($b);
 
-                            if ($order->getCard()->getProduct()?->itemable instanceof Item) {
-                                return $order->getCard()->getProduct()?->itemable[$this->sortBy];
-                            } else {
-                                return $order->getCard()->getProduct()?->itemable->items->sortBy(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
-                            }
-                        }
-                    }
-                }
-            });
-        } else {
-            $this->orders = $this->orders->sortByDesc(function (Order $order) {
-                try {
-                    return $order->{'get' . \Illuminate\Support\Str::apa($this->sortBy)}($this->currentUser());
-                } catch (\Error $e) {
-                    try {
-                        return $order->getCard()->{'get' . \Illuminate\Support\Str::apa($this->sortBy)}();
-                    } catch (\Error $e) {
-                        if (isset($order->getCard()->getProduct()[$this->sortBy])) {
-                            return $order->getCard()->getProduct()[$this->sortBy];
-                        } else {
-                            if ($this->sortBy === 'all_stocks') {
-                                if ($order->getCard()->getProduct()?->itemable instanceof Item) {
-                                    return $order->getCard()->getProduct()?->itemable->warehousesStocks()->sum('stock');
-                                } else {
-                                    return $order->getCard()->getProduct()?->itemable->items->sortByDesc(fn(Item $item) => $item->warehousesStocks()->sum('stock'))->first()->warehousesStocks()->sum('stock');
-                                }
-                            }
+            if (($stockA > 0) && ($stockB <= 0)) {
+                return -1; // $a идет выше $b
+            }
 
-                            if ($order->getCard()->getProduct()?->itemable instanceof Item) {
-                                return $order->getCard()->getProduct()?->itemable[$this->sortBy];
-                            } else {
-                                return $order->getCard()->getProduct()?->itemable->items->sortByDesc(fn(Item $item) => $item[$this->sortBy])->first()[$this->sortBy];
-                            }
-                        }
-                    }
-                }
-            });
+            if (($stockA <= 0) && ($stockB > 0)) {
+                return 1; // $b идет выше $a
+            }
+
+            // 2. Сортировка по дате создания (от старых к новым)
+            $dateA = $a->getCreatedAt($this->currentUser());
+            $dateB = $b->getCreatedAt($this->currentUser());
+
+            return strtotime($dateA) <=> strtotime($dateB);
+        });
+    }
+
+    private function getStock(Order $order): int
+    {
+        if ($order->getCard()->getProduct()?->itemable instanceof Item) {
+            return $order->getCard()->getProduct()?->itemable->warehousesStocks()->sum('stock') ?? 0;
         }
+
+        return $order->getCard()->getProduct()?->itemable->items
+            ->sortBy(fn(Item $item) => $item->warehousesStocks()->sum('stock'))
+            ->first()?->warehousesStocks()->sum('stock') ?? 0;
     }
 
     public function mount(): void
@@ -138,6 +108,8 @@ class AssemblyWb extends ModuleComponent
             ->toArray();
 
         $this->loadOrders();
+
+        $this->sort();
     }
 
     public function loadOrders(): void
