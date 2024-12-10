@@ -109,7 +109,7 @@ class EmailSupplierService
             }
 
             $reader->close();
-        }, 'email-supplier-unload');
+        }, 'supplier-unload');
     }
 
     protected function odsHandle(): void
@@ -140,7 +140,7 @@ class EmailSupplierService
             }
 
             $reader->close();
-        }, 'email-supplier-unload');
+        }, 'supplier-unload');
     }
 
     protected function anotherHandle(): void
@@ -156,14 +156,14 @@ class EmailSupplierService
                 });
 
             });
-        }, 'email-supplier-unload');
+        }, 'supplier-unload');
     }
 
     protected function importHandle(): void
     {
         app(Helpers::class)->toBatch(function (Batch $batch) {
             Excel::import(new SupplierPriceImport($this, $batch), $this->path);
-        }, 'email-supplier-unload');
+        }, 'supplier-unload');
     }
 
     public function nullAllStocks(): void

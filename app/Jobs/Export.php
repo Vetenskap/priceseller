@@ -27,6 +27,7 @@ class Export implements ShouldQueue, ShouldBeUnique
 
     public function __construct(public OzonMarket|WbMarket|User|Warehouse $model, public string $service, public array $exportExtItemFields)
     {
+        $this->queue = 'export-or-import';
         ItemsExportReportService::new($this->model);
     }
 

@@ -184,9 +184,9 @@ return [
     'defaults' => [
         'supervisor-1' => [
             'connection' => 'redis',
-            'queue' => ['default', 'email-supplier-unload', 'market-update-stock'],
+            'queue' => ['default', 'market-actions', 'export-or-import', 'market-unload', 'supplier-unload', 'notifications', 'moysklad'],
             'balance' => 'auto',
-            'autoScalingStrategy' => 'size',
+            'autoScalingStrategy' => 'time',
             'maxProcesses' => 12,
             'maxTime' => 0,
             'maxJobs' => 500,

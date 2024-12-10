@@ -25,6 +25,7 @@ class MarketRelationshipsAndCommissions implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(public Collection $defaultFields, public OzonMarket|WbMarket $model, public string $service, public bool $directLink = false)
     {
+        $this->queue = 'market-actions';
         ItemsImportReportService::new($this->model, '');
     }
 

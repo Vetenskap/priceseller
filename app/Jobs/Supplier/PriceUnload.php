@@ -28,7 +28,7 @@ class PriceUnload implements ShouldQueue
      */
     public function __construct(public int $emailSupplierId, public string $path)
     {
-
+        $this->queue = 'supplier-unload';
     }
 
     /**
@@ -70,7 +70,7 @@ class PriceUnload implements ShouldQueue
                 ->each(function (WbMarket $market) use ($batch, $emailSupplier) {
                     $batch->add(new \App\Jobs\Wb\PriceUnload($market, $emailSupplier));
                 });
-        });
+        }, 'market-unload');
 
         SupplierReportService::success($emailSupplier->supplier);
     }

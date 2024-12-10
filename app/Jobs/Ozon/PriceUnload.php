@@ -22,7 +22,7 @@ class PriceUnload implements ShouldQueue
      */
     public function __construct(public OzonMarket $market, public EmailSupplier|Supplier $supplier)
     {
-
+        $this->queue = 'market-unload';
     }
 
     /**

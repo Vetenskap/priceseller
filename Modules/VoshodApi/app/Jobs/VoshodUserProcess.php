@@ -24,7 +24,7 @@ class VoshodUserProcess implements ShouldQueue
      */
     public function __construct(public VoshodApi $voshodApi)
     {
-        $this->queue = 'email-supplier-unload';
+        $this->queue = 'supplier-unload';
     }
 
     /**
@@ -63,7 +63,7 @@ class VoshodUserProcess implements ShouldQueue
                 ->each(function (WbMarket $market) use ($batch, $supplier) {
                     $batch->add(new \App\Jobs\Wb\PriceUnload($market, $supplier));
                 });
-        });
+        }, 'market-unload');
 
         SupplierReportService::success($supplier, 'по АПИ');
     }

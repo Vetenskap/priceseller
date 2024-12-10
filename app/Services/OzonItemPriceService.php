@@ -191,7 +191,7 @@ class OzonItemPriceService
                 $batch->add(new UpdateStockBatch($this, $offset));
                 $offset += 10000;
             }
-        }, 'market-update-stock');
+        }, 'market-unload');
 
         $this->nullNotUpdatedStocks();
     }
@@ -287,8 +287,7 @@ class OzonItemPriceService
     public function nullNotUpdatedStocks(): void
     {
         Helpers::toBatch(function (Batch $batch) {
-
-            OzonWarehouseStock::query()
+            $count = OzonWarehouseStock::query()
                 ->with('ozonItem')
                 ->whereHas('ozonItem', function (Builder $query) {
                     $query->where('ozon_market_id', $this->market->id);
@@ -303,12 +302,13 @@ class OzonItemPriceService
                                 });
                             });
                     });
-                })
-                ->chunk(1000, function (Collection $stocks) use ($batch) {
-                    $batch->add(new NullNotUpdatedStocksBatch($this, $stocks));
-                });
-
-        }, 'market-update-stock');
+                })->count();
+            $offset = 0;
+            while ($count > $offset) {
+                $batch->add(new NullNotUpdatedStocksBatch($this, $offset));
+                $offset += 10000;
+            }
+        }, 'market-unload');
 
     }
 

@@ -21,7 +21,7 @@ class PriceUnload implements ShouldQueue
      */
     public function __construct(public WbMarket $market, public EmailSupplier|Supplier $supplier)
     {
-
+        $this->queue = 'market-unload';
     }
 
     /**

@@ -21,7 +21,7 @@ class UpdateStockBatch implements ShouldQueue
      */
     public function __construct(public WbItemPriceService|OzonItemPriceService $service, public int $offset)
     {
-        $this->queue = 'market-update-stock';
+        $this->queue = 'market-unload';
     }
 
     /**

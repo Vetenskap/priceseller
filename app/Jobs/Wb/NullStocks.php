@@ -29,6 +29,7 @@ class NullStocks implements ShouldQueue
      */
     public function __construct(public User $user, public $testWarehouses, public WbMarket $market)
     {
+        $this->queue = 'market-actions';
         $this->report = $this->market->actionReports()->create([
             'action' => 'Обнуление остатков',
             'status' => 2,

@@ -25,7 +25,7 @@ class SamsonUserProcess implements ShouldQueue
      */
     public function __construct(public SamsonApi $samsonApi)
     {
-        //
+        $this->queue = 'supplier-unload';
     }
 
     /**
@@ -64,7 +64,7 @@ class SamsonUserProcess implements ShouldQueue
                 ->each(function (WbMarket $market) use ($batch, $supplier) {
                     $batch->add(new \App\Jobs\Wb\PriceUnload($market, $supplier));
                 });
-        });
+        }, 'market-unload');
     }
 
     public function failed(\Throwable $th)

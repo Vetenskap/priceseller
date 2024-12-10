@@ -29,7 +29,7 @@ class BergUserProcess implements ShouldQueue
      */
     public function __construct(public BergApi $bergApi)
     {
-        $this->queue = 'email-supplier-unload';
+        $this->queue = 'supplier-unload';
     }
 
     /**
@@ -68,7 +68,7 @@ class BergUserProcess implements ShouldQueue
                 ->each(function (WbMarket $market) use ($batch, $supplier) {
                     $batch->add(new \App\Jobs\Wb\PriceUnload($market, $supplier));
                 });
-        });
+        }, 'market-unload');
 
     }
 

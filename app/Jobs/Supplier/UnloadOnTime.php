@@ -24,7 +24,7 @@ class UnloadOnTime implements ShouldQueue
      */
     public function __construct(public Supplier $supplier)
     {
-
+        $this->queue = 'supplier-unload';
     }
 
     /**
@@ -58,7 +58,7 @@ class UnloadOnTime implements ShouldQueue
                 ->each(function (WbMarket $market) use ($batch) {
                     $batch->add(new \App\Jobs\Wb\PriceUnload($market, $this->supplier));
                 });
-        });
+        }, 'market-unload');
 
         SupplierReportService::success($this->supplier);
     }

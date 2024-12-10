@@ -24,6 +24,7 @@ class MarketUpdateApiCommissions implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(public OzonMarket|WbMarket $model, public string $service, public array $defaultFields = [])
     {
+        $this->queue = 'market-actions';
         ItemsImportReportService::new($this->model, '');
     }
 
