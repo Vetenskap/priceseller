@@ -6,6 +6,8 @@ use App\Models\EmailSupplier;
 use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Services\OzonItemPriceService;
+use Illuminate\Bus\Batchable;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
@@ -13,7 +15,7 @@ use Illuminate\Queue\SerializesModels;
 
 class PriceUnload implements ShouldQueue
 {
-    use Dispatchable, InteractsWithQueue, \Illuminate\Bus\Queueable, SerializesModels;
+    use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
 
     /**
      * Create a new job instance.
