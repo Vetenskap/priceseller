@@ -9,14 +9,15 @@ use App\Models\WbMarket;
 use App\Services\SupplierReportService;
 use App\Services\SupplierService;
 use Illuminate\Bus\Batch;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 
-class UnloadOnTime implements ShouldQueue
+class UnloadOnTime implements ShouldQueue, ShouldBeUnique
 {
     use Queueable;
 
-    public int $uniqueFor = 600;
+    public int $uniqueFor = 7200;
     public int $tries = 1;
 
     /**
@@ -70,6 +71,6 @@ class UnloadOnTime implements ShouldQueue
 
     public function uniqueId(): string
     {
-        return $this->supplier->id . "price_unload";
+        return $this->supplier->id . "unload_on_time";
     }
 }
