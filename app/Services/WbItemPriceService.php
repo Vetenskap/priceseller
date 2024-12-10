@@ -131,6 +131,7 @@ class WbItemPriceService
     {
         $this->market
             ->items()
+            ->where('price', '>', 0)
             ->with('itemable')
             ->chunk(10000, function (Collection $items) {
 

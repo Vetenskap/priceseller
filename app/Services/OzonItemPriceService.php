@@ -154,6 +154,7 @@ class OzonItemPriceService
     {
         $this->market
             ->items()
+            ->where('price', '>', 0)
             ->with('itemable')
             ->chunk(10000, function (Collection $items) {
                 $items->filter(function (OzonItem $ozonItem) {
