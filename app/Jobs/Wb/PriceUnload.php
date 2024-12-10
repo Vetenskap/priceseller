@@ -3,6 +3,7 @@
 namespace App\Jobs\Wb;
 
 use App\Models\EmailSupplier;
+use App\Models\Supplier;
 use App\Models\WbMarket;
 use App\Services\WbItemPriceService;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,7 +17,7 @@ class PriceUnload implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public WbMarket $market, public EmailSupplier $emailSupplier)
+    public function __construct(public WbMarket $market, public EmailSupplier|Supplier $supplier)
     {
 
     }
@@ -26,7 +27,12 @@ class PriceUnload implements ShouldQueue
      */
     public function handle(): void
     {
-        $service = new WbItemPriceService($this->emailSupplier->supplier, $this->market, $this->emailSupplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray());
+        $actualSupplier = $this->supplier instanceof EmailSupplier ? $this->supplier->supplier : $this->supplier;
+        $warehouses = $this->supplier instanceof EmailSupplier ?
+            $this->supplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray() :
+            $this->supplier->warehouses->pluck('id')->values()->toArray();
+
+        $service = new WbItemPriceService($actualSupplier, $this->market, $warehouses);
         $service->updateStock();
         $service->updatePrice();
         $service->unloadAllStocks();
