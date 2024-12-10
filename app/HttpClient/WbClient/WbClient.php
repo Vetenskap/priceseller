@@ -6,6 +6,7 @@ use App\HttpClient\WbClient\Resources\Card\CardList;
 use App\HttpClient\WbClient\Resources\Order;
 use App\HttpClient\WbClient\Resources\Tariffs\Commission;
 use App\Models\Supplier;
+use App\Models\WbMarket;
 use App\Services\SupplierReportService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
@@ -133,13 +134,13 @@ class WbClient
         return $this->request->get('https://suppliers-api.wildberries.ru/api/v3/warehouses')->throw()->collect();
     }
 
-    public function putStocks(Collection $data, int $warehouseId, Supplier $supplier): void
+    public function putStocks(Collection $data, int $warehouseId, Supplier $supplier, WbMarket $market): void
     {
         $limits = 5;
 
-        while (RateLimiter::attempts('wb_get_cards_list') >= 300) {
-            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 2 сек.');
-            sleep(2);
+        while (RateLimiter::attempts('wb_put_stocks' . $market->id) >= 300) {
+            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 5 сек.');
+            sleep(5);
         }
 
         while ($limits > 0) {
@@ -151,7 +152,7 @@ class WbClient
             try {
 
                 RateLimiter::attempt(
-                    'wb_put_stocks',
+                    'wb_put_stocks' . $market->id,
                     300,
                     fn() => $this->request->put("https://suppliers-api.wildberries.ru/api/v3/stocks/{$warehouseId}", ['stocks' => $data->toArray()])->throw()
                 );
@@ -160,6 +161,11 @@ class WbClient
 
             } catch (RequestException $e) {
                 $response = $e->response;
+
+                if ($response->unauthorized()) {
+                    SupplierReportService::addLog($supplier, 'Неверный токен или область его действия не включает обновление остатков');
+                    return;
+                }
 
                 // TODO: переделать
                 if ($response->status() === 409) {
@@ -193,18 +199,18 @@ class WbClient
 
     }
 
-    public function putPrices(Collection $data, Supplier $supplier): void
+    public function putPrices(Collection $data, Supplier $supplier, WbMarket $market): void
     {
 
-        while (RateLimiter::attempts('wb_get_cards_list') >= 10) {
-            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 2 сек.');
-            sleep(2);
+        while (RateLimiter::attempts('wb_put_prices' . $market->id) >= 10) {
+            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 5 сек.');
+            sleep(5);
         }
 
 
         try {
             RateLimiter::attempt(
-                'wb_put_prices',
+                'wb_put_prices' . $market->id,
                 10,
                 fn() => $this->request->post("https://discounts-prices-api.wb.ru/api/v2/upload/task", ['data' => $data])->throw(),
                 6
@@ -213,6 +219,11 @@ class WbClient
             return;
         } catch (RequestException $e) {
             $response = $e->response;
+
+            if ($response->unauthorized()) {
+                SupplierReportService::addLog($supplier, 'Неверный токен или область его действия не включает обновление цен');
+                return;
+            }
 
             $body = $response->collect();
 

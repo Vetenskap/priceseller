@@ -2,10 +2,14 @@
 
 namespace Modules\BergApi\Jobs;
 
+use App\Helpers\Helpers;
 use App\Jobs\Supplier\MarketsUnload;
+use App\Models\OzonMarket;
+use App\Models\WbMarket;
 use App\Services\OzonItemPriceService;
 use App\Services\SupplierReportService;
 use App\Services\WbItemPriceService;
+use Illuminate\Bus\Batch;
 use Illuminate\Bus\Queueable;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Queue\SerializesModels;
@@ -45,7 +49,26 @@ class BergUserProcess implements ShouldQueue
         $user = $this->bergApi->user;
         $supplier = $this->bergApi->supplier;
 
-        MarketsUnload::dispatch($user, $supplier, 'по АПИ');
+        Helpers::toBatch(function (Batch $batch) use ($user, $supplier) {
+
+            $user->ozonMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $supplier)->first())
+                ->each(function (OzonMarket $market) use ($batch, $supplier) {
+                    $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $supplier));
+                });
+
+            $user->wbMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $supplier)->first())
+                ->each(function (WbMarket $market) use ($batch, $supplier) {
+                    $batch->add(new \App\Jobs\Wb\PriceUnload($market, $supplier));
+                });
+        });
 
     }
 

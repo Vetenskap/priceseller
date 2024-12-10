@@ -6,7 +6,6 @@ use App\Helpers\Helpers;
 use App\HttpClient\OzonClient\OzonClient;
 use App\Jobs\Market\NullNotUpdatedStocksBatch;
 use App\Jobs\Market\UpdateStockBatch;
-use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\ItemWarehouseStock;
 use App\Models\OzonItem;
@@ -22,7 +21,7 @@ use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\Bus;
+use Illuminate\Support\Facades\DB;
 use Modules\Moysklad\Services\MoyskladItemOrderService;
 
 class OzonItemPriceService
@@ -37,6 +36,7 @@ class OzonItemPriceService
     public function updatePrice(): void
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт цен");
+        $this->setLastPrices();
 
         $this->market
             ->items()
@@ -150,6 +150,28 @@ class OzonItemPriceService
         return $ozonItem;
     }
 
+    public function setLastPrices(): void
+    {
+        $this->market
+            ->items()
+            ->with('itemable')
+            ->chunk(10000, function (Collection $items) {
+                $items->filter(function (OzonItem $ozonItem) {
+
+                    if ($ozonItem->ozonitemable_type === Item::class) {
+                        if ($ozonItem->itemable->supplier_id === $this->supplier->id) return true;
+                    } else {
+                        if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) return true;
+                    }
+
+                    return false;
+
+                })->each(function (OzonItem $ozonItem) {
+                    $ozonItem->update(['last_price' => DB::raw('price')]);
+                });
+            });
+    }
+
     public function updateOzonItem(OzonItem $ozonItem): void
     {
         $ozonItem = $this->recountPriceOzonItem($ozonItem);
@@ -162,30 +184,12 @@ class OzonItemPriceService
         SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
 
         Helpers::toBatch(function (Batch $batch) {
-            $this->market
-                ->items()
-                ->with('itemable')
-                ->chunk(10000, function ($items) use ($batch) {
-
-                    $items = $items->filter(function (OzonItem $ozonItem) {
-
-                        if ($ozonItem->ozonitemable_type === Item::class) {
-                            if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
-                                return true;
-                            }
-                        } else {
-                            if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                                return true;
-                            }
-                        }
-
-                        return false;
-
-                    });
-
-                    $batch->add(new UpdateStockBatch($this, $items));
-                });
-
+            $count = $this->market->items()->count();
+            $offset = 0;
+            while ($count > $offset) {
+                $batch->add(new UpdateStockBatch($this, $offset));
+                $offset += 10000;
+            }
         }, 'market-update-stock');
 
         $this->nullNotUpdatedStocks();
@@ -421,7 +425,7 @@ class OzonItemPriceService
 
                         if (App::isProduction() && $data->isNotEmpty()) {
                             $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
-                            $ozonClient->putStocks($data->values()->all(), $this->supplier);
+                            $ozonClient->putStocks($data->values()->all(), $this->supplier, $this->market);
                         }
 
                     });
@@ -451,6 +455,7 @@ class OzonItemPriceService
             ->whereNotNull('sales_percent')
             ->whereNotNull('min_price')
             ->whereNotNull('min_price_percent')
+            ->where('price', '<>', DB::raw('last_price'))
             ->chunk(1000, function (Collection $items) {
 
                 /** @var Collection $data */
@@ -495,7 +500,7 @@ class OzonItemPriceService
 
                 if (App::isProduction() && $data->isNotEmpty()) {
                     $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
-                    $ozonClient->putPrices($data->values()->all());
+                    $ozonClient->putPrices($data->values()->all(), $this->supplier);
                 }
             });
     }

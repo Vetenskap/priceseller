@@ -39,8 +39,6 @@ class BergUnloadService
                 return ['resource_article' => $item->article, 'brand_name' => $item->brand];
             });
 
-            Log::info('BERG API ITEMS', $data->toArray());
-
             $client = new BergApiClient();
             $result = $client->get(Resource::ENDPOINT, [
                 'key' => $this->bergApi->api_key,
@@ -51,23 +49,12 @@ class BergUnloadService
                 return new Resource($resource);
             });
 
-            Log::info('BERG API RESPONSE DATA', $result->toArray());
-
             /** @var Resource $resource */
             foreach ($resources as $resource) {
-
-                Log::info('BERG API ARTICLE', [
-                    'article' => $resource->getArticle()
-                ]);
 
                 $itemService = new ItemPriceService($resource->getArticle(), $this->bergApi->supplier_id);
                 $items = $this->bergApi->supplier->use_brand ? $itemService->withBrand($resource->getBrandName())->find() : $itemService->find();
                 $price = $resource->getOffers()->firstWhere(fn (Offer $offer) => in_array($offer->getWarehouseName(), $this->bergApi->warehouses->pluck('warehouse_name')->toArray()))?->getPrice();
-
-                Log::info('BERG API PRICE', [
-                    'price' => $price
-                ]);
-                Log::info('BERG API ITEMS', $items->toArray());
 
                 if ($items && $price) {
 

@@ -184,9 +184,9 @@ return [
     'defaults' => [
         'supervisor-1' => [
             'connection' => 'redis',
-            'queue' => ['default'],
+            'queue' => ['default', 'email-supplier-unload', 'market-update-stock'],
             'balance' => 'auto',
-            'autoScalingStrategy' => 'time',
+            'autoScalingStrategy' => 'size',
             'maxProcesses' => 12,
             'maxTime' => 0,
             'maxJobs' => 500,
@@ -197,36 +197,6 @@ return [
             'balanceMaxShift' => 10,
             'balanceCooldown' => 3,
         ],
-        'supervisor-2' => [
-            'connection' => 'redis',
-            'queue' => ['email-supplier-unload'],
-            'balance' => 'simple',
-            'autoScalingStrategy' => 'time',
-            'maxProcesses' => 12,
-            'maxTime' => 0,
-            'maxJobs' => 200,
-            'memory' => 24400,
-            'tries' => 1,
-            'timeout' => 14350,
-            'nice' => 0,
-            'balanceMaxShift' => 10,
-            'balanceCooldown' => 3,
-        ],
-        'supervisor-3' => [
-            'connection' => 'redis',
-            'queue' => ['market-update-stock'],
-            'balance' => 'simple',
-            'autoScalingStrategy' => 'time',
-            'maxProcesses' => 12,
-            'maxTime' => 0,
-            'maxJobs' => 200,
-            'memory' => 12800,
-            'tries' => 1,
-            'timeout' => 14350,
-            'nice' => 0,
-            'balanceMaxShift' => 10,
-            'balanceCooldown' => 3,
-        ]
     ],
 
     'environments' => [

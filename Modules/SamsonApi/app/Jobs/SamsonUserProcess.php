@@ -2,12 +2,12 @@
 
 namespace Modules\SamsonApi\Jobs;
 
-use App\Jobs\Supplier\MarketsUnload;
-use App\Services\OzonItemPriceService;
+use App\Helpers\Helpers;
+use App\Models\OzonMarket;
+use App\Models\WbMarket;
 use App\Services\SupplierReportService;
-use App\Services\WbItemPriceService;
+use Illuminate\Bus\Batch;
 use Illuminate\Bus\Queueable;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -45,7 +45,26 @@ class SamsonUserProcess implements ShouldQueue
         $user = $this->samsonApi->user;
         $supplier = $this->samsonApi->supplier;
 
-        MarketsUnload::dispatch($user, $supplier, 'по АПИ');
+        Helpers::toBatch(function (Batch $batch) use ($user, $supplier) {
+
+            $user->ozonMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $supplier)->first())
+                ->each(function (OzonMarket $market) use ($batch, $supplier) {
+                    $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $supplier));
+                });
+
+            $user->wbMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $supplier)->first())
+                ->each(function (WbMarket $market) use ($batch, $supplier) {
+                    $batch->add(new \App\Jobs\Wb\PriceUnload($market, $supplier));
+                });
+        });
     }
 
     public function failed(\Throwable $th)

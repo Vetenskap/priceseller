@@ -2,6 +2,7 @@
 
 namespace App\HttpClient\OzonClient;
 
+use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Services\SupplierReportService;
 use Illuminate\Http\Client\ConnectionException;
@@ -93,23 +94,36 @@ class OzonClient
         return $this->request->post('/v1/warehouse/list', ['data' => []])->throw()->collect('result');
     }
 
-    public function putPrices(array $data): Collection
+    public function putPrices(array $data, Supplier $supplier): Collection
     {
-        return $this->request->post('/v1/product/import/prices', ['prices' => $data])->collect('result');
-    }
-
-    public function putStocks(array $data, Supplier $supplier)
-    {
-        while (RateLimiter::attempts('ozon_put_stocks') >= 80) {
-            SupplierReportService::addLog($supplier, 'Превышен лимит запросов, ожидаем 2 сек.');
-            sleep(2);
+        try {
+            return $this->request->post('/v1/product/import/prices', ['prices' => $data])->collect('result');
+        } catch (RequestException $e) {
+            if ($e->response->unauthorized()) {
+                SupplierReportService::addLog($supplier, 'Неверный токен или область его действия не включает обновление цен');
+            }
         }
 
-        return RateLimiter::attempt(
-            'ozon_put_stocks',
-            80,
-            fn() => $this->request->post('/v2/products/stocks', ['stocks' => $data])->collect('result')
-        );
+        return collect();
+    }
 
+    public function putStocks(array $data, Supplier $supplier, OzonMarket $market)
+    {
+        while (RateLimiter::attempts('ozon_put_stocks' . $market->id) >= 80) {
+            SupplierReportService::addLog($supplier, 'Превышен лимит запросов, ожидаем 5 сек.');
+            sleep(5);
+        }
+
+        try {
+            return RateLimiter::attempt(
+                'ozon_put_stocks' . $market->id,
+                80,
+                fn() => $this->request->post('/v2/products/stocks', ['stocks' => $data])->collect('result')
+            );
+        } catch (RequestException $e) {
+            if ($e->response->unauthorized()) {
+                SupplierReportService::addLog($supplier, 'Неверный токен или область его действия не включает обновление остатков');
+            }
+        }
     }
 }

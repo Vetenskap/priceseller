@@ -54,6 +54,7 @@ class Helpers {
         $batch = $batch->fresh();
 
         while (!$batch->finished() && ($batch->pendingJobs > 0)) {
+            if ($batch->hasFailures()) throw new \Exception('Batch failed!');
             if ($batch->cancelled()) throw new \Exception('Batch cancelled!');
             if ($progress) $progress($batch->progress());
             sleep(20);

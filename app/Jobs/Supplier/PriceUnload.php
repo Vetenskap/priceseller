@@ -2,23 +2,18 @@
 
 namespace App\Jobs\Supplier;
 
+use App\Helpers\Helpers;
 use App\Models\EmailSupplier;
-use App\Models\Supplier;
-use App\Models\User;
+use App\Models\OzonMarket;
+use App\Models\WbMarket;
 use App\Services\EmailSupplierService;
-use App\Services\OzonItemPriceService;
 use App\Services\SupplierReportService;
-use App\Services\WbItemPriceService;
+use Illuminate\Bus\Batch;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
 use Illuminate\Support\Facades\Storage;
 
 class PriceUnload implements ShouldQueue
@@ -54,15 +49,30 @@ class PriceUnload implements ShouldQueue
             'path' => Storage::disk('public')->path($this->path)
         ])->unload();
 
-        $ttl = Redis::ttl('laravel_unique_job:'.MarketsEmailSupplierUnload::class.':'.MarketsEmailSupplierUnload::getUniqueId($emailSupplier));
+        $user = $emailSupplier->supplier->user;
 
-        if ($ttl > 0) {
-            app(SupplierReportService::class)->addLog($emailSupplier->supplier, 'Кабинеты этого поставщика уже выгружаются или не прошло 10 минут с первой выгрузки. Оставшееся время: ' . $ttl . ' секунд');
-            app(SupplierReportService::class)->error($emailSupplier->supplier);
-        } else {
-            MarketsEmailSupplierUnload::dispatch($emailSupplier->supplier->user, $emailSupplier);
-        }
+        Helpers::toBatch(function (Batch $batch) use ($user, $emailSupplier) {
 
+            $user->ozonMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $emailSupplier->supplier->id)->first())
+                ->each(function (OzonMarket $market) use ($batch, $emailSupplier) {
+                    $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $emailSupplier));
+                });
+
+            $user->wbMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $emailSupplier->supplier->id)->first())
+                ->each(function (WbMarket $market) use ($batch, $emailSupplier) {
+                    $batch->add(new \App\Jobs\Wb\PriceUnload($market, $emailSupplier));
+                });
+        });
+
+        SupplierReportService::success($emailSupplier->supplier);
     }
 
     public function failed(\Throwable $th): void

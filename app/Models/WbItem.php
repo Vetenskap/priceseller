@@ -30,6 +30,7 @@ class WbItem extends MainModel
         'wbitemable_id',
         'wbitemable_type',
         'subject_id',
+        'last_price'
     ];
 
     const MAINATTRIBUTES = [
