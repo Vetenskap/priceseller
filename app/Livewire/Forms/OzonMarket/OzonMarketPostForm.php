@@ -59,6 +59,27 @@ class OzonMarketPostForm extends Form
     #[Validate]
     public $tariff = 'fbs';
 
+    #[Validate]
+    public $enabled_stocks = true;
+
+    #[Validate]
+    public $enabled_orders = true;
+
+    #[Validate]
+    public $export_ext_item_fields = [];
+
+    #[Validate]
+    public $test_warehouses = [];
+
+    #[Validate]
+    public $min_price = null;
+
+    #[Validate]
+    public $shipping_processing = null;
+
+    #[Validate]
+    public $min_price_percent_comm = null;
+
     public function rules(): array
     {
         return [
@@ -88,6 +109,13 @@ class OzonMarketPostForm extends Form
             'enabled_update_commissions_in_time' => ['nullable', 'boolean'],
             'update_commissions_time' => ['nullable', 'string', 'date_format:H:i'],
             'tariff' => ['nullable', 'in:fbs,fbo'],
+            'enabled_stocks' => ['nullable', 'boolean'],
+            'enabled_orders' => ['nullable', 'boolean'],
+            'export_ext_item_fields' => ['nullable', 'array'],
+            'test_warehouses' => ['nullable', 'array'],
+            'min_price' => ['nullable', 'integer'],
+            'shipping_processing' => ['nullable', 'integer'],
+            'min_price_percent_comm' => ['nullable', 'integer', 'max:100'],
         ];
     }
 
@@ -114,6 +142,13 @@ class OzonMarketPostForm extends Form
         $this->enabled_update_commissions_in_time = $market->enabled_update_commissions_in_time;
         $this->update_commissions_time = $market->update_commissions_time;
         $this->tariff = $market->tariff;
+        $this->enabled_stocks = $market->enabled_stocks;
+        $this->enabled_orders = $market->enabled_orders;
+        $this->export_ext_item_fields = $market->export_ext_item_fields;
+        $this->test_warehouses = $market->test_warehouses;
+        $this->min_price = $market->min_price;
+        $this->shipping_processing = $market->shipping_processing;
+        $this->min_price_percent_comm = $market->min_price_percent_comm;
     }
 
     public function store(): void
@@ -128,6 +163,7 @@ class OzonMarketPostForm extends Form
 
     public function update(): void
     {
+        logger('валидация');
         $this->validate();
 
         $this->market->update($this->except('market'));

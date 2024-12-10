@@ -2,8 +2,11 @@
 
 namespace Modules\VoshodApi\Jobs;
 
-use App\Jobs\Supplier\MarketsUnload;
+use App\Helpers\Helpers;
+use App\Models\OzonMarket;
+use App\Models\WbMarket;
 use App\Services\SupplierReportService;
+use Illuminate\Bus\Batch;
 use Illuminate\Bus\Queueable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Queue\InteractsWithQueue;
@@ -21,7 +24,7 @@ class VoshodUserProcess implements ShouldQueue
      */
     public function __construct(public VoshodApi $voshodApi)
     {
-        //
+        $this->queue = 'email-supplier-unload';
     }
 
     /**
@@ -41,7 +44,28 @@ class VoshodUserProcess implements ShouldQueue
         $user = $this->voshodApi->user;
         $supplier = $this->voshodApi->supplier;
 
-        MarketsUnload::dispatch($user, $supplier, 'по АПИ');
+        Helpers::toBatch(function (Batch $batch) use ($user, $supplier) {
+
+            $user->ozonMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $supplier)->first())
+                ->each(function (OzonMarket $market) use ($batch, $supplier) {
+                    $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $supplier));
+                });
+
+            $user->wbMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $supplier)->first())
+                ->each(function (WbMarket $market) use ($batch, $supplier) {
+                    $batch->add(new \App\Jobs\Wb\PriceUnload($market, $supplier));
+                });
+        });
+
+        SupplierReportService::success($supplier, 'по АПИ');
     }
 
     public function failed(\Throwable $th)

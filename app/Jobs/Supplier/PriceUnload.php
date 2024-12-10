@@ -5,9 +5,14 @@ namespace App\Jobs\Supplier;
 use App\Contracts\ReportContract;
 use App\Enums\TaskTypes;
 use App\Exceptions\ReportCancelled;
+use App\Helpers\Helpers;
 use App\Models\EmailSupplier;
 use App\Models\Report;
+use App\Models\OzonMarket;
+use App\Models\WbMarket;
 use App\Services\EmailSupplierService;
+use App\Services\SupplierReportService;
+use Illuminate\Bus\Batch;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -51,8 +56,30 @@ class PriceUnload implements ShouldQueue
             return;
         }
 
-        MarketsEmailSupplierUnload::dispatch($this->emailSupplier->supplier->user, $this->emailSupplier, $this->report);
+        $user = $this->emailSupplier->supplier->user;
 
+        Helpers::toBatch(function (Batch $batch) use ($user, $emailSupplier) {
+
+            $user->ozonMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $emailSupplier->supplier->id)->first())
+                ->each(function (OzonMarket $market) use ($batch, $emailSupplier) {
+                    $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $emailSupplier));
+                });
+
+            $user->wbMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $emailSupplier->supplier->id)->first())
+                ->each(function (WbMarket $market) use ($batch, $emailSupplier) {
+                    $batch->add(new \App\Jobs\Wb\PriceUnload($market, $emailSupplier));
+                });
+        });
+
+        SupplierReportService::success($emailSupplier->supplier);
     }
 
     public function failed(\Throwable $th): void

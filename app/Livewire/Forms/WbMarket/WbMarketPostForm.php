@@ -63,6 +63,27 @@ class WbMarketPostForm extends Form
     #[Validate]
     public $enabled_price = true;
 
+    #[Validate]
+    public $enabled_stocks = true;
+
+    #[Validate]
+    public $enabled_orders = true;
+
+    #[Validate]
+    public $export_ext_item_fields = [];
+
+    #[Validate]
+    public $test_warehouses = [];
+
+    #[Validate]
+    public $min_price = 0;
+
+    #[Validate]
+    public $retail_markup_percent = 0;
+
+    #[Validate]
+    public $package = 0;
+
     public function rules(): array
     {
         return [
@@ -89,6 +110,13 @@ class WbMarketPostForm extends Form
             'update_commissions_time' => ['nullable', 'string', 'date_format:H:i'],
             'tariff' => ['nullable', 'string'],
             'enabled_price' => ['nullable', 'boolean'],
+            'enabled_stocks' => ['nullable', 'boolean'],
+            'enabled_orders' => ['nullable', 'boolean'],
+            'export_ext_item_fields' => ['nullable', 'array'],
+            'test_warehouses' => ['nullable', 'array'],
+            'min_price' => ['nullable', 'integer'],
+            'retail_markup_percent' => ['nullable', 'integer', 'max:100'],
+            'package' => ['nullable', 'integer'],
         ];
     }
 
@@ -111,6 +139,13 @@ class WbMarketPostForm extends Form
         $this->update_commissions_time = $market->update_commissions_time;
         $this->tariff = $market->tariff;
         $this->enabled_price = $market->enabled_price;
+        $this->enabled_stocks = $market->enabled_stocks;
+        $this->enabled_orders = $market->enabled_orders;
+        $this->export_ext_item_fields = $market->export_ext_item_fields;
+        $this->test_warehouses = $market->test_warehouses;
+        $this->min_price = $market->min_price;
+        $this->retail_markup_percent = $market->retail_markup_percent;
+        $this->package = $market->package;
     }
 
     public function store(): void

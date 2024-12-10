@@ -52,22 +52,7 @@ class WbMarketEdit extends BaseComponent
     /** @var TemporaryUploadedFile $file */
     public $file;
 
-    #[Session('WbMarketEdit.min_price.{market.id}')]
-    public $min_price = null;
-
-    #[Session('WbMarketEdit.retail_markup_percent.{market.id}')]
-    public $retail_markup_percent = null;
-
-    #[Session('WbMarketEdit.package.{market.id}')]
-    public $package = null;
-
     public $directLink = false;
-
-    #[Session('WbMarketEdit.testWarehouses.{market.id}')]
-    public $testWarehouses = [];
-
-    #[Session('WbMarketEdit.exportExtItemFields.{market.id}')]
-    public $exportExtItemFields = [];
 
     #[Computed]
     public function items(): LengthAwarePaginator|\Illuminate\Pagination\LengthAwarePaginator|array
@@ -78,13 +63,7 @@ class WbMarketEdit extends BaseComponent
 
     public function updateUserCommissions(): void
     {
-        $this->validate([
-            'min_price' => 'nullable|numeric|min:0',
-            'retail_markup_percent' => 'nullable|numeric|min:0',
-            'package' => 'nullable|numeric|min:0',
-        ]);
-
-        collect($this->only('min_price', 'retail_markup_percent', 'package'))
+        collect($this->form->only('min_price', 'retail_markup_percent', 'package'))
             ->filter()
             ->each(fn($value, $key) => $this->market->items()->update([$key => $value]));
 
@@ -96,7 +75,7 @@ class WbMarketEdit extends BaseComponent
         MarketUpdateApiCommissions::dispatch(
             model: $this->market,
             service: WbMarketService::class,
-            defaultFields: collect($this->only('sales_percent', 'min_price', 'retail_markup_percent', 'package'))->filter()->toArray(),
+            defaultFields: collect($this->form->only('sales_percent', 'min_price', 'retail_markup_percent', 'package'))->filter()->toArray(),
         );
 
         $this->addJobNotification();
@@ -136,7 +115,7 @@ class WbMarketEdit extends BaseComponent
     {
         $status = $this->checkTtlJob(Export::getUniqueId($this->market), Export::class);
 
-        if ($status) Export::dispatch($this->market, WbMarketService::class, $this->exportExtItemFields);
+        if ($status) Export::dispatch($this->market, WbMarketService::class, $this->form->export_ext_item_fields);
     }
 
     public function import(): void
@@ -164,7 +143,7 @@ class WbMarketEdit extends BaseComponent
         $status = $this->checkTtlJob(MarketRelationshipsAndCommissions::getUniqueId($this->market), MarketRelationshipsAndCommissions::class);
 
         if ($status) MarketRelationshipsAndCommissions::dispatch(
-            defaultFields: collect($this->only(['package', 'retail_markup_percent', 'min_price', 'sales_percent'])),
+            defaultFields: collect($this->form->only(['package', 'retail_markup_percent', 'min_price', 'sales_percent'])),
             model: $this->market,
             service: WbMarketService::class,
             directLink: $this->directLink
@@ -195,24 +174,24 @@ class WbMarketEdit extends BaseComponent
 
     public function testStocks(): void
     {
-        if (!count($this->testWarehouses)) {
+        if (!count($this->form->test_warehouses)) {
             \Flux::toast('Выберите склады', variant: 'danger');
             return;
         }
 
-        TestStock::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
+        TestStock::dispatch($this->currentUser(), $this->form->test_warehouses, $this->market);
 
         $this->addJobNotification();
     }
 
     public function nullStocks(): void
     {
-        if (!count($this->testWarehouses)) {
+        if (!count($this->form->test_warehouses)) {
             \Flux::toast('Выберите склады', variant: 'danger');
             return;
         }
 
-        NullStocks::dispatch($this->currentUser(), $this->testWarehouses, $this->market);
+        NullStocks::dispatch($this->currentUser(), $this->form->test_warehouses, $this->market);
 
         $this->addJobNotification();
     }

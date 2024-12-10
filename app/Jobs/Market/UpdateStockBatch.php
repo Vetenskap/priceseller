@@ -19,9 +19,9 @@ class UpdateStockBatch implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public WbItemPriceService|OzonItemPriceService $service, public Collection $items)
+    public function __construct(public WbItemPriceService|OzonItemPriceService $service, public int $offset)
     {
-        //
+        $this->queue = 'market-update-stock';
     }
 
     /**
@@ -29,35 +29,42 @@ class UpdateStockBatch implements ShouldQueue
      */
     public function handle(): void
     {
-        $this->items->filter(function (WbItem|OzonItem $item) {
 
-            if ($item instanceof WbItem) {
-                $itemable = $item->itemable;
-                $type = $item->wbitemable_type;
-            } else {
-                $itemable = $item->itemable;
-                $type = $item->ozonitemable_type;
-            }
+        $this->service->market
+            ->items()
+            ->with('itemable')
+            ->limit(10000)
+            ->offset($this->offset)
+            ->get()
+            ->filter(function (WbItem|OzonItem $item) {
 
-            if ($type === Item::class) {
-                if ($itemable->supplier_id === $this->service->supplier->id) {
-                    return true;
+                if ($item instanceof WbItem) {
+                    $itemable = $item->itemable;
+                    $type = $item->wbitemable_type;
+                } else {
+                    $itemable = $item->itemable;
+                    $type = $item->ozonitemable_type;
                 }
-            } else {
-                if ($itemable->items->every(fn(Item $item) => $item->supplier_id === $this->service->supplier->id)) {
-                    return true;
+
+                if ($type === Item::class) {
+                    if ($itemable->supplier_id === $this->service->supplier->id) {
+                        return true;
+                    }
+                } else {
+                    if ($itemable->items->every(fn(Item $item) => $item->supplier_id === $this->service->supplier->id)) {
+                        return true;
+                    }
                 }
-            }
 
-            return false;
+                return false;
 
-        })->each(function (WbItem|OzonItem $item) {
-            if ($item instanceof WbItem) {
-                $item = $this->service->recountStockWbItem($item);
-            } else {
-                $item = $this->service->recountStockOzonItem($item);
-            }
-            $item->save();
-        });
+            })->each(function (WbItem|OzonItem $item) {
+                if ($item instanceof WbItem) {
+                    $item = $this->service->recountStockWbItem($item);
+                } else {
+                    $item = $this->service->recountStockOzonItem($item);
+                }
+                $item->save();
+            });
     }
 }

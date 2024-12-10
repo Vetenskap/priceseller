@@ -184,64 +184,25 @@ return [
     'defaults' => [
         'supervisor-1' => [
             'connection' => 'redis',
-            'queue' => ['default'],
+            'queue' => ['default', 'email-supplier-unload', 'market-update-stock'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'size',
-            'maxProcesses' => 1,
+            'maxProcesses' => 12,
             'maxTime' => 0,
-            'maxJobs' => 10,
+            'maxJobs' => 500,
             'memory' => 12800,
             'tries' => 1,
             'timeout' => 14350,
             'nice' => 0,
-        ],
-        'supervisor-2' => [
-            'connection' => 'redis',
-            'queue' => ['email-supplier-unload'],
-            'balance' => 'auto',
-            'autoScalingStrategy' => 'size',
-            'maxProcesses' => 10,
-            'maxTime' => 0,
-            'maxJobs' => 10,
-            'memory' => 24400,
-            'tries' => 1,
-            'timeout' => 14350,
-            'nice' => 0,
-            'balanceMaxShift' => 1,
+            'balanceMaxShift' => 10,
             'balanceCooldown' => 3,
         ],
-        'supervisor-3' => [
-            'connection' => 'redis',
-            'queue' => ['market-update-stock'],
-            'balance' => 'auto',
-            'autoScalingStrategy' => 'size',
-            'maxProcesses' => 40,
-            'maxTime' => 0,
-            'maxJobs' => 40,
-            'memory' => 12800,
-            'tries' => 1,
-            'timeout' => 14350,
-            'nice' => 0,
-            'balanceMaxShift' => 1,
-            'balanceCooldown' => 3,
-        ]
     ],
 
     'environments' => [
         'production' => [
-            'supervisor-1' => [
-                'maxProcesses' => 10,
-                'balanceMaxShift' => 1,
-                'balanceCooldown' => 3,
-            ],
         ],
-
         'local' => [
-            'supervisor-1' => [
-                'maxProcesses' => 10,
-                'balanceMaxShift' => 1,
-                'balanceCooldown' => 3,
-            ],
         ],
     ],
 ];

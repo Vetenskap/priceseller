@@ -7,7 +7,6 @@ use App\HttpClient\WbClient\WbClient;
 use App\Jobs\Market\NullNotUpdatedStocksBatch;
 use App\Jobs\Market\UpdateStockBatch;
 use App\Models\Item;
-use App\Models\ItemWarehouseStock;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbItem;
@@ -21,6 +20,7 @@ use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Modules\Moysklad\Services\MoyskladItemOrderService;
 
 class WbItemPriceService
@@ -35,11 +35,12 @@ class WbItemPriceService
     public function updatePrice(): void
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт цен");
+        $this->setLastPrices();
 
         $this->market
             ->items()
             ->with('itemable')
-            ->chunk(1000, function (Collection $items) {
+            ->chunk(10000, function (Collection $items) {
 
                 $items->filter(function (WbItem $wbItem) {
 
@@ -126,6 +127,31 @@ class WbItemPriceService
         return $wbItem;
     }
 
+    public function setLastPrices(): void
+    {
+        $this->market
+            ->items()
+            ->where('price', '>', 0)
+            ->with('itemable')
+            ->chunk(10000, function (Collection $items) {
+
+                $items->filter(function (WbItem $wbItem) {
+
+                    if ($wbItem->wbitemable_type === Item::class) {
+                        if ($wbItem->itemable->supplier_id === $this->supplier->id) return true;
+                    } else {
+                        if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) return true;
+                    }
+
+                    return false;
+
+                })->each(function (WbItem $wbItem) {
+                    $wbItem->update(['last_price' => DB::raw('price')]);
+                });
+
+            });
+    }
+
     /**
      * @throws \Exception
      */
@@ -134,30 +160,12 @@ class WbItemPriceService
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт остатков");
 
         Helpers::toBatch(function (Batch $batch) {
-            $this->market
-                ->items()
-                ->with('itemable')
-                ->chunk(1000, function (Collection $items) use ($batch) {
-
-                    $items = $items->filter(function (WbItem $wbItem) {
-
-                        if ($wbItem->wbitemable_type === Item::class) {
-                            if ($wbItem->itemable->supplier_id === $this->supplier->id) {
-                                return true;
-                            }
-                        } else {
-                            if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                                return true;
-                            }
-                        }
-
-                        return false;
-
-                    });
-
-                    $batch->add(new UpdateStockBatch($this, $items));
-
-                });
+            $count = $this->market->items()->count();
+            $offset = 0;
+            while ($count > $offset) {
+                $batch->add(new UpdateStockBatch($this, $offset));
+                $offset += 10000;
+            }
         }, 'market-update-stock');
 
         $this->nullNotUpdatedStocks();
@@ -233,14 +241,18 @@ class WbItemPriceService
                 $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $multiplicity === 1) ? 1 : $new_count;
                 $new_count = ($new_count + $myWarehousesStocks) / $multiplicity;
 
-                if (ModuleService::moduleIsEnabled('Order', $this->user)) {
-                    $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
-                }
+                if ($this->market->enabled_orders) {
 
-                if ($wbItem->wbitemable_type === 'App\Models\Item') {
-                    if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                        $new_count = $new_count - (($wbItem->itemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($wbItem->itemable)->sum('orders') : 0) * $wbItem->itemable->multiplicity);
+                    if (ModuleService::moduleIsEnabled('Order', $this->user)) {
+                        $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
                     }
+
+                    if ($wbItem->wbitemable_type === 'App\Models\Item') {
+                        if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+                            $new_count = $new_count - (($wbItem->itemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($wbItem->itemable)->sum('orders') : 0) * $wbItem->itemable->multiplicity);
+                        }
+                    }
+
                 }
 
                 $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
@@ -345,6 +357,11 @@ class WbItemPriceService
 
     public function unloadAllStocks(): void
     {
+        if (!$this->market->enabled_stocks) {
+            SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: пропускаем выгрузку остатков в кабинет");
+            return;
+        }
+
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: выгрузка остатков в кабинет");
 
         if (!$this->market->warehouses()->count()) {
@@ -396,7 +413,7 @@ class WbItemPriceService
 
                         if (App::isProduction() && $data->isNotEmpty()) {
                             $wbClient = new WbClient($this->market->api_key);
-                            $wbClient->putStocks($data->values(), $warehouse->warehouse_id, $this->supplier);
+                            $wbClient->putStocks($data->values(), $warehouse->warehouse_id, $this->supplier, $this->market);
                         }
 
                     });
@@ -423,6 +440,7 @@ class WbItemPriceService
             ->whereNotNull('price')
             ->where('price', '>', 0)
             ->whereNotNull('nm_id')
+            ->where('price', '<>', DB::raw('last_price'))
             ->chunk(1000, function (Collection $items) {
 
                 /** @var Collection $data */
@@ -462,7 +480,7 @@ class WbItemPriceService
 
                 if (App::isProduction() && $data->isNotEmpty()) {
                     $wbClient = new WbClient($this->market->api_key);
-                    $wbClient->putPrices($data->values(), $this->supplier);
+                    $wbClient->putPrices($data->values(), $this->supplier, $this->market);
                 }
 
             });

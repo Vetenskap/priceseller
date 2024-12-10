@@ -8,6 +8,9 @@
     </x-notify-top>
     @enderror
     <x-layouts.actions>
+        @if($this->user()->can('update-wb'))
+            <flux:button wire:click="update">Сохранить</flux:button>
+        @endif
         @if($this->user()->can('delete-wb'))
             <flux:button variant="danger" wire:click="destroy"
                          wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить
@@ -75,9 +78,9 @@
             <flux:tab.panel name="relationships_commissions">
                 <x-marketPages.relationships-commissions :market="$market" :file="$file" market-name="wb"
                                                          sort-by="$sortBy" sort-direction="$sortDirection">
-                    <flux:input wire:model="min_price" label="Минимальная цена продажи" type="number"/>
-                    <flux:input wire:model="retail_markup_percent" label="Наценка" type="number"/>
-                    <flux:input wire:model="package" label="Упаковка" type="number"/>
+                    <flux:input wire:model.live="form.min_price" label="Минимальная цена продажи" type="number"/>
+                    <flux:input wire:model.live="form.retail_markup_percent" label="Наценка" type="number"/>
+                    <flux:input wire:model.live="form.package" label="Упаковка" type="number"/>
                 </x-marketPages.relationships-commissions>
             </flux:tab.panel>
             <flux:tab.panel name="export">

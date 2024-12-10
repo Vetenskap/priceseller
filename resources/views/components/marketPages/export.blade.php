@@ -6,12 +6,13 @@
             <flux:heading size="xl" class="text-center">Дополнительные поля</flux:heading>
             <flux:subheading class="text-center">Добавить в таблицу дополнительные поля</flux:subheading>
             <flux:card>
-                <flux:checkbox.group wire:model.live="exportExtItemFields" label="Поля товара">
+                <flux:checkbox.group wire:model.live="form.export_ext_item_fields" label="Поля товара">
                     @foreach(\App\Models\Item::MAINATTRIBUTES as $attribute)
                         <flux:checkbox :value="$attribute['name']" :label="$attribute['label']" />
                     @endforeach
                 </flux:checkbox.group>
             </flux:card>
+            <flux:error name="form.export_ext_item_fields" />
         </flux:card>
     </x-blocks.main-block>
     <x-blocks.main-block>

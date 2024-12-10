@@ -8,6 +8,9 @@
     </x-notify-top>
     @enderror
     <x-layouts.actions>
+        @if($this->user()->can('update-ozon'))
+            <flux:button wire:click="update">Сохранить</flux:button>
+        @endif
         @if($this->user()->can('delete-ozon'))
             <flux:button variant="danger" wire:click="destroy"
                          wire:confirm="Вы действительно хотите удалить кабинет? Все связи так же будут удалены.">Удалить
@@ -146,9 +149,9 @@
                                 <flux:label>Минимальная цена, %</flux:label>
                             </flux:tooltip>
 
-                            <flux:input wire:model="min_price_percent" type="number"/>
+                            <flux:input wire:model.live="form.min_price_percent_comm" type="number"/>
 
-                            <flux:error name="min_price_percent"/>
+                            <flux:error name="form.min_price_percent_comm"/>
                         </flux:field>
                     </div>
                     <div>
@@ -157,9 +160,9 @@
                                 <flux:label>Минимальная цена продажи</flux:label>
                             </flux:tooltip>
 
-                            <flux:input wire:model="min_price" type="number"/>
+                            <flux:input wire:model.live="form.min_price" type="number"/>
 
-                            <flux:error name="min_price"/>
+                            <flux:error name="form.min_price"/>
                         </flux:field>
                     </div>
                     <div>
@@ -168,9 +171,9 @@
                                 <flux:label>Обработка отправления</flux:label>
                             </flux:tooltip>
 
-                            <flux:input wire:model="shipping_processing" type="number"/>
+                            <flux:input wire:model.live="form.shipping_processing" type="number"/>
 
-                            <flux:error name="shipping_processing"/>
+                            <flux:error name="form.shipping_processing"/>
                         </flux:field>
                     </div>
                 </x-marketPages.relationships-commissions>
