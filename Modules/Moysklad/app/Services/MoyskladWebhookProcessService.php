@@ -417,11 +417,11 @@ class MoyskladWebhookProcessService
                         'price type uuid' => $recountRetailMarkup->price_type_uuid
                     ]);
 
-
+                    /** @var SalePrice $salePrice */
                     $salePrice = $product->getSalePrices()->firstWhere(fn(SalePrice $salePrice) => $salePrice->getPriceType()->id === $recountRetailMarkup->price_type_uuid);
 
                     Log::info('sale price', [
-                        'value' => $salePrice
+                        'sale price id' => $salePrice->getPriceType()->id
                     ]);
 
                     if ($salePrice) {
