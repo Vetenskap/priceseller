@@ -57,7 +57,8 @@ class Currency extends Entity
                 "href" => MoyskladClient::BASEURL . self::ENDPOINT . $this->id,
                 "metadataHref" => MoyskladClient::BASEURL . self::ENDPOINT . 'metadata',
                 "type" => "currency",
-                "mediaType" => "application/json"
+                "mediaType" => "application/json",
+                "uuidHref" => "https://online.moysklad.ru/app/#currency/edit?id=2aa44791-fc1e-11eb-0a80-04aa0009fa4b"
             ]
         ];
     }

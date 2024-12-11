@@ -47,7 +47,8 @@ class PriceType extends Entity
                 "type" => "pricetype",
                 "mediaType" => "application/json"
             ],
-            "id" => $this->id
+            "id" => $this->id,
+            "name" => $this->name
         ];
     }
 

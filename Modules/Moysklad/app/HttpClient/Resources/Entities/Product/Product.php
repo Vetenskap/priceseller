@@ -290,7 +290,7 @@ class Product extends Entity
             if (count($fields['salePrices']) > 0) {
                 /** @var SalePrice $salePrice */
                 foreach ($fields['salePrices'] as $salePrice) {
-                    $data['salePrices'] = $salePrice->getFieldProduct();
+                    $data['salePrices'][] = $salePrice->getFieldProduct();
                 }
             } else {
                 $data['salePrices'] = $this->salePrices->map(function (SalePrice $salePrice) {
