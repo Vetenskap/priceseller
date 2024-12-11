@@ -280,10 +280,10 @@ class Product extends Entity
             if (count($fields['attributes']) > 0) {
                 /** @var Attribute $attribute */
                 foreach ($fields['attributes'] as $attribute) {
-                    $data['attributes'] = $attribute->getFieldProduct();
+                    $data['attributes'][] = $attribute->getFieldProduct();
                 }
             } else {
-                $data['attributes'] = $this->attributes->map(function (Attribute $attribute) {
+                $data['attributes'][] = $this->attributes->map(function (Attribute $attribute) {
                     return $attribute->getFieldProduct();
                 });
             }
@@ -295,7 +295,7 @@ class Product extends Entity
                     $data['salePrices'][] = $salePrice->getFieldProduct();
                 }
             } else {
-                $data['salePrices'] = $this->salePrices->map(function (SalePrice $salePrice) {
+                $data['salePrices'][] = $this->salePrices->map(function (SalePrice $salePrice) {
                     return $salePrice->getFieldProduct();
                 });
             }
