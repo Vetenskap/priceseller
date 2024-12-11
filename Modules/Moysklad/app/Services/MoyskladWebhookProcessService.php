@@ -391,7 +391,7 @@ class MoyskladWebhookProcessService
                 Log::info('Moysklad recountRetailMarkups else', $recountRetailMarkups->toArray());
             }
 
-            $recountRetailMarkups = $recountRetailMarkups->filter(fn (MoyskladRecountRetailMarkup $recountRetailMarkup) => $recountRetailMarkup->enabled);
+            $recountRetailMarkups = $recountRetailMarkups->filter(fn(MoyskladRecountRetailMarkup $recountRetailMarkup) => $recountRetailMarkup->enabled);
 
             Log::info('Moysklad recountRetailMarkups', $recountRetailMarkups->toArray());
 
@@ -402,7 +402,7 @@ class MoyskladWebhookProcessService
 
                 $recountRetailMarkups->each(function (MoyskladRecountRetailMarkup $recountRetailMarkup) use ($product, $event) {
 
-                    $retail_markup_percent = MoyskladService::getValueFromAttributesAndProduct(
+                    $retail_markup_percent = (int)MoyskladService::getValueFromAttributesAndProduct(
                         $recountRetailMarkup->link_type,
                         $recountRetailMarkup->link,
                         $product,
@@ -412,26 +412,24 @@ class MoyskladWebhookProcessService
                         'value' => $retail_markup_percent
                     ]);
 
-                    if (is_int($retail_markup_percent)) {
 
-                        $salePrice = $product->getSalePrices()->firstWhere(fn(SalePrice $salePrice) => $salePrice->getPriceType()->id === $recountRetailMarkup->price_type_uuid);
+                    $salePrice = $product->getSalePrices()->firstWhere(fn(SalePrice $salePrice) => $salePrice->getPriceType()->id === $recountRetailMarkup->price_type_uuid);
 
-                        Log::info('sale price', [
-                            'value' => $salePrice
+                    Log::info('sale price', [
+                        'value' => $salePrice
+                    ]);
+
+                    if ($salePrice) {
+                        $salePrice->setValue($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100));
+                        $product->update($this->webhook->moysklad->api_key, ['salePrices' => [$salePrice]]);
+                        $this->report->events()->create([
+                            'status' => true,
+                            'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
+                            'message' => 'Для товара перерасчитана цена',
+                            'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
                         ]);
-
-                        if ($salePrice) {
-                            $salePrice->setValue($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100));
-                            $product->update($this->webhook->moysklad->api_key, ['salePrices' => [$salePrice]]);
-                            $this->report->events()->create([
-                                'status' => true,
-                                'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
-                                'message' => 'Для товара перерасчитана цена',
-                                'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
-                            ]);
-                        }
-
                     }
+
                 });
 
             }
