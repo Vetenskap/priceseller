@@ -428,7 +428,7 @@ class MoyskladWebhookProcessService
                         Log::info('buyPrice', [
                             'value' => $product->getBuyPrice()->getValue()
                         ]);
-                        $salePrice->setValue(ceil($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100 + 1), PHP_ROUND_HALF_UP));
+                        $salePrice->setValue(ceil($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100 + 1)));
                         Log::info('salePrice value price', [
                             'value' => $salePrice->getValue()
                         ]);
