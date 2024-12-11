@@ -575,6 +575,11 @@ class MoyskladService
             } elseif ($link_user_type === 'integer') {
                 return intval(preg_replace("/[^0-9]/", "", $attribute->getValue()));
             } else {
+                Log::info('Moysklad findAttribute', [
+                    'value' => $attribute->getValue(),
+                    'attribute' => $attribute->getId(),
+                    'attribute_name' => $attribute->getName()
+                ]);
                 return $attribute->getValue();
             }
         }
