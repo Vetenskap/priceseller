@@ -381,6 +381,10 @@ class MoyskladWebhookProcessService
                 $recountRetailMarkups = $this->webhook->moysklad->recountRetailMarkups;
             }
 
+            $recountRetailMarkups = $recountRetailMarkups->filter(fn (MoyskladRecountRetailMarkup $recountRetailMarkup) => $recountRetailMarkup->enabled);
+
+            Log::info('Moysklad recountRetailMarkups', $recountRetailMarkups->toArray());
+
             if ($recountRetailMarkups->isNotEmpty()) {
 
                 $product = $event->getMeta();
@@ -394,9 +398,17 @@ class MoyskladWebhookProcessService
                         $product,
                     );
 
+                    Log::info('value attribute percent', [
+                        'value' => $retail_markup_percent
+                    ]);
+
                     if (is_int($retail_markup_percent)) {
 
                         $salePrice = $product->getSalePrices()->firstWhere(fn(SalePrice $salePrice) => $salePrice->getPriceType()->id === $recountRetailMarkup->price_type_uuid);
+
+                        Log::info('sale price', [
+                            'value' => $salePrice
+                        ]);
 
                         if ($salePrice) {
                             $salePrice->setValue($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100));
