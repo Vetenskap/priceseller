@@ -588,6 +588,10 @@ class MoyskladService
 
     public static function getValueFromAttributesAndProduct($link_type, $link, Product|Bundle $product, $link_user_type = null, $link_invert = null, $link_attribute_name = null): int|bool|float|string|null
     {
+        Log::info('Moysklad getValueFromAttributesAndProduct', [
+            'link_type' => $link_type,
+            'link' => $link
+        ]);
         if ($link_type === 'metadata') {
             return self::prepareAttributes($link, $product, $link_user_type, $link_invert, $link_attribute_name);
         } else if ($link_type === 'object.value') {
