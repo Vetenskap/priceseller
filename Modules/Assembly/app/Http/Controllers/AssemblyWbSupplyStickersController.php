@@ -24,7 +24,9 @@ class AssemblyWbSupplyStickersController extends Controller
         $ordersIds = $wbSupply->getOrders()->map(fn (Order $order) => $order->getId())->toArray();
         $stickers = Sticker::getFromOrderIds($ordersIds, $supply->market->api_key, 'svg');
 
-        $orders = $wbSupply->getOrders()->map(function (Order $order) use ($stickers) {
+        $orders = $wbSupply->getOrders()->map(function (Order $order) use ($stickers, $supply) {
+            $order->fetchCard($supply->market->api_key);
+            $order->getCard()->loadLink($supply->market);
             $order->setSticker($stickers->firstWhere(fn (Sticker $sticker) => $sticker->getOrderId() === $order->getId()));
             return $order;
         });
