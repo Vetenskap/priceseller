@@ -58,9 +58,7 @@ class MoyskladWebhookProcessService
                 switch ($this->webhook->action) {
                     case 'UPDATE':
                         $this->updateItem();
-                        if ($this->webhook->moysklad->enabled_recount_retail_markup) {
-                            $this->recountRetailMarkup();
-                        }
+                        $this->recountRetailMarkup();
                         break;
                     case 'CREATE':
                         $this->createItem();
