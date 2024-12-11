@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\HttpClient\Resources\Entities\Product;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Modules\Moysklad\HttpClient\Resources\Entities\Counterparty;
 use Modules\Moysklad\HttpClient\Resources\Entities\Employee;
 use Modules\Moysklad\HttpClient\Resources\Entities\Entity;
@@ -262,6 +263,9 @@ class Product extends Entity
 
     public function update(string $api_key, array $fields = []): bool
     {
+        Log::info('Moysklad item metas', [
+            'metas' => $this->getMetasToUpdate($fields)
+        ]);
         return $this->put($api_key, $this->getMetasToUpdate($fields));
     }
 
