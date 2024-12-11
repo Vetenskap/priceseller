@@ -5,6 +5,7 @@
         <flux:menu class="h-1/3 overflow-y-scroll">
             @foreach($reports as $report)
                 <flux:menu.item
+                    class="{{$report['report'] ? ($report['report']->status === 0 ? 'bg-green-300' : ($report['report']->status === 2 ? 'bg-yellow-300' : 'bg-red-300')) : ''}}"
                     :href="$report['report'] ? route('supplier.report.edit', ['supplier' => $report['supplier']->id, 'report' => $report['report']->id]) : ''"
                     :icon="match($report['report']?->status) {
                     0 => 'check-badge',
