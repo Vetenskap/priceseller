@@ -412,6 +412,11 @@ class MoyskladWebhookProcessService
                         'value' => $retail_markup_percent
                     ]);
 
+                    Log::info('sale prices', [
+                        'prices type ids' => $product->getSalePrices()->map(fn (SalePrice $salePrice) => $salePrice->getPriceType()->id),
+                        'price type uuid' => $recountRetailMarkup->price_type_uuid
+                    ]);
+
 
                     $salePrice = $product->getSalePrices()->firstWhere(fn(SalePrice $salePrice) => $salePrice->getPriceType()->id === $recountRetailMarkup->price_type_uuid);
 
