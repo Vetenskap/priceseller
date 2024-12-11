@@ -23,14 +23,14 @@ class BusinessLogicService
 
         $time = now()->format('i');
 
-        if ($time === "00") {
-            Supplier::where('open', true)
-                ->where('unload_without_price', true)
-                ->chunk(5, function (Collection $suppliers) {
-                    $suppliers->filter(fn (Supplier $supplier) => $supplier->user->isSub() || $supplier->user->isAdmin())->each(function (Supplier $supplier) {
-                        UnloadOnTime::dispatch($supplier);
-                    });
-                });
-        }
+//        if ($time === "00") {
+//            Supplier::where('open', true)
+//                ->where('unload_without_price', true)
+//                ->chunk(5, function (Collection $suppliers) {
+//                    $suppliers->filter(fn (Supplier $supplier) => $supplier->user->isSub() || $supplier->user->isAdmin())->each(function (Supplier $supplier) {
+//                        UnloadOnTime::dispatch($supplier);
+//                    });
+//                });
+//        }
     }
 }
