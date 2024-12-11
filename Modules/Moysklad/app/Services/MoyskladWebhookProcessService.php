@@ -371,7 +371,7 @@ class MoyskladWebhookProcessService
             $recountRetailMarkups = collect();
 
             Log::info('Moysklad recountRetailMarkups updatedFields', [
-                'value' => $event->getUpdatedFields()->toArray()
+                'value' => $event->getUpdatedFields()
             ]);
             $updatedFields = $event->getUpdatedFields()->get('buyPrice');
             Log::info('Moysklad recountRetailMarkups updatedFields result', [
