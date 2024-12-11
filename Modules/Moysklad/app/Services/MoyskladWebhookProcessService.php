@@ -425,16 +425,20 @@ class MoyskladWebhookProcessService
                     ]);
 
                     if ($salePrice) {
+                        $value = $product->getBuyPrice()->getValue() * ($retail_markup_percent / 100 + 1);
                         Log::info('buyPrice', [
-                            'value' => $product->getBuyPrice()->getValue(),
+                            'price' => $product->getBuyPrice()->getValue(),
+                            'value' => $value,
                             'retail_markup_percent' => $retail_markup_percent,
-                            'result' => ceil(($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100 + 1) / 10)) * 10
+                            'result' => intval(($value/10)+1)*10-10
                         ]);
-                        $salePrice->setValue(ceil(($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100 + 1) / 10)) * 10);
+
+                        $salePrice->setValue(intval(($value/10)+1)*10-10);
                         Log::info('salePrice value price', [
-                            'value' => $salePrice->getValue()
+                            'value' => $salePrice->getValue(),
+                            'value2' => $value
                         ]);
-                        $product->getMinPrice()->setValue((ceil(($product->getBuyPrice()->getValue() + ($product->getBuyPrice()->getValue() * 0.1)) / 10) * 10));
+                        $product->getMinPrice()->setValue(ceil($product->getBuyPrice()->getValue() * 1.1 / 10) * 10);
                         $status = $product->update($this->webhook->moysklad->api_key, ['salePrices' => [$salePrice], 'minPrice' => []]);
                         if ($status) {
                             $this->report->events()->create([
