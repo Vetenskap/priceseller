@@ -569,7 +569,7 @@ class MoyskladService
                 return floatval($attribute->getValue());
             } elseif ($link_user_type === 'integer') {
                 return intval(preg_replace("/[^0-9]/", "", $attribute->getValue()));
-            } else if ($link_user_type === 'string') {
+            } else {
                 return $attribute->getValue();
             }
         }

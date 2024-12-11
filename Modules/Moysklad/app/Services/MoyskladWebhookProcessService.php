@@ -382,7 +382,7 @@ class MoyskladWebhookProcessService
                     Log::info('Moysklad recountRetailMarkups linkName', [
                         'value' => $recountRetailMarkup->link_name
                     ]);
-                    if ($event->getUpdatedFields()->get($recountRetailMarkup->link_name)) {
+                    if ($event->getUpdatedFields()->contains($recountRetailMarkup->link_name)) {
                         $recountRetailMarkups->push($recountRetailMarkup);
                     }
                 });
