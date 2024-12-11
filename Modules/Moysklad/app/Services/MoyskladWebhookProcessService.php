@@ -426,13 +426,22 @@ class MoyskladWebhookProcessService
 
                     if ($salePrice) {
                         $salePrice->setValue($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100));
-                        $product->update($this->webhook->moysklad->api_key, ['salePrices' => [$salePrice]]);
-                        $this->report->events()->create([
-                            'status' => true,
-                            'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
-                            'message' => 'Для товара перерасчитана цена',
-                            'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
-                        ]);
+                        $status = $product->update($this->webhook->moysklad->api_key, ['salePrices' => [$salePrice]]);
+                        if ($status) {
+                            $this->report->events()->create([
+                                'status' => true,
+                                'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
+                                'message' => 'Для товара перерасчитана цена',
+                                'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
+                            ]);
+                        } else {
+                            $this->report->events()->create([
+                                'status' => false,
+                                'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
+                                'message' => 'Для товара не перерасчитана цена',
+                                'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
+                            ]);
+                        }
                     }
 
                 });
