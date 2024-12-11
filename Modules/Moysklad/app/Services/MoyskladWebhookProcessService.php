@@ -379,6 +379,7 @@ class MoyskladWebhookProcessService
                 });
             } else {
                 $recountRetailMarkups = $this->webhook->moysklad->recountRetailMarkups;
+                Log::info('Moysklad recountRetailMarkups else', $recountRetailMarkups->toArray());
             }
 
             $recountRetailMarkups = $recountRetailMarkups->filter(fn (MoyskladRecountRetailMarkup $recountRetailMarkup) => $recountRetailMarkup->enabled);
