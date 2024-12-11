@@ -187,7 +187,7 @@ return [
             'queue' => ['default', 'market-actions', 'export-or-import', 'market-unload', 'supplier-unload', 'notifications', 'moysklad'],
             'balance' => 'auto',
             'autoScalingStrategy' => 'time',
-            'maxProcesses' => 12,
+            'maxProcesses' => 16,
             'maxTime' => 0,
             'maxJobs' => 200,
             'memory' => 24400,
