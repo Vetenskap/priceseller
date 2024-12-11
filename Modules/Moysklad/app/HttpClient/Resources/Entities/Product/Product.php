@@ -275,7 +275,8 @@ class Product extends Entity
 
         if (isset($fields['buyPrice'])) {
             $data = $this->buyPrice->getFieldProduct();
-        } else if (in_array('attributes', $fields)) {
+        }
+        if (in_array('attributes', $fields)) {
             if (count($fields['attributes']) > 0) {
                 /** @var Attribute $attribute */
                 foreach ($fields['attributes'] as $attribute) {
@@ -286,7 +287,8 @@ class Product extends Entity
                     return $attribute->getFieldProduct();
                 });
             }
-        } else if (isset($fields['salePrices'])) {
+        }
+        if (isset($fields['salePrices'])) {
             if (count($fields['salePrices']) > 0) {
                 /** @var SalePrice $salePrice */
                 foreach ($fields['salePrices'] as $salePrice) {
@@ -297,6 +299,9 @@ class Product extends Entity
                     return $salePrice->getFieldProduct();
                 });
             }
+        }
+        if (isset($fields['minPrice'])) {
+            $data['minPrice'] = $this->minPrice->getFieldProduct();
         }
 
         return $data;
