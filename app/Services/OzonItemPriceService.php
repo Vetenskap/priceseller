@@ -31,7 +31,7 @@ class OzonItemPriceService
     protected User $user;
     public ReportContract $reportContract;
 
-    public function __construct(public ?Supplier $supplier = null, public OzonMarket $market, public array $supplierWarehousesIds, public Report $report = null)
+    public function __construct(public ?Supplier $supplier = null, public OzonMarket $market, public array $supplierWarehousesIds, public ?Report $report = null)
     {
         $this->user = $this->market->user;
         $this->reportContract = app(ReportContract::class);
@@ -186,18 +186,47 @@ class OzonItemPriceService
 
     public function updateStock(): void
     {
-        $this->reportContract->changeMessage($this->report, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
+//        $this->reportContract->changeMessage($this->report, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
 
-        Helpers::toBatch(function (Batch $batch) {
-            $count = $this->market->items()->count();
-            $offset = 0;
-            while ($count > $offset) {
-                $batch->add(new UpdateStockBatch($this, $offset));
-                $offset += 10000;
-            }
-        }, 'market-unload');
+        $this->service->market
+            ->items()
+            ->wh
+            ->with('itemable')
+            ->limit(10000)
+            ->offset($this->offset)
+            ->get()
+            ->filter(function (WbItem|OzonItem $item) {
 
-        $this->nullNotUpdatedStocks();
+                if ($item instanceof WbItem) {
+                    $itemable = $item->itemable;
+                    $type = $item->wbitemable_type;
+                } else {
+                    $itemable = $item->itemable;
+                    $type = $item->ozonitemable_type;
+                }
+
+                if ($type === Item::class) {
+                    if ($itemable->supplier_id === $this->service->supplier->id) {
+                        return true;
+                    }
+                } else {
+                    if ($itemable->items->every(fn(Item $item) => $item->supplier_id === $this->service->supplier->id)) {
+                        return true;
+                    }
+                }
+
+                return false;
+
+            })->each(function (WbItem|OzonItem $item) {
+                if ($item instanceof WbItem) {
+                    $item = $this->service->recountStockWbItem($item);
+                } else {
+                    $item = $this->service->recountStockOzonItem($item);
+                }
+                $item->save();
+            });
+
+//        $this->nullNotUpdatedStocks();
     }
 
     public function recountStockOzonItem(OzonItem $ozonItem): OzonItem

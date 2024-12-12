@@ -3,14 +3,12 @@
 namespace App\Contracts;
 
 use App\Enums\ReportStatus;
-use App\Enums\TaskTypes;
-use App\Models\Contracts\Reportable;
 use App\Models\Report;
 use App\Models\ReportLog;
 
-interface ReportContract
+interface ReportLogContract
 {
-    public function new(TaskTypes $type, array $payload, Reportable $reportable): Report;
+    public function new(TaskTypes $type, array $payload, Reportable $reportable): ReportLog;
 
     public function prune(): int;
 

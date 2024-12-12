@@ -350,7 +350,7 @@ class EmailSupplierService
                 ->get()
                 ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $this->supplier->supplier->id)->first())
                 ->each(function (OzonMarket $market) use ($batch) {
-                    $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $this->supplier));
+                    $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $this->supplier, $this->report));
                 });
 
             $this->supplier->supplier->user->wbMarkets()
@@ -359,7 +359,7 @@ class EmailSupplierService
                 ->get()
                 ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $this->supplier->supplier->id)->first())
                 ->each(function (WbMarket $market) use ($batch) {
-                    $batch->add(new \App\Jobs\Wb\PriceUnload($market, $this->supplier));
+                    $batch->add(new \App\Jobs\Wb\PriceUnload($market, $this->supplier, $this->report));
                 });
         }, 'market-unload', function (): bool {
             $this->report = $this->report->fresh();

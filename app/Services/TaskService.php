@@ -99,7 +99,7 @@ class TaskService implements ReportContract
         ]);
     }
 
-    public function addLog(Report $report, string $message, string $status = null, array $payload = null): ReportLog
+    public function addLog(Report $report, string $message, ReportStatus $status = null, array $payload = null): ReportLog
     {
         return $report->logs()->create([
             'status' => $status,

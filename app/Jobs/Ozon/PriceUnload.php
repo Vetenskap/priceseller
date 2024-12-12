@@ -2,8 +2,10 @@
 
 namespace App\Jobs\Ozon;
 
+use App\Contracts\ReportContract;
 use App\Models\EmailSupplier;
 use App\Models\OzonMarket;
+use App\Models\Report;
 use App\Models\Supplier;
 use App\Services\OzonItemPriceService;
 use Illuminate\Bus\Batchable;
@@ -19,13 +21,15 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
 
     public int $uniqueFor = 7200;
+    public ReportContract $reportContract;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(public OzonMarket $market, public EmailSupplier|Supplier $supplier)
+    public function __construct(public OzonMarket $market, public EmailSupplier|Supplier $supplier, public Report $report)
     {
         $this->queue = 'market-unload';
+        $this->reportContract = app(ReportContract::class);
     }
 
     /**

@@ -2,7 +2,10 @@
 
 namespace App\Jobs\Wb;
 
+use App\Contracts\ReportContract;
+use App\Enums\ReportStatus;
 use App\Models\EmailSupplier;
+use App\Models\Report;
 use App\Models\Supplier;
 use App\Models\WbMarket;
 use App\Services\WbItemPriceService;
@@ -19,13 +22,15 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
 
     public int $uniqueFor = 7200;
+    public ReportContract $reportContract;
 
     /**
      * Create a new job instance.
      */
-    public function __construct(public WbMarket $market, public EmailSupplier|Supplier $supplier)
+    public function __construct(public WbMarket $market, public EmailSupplier|Supplier $supplier, public Report $report)
     {
         $this->queue = 'market-unload';
+        $this->reportContract = app(ReportContract::class);
     }
 
     /**
@@ -33,6 +38,8 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
+        $log = $this->reportContract->addLog($this->report, "Кабинет: {$this->market->name}", ReportStatus::pending);
+
         $actualSupplier = $this->supplier instanceof EmailSupplier ? $this->supplier->supplier : $this->supplier;
         $warehouses = $this->supplier instanceof EmailSupplier ?
             $this->supplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray() :
