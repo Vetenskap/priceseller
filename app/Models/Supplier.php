@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Supplier extends MainModel implements Reportable
@@ -50,9 +51,9 @@ class Supplier extends MainModel implements Reportable
         return $this->hasMany(Item::class);
     }
 
-    public function reports()
+    public function reports(): MorphMany
     {
-        return $this->hasMany(SupplierReport::class);
+        return $this->morphMany(Task::class, 'taskable');
     }
 
     public function priceItems()
