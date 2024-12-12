@@ -39,8 +39,8 @@ class SamsonUserProcess implements ShouldQueue
             SupplierReportService::new($this->samsonApi->supplier, message: 'по АПИ');
         }
 
-        $service = new SamsonUnloadService($this->samsonApi);
-        $service->getNewPrice();
+        $service = new SamsonUnloadService();
+        $service->getNewPrice($this->samsonApi);
 
         $user = $this->samsonApi->user;
         $supplier = $this->samsonApi->supplier;
@@ -65,6 +65,8 @@ class SamsonUserProcess implements ShouldQueue
                     $batch->add(new \App\Jobs\Wb\PriceUnload($market, $supplier));
                 });
         }, 'market-unload');
+
+        SupplierReportService::success($this->samsonApi->supplier, message: 'по АПИ');
     }
 
     public function failed(\Throwable $th)

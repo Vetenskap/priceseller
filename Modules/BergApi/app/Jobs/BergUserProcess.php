@@ -23,7 +23,7 @@ class BergUserProcess implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $tries = 2;
+    public int $tries = 1;
     /**
      * Create a new job instance.
      */
@@ -69,6 +69,8 @@ class BergUserProcess implements ShouldQueue
                     $batch->add(new \App\Jobs\Wb\PriceUnload($market, $supplier));
                 });
         }, 'market-unload');
+
+        SupplierReportService::success($this->bergApi->supplier, message: 'по АПИ');
 
     }
 

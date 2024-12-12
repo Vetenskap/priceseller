@@ -13,37 +13,28 @@ use Modules\SamsonApi\Models\SamsonApiItemAdditionalAttributeLink;
 
 class SamsonUnloadService
 {
-    public SamsonApi $samsonApi;
-    public User $user;
 
-    /**
-     * @param SamsonApi $samsonApi
-     */
-    public function __construct(SamsonApi $samsonApi)
+    public function getNewPrice(SamsonApi $samsonApi): void
     {
-        $this->samsonApi = $samsonApi;
-        $this->user = $samsonApi->user;
-        $this->nullUpdated();
-        $this->nullAllStocks();
-    }
+        $user = $samsonApi->user;
+        $this->nullUpdated($samsonApi);
+        $this->nullAllStocks($samsonApi);
 
-    public function getNewPrice(): void
-    {
-        $skuList = new SkuList($this->samsonApi->api_key);
+        $skuList = new SkuList($samsonApi->api_key);
 
         do {
 
             $items = $skuList->fetchNext();
 
-            $items->each(function (Sku $samsonItem) {
+            $items->each(function (Sku $samsonItem) use ($samsonApi) {
 
                 $price = $samsonItem->getContract();
                 $article = $samsonItem->getSku();
                 $brand = $samsonItem->getBrand();
                 $count = $samsonItem->getIdp();
 
-                $itemService = new ItemPriceService($article, $this->samsonApi->supplier_id);
-                $items = $this->samsonApi->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
+                $itemService = new ItemPriceService($article, $samsonApi->supplier_id);
+                $items = $samsonApi->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
 
                 if ($items) {
 
@@ -52,10 +43,10 @@ class SamsonUnloadService
 
                         if ($count >= 0) {
                             $item->supplierWarehouseStocks()->updateOrCreate([
-                                'supplier_warehouse_id' => $this->samsonApi->supplier_warehouse_id,
+                                'supplier_warehouse_id' => $samsonApi->supplier_warehouse_id,
                                 'item_id' => $item->id
                             ], [
-                                'supplier_warehouse_id' => $this->samsonApi->supplier_warehouse_id,
+                                'supplier_warehouse_id' => $samsonApi->supplier_warehouse_id,
                                 'stock' => $count
                             ]);
                         }
@@ -64,7 +55,7 @@ class SamsonUnloadService
                         $item->updated = true;
                         $item->save();
 
-                        $this->samsonApi->itemAdditionalAttributeLinks->each(function (SamsonApiItemAdditionalAttributeLink $link) use ($item, $samsonItem) {
+                        $samsonApi->itemAdditionalAttributeLinks->each(function (SamsonApiItemAdditionalAttributeLink $link) use ($item, $samsonItem) {
 
                             $value = $samsonItem->{'get' . Str::apa($link->link)}();
 
@@ -86,13 +77,13 @@ class SamsonUnloadService
         } while ($skuList->hasNext());
     }
 
-    protected function nullUpdated(): void
+    protected function nullUpdated(SamsonApi $samsonApi): void
     {
-        $this->samsonApi->supplier->items()->update(['updated' => false]);
+        $samsonApi->supplier->items()->update(['updated' => false]);
     }
 
-    protected function nullAllStocks(): void
+    protected function nullAllStocks(SamsonApi $samsonApi): void
     {
-        $this->samsonApi->supplierWarehouse->stocks()->update(['stock' => 0]);
+        $samsonApi->supplierWarehouse->stocks()->update(['stock' => 0]);
     }
 }
