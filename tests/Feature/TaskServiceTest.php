@@ -27,7 +27,7 @@ class TaskServiceTest extends TestCase
 
         $user = User::factory()->create();
         $this->taskService = app(ReportContract::class);
-        $this->task = $this->taskService->new(TaskTypes::SupplierEmailUnload, ['payload' => 'test'], $user);
+        $this->task = $this->taskService->new(TaskTypes::SupplierUnload, ['payload' => 'test'], $user);
     }
 
     public function test_new_task()
@@ -36,7 +36,7 @@ class TaskServiceTest extends TestCase
         $this->assertTrue($this->task->isPending());
         $this->assertDatabaseHas(Task::class, [
             'status' => ReportStatus::pending,
-            'type' => TaskTypes::SupplierEmailUnload
+            'type' => TaskTypes::SupplierUnload
         ]);
     }
 

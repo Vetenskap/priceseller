@@ -9,7 +9,9 @@ use App\Jobs\Supplier\ProcessData;
 use App\Models\EmailSupplier;
 use App\Models\EmailSupplierWarehouse;
 use App\Models\Item;
+use App\Models\OzonMarket;
 use App\Models\Report;
+use App\Models\WbMarket;
 use App\Services\Item\ItemPriceService;
 use Box\Spout\Common\Entity\Row;
 use Box\Spout\Common\Exception\IOException;
@@ -36,13 +38,12 @@ class EmailSupplierService
 
     public function unload(): void
     {
-        $this->reportContract->changeMessage($this->report, 'Обнуление остатков');
         $this->reportContract->addLog($this->report, 'Обнуление остатков');
 
         $this->nullUpdated();
         $this->nullAllStocks();
 
-        $this->reportContract->changeMessage($this->report, 'Чтение прайса');
+        $this->reportContract->addLog($this->report, 'Чтение прайса');
 
         $ext = pathinfo($this->path, PATHINFO_EXTENSION);
 
@@ -82,7 +83,8 @@ class EmailSupplierService
             }
         }
 
-        SupplierReportService::changeMessage($this->supplier->supplier, 'Прайс прочитан');
+        $this->reportContract->addLog($this->report, 'Прайс прочитан');
+        $this->marketsUnload();
     }
 
     protected function xlsxHandle(): void
@@ -212,6 +214,10 @@ class EmailSupplierService
         if ($items->isEmpty()) {
             $this->handleNotFound($article, $brand, $price, $stock);
             return;
+        } else {
+            foreach ($items as $item) {
+                $this->handleFound($article, $brand, $price, $stock, $item->id);
+            }
         }
 
         foreach ($items as $item) {
@@ -236,6 +242,18 @@ class EmailSupplierService
             $brand,
             $price,
             $stock
+        );
+    }
+
+    public function handleFound(?string $article, ?string $brand, ?string $price, ?string $stock, string $itemId): void
+    {
+        EmailPriceItemService::handleFoundItem(
+            $this->supplier->supplier->id,
+            $article,
+            $brand,
+            $price,
+            $stock,
+            $itemId
         );
     }
 
@@ -320,5 +338,32 @@ class EmailSupplierService
     public function preparePrice(string $price): float
     {
         return (float)preg_replace("/,/", '.', $price);
+    }
+
+    public function marketsUnload(): void
+    {
+        Helpers::toBatch(function (Batch $batch) {
+
+            $this->supplier->supplier->user->ozonMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $this->supplier->supplier->id)->first())
+                ->each(function (OzonMarket $market) use ($batch) {
+                    $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $this->supplier));
+                });
+
+            $this->supplier->supplier->user->wbMarkets()
+                ->where('open', true)
+                ->where('close', false)
+                ->get()
+                ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $this->supplier->supplier->id)->first())
+                ->each(function (WbMarket $market) use ($batch) {
+                    $batch->add(new \App\Jobs\Wb\PriceUnload($market, $this->supplier));
+                });
+        }, 'market-unload', function (): bool {
+            $this->report = $this->report->fresh();
+            return $this->report->isCancelled();
+        });
     }
 }

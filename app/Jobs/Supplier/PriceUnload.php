@@ -37,7 +37,10 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
     public function __construct(public EmailSupplier $emailSupplier, public string $path)
     {
         $this->reportContract = app(ReportContract::class);
-        $this->report = $this->reportContract->new(TaskTypes::SupplierEmailUnload, [], $this->emailSupplier->supplier);
+        $this->report = $this->reportContract->new(TaskTypes::SupplierUnload, [
+            'type' => $this->emailSupplier->email->address,
+            'path' => $path
+        ], $this->emailSupplier->supplier);
         $this->queue = 'supplier-unload';
     }
 
@@ -58,30 +61,7 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
             return;
         }
 
-        $user = $this->emailSupplier->supplier->user;
-
-        Helpers::toBatch(function (Batch $batch) use ($user, $emailSupplier) {
-
-            $user->ozonMarkets()
-                ->where('open', true)
-                ->where('close', false)
-                ->get()
-                ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $emailSupplier->supplier->id)->first())
-                ->each(function (OzonMarket $market) use ($batch, $emailSupplier) {
-                    $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $emailSupplier));
-                });
-
-            $user->wbMarkets()
-                ->where('open', true)
-                ->where('close', false)
-                ->get()
-                ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $emailSupplier->supplier->id)->first())
-                ->each(function (WbMarket $market) use ($batch, $emailSupplier) {
-                    $batch->add(new \App\Jobs\Wb\PriceUnload($market, $emailSupplier));
-                });
-        }, 'market-unload');
-
-        SupplierReportService::success($emailSupplier->supplier);
+        $this->reportContract->finished($this->report);
     }
 
     public function failed(\Throwable $th): void
@@ -91,6 +71,6 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
 
     public function uniqueId(): string
     {
-        return $this->emailSupplier->id . "price_unload";
+        return $this->emailSupplier->id . "_price_unload";
     }
 }
