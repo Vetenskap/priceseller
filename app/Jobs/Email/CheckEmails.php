@@ -35,7 +35,7 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(public User $user)
     {
-
+        $this->queue = 'default';
     }
 
     /**

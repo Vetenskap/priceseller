@@ -18,7 +18,7 @@ class SubscriptionExpires extends Notification implements ShouldQueue
      */
     public function __construct(public Permission $permission, public string $expires)
     {
-
+        $this->queue = 'notifications';
     }
 
     /**

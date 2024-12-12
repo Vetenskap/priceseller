@@ -166,7 +166,7 @@ class WbItemPriceService
                 $batch->add(new UpdateStockBatch($this, $offset));
                 $offset += 10000;
             }
-        }, 'market-update-stock');
+        }, 'market-unload');
 
         $this->nullNotUpdatedStocks();
     }
@@ -274,8 +274,7 @@ class WbItemPriceService
     public function nullNotUpdatedStocks(): void
     {
         Helpers::toBatch(function (Batch $batch) {
-
-            WbWarehouseStock::query()
+            $count = WbWarehouseStock::query()
                 ->with('wbItem')
                 ->whereHas('wbItem', function (Builder $query) {
                     $query->where('wb_market_id', $this->market->id);
@@ -290,12 +289,13 @@ class WbItemPriceService
                                 });
                             });
                     });
-                })
-                ->chunk(1000, function (Collection $stocks) use ($batch) {
-                    $batch->add(new NullNotUpdatedStocksBatch($this, $stocks));
-                });
-
-        }, 'market-update-stock');
+                })->count();
+            $offset = 0;
+            while ($count > $offset) {
+                $batch->add(new NullNotUpdatedStocksBatch($this, $offset));
+                $offset += 10000;
+            }
+        }, 'market-unload');
 
     }
 

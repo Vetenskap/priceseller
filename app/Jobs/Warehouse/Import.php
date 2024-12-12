@@ -23,6 +23,7 @@ class Import implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(public User $user, public string $uuid)
     {
+        $this->queue = 'export-or-import';
         WarehouseItemsImportReportService::newOrFail($this->user, $this->uuid);
     }
 

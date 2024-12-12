@@ -29,6 +29,7 @@ class Import implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(public string $uuid, public string $ext, public OzonMarket|WbMarket|User|Warehouse $model, public string $service)
     {
+        $this->queue = 'export-or-import';
         ItemsImportReportService::new($this->model, $this->uuid);
     }
 

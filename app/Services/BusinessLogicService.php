@@ -2,18 +2,12 @@
 
 namespace App\Services;
 
-use App\Helpers\Helpers;
 use App\Jobs\Email\CheckEmails;
-use App\Jobs\Supplier\MarketsUnload;
 use App\Jobs\Supplier\UnloadOnTime;
-use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\User;
-use App\Models\WbMarket;
-use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\App;
 
 class BusinessLogicService
 {
@@ -29,14 +23,14 @@ class BusinessLogicService
 
         $time = now()->format('i');
 
-        if ($time === "00") {
-            Supplier::where('open', true)
-                ->where('unload_without_price', true)
-                ->chunk(5, function (Collection $suppliers) {
-                    $suppliers->filter(fn (Supplier $supplier) => $supplier->user->isSub() || $supplier->user->isAdmin())->each(function (Supplier $supplier) {
-                        UnloadOnTime::dispatch($supplier);
-                    });
-                });
-        }
+//        if ($time === "00") {
+//            Supplier::where('open', true)
+//                ->where('unload_without_price', true)
+//                ->chunk(5, function (Collection $suppliers) {
+//                    $suppliers->filter(fn (Supplier $supplier) => $supplier->user->isSub() || $supplier->user->isAdmin())->each(function (Supplier $supplier) {
+//                        UnloadOnTime::dispatch($supplier);
+//                    });
+//                });
+//        }
     }
 }

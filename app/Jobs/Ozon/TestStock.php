@@ -29,6 +29,7 @@ class TestStock implements ShouldQueue
      */
     public function __construct(public User $user, public array $testWarehouses, public OzonMarket $market)
     {
+        $this->queue = 'market-actions';
         $this->report = $this->market->actionReports()->create([
             'action' => 'Тест остатков',
             'status' => 2,

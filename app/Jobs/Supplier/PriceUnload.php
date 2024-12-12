@@ -14,17 +14,18 @@ use App\Services\EmailSupplierService;
 use App\Services\SupplierReportService;
 use Illuminate\Bus\Batch;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Storage;
 
-class PriceUnload implements ShouldQueue
+class PriceUnload implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-    public int $uniqueFor = 600;
+    public int $uniqueFor = 7200;
     public int $tries = 1;
 
     public ReportContract $reportContract;
@@ -37,6 +38,7 @@ class PriceUnload implements ShouldQueue
     {
         $this->reportContract = app(ReportContract::class);
         $this->report = $this->reportContract->new(TaskTypes::SupplierEmailUnload, [], $this->emailSupplier->supplier);
+        $this->queue = 'supplier-unload';
     }
 
     /**
@@ -77,7 +79,7 @@ class PriceUnload implements ShouldQueue
                 ->each(function (WbMarket $market) use ($batch, $emailSupplier) {
                     $batch->add(new \App\Jobs\Wb\PriceUnload($market, $emailSupplier));
                 });
-        });
+        }, 'market-unload');
 
         SupplierReportService::success($emailSupplier->supplier);
     }

@@ -7,6 +7,7 @@ use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Log;
 
 class MoyskladClient
 {
@@ -44,7 +45,12 @@ class MoyskladClient
 
     public function put(string $endpoint, array $data): bool
     {
-        return $this->request->put($endpoint, $data)->throw()->successful();
+        $response = $this->request->put($endpoint, $data)->throw();
+        Log::info('Moysklad response', [
+            'body' => $response->body(),
+            'status' => $response->status()
+        ]);
+        return $response->successful();
     }
 
 }

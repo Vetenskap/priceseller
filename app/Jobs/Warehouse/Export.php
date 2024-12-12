@@ -24,6 +24,7 @@ class Export implements ShouldQueue, ShouldBeUnique
      */
     public function __construct(public User $user)
     {
+        $this->queue = 'export-or-import';
         WarehouseItemsExportReportService::newOrFail($this->user);
     }
 

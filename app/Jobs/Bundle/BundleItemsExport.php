@@ -20,6 +20,7 @@ class BundleItemsExport implements ShouldQueue, ShouldBeUnique
 
     public function __construct(public User $user)
     {
+        $this->queue = 'export-or-import';
         BundleItemsExportReportService::new($this->user);
     }
 

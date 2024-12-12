@@ -18,7 +18,7 @@ class ProcessData implements ShouldQueue
      */
     public function __construct(public EmailSupplierService $emailSupplierService, public Collection $collection)
     {
-        //
+        $this->queue = 'supplier-unload';
     }
 
     /**

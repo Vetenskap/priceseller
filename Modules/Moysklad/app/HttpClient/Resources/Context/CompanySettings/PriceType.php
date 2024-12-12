@@ -46,7 +46,9 @@ class PriceType extends Entity
                 "href" => MoyskladClient::BASEURL . self::ENDPOINT . $this->id,
                 "type" => "pricetype",
                 "mediaType" => "application/json"
-            ]
+            ],
+            "id" => $this->id,
+            "name" => $this->name
         ];
     }
 

@@ -98,7 +98,7 @@ class SupplierReportService
 
     public static function timeout(): void
     {
-        SupplierReport::where('updated_at', '<', now()->subHours(4))
+        SupplierReport::where('updated_at', '<', now()->subHours(2))
             ->where('status', 2)
             ->chunk(100, function (Collection $reports) {
                 $reports->each(function (SupplierReport $report) {

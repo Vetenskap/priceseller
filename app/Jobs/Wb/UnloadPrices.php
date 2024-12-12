@@ -27,6 +27,7 @@ class UnloadPrices implements ShouldQueue
      */
     public function __construct(public User $user, public WbMarket $market)
     {
+        $this->queue = 'market-actions';
         $this->report = $this->market->actionReports()->create([
             'action' => 'Выгрузка цен',
             'status' => 2,

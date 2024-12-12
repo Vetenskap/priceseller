@@ -113,7 +113,7 @@ class EmailSupplierService
             }
 
             $reader->close();
-        }, 'email-supplier-unload', function (): bool {
+        }, 'supplier-unload', function (): bool {
             $this->report = $this->report->fresh();
             return $this->report->isCancelled();
         });
@@ -147,7 +147,7 @@ class EmailSupplierService
             }
 
             $reader->close();
-        }, 'email-supplier-unload', function (): bool {
+        }, 'supplier-unload', function (): bool {
             $this->report = $this->report->fresh();
             return $this->report->isCancelled();
         });
@@ -166,7 +166,7 @@ class EmailSupplierService
                 });
 
             });
-        }, 'email-supplier-unload', function (): bool {
+        }, 'supplier-unload', function (): bool {
             $this->report = $this->report->fresh();
             return $this->report->isCancelled();
         });
@@ -176,7 +176,7 @@ class EmailSupplierService
     {
         app(Helpers::class)->toBatch(function (Batch $batch) {
             Excel::import(new SupplierPriceImport($this, $batch), $this->path);
-        }, 'email-supplier-unload', function (): bool {
+        }, 'supplier-unload', function (): bool {
             $this->report = $this->report->fresh();
             return $this->report->isCancelled();
         });

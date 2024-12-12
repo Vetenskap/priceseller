@@ -37,4 +37,17 @@ class MinPrice
         ];
     }
 
+    public function setValue(float $value): void
+    {
+        $this->value = $value;
+    }
+
+    public function getFieldProduct(): array
+    {
+        return [
+            "value" => $this->value * 100,
+            "currency" => $this->currency->getMeta()
+        ];
+    }
+
 }

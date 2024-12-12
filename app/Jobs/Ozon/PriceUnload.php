@@ -8,21 +8,24 @@ use App\Models\Supplier;
 use App\Services\OzonItemPriceService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
-class PriceUnload implements ShouldQueue
+class PriceUnload implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
+
+    public int $uniqueFor = 7200;
 
     /**
      * Create a new job instance.
      */
     public function __construct(public OzonMarket $market, public EmailSupplier|Supplier $supplier)
     {
-
+        $this->queue = 'market-unload';
     }
 
     /**
@@ -40,5 +43,10 @@ class PriceUnload implements ShouldQueue
         $service->updatePrice();
         $service->unloadAllStocks();
         $service->unloadAllPrices();
+    }
+
+    public function uniqueId(): string
+    {
+        return $this->market->id . $this->supplier->id . "ozon_price_unload";
     }
 }

@@ -8,6 +8,7 @@ use App\Services\Item\ItemService;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Modules\Moysklad\HttpClient\Resources\Context\CompanySettings\PriceType;
 use Modules\Moysklad\HttpClient\Resources\Entities\Bundle\Bundle;
@@ -560,6 +561,10 @@ class MoyskladService
 
     public static function prepareAttributes($link, Product|Bundle $product, $link_user_type = null, $link_invert = null, $link_attribute_name = null): int|bool|float|string|null
     {
+        Log::info('Moysklad prepareAttributes', [
+            'attributes' => $product->getAttributes()->map(fn (Attribute $attribute) => $attribute->getId()),
+            'link' => $link
+        ]);
         /** @var Attribute $attribute */
         if ($attribute = $product->getAttributes()->firstWhere(fn(Attribute $attribute) => $attribute->getId() === $link)) {
             if ($link_user_type === 'boolean') {
@@ -569,7 +574,12 @@ class MoyskladService
                 return floatval($attribute->getValue());
             } elseif ($link_user_type === 'integer') {
                 return intval(preg_replace("/[^0-9]/", "", $attribute->getValue()));
-            } else if ($link_user_type === 'string') {
+            } else {
+                Log::info('Moysklad findAttribute', [
+                    'value' => $attribute->getValue(),
+                    'attribute' => $attribute->getId(),
+                    'attribute_name' => $attribute->getName()
+                ]);
                 return $attribute->getValue();
             }
         }
@@ -583,6 +593,10 @@ class MoyskladService
 
     public static function getValueFromAttributesAndProduct($link_type, $link, Product|Bundle $product, $link_user_type = null, $link_invert = null, $link_attribute_name = null): int|bool|float|string|null
     {
+        Log::info('Moysklad getValueFromAttributesAndProduct', [
+            'link_type' => $link_type,
+            'link' => $link
+        ]);
         if ($link_type === 'metadata') {
             return self::prepareAttributes($link, $product, $link_user_type, $link_invert, $link_attribute_name);
         } else if ($link_type === 'object.value') {

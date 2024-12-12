@@ -58,9 +58,7 @@ class MoyskladWebhookProcessService
                 switch ($this->webhook->action) {
                     case 'UPDATE':
                         $this->updateItem();
-                        if ($this->webhook->moysklad->enabled_recount_retail_markup) {
-                            $this->recountRetailMarkup();
-                        }
+                        $this->recountRetailMarkup();
                         break;
                     case 'CREATE':
                         $this->createItem();
@@ -372,40 +370,89 @@ class MoyskladWebhookProcessService
 
             $recountRetailMarkups = collect();
 
-            $updatedFields = $event->getUpdatedFields()->get('buyPrice');
+            Log::info('Moysklad recountRetailMarkups updatedFields', [
+                'value' => $event->getUpdatedFields()
+            ]);
+            $updatedFields = $event->getUpdatedFields()->contains('buyPrice');
+            Log::info('Moysklad recountRetailMarkups updatedFields result', [
+                'value' => $updatedFields
+            ]);
             if (!$updatedFields) {
                 $this->webhook->moysklad->recountRetailMarkups->each(function (MoyskladRecountRetailMarkup $recountRetailMarkup) use ($event, &$recountRetailMarkups) {
-                    if ($event->getUpdatedFields()->get($recountRetailMarkup->link_name)) {
+                    Log::info('Moysklad recountRetailMarkups linkName', [
+                        'value' => $recountRetailMarkup->link_name
+                    ]);
+                    if ($event->getUpdatedFields()->contains($recountRetailMarkup->link_name)) {
                         $recountRetailMarkups->push($recountRetailMarkup);
                     }
                 });
             } else {
                 $recountRetailMarkups = $this->webhook->moysklad->recountRetailMarkups;
+                Log::info('Moysklad recountRetailMarkups else', $recountRetailMarkups->toArray());
             }
+
+            $recountRetailMarkups = $recountRetailMarkups->filter(fn(MoyskladRecountRetailMarkup $recountRetailMarkup) => $recountRetailMarkup->enabled);
+
+            Log::info('Moysklad recountRetailMarkups', $recountRetailMarkups->toArray());
 
             if ($recountRetailMarkups->isNotEmpty()) {
 
                 $product = $event->getMeta();
                 $product->fetch($this->webhook->moysklad->api_key);
 
-                $recountRetailMarkups->each(function (MoyskladRecountRetailMarkup $recountRetailMarkup) use ($product) {
+                $recountRetailMarkups->each(function (MoyskladRecountRetailMarkup $recountRetailMarkup) use ($product, $event) {
 
-                    $retail_markup_percent = MoyskladService::getValueFromAttributesAndProduct(
+                    $retail_markup_percent = (int)MoyskladService::getValueFromAttributesAndProduct(
                         $recountRetailMarkup->link_type,
                         $recountRetailMarkup->link,
                         $product,
                     );
 
-                    if (is_int($retail_markup_percent)) {
+                    Log::info('value attribute percent', [
+                        'value' => $retail_markup_percent
+                    ]);
 
-                        $salePrice = $product->getSalePrices()->firstWhere(fn(SalePrice $salePrice) => $salePrice->getPriceType()->id === $recountRetailMarkup->price_type_uuid);
+                    Log::info('sale prices', [
+                        'prices type ids' => $product->getSalePrices()->map(fn (SalePrice $salePrice) => $salePrice->getPriceType()->id),
+                        'price type uuid' => $recountRetailMarkup->price_type_uuid
+                    ]);
 
-                        if ($salePrice) {
-                            $salePrice->setValue($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100));
-                            $product->update($this->webhook->moysklad->api_key, ['salePrices' => [$salePrice]]);
+                    /** @var SalePrice $salePrice */
+                    $salePrice = $product->getSalePrices()->firstWhere(fn(SalePrice $salePrice) => $salePrice->getPriceType()->id === $recountRetailMarkup->price_type_uuid);
+
+                    Log::info('sale price', [
+                        'sale price id' => $salePrice->getPriceType()->id
+                    ]);
+
+                    if ($salePrice) {
+                        Log::info('buyPrice', [
+                            'value' => $product->getBuyPrice()->getValue(),
+                            'retail_markup_percent' => $retail_markup_percent,
+                            'result' => ceil($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100 + 1) / 10) * 10
+                        ]);
+                        $salePrice->setValue(ceil($product->getBuyPrice()->getValue() * ($retail_markup_percent / 100 + 1) / 10) * 10);
+                        Log::info('salePrice value price', [
+                            'value' => $salePrice->getValue()
+                        ]);
+                        $product->getMinPrice()->setValue(ceil($product->getBuyPrice()->getValue() * 1.1 / 10) * 10);
+                        $status = $product->update($this->webhook->moysklad->api_key, ['salePrices' => [$salePrice], 'minPrice' => []]);
+                        if ($status) {
+                            $this->report->events()->create([
+                                'status' => true,
+                                'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
+                                'message' => 'Для товара перерасчитана цена',
+                                'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
+                            ]);
+                        } else {
+                            $this->report->events()->create([
+                                'status' => false,
+                                'event' => json_encode($event->toArray(), JSON_UNESCAPED_UNICODE),
+                                'message' => 'Для товара не перерасчитана цена',
+                                'exception' => json_encode([], JSON_UNESCAPED_UNICODE),
+                            ]);
                         }
-
                     }
+
                 });
 
             }

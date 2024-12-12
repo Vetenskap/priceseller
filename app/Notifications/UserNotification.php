@@ -17,7 +17,7 @@ class UserNotification extends Notification implements ShouldQueue
      */
     public function __construct(public string $title, public string $message)
     {
-        //
+        $this->queue = 'notifications';
     }
 
     /**

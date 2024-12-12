@@ -3,6 +3,7 @@
 namespace Modules\Moysklad\HttpClient\Resources\Entities\Product;
 
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Log;
 use Modules\Moysklad\HttpClient\Resources\Entities\Counterparty;
 use Modules\Moysklad\HttpClient\Resources\Entities\Employee;
 use Modules\Moysklad\HttpClient\Resources\Entities\Entity;
@@ -262,6 +263,9 @@ class Product extends Entity
 
     public function update(string $api_key, array $fields = []): bool
     {
+        Log::info('Moysklad item metas', [
+            'metas' => $this->getMetasToUpdate($fields)
+        ]);
         return $this->put($api_key, $this->getMetasToUpdate($fields));
     }
 
@@ -271,28 +275,33 @@ class Product extends Entity
 
         if (isset($fields['buyPrice'])) {
             $data = $this->buyPrice->getFieldProduct();
-        } else if (in_array('attributes', $fields)) {
+        }
+        if (in_array('attributes', $fields)) {
             if (count($fields['attributes']) > 0) {
                 /** @var Attribute $attribute */
                 foreach ($fields['attributes'] as $attribute) {
-                    $data['attributes'] = $attribute->getFieldProduct();
+                    $data['attributes'][] = $attribute->getFieldProduct();
                 }
             } else {
-                $data['attributes'] = $this->attributes->map(function (Attribute $attribute) {
+                $data['attributes'][] = $this->attributes->map(function (Attribute $attribute) {
                     return $attribute->getFieldProduct();
                 });
             }
-        } else if (isset($fields['salePrices'])) {
+        }
+        if (isset($fields['salePrices'])) {
             if (count($fields['salePrices']) > 0) {
                 /** @var SalePrice $salePrice */
                 foreach ($fields['salePrices'] as $salePrice) {
-                    $data['salePrices'] = $salePrice->getFieldProduct();
+                    $data['salePrices'][] = $salePrice->getFieldProduct();
                 }
             } else {
-                $data['salePrices'] = $this->salePrices->map(function (SalePrice $salePrice) {
+                $data['salePrices'][] = $this->salePrices->map(function (SalePrice $salePrice) {
                     return $salePrice->getFieldProduct();
                 });
             }
+        }
+        if (isset($fields['minPrice'])) {
+            $data['minPrice'] = $this->minPrice->getFieldProduct();
         }
 
         return $data;
