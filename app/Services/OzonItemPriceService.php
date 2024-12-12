@@ -9,6 +9,7 @@ use App\Jobs\Market\NullNotUpdatedStocksBatch;
 use App\Jobs\Market\UpdateStockBatch;
 use App\Models\Bundle;
 use App\Models\Item;
+use App\Models\ItemSupplierWarehouseStock;
 use App\Models\ItemWarehouseStock;
 use App\Models\OzonItem;
 use App\Models\OzonMarket;
@@ -31,6 +32,8 @@ class OzonItemPriceService
 {
     protected User $user;
     public ReportContract $reportContract;
+    public bool $enabledOrderModule;
+    public bool $enabledMoyskladModule;
 
     public function __construct(public ?Supplier $supplier = null, public OzonMarket $market, public array $supplierWarehousesIds, public ?Report $report = null)
     {
@@ -41,6 +44,8 @@ class OzonItemPriceService
             'warehouses.suppliers.warehouses',
             'warehouses.userWarehouses.warehouse.stocks'
         ]);
+        $this->enabledMoyskladModule = ModuleService::moduleIsEnabled('Order', $this->user);
+        $this->enabledOrderModule = ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders;
     }
 
     public function updatePrice(): void
@@ -179,21 +184,39 @@ class OzonItemPriceService
             ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
                 $query->where('supplier_id', $this->supplier->id);
             })
-            ->with(['itemable.warehousesStocks'])
-            ->limit(5)
-            ->get()
+            ->with(['itemable.warehousesStocks', 'itemable.supplierWarehouseStocks', 'itemable.moyskladOrders'])
+            ->lazy()
             ->each(function (OzonItem $item) {
-                $item = $this->recountStockOzonItem($item);
-                $item->save();
+                $this->recountStockOzonItem($item);
             });
 
-//        $this->nullNotUpdatedStocks();
+        $this->market
+            ->items()
+            ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
+                $query->whereHas('items', function (Builder $query) {
+                    $query->where('supplier_id', $this->supplier->id);
+                });
+            })
+            ->with(['itemable.items.warehousesStocks', 'itemable.items.supplierWarehouseStocks', 'itemable.items.moyskladOrders'])
+            ->lazy()
+            ->each(function (OzonItem $item) {
+                $this->recountStockOzonItem($item);
+            });
+
+        $this->nullNotUpdatedStocks();
     }
 
-    public function recountStockOzonItem(OzonItem $ozonItem): OzonItem
+    public function recountStockOzonItem(OzonItem $ozonItem): void
     {
-        $time = now();
+        if ($ozonItem->ozonitemable_type === Item::class) {
+            $this->recountStockItem($ozonItem);
+        } else {
+            $this->recountStockBundle($ozonItem);
+        }
+    }
 
+    private function recountStockItem(OzonItem $ozonItem): void
+    {
         $this->market->warehouses->each(function (OzonWarehouse $warehouse) use ($ozonItem) {
 
             /** @var OzonWarehouseSupplier $ozonWarehouseSupplier */
@@ -202,106 +225,118 @@ class OzonItemPriceService
 
             if (!$ozonWarehouseSupplier) return;
 
-            $supplierWarehousesIds = $ozonWarehouseSupplier->warehouses
-                ->filter(fn(OzonWarehouseSupplierWarehouse $warehouse) => $warehouse->supplier_warehouse_id, $this->supplierWarehousesIds)
-                ->pluck('supplier_warehouse_id');
+            if ($ozonItem->itemable->unload_ozon) {
 
-            $new_count = 0;
+                $supplierWarehousesIds = $ozonWarehouseSupplier->warehouses
+                    ->filter(fn(OzonWarehouseSupplierWarehouse $warehouse) => $warehouse->supplier_warehouse_id, $this->supplierWarehousesIds)
+                    ->pluck('supplier_warehouse_id')
+                    ->toArray();
 
-            $unload_ozon = !$ozonItem->itemable->unload_ozon;
+                $myWarehousesStocks = $ozonItem->itemable
+                    ->warehousesStocks
+                    ->filter(fn (ItemWarehouseStock $stock) => in_array($stock->warehouse_id, $warehouse->userWarehouses->pluck('warehouse_id')->toArray()))
+                    ->sum('stock');
 
-            $myWarehousesStocks = $ozonItem->itemable
-                ->warehousesStocks
-                ->filter(fn (ItemWarehouseStock $stock) => in_array($stock->warehouse_id, $warehouse->userWarehouses->pluck('warehouse_id')->toArray()))
-                ->sum('stock');
+                $newCount = $ozonItem->itemable
+                    ->supplierWarehouseStocks
+                    ->filter(fn (ItemSupplierWarehouseStock $stock) => in_array($stock->supplier_warehouse_id, $supplierWarehousesIds))
+                    ->sum('stock');
+                $multiplicity = $ozonItem->itemable->multiplicity;
 
-            $new_count = 224;
-            $multiplicity = 1;
+                $newCount = $newCount - $this->market->minus_stock;
+                $newCount = $newCount < $this->market->min ? 0 : $newCount;
+                $newCount = ($newCount >= $this->market->min && $newCount <= $this->market->max && $multiplicity === 1) ? 1 : $newCount;
+                $newCount = ($newCount + $myWarehousesStocks) / $multiplicity;
 
-            $new_count = $new_count - $this->market->minus_stock;
-            $new_count = $new_count < $this->market->min ? 0 : $new_count;
-            $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $multiplicity === 1) ? 1 : $new_count;
-            $new_count = ($new_count + $myWarehousesStocks) / $multiplicity;
+                if ($this->market->enabled_orders) {
 
-            $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
-            $new_count = (int)max($new_count, 0);
+                    if ($this->enabledOrderModule) {
+                        $newCount = $newCount - ($ozonItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
+                    }
 
-//            $warehouse->stocks()->updateOrCreate([
-//                'ozon_item_id' => $ozonItem->id
-//            ], [
-//                'ozon_item_id' => $ozonItem->id,
-//                'stock' => $new_count
-//            ]);
+                    if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
+                        if ($this->enabledMoyskladModule) {
+                            $newCount = $newCount - (($ozonItem->itemable->moyskladOrders->firstWhere('new', true) ? MoyskladItemOrderService::getOrders($ozonItem->itemable)->sum('orders') : 0) * $ozonItem->itemable->multiplicity);
+                        }
+                    }
+
+                }
+
+                $newCount = $newCount > $this->market->max_count ? $this->market->max_count : $newCount;
+                $newCount = (int)max($newCount, 0);
+
+            } else {
+                $newCount = 0;
+            }
+
+            $warehouse->stocks()->updateOrCreate(
+                ['ozon_item_id' => $ozonItem->id],
+                ['stock' => $newCount]
+            );
         });
+    }
 
-//        $this->market->warehouses->each(function (OzonWarehouse $warehouse) use ($ozonItem) {
-//
+    private function recountStockBundle(OzonItem $ozonItem): void
+    {
+        $this->market->warehouses->each(function (OzonWarehouse $warehouse) use ($ozonItem) {
 
-//
-//
-//
+            /** @var OzonWarehouseSupplier $ozonWarehouseSupplier */
+            $ozonWarehouseSupplier = $warehouse->suppliers
+                ->firstWhere('supplier_id', $this->supplier->id);
 
-//
-//            if (!$unload_ozon) {
-//
-//                $itemIds = $ozonItem->ozonitemable_type === 'App\Models\Item' ? [$ozonItem->ozonitemable_id] : $ozonItem->itemable->items->pluck('id')->toArray();
-//
+            if (!$ozonWarehouseSupplier) return;
 
-//
-//                if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
-//                    $new_count = $ozonItem->itemable->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock');
-//                    $multiplicity = $ozonItem->itemable->multiplicity;
-//                } else {
-//                    $new_count = $ozonItem->itemable->items->map(function (Item $item) use ($supplierWarehousesIds) {
-//
-//                        $count = $item->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock') / $item->pivot->multiplicity;
-//
-//                        if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-//                            $count = $count - (($item->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($item)->sum('orders') : 0));
-//                        }
-//
-//                        return $count;
-//
-//                    })->min();
-//                    $multiplicity = 1;
-//                }
-//
-//                $new_count = $new_count - $this->market->minus_stock;
-//                $new_count = $new_count < $this->market->min ? 0 : $new_count;
-//                $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $multiplicity === 1) ? 1 : $new_count;
-//                $new_count = ($new_count + $myWarehousesStocks) / $multiplicity;
-//
-//                if ($this->market->enabled_orders) {
-//
-//                    if (ModuleService::moduleIsEnabled('Order', $this->user)) {
-//                        $new_count = $new_count - ($ozonItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
-//                    }
-//
-//                    if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
-//                        if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-//                            $new_count = $new_count - (($ozonItem->itemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($ozonItem->itemable)->sum('orders') : 0) * $ozonItem->itemable->multiplicity);
-//                        }
-//                    }
-//
-//                }
-//
-//                $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
-//                $new_count = (int)max($new_count, 0);
-//
-//            }
-//
-//            $warehouse->stocks()->updateOrCreate([
-//                'ozon_item_id' => $ozonItem->id
-//            ], [
-//                'ozon_item_id' => $ozonItem->id,
-//                'stock' => $new_count
-//            ]);
-//
-//        });
+            if (!boolval($ozonItem->itemable->items->firstWhere('unload_wb', false))) {
 
-        dump(now()->diff($time)->toDateInterval()->f);
+                $supplierWarehousesIds = $ozonWarehouseSupplier->warehouses
+                    ->filter(fn(OzonWarehouseSupplierWarehouse $warehouse) => $warehouse->supplier_warehouse_id, $this->supplierWarehousesIds)
+                    ->pluck('supplier_warehouse_id')
+                    ->toArray();
 
-        return $ozonItem;
+                $myWarehousesStocks = $ozonItem->itemable
+                    ->items
+                    ->sum(function (Item $item) use ($warehouse) {
+                        return $item
+                            ->warehousesStocks
+                            ->filter(fn (ItemWarehouseStock $stock) => in_array($stock->warehouse_id, $warehouse->userWarehouses->pluck('warehouse_id')->toArray()))
+                            ->sum(fn (ItemWarehouseStock $stock) => $stock->stock / $item->pivot->multiplicity);
+                    });
+
+                $newCount = $ozonItem->itemable
+                    ->items
+                    ->map(function (Item $item) use ($supplierWarehousesIds) {
+                        $count = $item
+                            ->supplierWarehouseStocks
+                            ->filter(fn (ItemSupplierWarehouseStock $stock) => in_array($stock->supplier_warehouse_id, $supplierWarehousesIds))
+                            ->sum(fn (ItemSupplierWarehouseStock $stock) => $stock->stock / $item->pivot->multiplicity);
+
+                        if ($this->enabledMoyskladModule) {
+                            $count = $count - (($item->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($item)->sum('orders') : 0));
+                        }
+
+                        return $count;
+                    })
+                    ->min();
+
+                $multiplicity = 1;
+
+                $newCount = $newCount - $this->market->minus_stock;
+                $newCount = $newCount < $this->market->min ? 0 : $newCount;
+                $newCount = ($newCount >= $this->market->min && $newCount <= $this->market->max && $multiplicity === 1) ? 1 : $newCount;
+                $newCount = ($newCount + $myWarehousesStocks) / $multiplicity;
+
+                $newCount = $newCount > $this->market->max_count ? $this->market->max_count : $newCount;
+                $newCount = (int)max($newCount, 0);
+
+            } else {
+                $newCount = 0;
+            }
+
+            $warehouse->stocks()->updateOrCreate(
+                ['ozon_item_id' => $ozonItem->id],
+                ['stock' => $newCount]
+            );
+        });
     }
 
     public function nullNotUpdatedStocks(): void

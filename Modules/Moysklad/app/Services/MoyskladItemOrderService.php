@@ -10,7 +10,12 @@ class MoyskladItemOrderService
 {
     public static function getOrders(Item $item): Collection
     {
-        $orders = $item->moyskladOrders()->where('new', true)->get();
+        if ($item->loadExists('moyskladOrders')) {
+            $orders = $item->moyskladOrders->filter(fn (MoyskladItemOrder $order) => $order->new);
+        } else {
+            $orders = $item->moyskladOrders()->where('new', true)->get();
+        }
+
 
         return $orders->filter(fn (MoyskladItemOrder $order) => static::checkOrder($order));
 

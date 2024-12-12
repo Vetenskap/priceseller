@@ -6,7 +6,10 @@ use App\Helpers\Helpers;
 use App\HttpClient\WbClient\WbClient;
 use App\Jobs\Market\NullNotUpdatedStocksBatch;
 use App\Jobs\Market\UpdateStockBatch;
+use App\Models\Bundle;
 use App\Models\Item;
+use App\Models\ItemSupplierWarehouseStock;
+use App\Models\ItemWarehouseStock;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbItem;
@@ -27,9 +30,19 @@ class WbItemPriceService
 {
     protected User $user;
 
+    public bool $enabledOrderModule;
+    public bool $enabledMoyskladModule;
+
     public function __construct(public ?Supplier $supplier = null, public WbMarket $market, public array $supplierWarehousesIds = [])
     {
         $this->user = $this->market->user;
+        $this->market = $this->market->load([
+            'warehouses',
+            'warehouses.suppliers.warehouses',
+            'warehouses.userWarehouses.warehouse.stocks'
+        ]);
+        $this->enabledMoyskladModule = ModuleService::moduleIsEnabled('Order', $this->user);
+        $this->enabledOrderModule = ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders;
     }
 
     public function updatePrice(): void
@@ -157,118 +170,164 @@ class WbItemPriceService
      */
     public function updateStock(): void
     {
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт остатков");
+        $this->market
+            ->items()
+            ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
+                $query->where('supplier_id', $this->supplier->id);
+            })
+            ->with(['itemable.warehousesStocks', 'itemable.supplierWarehouseStocks', 'itemable.moyskladOrders'])
+            ->lazy()
+            ->each(function (WbItem $item) {
+                $this->recountStockWbItem($item);
+            });
 
-        Helpers::toBatch(function (Batch $batch) {
-            $count = $this->market->items()->count();
-            $offset = 0;
-            while ($count > $offset) {
-                $batch->add(new UpdateStockBatch($this, $offset));
-                $offset += 10000;
-            }
-        }, 'market-unload');
+        $this->market
+            ->items()
+            ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
+                $query->whereHas('items', function (Builder $query) {
+                    $query->where('supplier_id', $this->supplier->id);
+                });
+            })
+            ->with(['itemable.items.warehousesStocks', 'itemable.items.supplierWarehouseStocks', 'itemable.items.moyskladOrders'])
+            ->lazy()
+            ->each(function (WbItem $item) {
+                $this->recountStockWbItem($item);
+            });
 
         $this->nullNotUpdatedStocks();
     }
 
-    public function recountStockWbItem(WbItem $wbItem): WbItem
+    public function recountStockWbItem(WbItem $wbItem): void
+    {
+        if ($wbItem->wbitemable_type === Item::class) {
+            $this->recountStockItem($wbItem);
+        } else {
+            $this->recountStockBundle($wbItem);
+        }
+    }
+
+    public function recountStockItem(WbItem $wbItem)
     {
         $this->market->warehouses->each(function (WbWarehouse $warehouse) use ($wbItem) {
 
             /** @var WbWarehouseSupplier $wbWarehouseSupplier */
-            $wbWarehouseSupplier = $warehouse->suppliers()
-                ->where('supplier_id', $this->supplier->id)
-                ->first();
+            $wbWarehouseSupplier = $warehouse->suppliers
+                ->firstWhere('supplier_id', $this->supplier->id);
 
             if (!$wbWarehouseSupplier) return;
 
-            $supplierWarehousesIds = $wbWarehouseSupplier->warehouses()
-                ->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds)
-                ->get()
-                ->map(function (WbWarehouseSupplierWarehouse $warehouse) {
-                    return $warehouse->supplier_warehouse_id;
-                });
+            if ($wbItem->itemable->unload_ozon) {
 
-            $new_count = 0;
+                $supplierWarehousesIds = $wbWarehouseSupplier->warehouses
+                    ->filter(fn(WbWarehouseSupplierWarehouse $warehouse) => $warehouse->supplier_warehouse_id, $this->supplierWarehousesIds)
+                    ->pluck('supplier_warehouse_id')
+                    ->toArray();
 
-            if ($wbItem->wbitemable_type === 'App\Models\Item') {
-                $unload_wb = !$wbItem->itemable->unload_wb;
-            } else {
-                $unload_wb = boolval($wbItem->itemable->items->first(fn(Item $item) => !$item->unload_wb));
-            }
+                $myWarehousesStocks = $wbItem->itemable
+                    ->warehousesStocks
+                    ->filter(fn (ItemWarehouseStock $stock) => in_array($stock->warehouse_id, $warehouse->userWarehouses->pluck('warehouse_id')->toArray()))
+                    ->sum('stock');
 
-            if (!$unload_wb) {
+                $newCount = $wbItem->itemable
+                    ->supplierWarehouseStocks
+                    ->filter(fn (ItemSupplierWarehouseStock $stock) => in_array($stock->supplier_warehouse_id, $supplierWarehousesIds))
+                    ->sum('stock');
+                $multiplicity = $wbItem->itemable->multiplicity;
 
-                if ($wbItem->wbitemable_type === 'App\Models\Item') {
-                    $myWarehousesStocks = $warehouse->userWarehouses->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($wbItem) {
-                        $stock = $userWarehouse->warehouse->stocks()->where('item_id', $wbItem->wbitemable_id)->first();
-                        return $stock ? $stock->stock : 0;
-                    })->sum();
-                } else {
+                $newCount = $newCount - $this->market->minus_stock;
+                $newCount = $newCount < $this->market->min ? 0 : $newCount;
+                $newCount = ($newCount >= $this->market->min && $newCount <= $this->market->max && $multiplicity === 1) ? 1 : $newCount;
+                $newCount = ($newCount + $myWarehousesStocks) / $multiplicity;
 
-                    $myWarehousesStocks = $wbItem->itemable->items->map(function (Item $item) use ($warehouse) {
-                        return $warehouse->userWarehouses()->whereHas('warehouse', function (Builder $query) use ($item) {
-                            $query->whereHas('stocks', function (Builder $query) use ($item) {
-                                $query->where('item_id', $item->id);
-                            });
-                        })->get()->map(function (WbWarehouseUserWarehouse $userWarehouse) use ($item) {
-                            $stock = $userWarehouse->warehouse->stocks()->where('item_id', $item->id)->first();
-                            return $stock ? $stock->stock / $item->pivot->multiplicity : 0;
-                        })->sum();
-                    })->sum();
+                if ($this->market->enabled_orders) {
+
+                    if ($this->enabledOrderModule) {
+                        $newCount = $newCount - ($wbItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
+                    }
+
+                    if ($wbItem->ozonitemable_type === 'App\Models\Item') {
+                        if ($this->enabledMoyskladModule) {
+                            $newCount = $newCount - (($wbItem->itemable->moyskladOrders->firstWhere('new', true) ? MoyskladItemOrderService::getOrders($wbItem->itemable)->sum('orders') : 0) * $wbItem->itemable->multiplicity);
+                        }
+                    }
+
                 }
 
-                if ($wbItem->wbitemable_type === 'App\Models\Item') {
-                    $new_count = $wbItem->itemable->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock');
-                    $multiplicity = $wbItem->itemable->multiplicity;
-                } else {
-                    $new_count = $wbItem->itemable->items->map(function (Item $item) use ($supplierWarehousesIds) {
+                $newCount = $newCount > $this->market->max_count ? $this->market->max_count : $newCount;
+                $newCount = (int)max($newCount, 0);
 
-                        $count = $item->supplierWarehouseStocks()->whereIn('supplier_warehouse_id', $supplierWarehousesIds)->sum('stock') / $item->pivot->multiplicity;
+            } else {
+                $newCount = 0;
+            }
 
-                        if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
+            $warehouse->stocks()->updateOrCreate(
+                ['wb_item_id' => $wbItem->id],
+                ['stock' => $newCount]
+            );
+        });
+    }
+
+    public function recountStockBundle(WbItem $wbItem)
+    {
+        $this->market->warehouses->each(function (WbWarehouse $warehouse) use ($wbItem) {
+
+            /** @var WbWarehouseSupplier $wbWarehouseSupplier */
+            $wbWarehouseSupplier = $warehouse->suppliers
+                ->firstWhere('supplier_id', $this->supplier->id);
+
+            if (!$wbWarehouseSupplier) return;
+
+            if (!boolval($wbItem->itemable->items->firstWhere('unload_wb', false))) {
+
+                $supplierWarehousesIds = $wbWarehouseSupplier->warehouses
+                    ->filter(fn(WbWarehouseSupplierWarehouse $warehouse) => $warehouse->supplier_warehouse_id, $this->supplierWarehousesIds)
+                    ->pluck('supplier_warehouse_id')
+                    ->toArray();
+
+                $myWarehousesStocks = $wbItem->itemable
+                    ->items
+                    ->sum(function (Item $item) use ($warehouse) {
+                        return $item
+                            ->warehousesStocks
+                            ->filter(fn (ItemWarehouseStock $stock) => in_array($stock->warehouse_id, $warehouse->userWarehouses->pluck('warehouse_id')->toArray()))
+                            ->sum(fn (ItemWarehouseStock $stock) => $stock->stock / $item->pivot->multiplicity);
+                    });
+
+                $newCount = $wbItem->itemable
+                    ->items
+                    ->map(function (Item $item) use ($supplierWarehousesIds) {
+                        $count = $item
+                            ->supplierWarehouseStocks
+                            ->filter(fn (ItemSupplierWarehouseStock $stock) => in_array($stock->supplier_warehouse_id, $supplierWarehousesIds))
+                            ->sum(fn (ItemSupplierWarehouseStock $stock) => $stock->stock / $item->pivot->multiplicity);
+
+                        if ($this->enabledMoyskladModule) {
                             $count = $count - (($item->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($item)->sum('orders') : 0));
                         }
 
                         return $count;
+                    })
+                    ->min();
 
-                    })->min();
-                    $multiplicity = 1;
-                }
+                $multiplicity = 1;
 
-                $new_count = $new_count - $this->market->minus_stock;
-                $new_count = $new_count < $this->market->min ? 0 : $new_count;
-                $new_count = ($new_count >= $this->market->min && $new_count <= $this->market->max && $multiplicity === 1) ? 1 : $new_count;
-                $new_count = ($new_count + $myWarehousesStocks) / $multiplicity;
+                $newCount = $newCount - $this->market->minus_stock;
+                $newCount = $newCount < $this->market->min ? 0 : $newCount;
+                $newCount = ($newCount >= $this->market->min && $newCount <= $this->market->max && $multiplicity === 1) ? 1 : $newCount;
+                $newCount = ($newCount + $myWarehousesStocks) / $multiplicity;
 
-                if ($this->market->enabled_orders) {
+                $newCount = $newCount > $this->market->max_count ? $this->market->max_count : $newCount;
+                $newCount = (int)max($newCount, 0);
 
-                    if (ModuleService::moduleIsEnabled('Order', $this->user)) {
-                        $new_count = $new_count - ($wbItem->orders()->where('state', 'new')->sum('count') * $multiplicity);
-                    }
-
-                    if ($wbItem->wbitemable_type === 'App\Models\Item') {
-                        if (ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders) {
-                            $new_count = $new_count - (($wbItem->itemable->moyskladOrders()->where('new', true)->exists() ? MoyskladItemOrderService::getOrders($wbItem->itemable)->sum('orders') : 0) * $wbItem->itemable->multiplicity);
-                        }
-                    }
-
-                }
-
-                $new_count = $new_count > $this->market->max_count ? $this->market->max_count : $new_count;
-                $new_count = (int)max($new_count, 0);
-
+            } else {
+                $newCount = 0;
             }
 
-            $warehouse->stocks()->updateOrCreate([
-                'wb_item_id' => $wbItem->id
-            ], [
-                'wb_item_id' => $wbItem->id,
-                'stock' => $new_count
-            ]);
+            $warehouse->stocks()->updateOrCreate(
+                ['wb_item_id' => $wbItem->id],
+                ['stock' => $newCount]
+            );
         });
-
-        return $wbItem;
     }
 
     public function nullNotUpdatedStocks(): void
