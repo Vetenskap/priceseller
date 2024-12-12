@@ -39,7 +39,7 @@ class BusinessLogicService
                         UnloadOnTime::dispatch($supplier);
                     });
                 });
-            Cache::set('supplier-unload_without_price_offset', $offset + 3);
+            Cache::set('supplier-unload_without_price_offset', $offset + 2);
         }
     }
 }
