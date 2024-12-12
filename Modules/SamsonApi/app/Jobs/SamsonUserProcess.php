@@ -51,7 +51,7 @@ class SamsonUserProcess implements ShouldQueue
                 ->where('open', true)
                 ->where('close', false)
                 ->get()
-                ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $supplier)->first())
+                ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $supplier->id)->first())
                 ->each(function (OzonMarket $market) use ($batch, $supplier) {
                     $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $supplier));
                 });
@@ -60,7 +60,7 @@ class SamsonUserProcess implements ShouldQueue
                 ->where('open', true)
                 ->where('close', false)
                 ->get()
-                ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $supplier)->first())
+                ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $supplier->id)->first())
                 ->each(function (WbMarket $market) use ($batch, $supplier) {
                     $batch->add(new \App\Jobs\Wb\PriceUnload($market, $supplier));
                 });
