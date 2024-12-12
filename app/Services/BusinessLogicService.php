@@ -24,7 +24,7 @@ class BusinessLogicService
 
         $time = now()->format('i');
 
-        if ($time === "30") {
+        if ($time === "00") {
             $offset = Cache::get('supplier-unload_without_price_offset', 0);
             if ($offset > Supplier::where('open', true)->where('unload_without_price', true)->count()) {
                 $offset = 0;
