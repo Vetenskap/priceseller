@@ -49,7 +49,7 @@ class TestEmailUser extends Command
         foreach ($client->getFolders()->paginate()->getIterator() as $folder) {
 
             /** @var Message $message */
-            foreach ($folder->messages()->unseen()->fetchOrderDesc()->paginate()->getIterator() as $message) {
+            foreach ($folder->messages()->unseen()->get() as $message) {
 
                 $this->info('Письмо:');
 
