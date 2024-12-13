@@ -355,29 +355,47 @@ class OzonItemPriceService
 
     public function nullNotUpdatedStocks(): void
     {
-        Helpers::toBatch(function (Batch $batch) {
-            $count = OzonWarehouseStock::query()
-                ->with('ozonItem')
-                ->whereHas('ozonItem', function (Builder $query) {
-                    $query->where('ozon_market_id', $this->market->id);
-                })
-                ->whereHas('warehouse', function (Builder $query) {
-                    $query->whereHas('suppliers', function (Builder $query) {
-                        $query
-                            ->where('supplier_id', $this->supplier->id)
-                            ->when($this->supplierWarehousesIds, function (Builder $query) {
-                                $query->whereHas('warehouses', function (Builder $query) {
-                                    $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
-                                });
+        OzonWarehouseStock::query()
+            ->whereHas('ozonItem', function (Builder $query) {
+                $query
+                    ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
+                        $query->where('unload_wb', false);
+                    })
+                    ->where('ozon_market_id', $this->market->id);
+            })
+            ->whereHas('warehouse', function (Builder $query) {
+                $query->whereHas('suppliers', function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when($this->supplierWarehousesIds, function (Builder $query) {
+                            $query->whereHas('warehouses', function (Builder $query) {
+                                $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
                             });
-                    });
-                })->count();
-            $offset = 0;
-            while ($count > $offset) {
-                $batch->add(new NullNotUpdatedStocksBatch($this, $offset));
-                $offset += 10000;
-            }
-        }, 'market-unload');
+                        });
+                });
+            })->update(['stock' => 0]);
+
+        OzonWarehouseStock::query()
+            ->whereHas('ozonItem', function (Builder $query) {
+                $query
+                    ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
+                        $query->whereHas('items', function (Builder $query) {
+                            $query->where('unload_wb', false);
+                        });
+                    })
+                    ->where('ozon_market_id', $this->market->id);
+            })
+            ->whereHas('warehouse', function (Builder $query) {
+                $query->whereHas('suppliers', function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when($this->supplierWarehousesIds, function (Builder $query) {
+                            $query->whereHas('warehouses', function (Builder $query) {
+                                $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+                            });
+                        });
+                });
+            })->update(['stock' => 0]);
 
     }
 

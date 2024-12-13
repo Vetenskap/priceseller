@@ -25,21 +25,14 @@ class BusinessLogicService
         $time = now()->format('i');
 
         if ($time === "00") {
-            $offset = Cache::get('supplier-unload_without_price_offset', 0);
-            if ($offset > Supplier::where('open', true)->where('unload_without_price', true)->count()) {
-                $offset = 0;
-            }
             Supplier::where('open', true)
                 ->where('unload_without_price', true)
-                ->offset($offset)
-                ->limit(2)
                 ->get()
                 ->each(function (Collection $suppliers) {
-                    $suppliers->filter(fn (Supplier $supplier) => $supplier->user->isSub() || $supplier->user->isAdmin())->each(function (Supplier $supplier) {
+                    $suppliers->filter(fn(Supplier $supplier) => $supplier->user->isSub() || $supplier->user->isAdmin())->each(function (Supplier $supplier) {
                         UnloadOnTime::dispatch($supplier);
                     });
                 });
-            Cache::set('supplier-unload_without_price_offset', $offset + 2);
         }
     }
 }
