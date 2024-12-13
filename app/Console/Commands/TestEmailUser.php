@@ -51,19 +51,26 @@ class TestEmailUser extends Command
             /** @var Message $message */
             foreach ($folder->messages()->unseen()->fetchOrderDesc()->paginate()->getIterator() as $message) {
 
+                $this->info('Письмо:');
+                $this->info($message->getFrom()->toDate()->toString());
                 $this->info($message->getFrom()->getName());
 
                 if ($message->hasAttachments()) {
+
+                    $this->info('Вложения:');
 
                     /** @var Attachment $file */
                     foreach ($message->getAttachments()->paginate()->getIterator() as $file) {
 
                         $name = $file->getName();
                         $this->info($name);
+                        return;
 
                     }
 
                 }
+
+                $this->info('Нет вложений');
             }
         }
     }
