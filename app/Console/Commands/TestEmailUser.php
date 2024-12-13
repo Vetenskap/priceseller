@@ -52,8 +52,18 @@ class TestEmailUser extends Command
             foreach ($folder->messages()->unseen()->fetchOrderDesc()->paginate()->getIterator() as $message) {
 
                 $this->info('Письмо:');
-                $this->info($message->getFrom()->toDate()->toString());
-                $this->info($message->getFrom()->getName());
+
+                try {
+                    $this->info($message->getFrom()->toDate()->toString());
+                } catch (\Throwable) {
+                    $this->info('Ошибка парсинга даты');
+                }
+
+                try {
+                    $this->info($message->getFrom()->getName());
+                } catch (\Throwable) {
+                    $this->info('Ошибка парсинга отправителя');
+                }
 
                 if ($message->hasAttachments()) {
 
