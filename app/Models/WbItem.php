@@ -82,6 +82,11 @@ class WbItem extends MainModel
             });
     }
 
+    public function logs()
+    {
+        return $this->morphMany(SupplierReportLogMarket::class, 'logable');
+    }
+
     public function orders()
     {
         return $this->morphMany(Order::class, 'orderable');

@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
 
 class SupplierReportLogMarket extends Model
 {
@@ -12,7 +13,13 @@ class SupplierReportLogMarket extends Model
     protected $fillable = [
         'status',
         'message',
-        'item_id',
+        'logable_id',
+        'logable_type',
         'task_log',
     ];
+
+    public function logable(): MorphTo
+    {
+        return $this->morphTo();
+    }
 }

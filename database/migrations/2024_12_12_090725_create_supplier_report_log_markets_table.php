@@ -15,7 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('status')->nullable();
             $table->longText('message');
-            $table->foreignUuid('item_id')->nullable()->constrained('items')->cascadeOnDelete();
+            $table->string('logable_id')->nullable();
+            $table->string('logable_type')->nullable();
             $table->foreignUuid('task_log')->constrained('task_logs')->cascadeOnDelete();
             $table->timestamps();
         });

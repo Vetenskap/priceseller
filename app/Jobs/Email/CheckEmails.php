@@ -3,6 +3,7 @@
 namespace App\Jobs\Email;
 
 use App\Components\EmailClient\EmailHandlerLaravelImap;
+use App\Contracts\EmailHandlerContract;
 use App\Contracts\ReportContract;
 use App\Enums\TaskTypes;
 use App\Jobs\Supplier\PriceUnload;
@@ -46,9 +47,9 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
         /** @var Email $email */
         foreach ($this->user->emails()->where('open', true)->get() as $email) {
 
-            $handler = new EmailHandlerLaravelImap($email->address, $email->password);
+            $handler = app(EmailHandlerContract::class);
             foreach ($email->suppliers()->where('open', true)->where('unload_without_price', false)->get() as $supplier) {
-                $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
+                $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename, $email->address, $email->password);
                 PriceUnload::dispatchIf((boolean)$pricePath, EmailSupplier::findOrFail($supplier->pivot->id), $pricePath);
             }
         }

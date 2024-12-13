@@ -2,10 +2,9 @@
 
 namespace App\Components\EmailClient;
 
+use App\Contracts\EmailHandlerContract;
 use App\Services\SupplierService;
-use Illuminate\Contracts\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Context;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 use Webklex\IMAP\Facades\Client;
@@ -15,15 +14,11 @@ use Webklex\PHPIMAP\Exceptions\FolderFetchingException;
 use Webklex\PHPIMAP\Exceptions\GetMessagesFailedException;
 use Webklex\PHPIMAP\Exceptions\RuntimeException;
 use Webklex\PHPIMAP\Folder;
-use Webklex\PHPIMAP\Attribute;
 use Webklex\PHPIMAP\Message;
-use Webklex\PHPIMAP\Support\MessageCollection;
 use ZipArchive;
 
-class EmailHandlerLaravelImap
+class EmailHandlerLaravelImap implements EmailHandlerContract
 {
-    public $connection;
-    public Filesystem $storage;
     const ZIP_TYPES = ['application/x-zip-compressed', 'application/zip'];
     const TABLE_TYPES = [
         'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
@@ -33,36 +28,13 @@ class EmailHandlerLaravelImap
     ];
 
     /**
-     * @throws ConnectionFailedException
-     */
-    public function __construct(string $address, string $password, ?Filesystem $storage = null)
-    {
-        $this->storage = $storage ?? Storage::disk('public');
-
-        $this->connection = Client::make([
-            'host' => 'imap.mail.ru',
-            'port' => 993,
-            'protocol' => 'imap',
-            'encryption' => 'ssl',
-            'validate_cert' => true,
-            'username' => $address,
-            'password' => $password,
-            'authentication' => null,
-            "timeout" => 30,
-        ]);
-
-        $this->connection->connect();
-
-    }
-
-    /**
      * @throws RuntimeException
      * @throws FolderFetchingException
      * @throws ConnectionFailedException
      */
-    public function getFoldersIterator(): \Iterator
+    public function getFoldersIterator(Client $client): \Iterator
     {
-        return $this->connection->getFolders()->paginate()->getIterator();
+        return $client->getFolders()->paginate()->getIterator();
     }
 
     /**
@@ -87,11 +59,22 @@ class EmailHandlerLaravelImap
      * @throws \Webklex\PHPIMAP\Exceptions\MessageFlagException
      * @throws \Webklex\PHPIMAP\Exceptions\RuntimeException
      */
-    public function getNewPrice(string $supplierEmail, string $supplierFilename): ?string
+    public function getNewPrice(string $supplierEmail, string $supplierFilename, string $address, string $password): ?string
     {
+        $client = Client::make([
+            'host' => 'imap.mail.ru',
+            'port' => 993,
+            'protocol' => 'imap',
+            'encryption' => 'ssl',
+            'validate_cert' => true,
+            'username' => $address,
+            'password' => $password,
+            'authentication' => null,
+            "timeout" => 30,
+        ])->connect();
 
         /** @var Folder $folder */
-        foreach ($this->getFoldersIterator() as $folder) {
+        foreach ($this->getFoldersIterator($client) as $folder) {
 
             // TODO if ($folder->name)
 
@@ -120,13 +103,13 @@ class EmailHandlerLaravelImap
 
                             $fullPath = SupplierService::PATH . uniqid() . '_';
 
-                            $this->storage->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext, $file->getContent());
+                            Storage::disk('public')->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext, $file->getContent());
 
                             if (in_array($file->getContentType(), self::ZIP_TYPES)) {
 
                                 $zip = new ZipArchive;
 
-                                $res = $zip->open($this->storage->path($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext));
+                                $res = $zip->open(Storage::disk('public')->path($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext));
 
                                 if ($res === TRUE) {
 
@@ -134,11 +117,11 @@ class EmailHandlerLaravelImap
                                     $zipExt = '.' . pathinfo($nameZip, PATHINFO_EXTENSION);
                                     $nameZip = str_replace($zipExt, '', $nameZip);
 
-                                    $this->storage->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($nameZip)) . $zipExt, $zip->getFromIndex(0));
+                                    Storage::disk('public')->put($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($nameZip)) . $zipExt, $zip->getFromIndex(0));
 
                                     $zip->close();
 
-                                    $this->storage->delete($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext);
+                                    Storage::disk('public')->delete($fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($name)) . $ext);
 
                                     $fullPath = $fullPath . preg_replace('/[^a-zA-Z]/', '_', Str::ascii($nameZip)) . $zipExt;
 

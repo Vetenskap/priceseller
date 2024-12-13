@@ -54,6 +54,13 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
         $service->updateStock();
         $service->unloadAllStocks();
 
+        $this->reportLogContract->finished($this->log);
+
+    }
+
+    public function failed(\Throwable $th): void
+    {
+        $this->reportLogContract->failed($this->log);
     }
 
     public function uniqueId(): string

@@ -5,8 +5,10 @@ namespace App\HttpClient\WbClient;
 use App\HttpClient\WbClient\Resources\Card\CardList;
 use App\HttpClient\WbClient\Resources\Order;
 use App\HttpClient\WbClient\Resources\Tariffs\Commission;
+use App\Models\ReportLog;
 use App\Models\Supplier;
 use App\Models\WbMarket;
+use App\Services\SupplierReportLogMarketService;
 use App\Services\SupplierReportService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
@@ -134,12 +136,13 @@ class WbClient
         return $this->request->get('https://suppliers-api.wildberries.ru/api/v3/warehouses')->throw()->collect();
     }
 
-    public function putStocks(Collection $data, int $warehouseId, Supplier $supplier, WbMarket $market): void
+    public function putStocks(Collection $data, int $warehouseId, WbMarket $market, ReportLog $log): void
     {
         $limits = 5;
 
         while (RateLimiter::attempts('wb_put_stocks' . $market->id) >= 300) {
-            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 60 сек.');
+            $marketLog = SupplierReportLogMarketService::new($log, 'Превышен лимит запрос, ожидаем 60 сек.');
+            SupplierReportLogMarketService::finished($marketLog);
             sleep(60);
         }
 
@@ -163,7 +166,9 @@ class WbClient
                 $response = $e->response;
 
                 if ($response->unauthorized()) {
-                    SupplierReportService::addLog($supplier, 'Неверный токен или область его действия не включает обновление остатков');
+                    report($e);
+                    $marketLog = SupplierReportLogMarketService::new($log, 'Ошибка при выгрузке 1000 остатков: ' . $e->getMessage());
+                    SupplierReportLogMarketService::failed($marketLog);
                     return;
                 }
 
@@ -171,25 +176,30 @@ class WbClient
                 if ($response->status() === 409) {
                     $errors = $response->collect();
 
-                    $errors->each(function (array $error) use (&$data, $e, $supplier) {
+                    $errors->each(function (array $error) use (&$data, $e, $log, $market)  {
                         $error = collect($error);
 
                         $badItems = collect($error->get('data'));
 
-                        $badItems->each(function (array $badItem) use (&$data, $supplier, $error) {
+                        $badItems->each(function (array $badItem) use (&$data, $error, $log, $market) {
                             $badItem = collect($badItem);
 
                             $data = $data->filter(fn (array $item) => $item['sku'] !== $badItem->get('sku'))->values();
 
-                            SupplierReportService::addLog($supplier, "sku: " . $badItem->get('sku') . " - " . $error->get('message'), 'warning');
+                            $wbItem = $market->items()->where('sku', $badItem->get('sku'))->first();
+
+                            $marketLog = SupplierReportLogMarketService::new($log, $error->get('message'), $wbItem);
+                            SupplierReportLogMarketService::failed($marketLog);
                         });
                     });
 
                     continue;
                 }
 
-                $data->each(function (array $item) use ($supplier, $response) {
-                    SupplierReportService::addLog($supplier, "sku: " . $item['sku'] . " - Статус: " . $response->status() . ", Тело: " . $response->body(), 'warning');
+                $data->each(function (array $item) use ($response, $market, $log) {
+                    $wbItem = $market->items()->where('sku', $item['sku'])->first();
+                    $marketLog = SupplierReportLogMarketService::new($log, $response->body(), $wbItem);
+                    SupplierReportLogMarketService::failed($marketLog);
                 });
 
                 return;
@@ -199,11 +209,12 @@ class WbClient
 
     }
 
-    public function putPrices(Collection $data, Supplier $supplier, WbMarket $market): void
+    public function putPrices(Collection $data, WbMarket $market, ReportLog $log): void
     {
 
         while (RateLimiter::attempts('wb_put_prices' . $market->id) >= 10) {
-            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 60 сек.');
+            $marketLog = SupplierReportLogMarketService::new($log, 'Превышен лимит запрос, ожидаем 60 сек.');
+            SupplierReportLogMarketService::finished($marketLog);
             sleep(60);
         }
 
@@ -221,21 +232,18 @@ class WbClient
             $response = $e->response;
 
             if ($response->unauthorized()) {
-                SupplierReportService::addLog($supplier, 'Неверный токен или область его действия не включает обновление цен');
+                report($e);
+                $marketLog = SupplierReportLogMarketService::new($log, 'Ошибка при выгрузке 1000 цен: ' . $e->getMessage());
+                SupplierReportLogMarketService::failed($marketLog);
                 return;
             }
 
             $body = $response->collect();
 
-            if (!$body) {
-                Log::alert('Обновленеи цен вб: не найдено тело ошибки', [
-                    'status' => $response->status(),
-                    'body' => $response->body()
-                ]);
-            }
-
-            $data->each(function (array $item) use ($supplier, $body) {
-                SupplierReportService::addLog($supplier, "nmId: " . $item['nmId'] . " - " . $body->get('errorText'), 'warning');
+            $data->each(function (array $item) use ($body, $log, $market) {
+                $wbItem = $market->items()->where('nm_id', $item['nmId'])->first();
+                $marketLog = SupplierReportLogMarketService::new($log, $body->get('errorText'), $wbItem);
+                SupplierReportLogMarketService::failed($marketLog);
             });
 
             return;

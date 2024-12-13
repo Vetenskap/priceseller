@@ -3,9 +3,11 @@
 namespace App\Jobs\Wb;
 
 use App\Contracts\ReportContract;
+use App\Contracts\ReportLogContract;
 use App\Enums\ReportStatus;
 use App\Models\EmailSupplier;
 use App\Models\Report;
+use App\Models\ReportLog;
 use App\Models\Supplier;
 use App\Models\WbMarket;
 use App\Services\WbItemPriceService;
@@ -22,7 +24,8 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels, Batchable;
 
     public int $uniqueFor = 7200;
-    public ReportContract $reportContract;
+    public ReportLog $log;
+    public ReportLogContract $reportLogContract;
 
     /**
      * Create a new job instance.
@@ -30,7 +33,8 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
     public function __construct(public WbMarket $market, public EmailSupplier|Supplier $supplier, public Report $report)
     {
         $this->queue = 'market-unload';
-        $this->reportContract = app(ReportContract::class);
+        $this->reportLogContract = app(ReportLogContract::class);
+        $this->log = $this->reportLogContract->new($this->report, "Выгрузка кабинета: {$this->market->name}");
     }
 
     /**
@@ -38,19 +42,25 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        $log = $this->reportContract->addLog($this->report, "Кабинет: {$this->market->name}", ReportStatus::pending);
-
+        $this->reportLogContract->running($this->log);
         $actualSupplier = $this->supplier instanceof EmailSupplier ? $this->supplier->supplier : $this->supplier;
         $warehouses = $this->supplier instanceof EmailSupplier ?
             $this->supplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray() :
             $this->supplier->warehouses->pluck('id')->values()->toArray();
 
-        $service = new WbItemPriceService($actualSupplier, $this->market, $warehouses);
+        $service = new WbItemPriceService($actualSupplier, $this->market, $warehouses, $this->log);
         $service->updatePrice();
         $service->unloadAllPrices();
         $service->updateStock();
         $service->unloadAllStocks();
 
+        $this->reportLogContract->finished($this->log);
+
+    }
+
+    public function failed(\Throwable $th): void
+    {
+        $this->reportLogContract->failed($this->log);
     }
 
     public function uniqueId(): string

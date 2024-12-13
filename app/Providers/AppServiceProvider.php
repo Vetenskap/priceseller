@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Components\EmailClient\EmailClient;
 use App\Components\EmailClient\EmailHandlerLaravelImap;
+use App\Contracts\EmailHandlerContract;
 use App\Contracts\NotificationContract;
 use App\Contracts\PriceProcessingServiceInterface;
 use App\Contracts\ReportContract;
@@ -50,6 +51,7 @@ class AppServiceProvider extends ServiceProvider
             return new TaskService($app->make(NotificationContract::class));
         });
         $this->app->bind(ReportLogContract::class, TaskLogService::class);
+        $this->app->bind(EmailHandlerContract::class, EmailHandlerLaravelImap::class);
     }
 
     /**

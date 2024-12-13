@@ -2,14 +2,13 @@
 
 namespace App\Services;
 
-use App\Helpers\Helpers;
+use App\Contracts\ReportLogContract;
 use App\HttpClient\WbClient\WbClient;
-use App\Jobs\Market\NullNotUpdatedStocksBatch;
-use App\Jobs\Market\UpdateStockBatch;
 use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\ItemSupplierWarehouseStock;
 use App\Models\ItemWarehouseStock;
+use App\Models\ReportLog;
 use App\Models\Supplier;
 use App\Models\User;
 use App\Models\WbItem;
@@ -18,8 +17,6 @@ use App\Models\WbWarehouse;
 use App\Models\WbWarehouseStock;
 use App\Models\WbWarehouseSupplier;
 use App\Models\WbWarehouseSupplierWarehouse;
-use App\Models\WbWarehouseUserWarehouse;
-use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
@@ -31,12 +28,11 @@ class WbItemPriceService
     protected User $user;
     public bool $enabledOrderModule;
     public bool $enabledMoyskladModule;
+    public ReportLogContract $reportLogContract;
 
-    public bool $enabledOrderModule;
-    public bool $enabledMoyskladModule;
-
-    public function __construct(public ?Supplier $supplier = null, public WbMarket $market, public array $supplierWarehousesIds = [])
+    public function __construct(public Supplier $supplier, public WbMarket $market, public array $supplierWarehousesIds, public ReportLog $log)
     {
+        $this->reportLogContract = \app(ReportLogContract::class);
         $this->user = $this->market->user;
         $this->market = $this->market->load([
             'warehouses',
@@ -49,46 +45,48 @@ class WbItemPriceService
 
     public function updatePrice(): void
     {
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт цен");
-        $this->setLastPrices();
+        $log = SupplierReportLogMarketService::new($this->log, 'Обновление цен');
+        SupplierReportLogMarketService::running($log);
 
-        $this->market
-            ->items()
-            ->with('itemable')
-            ->chunk(10000, function (Collection $items) {
-
-                $items->filter(function (WbItem $wbItem) {
-
-                    if ($wbItem->wbitemable_type === Item::class) {
-                        if ($wbItem->itemable->supplier_id === $this->supplier->id) {
-                            if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($wbItem->itemable->updated) {
-                                    return true;
-                                }
-                            } else {
-                                return true;
-                            }
-                        }
-                    } else {
-                        if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                            if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($wbItem->itemable->items->every(fn(Item $item) => $item->updated)) {
-                                    return true;
-                                }
-                            } else {
-                                return true;
-                            }
-                        }
-                    }
-
-                    return false;
-
-                })->each(function (WbItem $wbItem) {
-                    $wbItem = $this->recountPriceWbItem($wbItem);
-                    $wbItem->save();
+        try {
+            $this->market
+                ->items()
+                ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                            $query->where('updated', true);
+                        });
+                })
+                ->with(['itemable'])
+                ->lazy()
+                ->each(function (WbItem $ozonItem) {
+                    $this->recountPriceWbItem($ozonItem);
                 });
 
-            });
+            $this->market
+                ->items()
+                ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
+                    $query->whereHas('items', function (Builder $query) {
+                        $query
+                            ->where('supplier_id', $this->supplier->id)
+                            ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                                $query->where('updated', true);
+                            });
+                    });
+                })
+                ->with(['itemable'])
+                ->lazy()
+                ->each(function (WbItem $ozonItem) {
+                    $this->recountPriceWbItem($ozonItem);
+                });
+        } catch (\Throwable $th) {
+            report($th);
+            SupplierReportLogMarketService::failed($log);
+            return;
+        }
+
+        SupplierReportLogMarketService::finished($log);
     }
 
     public function recountPriceWbItem(WbItem $wbItem): WbItem
@@ -142,58 +140,44 @@ class WbItemPriceService
         return $wbItem;
     }
 
-    public function setLastPrices(): void
-    {
-        $this->market
-            ->items()
-            ->where('price', '>', 0)
-            ->with('itemable')
-            ->chunk(10000, function (Collection $items) {
-
-                $items->filter(function (WbItem $wbItem) {
-
-                    if ($wbItem->wbitemable_type === Item::class) {
-                        if ($wbItem->itemable->supplier_id === $this->supplier->id) return true;
-                    } else {
-                        if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) return true;
-                    }
-
-                    return false;
-
-                })->each(function (WbItem $wbItem) {
-                    $wbItem->update(['last_price' => DB::raw('price')]);
-                });
-
-            });
-    }
-
     public function updateStock(): void
     {
-        $this->market
-            ->items()
-            ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
-                $query->where('supplier_id', $this->supplier->id);
-            })
-            ->with(['itemable.warehousesStocks', 'itemable.supplierWarehouseStocks', 'itemable.moyskladOrders'])
-            ->lazy()
-            ->each(function (WbItem $item) {
-                $this->recountStockWbItem($item);
-            });
+        $log = SupplierReportLogMarketService::new($this->log, 'Обновление остатков');
+        SupplierReportLogMarketService::running($log);
 
-        $this->market
-            ->items()
-            ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
-                $query->whereHas('items', function (Builder $query) {
+        try {
+            $this->market
+                ->items()
+                ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
                     $query->where('supplier_id', $this->supplier->id);
+                })
+                ->with(['itemable.warehousesStocks', 'itemable.supplierWarehouseStocks', 'itemable.moyskladOrders'])
+                ->lazy()
+                ->each(function (WbItem $item) {
+                    $this->recountStockWbItem($item);
                 });
-            })
-            ->with(['itemable.items.warehousesStocks', 'itemable.items.supplierWarehouseStocks', 'itemable.items.moyskladOrders'])
-            ->lazy()
-            ->each(function (WbItem $item) {
-                $this->recountStockWbItem($item);
-            });
 
-        $this->nullNotUpdatedStocks();
+            $this->market
+                ->items()
+                ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
+                    $query->whereHas('items', function (Builder $query) {
+                        $query->where('supplier_id', $this->supplier->id);
+                    });
+                })
+                ->with(['itemable.items.warehousesStocks', 'itemable.items.supplierWarehouseStocks', 'itemable.items.moyskladOrders'])
+                ->lazy()
+                ->each(function (WbItem $item) {
+                    $this->recountStockWbItem($item);
+                });
+
+            $this->nullNotUpdatedStocks();
+        } catch (\Throwable $th) {
+            report($th);
+            SupplierReportLogMarketService::failed($log);
+            return;
+        }
+
+        SupplierReportLogMarketService::finished($log);
     }
 
     public function recountStockWbItem(WbItem $wbItem): void
@@ -407,158 +391,149 @@ class WbItemPriceService
             });
     }
 
-//    public function unloadWbItemStocks(WbItem $wbItem): void
-//    {
-//        $this->market->warehouses()
-//            ->whereHas('market', function (Builder $query) use ($wbItem) {
-//                $query->whereHas('items', function (Builder $query) use ($wbItem) {
-//                    $query->where('id', $wbItem->item_id);
-//                });
-//            })
-//            ->get()
-//            ->map(function (WbWarehouse $warehouse) use ($wbItem) {
-//
-//                $data = collect([
-//                    [
-//                        "sku" => (string)$wbItem->sku,
-//                        "amount" => (int)$wbItem->warehouseStock($warehouse) ? $wbItem->warehouseStock($warehouse)->stock : 0,
-//                    ]
-//                ]);
-//
-//                if (App::isProduction()) {
-//                    $this->wbClient->putStocks($data, $warehouse->warehouse_id, $this->supplier);
-//                }
-//            });
-//    }
-
     public function unloadAllStocks(): void
     {
-        if (!$this->market->enabled_stocks) {
-            SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: пропускаем выгрузку остатков в кабинет");
+        if (!$this->market->enabled_stocks || !$this->market->warehouses()->count()) {
+            $log = SupplierReportLogMarketService::new($this->log, 'Пропускаем выгрузку остатков в кабинет');
+            SupplierReportLogMarketService::failed($log);
             return;
         }
 
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: выгрузка остатков в кабинет");
+        $log = SupplierReportLogMarketService::new($this->log, 'Выгрузка остатков');
+        SupplierReportLogMarketService::running($log);
 
-        if (!$this->market->warehouses()->count()) {
-            SupplierReportService::addLog($this->supplier, "Нет складов. Остатки не выгружены");
-            return;
-        }
-
-        $this->market->warehouses()
-            ->whereHas('suppliers', function (Builder $query) {
-                $query
-                    ->where('supplier_id', $this->supplier->id)
-                    ->when($this->supplierWarehousesIds, function (Builder $query) {
-                        $query->whereHas('warehouses', function (Builder $query) {
-                            $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+        try {
+            $this->market->warehouses()
+                ->whereHas('suppliers', function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when($this->supplierWarehousesIds, function (Builder $query) {
+                            $query->whereHas('warehouses', function (Builder $query) {
+                                $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+                            });
                         });
-                    });
-            })
-            ->get()
-            ->map(function (WbWarehouse $warehouse) {
+                })
+                ->get()
+                ->map(function (WbWarehouse $warehouse) {
 
-                SupplierReportService::addLog($this->supplier, "Склад {$warehouse->name}: выгрузка остатков");
+                    SupplierReportService::addLog($this->supplier, "Склад {$warehouse->name}: выгрузка остатков");
 
-                $this->market
-                    ->items()
-                    ->with('itemable')
-                    ->chunk(1000, function (Collection $items) use ($warehouse) {
+                    $this->market
+                        ->items()
+                        ->with('itemable')
+                        ->chunk(1000, function (Collection $items) use ($warehouse) {
 
-                        /** @var Collection $data */
-                        $data = $items->filter(function (WbItem $wbItem) {
+                            /** @var Collection $data */
+                            $data = $items->filter(function (WbItem $wbItem) {
 
-                            if ($wbItem->wbitemable_type === Item::class) {
-                                if ($wbItem->itemable->supplier_id === $this->supplier->id) {
-                                    return true;
+                                if ($wbItem->wbitemable_type === Item::class) {
+                                    if ($wbItem->itemable->supplier_id === $this->supplier->id) {
+                                        return true;
+                                    }
+                                } else {
+                                    if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                                        return true;
+                                    }
                                 }
-                            } else {
-                                if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                                    return true;
-                                }
+
+                                return false;
+
+                            })->map(function (WbItem $item) use ($warehouse) {
+                                return [
+                                    "sku" => (string)$item->sku,
+                                    "amount" => (int)($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
+                                ];
+                            });
+
+                            if (App::isProduction() && $data->isNotEmpty()) {
+                                $wbClient = new WbClient($this->market->api_key);
+                                $wbClient->putStocks($data->values(), $warehouse->warehouse_id, $this->market, $this->log);
                             }
 
-                            return false;
-
-                        })->map(function (WbItem $item) use ($warehouse) {
-                            return [
-                                "sku" => (string)$item->sku,
-                                "amount" => (int)($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
-                            ];
                         });
+                });
+        } catch (\Throwable $th) {
+            report($th);
+            SupplierReportLogMarketService::failed($log);
+            return;
+        }
 
-                        if (App::isProduction() && $data->isNotEmpty()) {
-                            $wbClient = new WbClient($this->market->api_key);
-                            $wbClient->putStocks($data->values(), $warehouse->warehouse_id, $this->supplier, $this->market);
-                        }
-
-                    });
-            });
+        SupplierReportLogMarketService::finished($log);
     }
 
     public function unloadAllPrices(): void
     {
         if (!$this->market->enabled_price) {
-            SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: пропускаем выгрузку цен в кабинет");
+            $log = SupplierReportLogMarketService::new($this->log, 'Пропускаем выгрузку цен');
+            SupplierReportLogMarketService::failed($log);
             return;
         }
 
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: выгрузка цен в кабинет");
+        $log = SupplierReportLogMarketService::new($this->log, 'Выгрузка цен');
+        SupplierReportLogMarketService::running($log);
 
-        $this->market
-            ->items()
-            ->with('itemable')
-            ->whereNotNull('volume')
-            ->whereNotNull('retail_markup_percent')
-            ->whereNotNull('package')
-            ->whereNotNull('sales_percent')
-            ->whereNotNull('min_price')
-            ->whereNotNull('price')
-            ->where('price', '>', 0)
-            ->whereNotNull('nm_id')
-            ->where('price', '<>', DB::raw('last_price'))
-            ->chunk(1000, function (Collection $items) {
+        try {
+            $this->market
+                ->items()
+                ->with('itemable')
+                ->whereNotNull('volume')
+                ->whereNotNull('retail_markup_percent')
+                ->whereNotNull('package')
+                ->whereNotNull('sales_percent')
+                ->whereNotNull('min_price')
+                ->whereNotNull('price')
+                ->where('price', '>', 0)
+                ->whereNotNull('nm_id')
+                ->where('price', '<>', DB::raw('last_price'))
+                ->chunk(1000, function (Collection $items) {
 
-                /** @var Collection $data */
-                $data = $items->filter(function (WbItem $wbItem) {
+                    /** @var Collection $data */
+                    $data = $items->filter(function (WbItem $wbItem) {
 
-                    if ($wbItem->wbitemable_type === Item::class) {
-                        if ($wbItem->itemable->supplier_id === $this->supplier->id) {
-                            if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($wbItem->itemable->updated) {
+                        if ($wbItem->wbitemable_type === Item::class) {
+                            if ($wbItem->itemable->supplier_id === $this->supplier->id) {
+                                if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
+                                    if ($wbItem->itemable->updated) {
+                                        return true;
+                                    }
+                                } else {
                                     return true;
                                 }
-                            } else {
-                                return true;
                             }
-                        }
-                    } else {
-                        if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                            if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($wbItem->itemable->items->every(fn(Item $item) => $item->updated)) {
+                        } else {
+                            if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                                if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
+                                    if ($wbItem->itemable->items->every(fn(Item $item) => $item->updated)) {
+                                        return true;
+                                    }
+                                } else {
                                     return true;
                                 }
-                            } else {
-                                return true;
                             }
                         }
+
+                        return false;
+
+                    })->map(function (WbItem $item) {
+
+                        return [
+                            "nmId" => (int)$item->nm_id,
+                            "price" => (int)$item->price
+                        ];
+                    });
+
+                    if (App::isProduction() && $data->isNotEmpty()) {
+                        $wbClient = new WbClient($this->market->api_key);
+                        $wbClient->putPrices($data->values(), $this->market, $this->log);
                     }
 
-                    return false;
-
-                })->map(function (WbItem $item) {
-
-                    return [
-                        "nmId" => (int)$item->nm_id,
-                        "price" => (int)$item->price
-                    ];
                 });
+        } catch (\Throwable $th) {
+            report($th);
+            SupplierReportLogMarketService::failed($log);
+            return;
+        }
 
-                if (App::isProduction() && $data->isNotEmpty()) {
-                    $wbClient = new WbClient($this->market->api_key);
-                    $wbClient->putPrices($data->values(), $this->supplier, $this->market);
-                }
-
-            });
+        SupplierReportLogMarketService::finished($log);
     }
 }

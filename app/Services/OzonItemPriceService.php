@@ -53,7 +53,28 @@ class OzonItemPriceService
             $this->market
                 ->items()
                 ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
-                    $query->where('supplier_id', $this->supplier->id);
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                            $query->where('updated', true);
+                        });
+                })
+                ->with(['itemable'])
+                ->lazy()
+                ->each(function (OzonItem $ozonItem) {
+                    $this->recountPriceOzonItem($ozonItem);
+                });
+
+            $this->market
+                ->items()
+                ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
+                    $query->whereHas('items', function (Builder $query) {
+                        $query
+                            ->where('supplier_id', $this->supplier->id)
+                            ->when(!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve, function (Builder $query) {
+                                $query->where('updated', true);
+                            });
+                    });
                 })
                 ->with(['itemable'])
                 ->lazy()
@@ -463,6 +484,8 @@ class OzonItemPriceService
             SupplierReportLogMarketService::failed($log);
             return;
         }
+
+        SupplierReportLogMarketService::finished($log);
     }
 
     public function unloadAllPrices(): void
@@ -551,5 +574,7 @@ class OzonItemPriceService
             SupplierReportLogMarketService::failed($log);
             return;
         }
+
+        SupplierReportLogMarketService::finished($log);
     }
 }
