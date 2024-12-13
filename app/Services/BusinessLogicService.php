@@ -3,8 +3,6 @@
 namespace App\Services;
 
 use App\Jobs\Email\CheckEmails;
-use App\Jobs\Supplier\UnloadOnTime;
-use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -25,7 +23,7 @@ class BusinessLogicService
         $time = now()->format('i');
 
         if ($time === "00") {
-            Artisan::command('supplier:unload-on-time', fn () => null);
+            Artisan::call('supplier:unload-on-time');
         }
     }
 }
