@@ -28,7 +28,8 @@ class BusinessLogicService
 
         Log::info('time: ' . $time);
 
-        if ($time === "00") {
+        if ($time === "03") {
+            Log::info('start command');
             Artisan::command('supplier:unload-on-time', fn () => null);
         }
     }
