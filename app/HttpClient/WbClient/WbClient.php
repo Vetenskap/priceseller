@@ -139,8 +139,8 @@ class WbClient
         $limits = 5;
 
         while (RateLimiter::attempts('wb_put_stocks' . $market->id) >= 300) {
-            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 5 сек.');
-            sleep(5);
+            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 60 сек.');
+            sleep(60);
         }
 
         while ($limits > 0) {
@@ -203,8 +203,8 @@ class WbClient
     {
 
         while (RateLimiter::attempts('wb_put_prices' . $market->id) >= 10) {
-            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 5 сек.');
-            sleep(5);
+            SupplierReportService::addLog($supplier, 'Превышен лимит запрос, ожидаем 60 сек.');
+            sleep(60);
         }
 
 
