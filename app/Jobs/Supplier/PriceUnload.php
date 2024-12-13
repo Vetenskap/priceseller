@@ -38,7 +38,7 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
     {
         $this->reportContract = app(ReportContract::class);
         $this->report = $this->reportContract->new(TaskTypes::SupplierUnload, [
-            'type' => $this->emailSupplier->email->address,
+            'type' => $this->emailSupplier->mainEmail->address,
             'path' => $path
         ], $this->emailSupplier->supplier);
         $this->queue = 'supplier-unload';

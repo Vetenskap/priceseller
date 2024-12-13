@@ -44,8 +44,10 @@ class CheckEmailsTest extends TestCase
         $job = new CheckEmails($user);
         $job->handle();
 
+        $this->assertTrue($job->uniqueId() === $user->id . 'check_emails');
+
         Queue::assertPushed(PriceUnload::class, function ($job) use ($emailSupplier) {
-            return $job->emailSupplier === $emailSupplier
+            return $job->emailSupplier->id === $emailSupplier->id
                 && $job->path === 'path/to/price/file.xlsx';
         });
     }

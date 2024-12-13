@@ -24,11 +24,6 @@ class EmailSupplier extends MainModel
         'header_warehouse',
     ];
 
-    public function email(): BelongsTo
-    {
-        return $this->belongsTo(Email::class, 'email_id', 'id');
-    }
-
     public function supplier()
     {
         return $this->belongsTo(Supplier::class);
