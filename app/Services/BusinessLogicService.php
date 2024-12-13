@@ -8,7 +8,7 @@ use App\Models\Supplier;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Artisan;
 
 class BusinessLogicService
 {
@@ -24,22 +24,8 @@ class BusinessLogicService
 
         $time = now()->format('i');
 
-        if ($time === "30") {
-            $offset = Cache::get('supplier-unload_without_price_offset', 0);
-            if ($offset > Supplier::where('open', true)->where('unload_without_price', true)->count()) {
-                $offset = 0;
-            }
-            Supplier::where('open', true)
-                ->where('unload_without_price', true)
-                ->offset($offset)
-                ->limit(2)
-                ->get()
-                ->each(function (Collection $suppliers) {
-                    $suppliers->filter(fn (Supplier $supplier) => $supplier->user->isSub() || $supplier->user->isAdmin())->each(function (Supplier $supplier) {
-                        UnloadOnTime::dispatch($supplier);
-                    });
-                });
-            Cache::set('supplier-unload_without_price_offset', $offset + 3);
+        if ($time === "00") {
+            Artisan::command('supplier:unload-on-time', fn () => null);
         }
     }
 }

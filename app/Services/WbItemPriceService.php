@@ -29,6 +29,8 @@ use Modules\Moysklad\Services\MoyskladItemOrderService;
 class WbItemPriceService
 {
     protected User $user;
+    public bool $enabledOrderModule;
+    public bool $enabledMoyskladModule;
 
     public bool $enabledOrderModule;
     public bool $enabledMoyskladModule;
@@ -165,9 +167,6 @@ class WbItemPriceService
             });
     }
 
-    /**
-     * @throws \Exception
-     */
     public function updateStock(): void
     {
         $this->market
@@ -332,29 +331,47 @@ class WbItemPriceService
 
     public function nullNotUpdatedStocks(): void
     {
-        Helpers::toBatch(function (Batch $batch) {
-            $count = WbWarehouseStock::query()
-                ->with('wbItem')
-                ->whereHas('wbItem', function (Builder $query) {
-                    $query->where('wb_market_id', $this->market->id);
-                })
-                ->whereHas('warehouse', function (Builder $query) {
-                    $query->whereHas('suppliers', function (Builder $query) {
-                        $query
-                            ->where('supplier_id', $this->supplier->id)
-                            ->when($this->supplierWarehousesIds, function (Builder $query) {
-                                $query->whereHas('warehouses', function (Builder $query) {
-                                    $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
-                                });
+        WbWarehouseStock::query()
+            ->whereHas('wbItem', function (Builder $query) {
+                $query
+                    ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
+                        $query->where('unload_wb', false);
+                    })
+                    ->where('wb_market_id', $this->market->id);
+            })
+            ->whereHas('warehouse', function (Builder $query) {
+                $query->whereHas('suppliers', function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when($this->supplierWarehousesIds, function (Builder $query) {
+                            $query->whereHas('warehouses', function (Builder $query) {
+                                $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
                             });
-                    });
-                })->count();
-            $offset = 0;
-            while ($count > $offset) {
-                $batch->add(new NullNotUpdatedStocksBatch($this, $offset));
-                $offset += 10000;
-            }
-        }, 'market-unload');
+                        });
+                });
+            })->update(['stock' => 0]);
+
+        WbWarehouseStock::query()
+            ->whereHas('wbItem', function (Builder $query) {
+                $query
+                    ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
+                        $query->whereHas('items', function (Builder $query) {
+                            $query->where('unload_wb', false);
+                        });
+                    })
+                    ->where('wb_market_id', $this->market->id);
+            })
+            ->whereHas('warehouse', function (Builder $query) {
+                $query->whereHas('suppliers', function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when($this->supplierWarehousesIds, function (Builder $query) {
+                            $query->whereHas('warehouses', function (Builder $query) {
+                                $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+                            });
+                        });
+                });
+            })->update(['stock' => 0]);
 
     }
 

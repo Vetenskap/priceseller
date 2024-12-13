@@ -37,6 +37,18 @@ class Bundle extends MainModel
         ],
     ];
 
+    protected static function booted()
+    {
+        static::deleting(function (Bundle $bundle) {
+            foreach ($bundle->ozonItems as $ozonItem) {
+                $ozonItem->delete();
+            }
+            foreach ($bundle->wbItems as $wbItem) {
+                $wbItem->delete();
+            }
+        });
+    }
+
     public function scopeFilters(Builder $query)
     {
         return $query->when(request('filters.code'), function (Builder $query) {

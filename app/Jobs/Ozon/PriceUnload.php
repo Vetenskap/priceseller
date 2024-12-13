@@ -43,10 +43,11 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
             $this->supplier->warehouses->pluck('id')->values()->toArray();
 
         $service = new OzonItemPriceService($actualSupplier, $this->market, $warehouses);
-        $service->updateStock();
         $service->updatePrice();
-        $service->unloadAllStocks();
         $service->unloadAllPrices();
+        $service->updateStock();
+        $service->unloadAllStocks();
+
     }
 
     public function uniqueId(): string
