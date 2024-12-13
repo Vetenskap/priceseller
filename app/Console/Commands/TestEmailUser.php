@@ -16,7 +16,7 @@ class TestEmailUser extends Command
      *
      * @var string
      */
-    protected $signature = 'test:email-user {userId}';
+    protected $signature = 'test:email-user {userId} {from}';
 
     /**
      * The console command description.
@@ -49,7 +49,7 @@ class TestEmailUser extends Command
         foreach ($client->getFolders()->paginate()->getIterator() as $folder) {
 
             /** @var Message $message */
-            foreach ($folder->messages()->unseen()->get() as $message) {
+            foreach ($folder->messages()->unseen()->from($this->argument('from'))->fetchOrderDesc()->paginate()->getIterator() as $message) {
 
                 $this->info('Письмо:');
 
