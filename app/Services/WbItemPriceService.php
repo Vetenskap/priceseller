@@ -2,10 +2,7 @@
 
 namespace App\Services;
 
-use App\Helpers\Helpers;
 use App\HttpClient\WbClient\WbClient;
-use App\Jobs\Market\NullNotUpdatedStocksBatch;
-use App\Jobs\Market\UpdateStockBatch;
 use App\Models\Bundle;
 use App\Models\Item;
 use App\Models\ItemSupplierWarehouseStock;
@@ -18,8 +15,6 @@ use App\Models\WbWarehouse;
 use App\Models\WbWarehouseStock;
 use App\Models\WbWarehouseSupplier;
 use App\Models\WbWarehouseSupplierWarehouse;
-use App\Models\WbWarehouseUserWarehouse;
-use Illuminate\Bus\Batch;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
@@ -47,7 +42,6 @@ class WbItemPriceService
     public function updatePrice(): void
     {
         SupplierReportService::changeMessage($this->supplier, "Кабинет ВБ {$this->market->name}: перерасчёт цен");
-        $this->setLastPrices();
 
         $this->market
             ->items()
@@ -137,31 +131,6 @@ class WbItemPriceService
         $wbItem->price = $newPrice;
 
         return $wbItem;
-    }
-
-    public function setLastPrices(): void
-    {
-        $this->market
-            ->items()
-            ->where('price', '>', 0)
-            ->with('itemable')
-            ->chunk(10000, function (Collection $items) {
-
-                $items->filter(function (WbItem $wbItem) {
-
-                    if ($wbItem->wbitemable_type === Item::class) {
-                        if ($wbItem->itemable->supplier_id === $this->supplier->id) return true;
-                    } else {
-                        if ($wbItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) return true;
-                    }
-
-                    return false;
-
-                })->each(function (WbItem $wbItem) {
-                    $wbItem->update(['last_price' => DB::raw('price')]);
-                });
-
-            });
     }
 
     public function updateStock(): void
@@ -513,7 +482,6 @@ class WbItemPriceService
             ->whereNotNull('price')
             ->where('price', '>', 0)
             ->whereNotNull('nm_id')
-            ->where('price', '<>', DB::raw('last_price'))
             ->chunk(1000, function (Collection $items) {
 
                 /** @var Collection $data */
