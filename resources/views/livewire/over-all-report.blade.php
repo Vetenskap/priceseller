@@ -5,14 +5,18 @@
         <flux:menu class="h-1/3 overflow-y-scroll">
             @foreach($reports as $report)
                 <flux:menu.item
-                    class="{{$report['report'] ? ($report['report']->status === 0 ? 'bg-green-300' : ($report['report']->status === 2 ? 'bg-yellow-300' : 'bg-red-300')) : ''}}"
+                    class="flex gap-6"
                     :href="$report['report'] ? route('supplier.report.edit', ['supplier' => $report['supplier']->id, 'report' => $report['report']->id]) : ''"
-                    :icon="match($report['report']?->status) {
-                    0 => 'check-badge',
-                    1 => 'exclamation-triangle',
-                    default => 'exclamation-circle',
-                }"
                 >
+                    <flux:badge color="{{$report['report'] ? ($report['report']->status === 0 ? 'lime' : ($report['report']->status === 2 ? 'yellow' : 'red')) : ''}}">
+                        @if($report['report']?->status === 0)
+                            <flux:icon.check-badge />
+                        @elseif($report['report']?->status === 1)
+                            <flux:icon.exclamation-triangle />
+                        @else
+                            <flux:icon.exclamation-circle />
+                        @endif
+                    </flux:badge>
                     {{$report['supplier']->name}} [{{$report['report']?->updated_at}} {{$report['report']?->message}}]
                 </flux:menu.item>
             @endforeach
