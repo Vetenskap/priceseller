@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Log;
 
 class BusinessLogicService
 {
@@ -24,6 +25,8 @@ class BusinessLogicService
         });
 
         $time = now()->format('i');
+
+        Log::info('time: ' . $time);
 
         if ($time === "00") {
             Artisan::command('supplier:unload-on-time', fn () => null);
