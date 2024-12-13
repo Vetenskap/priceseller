@@ -88,6 +88,18 @@ class Item extends MainModel
         ],
     ];
 
+    protected static function booted()
+    {
+        static::deleting(function (Item $item) {
+            foreach ($item->ozonItems as $ozonItem) {
+                $ozonItem->delete();
+            }
+            foreach ($item->wbItems as $wbItem) {
+                $wbItem->delete();
+            }
+        });
+    }
+
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
