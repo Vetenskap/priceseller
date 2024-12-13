@@ -2,8 +2,7 @@
 
 namespace App\Services;
 
-use App\Contracts\ReportContract;
-use App\Helpers\Helpers;
+use App\Contracts\ReportLogContract;
 use App\HttpClient\OzonClient\OzonClient;
 use App\Models\Bundle;
 use App\Models\Item;
@@ -15,11 +14,10 @@ use App\Models\OzonWarehouse;
 use App\Models\OzonWarehouseStock;
 use App\Models\OzonWarehouseSupplier;
 use App\Models\OzonWarehouseSupplierWarehouse;
-use App\Models\OzonWarehouseUserWarehouse;
-use App\Models\Report;
+use App\Models\ReportLog;
 use App\Models\Supplier;
 use App\Models\User;
-use Illuminate\Bus\Batch;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
@@ -29,14 +27,14 @@ use Modules\Moysklad\Services\MoyskladItemOrderService;
 class OzonItemPriceService
 {
     protected User $user;
-    public ReportContract $reportContract;
     public bool $enabledOrderModule;
     public bool $enabledMoyskladModule;
+    public ReportLogContract $reportLogContract;
 
-    public function __construct(public ?Supplier $supplier = null, public OzonMarket $market, public array $supplierWarehousesIds, public ?Report $report = null)
+    public function __construct(public Supplier $supplier, public OzonMarket $market, public array $supplierWarehousesIds, public ReportLog $log)
     {
+        $this->reportLogContract = \app(ReportLogContract::class);
         $this->user = $this->market->user;
-        $this->reportContract = app(ReportContract::class);
         $this->market = $this->market->load([
             'warehouses',
             'warehouses.suppliers.warehouses',
@@ -48,23 +46,30 @@ class OzonItemPriceService
 
     public function updatePrice(): void
     {
-//        $this->reportContract->changeMessage($this->report, "Кабинет ОЗОН {$this->market->name}: перерасчёт цен");
-//        $this->setLastPrices();
+        $log = SupplierReportLogMarketService::new($this->log, 'Обновление цен');
+        SupplierReportLogMarketService::running($log);
 
-        $this->market
-            ->items()
-            ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
-                $query->where('supplier_id', $this->supplier->id);
-            })
-            ->with(['itemable'])
-            ->lazy()
-            ->each(function (OzonItem $ozonItem) {
-                $ozonItem = $this->recountPriceOzonItem($ozonItem);
-                $ozonItem->save();
-            });
+        try {
+            $this->market
+                ->items()
+                ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
+                    $query->where('supplier_id', $this->supplier->id);
+                })
+                ->with(['itemable'])
+                ->lazy()
+                ->each(function (OzonItem $ozonItem) {
+                    $this->recountPriceOzonItem($ozonItem);
+                });
+        } catch (\Throwable $th) {
+            report($th);
+            SupplierReportLogMarketService::failed($log);
+            return;
+        }
+
+        SupplierReportLogMarketService::finished($log);
     }
 
-    public function recountPriceOzonItem(OzonItem $ozonItem): OzonItem
+    public function recountPriceOzonItem(OzonItem $ozonItem): void
     {
         if ($ozonItem->ozonitemable_type === 'App\Models\Item') {
 
@@ -136,68 +141,47 @@ class OzonItemPriceService
             $ozonItem->price = floor(max($formulaPriceSeller, $ozonItem->price_min));
         }
 
-        return $ozonItem;
-    }
-
-    public function setLastPrices(): void
-    {
-        $this->market
-            ->items()
-            ->where('price', '>', 0)
-            ->with('itemable')
-            ->chunk(10000, function (Collection $items) {
-                $items->filter(function (OzonItem $ozonItem) {
-
-                    if ($ozonItem->ozonitemable_type === Item::class) {
-                        if ($ozonItem->itemable->supplier_id === $this->supplier->id) return true;
-                    } else {
-                        if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) return true;
-                    }
-
-                    return false;
-
-                })->each(function (OzonItem $ozonItem) {
-                    $ozonItem->update(['last_price' => DB::raw('price')]);
-                });
-            });
-    }
-
-    public function updateOzonItem(OzonItem $ozonItem): void
-    {
-        $ozonItem = $this->recountPriceOzonItem($ozonItem);
-        $ozonItem = $this->recountStockOzonItem($ozonItem);
         $ozonItem->save();
     }
 
     public function updateStock(): void
     {
-//        $this->reportContract->changeMessage($this->report, "Кабинет ОЗОН {$this->market->name}: перерасчёт остатков");
+        $log = SupplierReportLogMarketService::new($this->log, 'Обновление остатков');
+        SupplierReportLogMarketService::running($log);
 
-        $this->market
-            ->items()
-            ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
-                $query->where('supplier_id', $this->supplier->id);
-            })
-            ->with(['itemable.warehousesStocks', 'itemable.supplierWarehouseStocks', 'itemable.moyskladOrders'])
-            ->lazy()
-            ->each(function (OzonItem $item) {
-                $this->recountStockOzonItem($item);
-            });
-
-        $this->market
-            ->items()
-            ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
-                $query->whereHas('items', function (Builder $query) {
+        try {
+            $this->market
+                ->items()
+                ->whereHasMorph('itemable', [Item::class], function (Builder $query) {
                     $query->where('supplier_id', $this->supplier->id);
+                })
+                ->with(['itemable.warehousesStocks', 'itemable.supplierWarehouseStocks', 'itemable.moyskladOrders'])
+                ->lazy()
+                ->each(function (OzonItem $item) {
+                    $this->recountStockOzonItem($item);
                 });
-            })
-            ->with(['itemable.items.warehousesStocks', 'itemable.items.supplierWarehouseStocks', 'itemable.items.moyskladOrders'])
-            ->lazy()
-            ->each(function (OzonItem $item) {
-                $this->recountStockOzonItem($item);
-            });
 
-        $this->nullNotUpdatedStocks();
+            $this->market
+                ->items()
+                ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
+                    $query->whereHas('items', function (Builder $query) {
+                        $query->where('supplier_id', $this->supplier->id);
+                    });
+                })
+                ->with(['itemable.items.warehousesStocks', 'itemable.items.supplierWarehouseStocks', 'itemable.items.moyskladOrders'])
+                ->lazy()
+                ->each(function (OzonItem $item) {
+                    $this->recountStockOzonItem($item);
+                });
+
+            $this->nullNotUpdatedStocks();
+        } catch (\Throwable $th) {
+            report($th);
+            SupplierReportLogMarketService::failed($log);
+            return;
+        }
+
+        SupplierReportLogMarketService::finished($log);
     }
 
     public function recountStockOzonItem(OzonItem $ozonItem): void
@@ -407,170 +391,165 @@ class OzonItemPriceService
             });
     }
 
-//    public function unloadOzonItemStocks(OzonItem $ozonItem): void
-//    {
-//        $this->market->warehouses()
-//            ->whereHas('market', function (Builder $query) use ($ozonItem) {
-//                $query->whereHas('items', function (Builder $query) use ($ozonItem) {
-//                    $query->where('id', $ozonItem->item_id);
-//                });
-//            })
-//            ->get()
-//            ->map(function (OzonWarehouse $warehouse) use ($ozonItem) {
-//
-//                $data = [
-//                    [
-//                        'offer_id' => (string)$ozonItem->offer_id,
-//                        'product_id' => (int)$ozonItem->product_id,
-//                        'stock' => (int)$ozonItem->warehouseStock($warehouse) ? $ozonItem->warehouseStock($warehouse)->stock : 0,
-//                        'warehouse_id' => (int)$warehouse->warehouse_id
-//                    ]
-//                ];
-//
-//                if (App::isProduction()) {
-//                    $this->ozonClient->putStocks($data, $this->supplier);
-//                }
-//            });
-//    }
-
     public function unloadAllStocks(): void
     {
-        $this->reportContract->changeMessage($this->report, "Кабинет ОЗОН {$this->market->name}: выгрузка остатков в кабинет");
-//        if (!$this->market->enabled_stocks) {
-//            SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: пропускаем выгрузку остатков в кабинет");
-//            return;
-//        }
+        if (!$this->market->enabled_stocks || !$this->market->warehouses()->count()) {
+            $log = SupplierReportLogMarketService::new($this->log, 'Пропускаем выгрузку остатков в кабинет');
+            SupplierReportLogMarketService::failed($log);
+            return;
+        }
 
-//        if (!$this->market->warehouses()->count()) {
-//            SupplierReportService::addLog($this->supplier, "Нет складов. Остатки не выгружены");
-//            return;
-//        }
+        $log = SupplierReportLogMarketService::new($this->log, 'Выгрузка остатков');
+        SupplierReportLogMarketService::running($log);
 
-        SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: выгрузка остатков в кабинет");
-
-        $this->market->warehouses()
-            ->whereHas('suppliers', function (Builder $query) {
-                $query
-                    ->where('supplier_id', $this->supplier->id)
-                    ->when($this->supplierWarehousesIds, function (Builder $query) {
-                        $query->whereHas('warehouses', function (Builder $query) {
-                            $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+        try {
+            $this->market->warehouses()
+                ->whereHas('suppliers', function (Builder $query) {
+                    $query
+                        ->where('supplier_id', $this->supplier->id)
+                        ->when($this->supplierWarehousesIds, function (Builder $query) {
+                            $query->whereHas('warehouses', function (Builder $query) {
+                                $query->whereIn('supplier_warehouse_id', $this->supplierWarehousesIds);
+                            });
                         });
-                    });
-            })
-            ->get()
-            ->map(function (OzonWarehouse $warehouse) {
+                })
+                ->get()
+                ->map(function (OzonWarehouse $warehouse) {
+                    $this->market
+                        ->items()
+                        ->with('itemable')
+                        ->chunk(100, function (Collection $items) use ($warehouse) {
 
-//                SupplierReportService::addLog($this->supplier, "Склад {$warehouse->name}: выгрузка остатков");
+                            /** @var Collection $data */
+                            $data = $items->filter(function (OzonItem $ozonItem) {
 
-                $this->market
-                    ->items()
-                    ->with('itemable')
-                    ->chunk(100, function (Collection $items) use ($warehouse) {
-
-                        /** @var Collection $data */
-                        $data = $items->filter(function (OzonItem $ozonItem) {
-
-                            if ($ozonItem->ozonitemable_type === Item::class) {
-                                if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
-                                    return true;
+                                if ($ozonItem->ozonitemable_type === Item::class) {
+                                    if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
+                                        return true;
+                                    }
+                                } else {
+                                    if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                                        return true;
+                                    }
                                 }
-                            } else {
-                                if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                                    return true;
+
+                                return false;
+
+                            })->map(function (OzonItem $item) use ($warehouse) {
+                                return [
+                                    'offer_id' => (string)$item->offer_id,
+                                    'product_id' => (int)$item->product_id,
+                                    'stock' => (int)($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
+                                    'warehouse_id' => (int)$warehouse->warehouse_id
+                                ];
+                            });
+
+                            if (App::isProduction() && $data->isNotEmpty()) {
+                                $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
+
+                                try {
+                                    $ozonClient->putStocks($data->values()->all(), $this->supplier, $this->market);
+                                } catch (RequestException $e) {
+                                    report($e);
+                                    $log = SupplierReportLogMarketService::new($this->log, 'Ошибка при выгрузке 100 остатков: ' . $e->getMessage());
+                                    SupplierReportLogMarketService::failed($log);
                                 }
                             }
 
-                            return false;
-
-                        })->map(function (OzonItem $item) use ($warehouse) {
-                            return [
-                                'offer_id' => (string)$item->offer_id,
-                                'product_id' => (int)$item->product_id,
-                                'stock' => (int)($item->warehouseStock($warehouse) ? $item->warehouseStock($warehouse)->stock : 0),
-                                'warehouse_id' => (int)$warehouse->warehouse_id
-                            ];
                         });
-
-                        if (App::isProduction() && $data->isNotEmpty()) {
-                            $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
-                            $ozonClient->putStocks($data->values()->all(), $this->supplier, $this->market);
-                        }
-
-                    });
-            });
+                });
+        } catch (\Throwable $th) {
+            report($th);
+            SupplierReportLogMarketService::failed($log);
+            return;
+        }
     }
 
     public function unloadAllPrices(): void
     {
-//        if (!$this->market->enabled_price) {
-//            SupplierReportService::changeMessage($this->supplier, "Кабинет ОЗОН {$this->market->name}: пропускаем выгрузку цен в кабинет");
-//            return;
-//        }
+        if (!$this->market->enabled_price) {
+            $log = SupplierReportLogMarketService::new($this->log, 'Пропускаем выгрузку цен');
+            SupplierReportLogMarketService::failed($log);
+            return;
+        }
 
-        $this->reportContract->changeMessage($this->report, "Кабинет ОЗОН {$this->market->name}: выгрузка цен в кабинет");
+        $log = SupplierReportLogMarketService::new($this->log, 'Выгрузка цен');
+        SupplierReportLogMarketService::running($log);
 
-        $this->market
-            ->items()
-            ->with('itemable')
-            ->whereNotNull('price_min')
-            ->whereNotNull('offer_id')
-            ->whereNotNull('price_max')
-            ->whereNotNull('price')
-            ->where('price', '>', 0)
-            ->whereNotNull('product_id')
-            ->whereNotNull('shipping_processing')
-            ->whereNotNull('direct_flow_trans')
-            ->whereNotNull('sales_percent')
-            ->whereNotNull('min_price')
-            ->whereNotNull('min_price_percent')
-            ->where('price', '<>', DB::raw('last_price'))
-            ->chunk(1000, function (Collection $items) {
+        try {
+            $this->market
+                ->items()
+                ->with('itemable')
+                ->whereNotNull('price_min')
+                ->whereNotNull('offer_id')
+                ->whereNotNull('price_max')
+                ->whereNotNull('price')
+                ->where('price', '>', 0)
+                ->whereNotNull('product_id')
+                ->whereNotNull('shipping_processing')
+                ->whereNotNull('direct_flow_trans')
+                ->whereNotNull('sales_percent')
+                ->whereNotNull('min_price')
+                ->whereNotNull('min_price_percent')
+                ->where('price', '<>', DB::raw('last_price'))
+                ->chunk(1000, function (Collection $items) {
 
-                /** @var Collection $data */
-                $data = $items->filter(function (OzonItem $ozonItem) {
+                    /** @var Collection $data */
+                    $data = $items->filter(function (OzonItem $ozonItem) {
 
-                    if ($ozonItem->ozonitemable_type === Item::class) {
-                        if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
-                            if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($ozonItem->itemable->updated) {
+                        if ($ozonItem->ozonitemable_type === Item::class) {
+                            if ($ozonItem->itemable->supplier_id === $this->supplier->id) {
+                                if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
+                                    if ($ozonItem->itemable->updated) {
+                                        return true;
+                                    }
+                                } else {
                                     return true;
                                 }
-                            } else {
-                                return true;
+                            }
+                        } else {
+                            if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
+                                if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
+                                    if ($ozonItem->itemable->items->every(fn(Item $item) => $item->updated)) {
+                                        return true;
+                                    }
+                                } else {
+                                    return true;
+                                }
                             }
                         }
-                    } else {
-                        if ($ozonItem->itemable->items->every(fn(Item $item) => $item->supplier_id === $this->supplier->id)) {
-                            if (!$this->user->baseSettings()->exists() || !$this->user->baseSettings->enabled_use_buy_price_reserve) {
-                                if ($ozonItem->itemable->items->every(fn(Item $item) => $item->updated)) {
-                                    return true;
-                                }
-                            } else {
-                                return true;
-                            }
+
+                        return false;
+
+                    })->map(function (OzonItem $item) {
+
+                        return [
+                            "auto_action_enabled" => "UNKNOWN",
+                            "currency_code" => "RUB",
+                            "min_price" => (string)$item->price_min,
+                            "offer_id" => (string)$item->offer_id,
+                            "old_price" => (string)$item->price_max,
+                            "price" => (string)$item->price,
+                            "product_id" => (int)$item->product_id
+                        ];
+                    });
+
+                    if (App::isProduction() && $data->isNotEmpty()) {
+                        $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
+
+                        try {
+                            $ozonClient->putPrices($data->values()->all(), $this->supplier);
+                        } catch (\Throwable $th) {
+                            report($th);
+                            $log = SupplierReportLogMarketService::new($this->log, 'Ошибка при выгрузке 100 цен: ' . $th->getMessage());
+                            SupplierReportLogMarketService::failed($log);
                         }
                     }
-
-                    return false;
-
-                })->map(function (OzonItem $item) {
-
-                    return [
-                        "auto_action_enabled" => "UNKNOWN",
-                        "currency_code" => "RUB",
-                        "min_price" => (string)$item->price_min,
-                        "offer_id" => (string)$item->offer_id,
-                        "old_price" => (string)$item->price_max,
-                        "price" => (string)$item->price,
-                        "product_id" => (int)$item->product_id
-                    ];
                 });
-
-                if (App::isProduction() && $data->isNotEmpty()) {
-                    $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
-                    $ozonClient->putPrices($data->values()->all(), $this->supplier);
-                }
-            });
+        } catch (\Throwable $th) {
+            report($th);
+            SupplierReportLogMarketService::failed($log);
+            return;
+        }
     }
 }

@@ -48,15 +48,8 @@ class CheckEmails implements ShouldQueue, ShouldBeUnique
 
             $handler = new EmailHandlerLaravelImap($email->address, $email->password);
             foreach ($email->suppliers()->where('open', true)->where('unload_without_price', false)->get() as $supplier) {
-
-                RateLimiter::attempt('email-unload-' . $supplier->id, 1, function () use ($handler, $supplier) {
-                    if (!SupplierReportService::get($supplier)) {
-                        $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
-
-                        PriceUnload::dispatchIf((boolean)$pricePath, EmailSupplier::findOrFail($supplier->pivot->id), $pricePath);
-                    }
-                });
-
+                $pricePath = $handler->getNewPrice($supplier->pivot->email, $supplier->pivot->filename);
+                PriceUnload::dispatchIf((boolean)$pricePath, EmailSupplier::findOrFail($supplier->pivot->id), $pricePath);
             }
         }
 

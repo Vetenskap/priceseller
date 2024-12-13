@@ -7,6 +7,7 @@ use App\Components\EmailClient\EmailHandlerLaravelImap;
 use App\Contracts\NotificationContract;
 use App\Contracts\PriceProcessingServiceInterface;
 use App\Contracts\ReportContract;
+use App\Contracts\ReportLogContract;
 use App\Jobs\Email\CheckEmails;
 use App\Jobs\Export;
 use App\Jobs\Import;
@@ -20,6 +21,7 @@ use App\Services\ItemsExportReportService;
 use App\Services\ItemsImportReportService;
 use App\Services\NotificationService;
 use App\Services\PriceProcessingService;
+use App\Services\TaskLogService;
 use App\Services\TaskService;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
@@ -47,6 +49,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ReportContract::class, function ($app) {
             return new TaskService($app->make(NotificationContract::class));
         });
+        $this->app->bind(ReportLogContract::class, TaskLogService::class);
     }
 
     /**

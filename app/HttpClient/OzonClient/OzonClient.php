@@ -114,16 +114,10 @@ class OzonClient
             sleep(60);
         }
 
-        try {
-            return RateLimiter::attempt(
-                'ozon_put_stocks' . $market->id,
-                80,
-                fn() => $this->request->post('/v2/products/stocks', ['stocks' => $data])->collect('result')
-            );
-        } catch (RequestException $e) {
-            if ($e->response->unauthorized()) {
-                SupplierReportService::addLog($supplier, 'Неверный токен или область его действия не включает обновление остатков');
-            }
-        }
+        return RateLimiter::attempt(
+            'ozon_put_stocks' . $market->id,
+            80,
+            fn() => $this->request->post('/v2/products/stocks', ['stocks' => $data])->collect('result')
+        );
     }
 }

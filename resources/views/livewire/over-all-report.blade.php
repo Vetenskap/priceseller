@@ -17,7 +17,7 @@
                             <flux:icon.exclamation-circle />
                         @endif
                     </flux:badge>
-                    {{$report['supplier']->name}} [{{$report['report']?->updated_at}}] [{{$report['report']?->message}}]
+                    {{$report['supplier']->name}} [{{$report['report']?->updated_at->forma('d.m.Y H:i:s')}}] [{{$report['report']?->message}}]
                 </flux:menu.item>
             @endforeach
             <flux:menu.separator />

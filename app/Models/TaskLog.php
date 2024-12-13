@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TaskLog extends ReportLog
 {
@@ -24,5 +25,10 @@ class TaskLog extends ReportLog
     public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class, 'task_id');
+    }
+
+    public function supplierReportLogMarkets(): HasMany
+    {
+        return $this->hasMany(SupplierReportLogMarket::class);
     }
 }
