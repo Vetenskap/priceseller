@@ -18,6 +18,7 @@ class MarketUpdateApiCommissions implements ShouldQueue, ShouldBeUnique
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $uniqueFor = 600;
+    public $timeout = 14400;
 
     /**
      * Create a new job instance.
