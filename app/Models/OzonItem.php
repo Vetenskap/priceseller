@@ -48,7 +48,8 @@ class OzonItem extends MainModel
         'ozon_market_id',
         'ozonitemable_id',
         'ozonitemable_type',
-        'last_price'
+        'last_price',
+        'id'
     ];
 
     public function scopeFilters(Builder $query)
