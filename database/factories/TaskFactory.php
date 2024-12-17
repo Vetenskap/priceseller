@@ -16,8 +16,8 @@ class TaskFactory extends Factory
             'type' => $this->faker->word(),
             'status' => $this->faker->word(),
             'payload' => $this->faker->words(),
-            'reportable_id' => $this->faker->word(),
-            'reportable_type' => $this->faker->word(),
+            'taskable_id' => $this->faker->word(),
+            'taskable_type' => $this->faker->word(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ];

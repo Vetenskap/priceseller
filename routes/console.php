@@ -48,7 +48,7 @@ if (\Illuminate\Support\Facades\App::isProduction()) {
 
     Schedule::call(function () {
 
-        \App\Services\MarketsService::updateCommissionsInTime();
+        \App\Services\MarketService::updateCommissionsInTime();
         \App\Services\BusinessLogicService::usersEmailsUnload();
         \App\Services\ReportService::checkTimeouts();
 

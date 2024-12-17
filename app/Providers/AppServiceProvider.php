@@ -5,36 +5,25 @@ namespace App\Providers;
 use App\Components\EmailClient\EmailClient;
 use App\Components\EmailClient\EmailHandlerLaravelImap;
 use App\Contracts\EmailHandlerContract;
+use App\Contracts\MarketContract;
 use App\Contracts\NotificationContract;
-use App\Contracts\PriceProcessingServiceInterface;
 use App\Contracts\ReportContract;
 use App\Contracts\ReportLogContract;
-use App\Jobs\Email\CheckEmails;
-use App\Jobs\Export;
-use App\Jobs\Import;
+use App\Contracts\SupplierUnloadContract;
 use App\Listeners\ResponseReceivedLogging;
 use App\Models\Employee;
 use App\Models\Permission;
 use App\Models\User;
-use App\Services\Item\ItemPriceWithCacheService;
-use App\Services\Item\ItemPriceServiceInterface;
-use App\Services\ItemsExportReportService;
-use App\Services\ItemsImportReportService;
+use App\Services\EmailSupplierService;
+use App\Services\MarketService;
 use App\Services\NotificationService;
-use App\Services\PriceProcessingService;
 use App\Services\TaskLogService;
 use App\Services\TaskService;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Http\Client\Events\ResponseReceived;
-use Illuminate\Queue\Events\JobFailed;
-use Illuminate\Queue\Events\JobProcessed;
-use Illuminate\Queue\Jobs\RedisJob;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
@@ -52,6 +41,8 @@ class AppServiceProvider extends ServiceProvider
         });
         $this->app->bind(ReportLogContract::class, TaskLogService::class);
         $this->app->bind(EmailHandlerContract::class, EmailHandlerLaravelImap::class);
+        $this->app->bind(SupplierUnloadContract::class, EmailSupplierService::class);
+        $this->app->bind(MarketContract::class, MarketService::class);
     }
 
     /**

@@ -5,6 +5,7 @@ namespace Modules\VoshodApi\Services;
 use App\Models\Item;
 use App\Models\User;
 use App\Services\Item\ItemPriceService;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Str;
 use Modules\VoshodApi\HttpClient\Resources\ItemsPageList;
 use Modules\VoshodApi\Models\VoshodApi;
@@ -39,7 +40,12 @@ class VoshodUnloadService
 
         do {
 
-            $items = $itemsPageList->fetchNext();
+            try {
+                $items = $itemsPageList->fetchNext();
+            } catch (RequestException) {
+                $itemsPageList->setNext($itemsPageList->getNext() + 1);
+                continue;
+            }
 
             $items->each(function (\Modules\VoshodApi\HttpClient\Resources\Item $voshodItem) {
 
@@ -108,4 +114,6 @@ class VoshodUnloadService
             $warehouse->supplierWarehouse->stocks()->update(['stock' => 0]);
         });
     }
+
+
 }

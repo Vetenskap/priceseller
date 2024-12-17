@@ -31,10 +31,11 @@ class CheckEmailsTest extends TestCase
         $emailSupplier = EmailSupplier::factory()->state([
             'email' => 'supplier@example.com',
             'filename' => 'price.xlsx'
-        ])->for($user->emails->first())->for($supplier)->create();
+        ])->for($user->emails->first(), 'mainEmail')->for($supplier)->create();
 
         $mockHandler = \Mockery::mock(EmailHandlerContract::class);
         $mockHandler->shouldReceive('getNewPrice')
+            ->once()
             ->with('supplier@example.com', 'price.xlsx', 'email@gmail.com', 'qwerty1234')
             ->andReturn('path/to/price/file.xlsx');
 

@@ -35,7 +35,7 @@ class VoshodClient
     public function get($endpoint, $queryParameters): Collection
     {
         while (RateLimiter::attempts('voshod_get_' . $this->proxyIp) >= 5) {
-            sleep(2);
+            sleep(1);
         }
 
         return RateLimiter::attempt(

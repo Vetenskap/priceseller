@@ -4,6 +4,7 @@ namespace App\Helpers;
 use App\Exceptions\ReportCancelled;
 use App\Models\Employee;
 use App\Models\User;
+use Illuminate\Bus\Batch;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Cache;
@@ -51,6 +52,8 @@ class Helpers {
         $batch = Bus::batch([])->onQueue($queue)->dispatch();
 
         $callback($batch);
+
+        if (!$batch instanceof Batch) return;
 
         $batch = $batch->fresh();
 

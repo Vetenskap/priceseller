@@ -72,4 +72,6 @@ class VoshodUserProcess implements ShouldQueue
     {
         SupplierReportService::error($this->voshodApi->supplier, message: 'по АПИ');
     }
+
+
 }

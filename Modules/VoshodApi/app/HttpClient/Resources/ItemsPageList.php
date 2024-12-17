@@ -49,4 +49,16 @@ class ItemsPageList
         return !is_null($this->next);
     }
 
+    public function setNext(?int $next): void
+    {
+        $this->next = $next;
+    }
+
+    public function getNext(): ?int
+    {
+        return $this->next;
+    }
+
+
+
 }

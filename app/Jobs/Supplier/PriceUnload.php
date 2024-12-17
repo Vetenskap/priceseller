@@ -3,16 +3,11 @@
 namespace App\Jobs\Supplier;
 
 use App\Contracts\ReportContract;
+use App\Contracts\SupplierUnloadContract;
 use App\Enums\TaskTypes;
 use App\Exceptions\ReportCancelled;
-use App\Helpers\Helpers;
 use App\Models\EmailSupplier;
 use App\Models\Report;
-use App\Models\OzonMarket;
-use App\Models\WbMarket;
-use App\Services\EmailSupplierService;
-use App\Services\SupplierReportService;
-use Illuminate\Bus\Batch;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -52,11 +47,9 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
         $this->reportContract->running($this->report);
 
         try {
-            app(EmailSupplierService::class, [
-                'supplier' => $this->emailSupplier,
-                'path' => Storage::disk('public')->path($this->path),
-                'report' => $this->report
-            ])->unload();
+            $service = app(SupplierUnloadContract::class);
+            $service->make($this->emailSupplier, Storage::disk('public')->path($this->path), $this->report);
+            $service->unload();
         } catch (ReportCancelled $e) {
             return;
         }
