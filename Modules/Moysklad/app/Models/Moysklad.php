@@ -100,4 +100,9 @@ class Moysklad extends MainModel
         return $this->hasMany(MoyskladRecountRetailMarkup::class, 'moysklad_id', 'id');
     }
 
+    public function warehousesUnloadTimes(): HasMany
+    {
+        return $this->hasMany(MoyskladWarehousesUnloadTime::class);
+    }
+
 }
