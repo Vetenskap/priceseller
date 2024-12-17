@@ -2,8 +2,13 @@
 
 namespace Modules\Moysklad\Providers;
 
+use App\Services\ModuleService;
+use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\Moysklad\Jobs\WarehousesUnloadOnTime;
+use Modules\Moysklad\Models\Moysklad;
 
 class MoyskladServiceProvider extends ServiceProvider
 {
@@ -46,10 +51,21 @@ class MoyskladServiceProvider extends ServiceProvider
      */
     protected function registerCommandSchedules(): void
     {
-        // $this->app->booted(function () {
-        //     $schedule = $this->app->make(Schedule::class);
-        //     $schedule->command('inspire')->hourly();
-        // });
+        if (App::isProduction()) {
+            $this->app->booted(function () {
+                $schedule = $this->app->make(Schedule::class);
+                $schedule->call(function () {
+                    $time = now()->format('H:i');
+                    Moysklad::whereHas('warehousesUnloadTimes')->get()->each(function (Moysklad $moysklad) use ($time) {
+                        if (ModuleService::moduleIsEnabled($this->moduleName, $moysklad->user)) {
+                            if ($moysklad->warehousesUnloadTimes()->where('time', $time)->exists()) {
+                                WarehousesUnloadOnTime::dispatch($moysklad);
+                            }
+                        }
+                    });
+                })->name('MoyskladEveryMinuteSchedule')->everyMinute()->withoutOverlapping();
+            });
+        }
     }
 
     /**
