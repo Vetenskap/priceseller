@@ -2,6 +2,7 @@
 
 namespace Modules\Moysklad\Providers;
 
+use App\Helpers\Helpers;
 use App\Services\ModuleService;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\App;
@@ -55,10 +56,10 @@ class MoyskladServiceProvider extends ServiceProvider
             $this->app->booted(function () {
                 $schedule = $this->app->make(Schedule::class);
                 $schedule->call(function () {
-                    $time = now()->format('H:i');
+                    $time = now();
                     Moysklad::whereHas('warehousesUnloadTimes')->get()->each(function (Moysklad $moysklad) use ($time) {
                         if (ModuleService::moduleIsEnabled($this->moduleName, $moysklad->user)) {
-                            if ($moysklad->warehousesUnloadTimes()->where('time', $time)->exists()) {
+                            if ($moysklad->warehousesUnloadTimes()->where('time', $time->timezone(Helpers::getUserTimeZone($moysklad->user))->format('H:i'))->exists()) {
                                 WarehousesUnloadOnTime::dispatch($moysklad);
                             }
                         }
