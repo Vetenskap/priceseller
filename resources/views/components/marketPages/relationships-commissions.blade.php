@@ -50,7 +50,7 @@
         <flux:card class="space-y-6">
             <flux:heading size="xl">Все связи</flux:heading>
             @if($this->user()->can('delete-' . $marketName))
-                <flux:button variant="danger" wire:click="clearRelationships">Очистить связи</flux:button>
+                <flux:button variant="danger" wire:click="clearRelationships" wire:confirm="Вы действительно хотите очистить все связи?">Очистить связи</flux:button>
             @endif
             <flux:card class="space-y-6">
                 <flux:heading size="lg">Фильтры</flux:heading>

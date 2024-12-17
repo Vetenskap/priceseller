@@ -27,50 +27,53 @@
         </div>
     </flux:modal>
 
-    <x-blocks.main-block>
-        <flux:card class="space-y-6">
-            <flux:heading size="xl">Добавление нового склада</flux:heading>
-            <flux:subheading>Вы можете привязать свои склады с Моего Склада к своим существующим.</flux:subheading>
-            <div>
-                <flux:modal.trigger name="create-moysklad-warehouse">
-                    <flux:button>Добавить</flux:button>
-                </flux:modal.trigger>
-            </div>
-        </flux:card>
-    </x-blocks.main-block>
-    <x-blocks.main-block>
+    <livewire:moysklad::moysklad-warehouses-unload-time.moysklad-warehouses-unload-time-index
+        :moysklad="$form->moysklad"/>
 
+    <x-blocks.main-block>
         <flux:card class="space-y-6">
-            <flux:heading size="xl">Список</flux:heading>
-            @if($this->warehouses->isNotEmpty())
-                <flux:table :paginate="$this->warehouses">
-                    <flux:columns>
-                        <flux:column>Склад priceseller</flux:column>
-                        <flux:column>Склад мой склад</flux:column>
-                    </flux:columns>
-                    <flux:rows>
-                        @foreach($this->warehouses as $warehouse)
-                            <flux:row :key="$warehouse->getKey()">
-                                <flux:cell>{{$warehouse->warehouse->name}}</flux:cell>
-                                <flux:cell>{{collect($moyskladWarehouses)->firstWhere('id', $warehouse->moysklad_warehouse_uuid)['name']}}</flux:cell>
-                                <flux:cell align="right">
-                                    <flux:button size="sm" variant="danger" icon="trash"
-                                                 wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
-                                                 wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
-                                                 wire:confirm="Вы действительно хотите удалить этот склад?"
-                                    />
-                                </flux:cell>
-                                <flux:cell align="right">
-                                    <flux:tooltip content="Выгрузить все остатки">
-                                        <flux:button icon="arrow-up-tray"
-                                                     wire:click="updateStocks({{ json_encode($warehouse->getKey()) }})"/>
-                                    </flux:tooltip>
-                                </flux:cell>
-                            </flux:row>
-                        @endforeach
-                    </flux:rows>
-                </flux:table>
-            @endif
+            <flux:heading size="xl">Склады</flux:heading>
+            <flux:card class="space-y-6">
+                <flux:heading size="xl">Добавление нового склада</flux:heading>
+                <flux:subheading>Вы можете привязать свои склады с Моего Склада к своим существующим.</flux:subheading>
+                <div>
+                    <flux:modal.trigger name="create-moysklad-warehouse">
+                        <flux:button>Добавить</flux:button>
+                    </flux:modal.trigger>
+                </div>
+            </flux:card>
+            <flux:card class="space-y-6">
+                <flux:heading size="xl">Список</flux:heading>
+                @if($this->warehouses->isNotEmpty())
+                    <flux:table :paginate="$this->warehouses">
+                        <flux:columns>
+                            <flux:column>Склад priceseller</flux:column>
+                            <flux:column>Склад мой склад</flux:column>
+                        </flux:columns>
+                        <flux:rows>
+                            @foreach($this->warehouses as $warehouse)
+                                <flux:row :key="$warehouse->getKey()">
+                                    <flux:cell>{{$warehouse->warehouse->name}}</flux:cell>
+                                    <flux:cell>{{collect($moyskladWarehouses)->firstWhere('id', $warehouse->moysklad_warehouse_uuid)['name']}}</flux:cell>
+                                    <flux:cell align="right">
+                                        <flux:button size="sm" variant="danger" icon="trash"
+                                                     wire:click="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                     wire:target="destroy({{ json_encode($warehouse->getKey()) }})"
+                                                     wire:confirm="Вы действительно хотите удалить этот склад?"
+                                        />
+                                    </flux:cell>
+                                    <flux:cell align="right">
+                                        <flux:tooltip content="Выгрузить все остатки">
+                                            <flux:button icon="arrow-up-tray"
+                                                         wire:click="updateStocks({{ json_encode($warehouse->getKey()) }})"/>
+                                        </flux:tooltip>
+                                    </flux:cell>
+                                </flux:row>
+                            @endforeach
+                        </flux:rows>
+                    </flux:table>
+                @endif
+            </flux:card>
         </flux:card>
     </x-blocks.main-block>
     <x-blocks.main-block>

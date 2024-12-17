@@ -24,7 +24,7 @@ use PHPUnit\Logging\Exception;
 
 class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBatchInserts, WithValidation, SkipsEmptyRows, SkipsOnFailure
 {
-    CONST HEADERS = [
+    const HEADERS = [
         'Артикул WB (nmID)',
         'Артикул продавца (vendorCode)',
         'Код',
@@ -60,9 +60,15 @@ class WbItemsImport implements ToModel, WithHeadingRow, WithChunkReading, WithBa
     {
         $row = collect($row);
 
-        $item = $row->get('Тип (Комплект или Товар)') === 'Комплект'
-            ? $this->user->bundles()->where('code', $row->get('Код'))->first()
-            : $this->user->items()->where('code', $row->get('Код'))->first();
+        if ($row->get('Тип (Комплект или Товар)') === 'Комплект') {
+            $item = $this->user->bundles()->where('code', $row->get('Код'))->first();
+        } else if ($row->get('Тип (Комплект или Товар)') === 'Товар') {
+            $item = $this->user->items()->where('code', $row->get('Код'))->first();
+        } else {
+            $item = $this->user->bundles()->where('code', $row->get('Код'))->exists()
+                ? $this->user->bundles()->where('code', $row->get('Код'))->first()
+                : $this->user->items()->where('code', $row->get('Код'))->first();
+        }
 
         if (!$item) {
             MarketItemRelationshipService::handleNotFoundItem(
