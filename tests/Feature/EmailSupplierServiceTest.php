@@ -4,7 +4,9 @@ namespace Tests\Feature;
 
 use App\Contracts\MarketContract;
 use App\Contracts\ReportContract;
+use App\Enums\ReportStatus;
 use App\Enums\TaskTypes;
+use App\Exceptions\ReportCancelled;
 use App\Models\EmailSupplier;
 use App\Models\EmailSupplierWarehouse;
 use App\Models\Item;
@@ -15,6 +17,7 @@ use App\Models\TaskLog;
 use App\Models\User;
 use App\Services\EmailSupplierService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -74,6 +77,51 @@ class EmailSupplierServiceTest extends TestCase
             'item_id' => $item->id
         ]);
 
+    }
+
+    public function test_unload_success_with_default_warehouse_cancelled()
+    {
+        Queue::fake();
+
+        $this->expectException(ReportCancelled::class);
+
+        $user = User::factory()->hasEmails(1, [
+            'open' => true,
+            'address' => 'email@gmail.com',
+            'password' => 'qwerty1234'
+        ])->create();
+        $supplier = Supplier::factory()->state(['unload_without_price' => false, 'open' => true, 'use_brand' => false])->for($user)->create();
+        $warehouse = SupplierWarehouse::factory()->for($supplier)->create();
+        $emailSupplier = EmailSupplier::factory()->state([
+            'email' => 'supplier@example.com',
+            'filename' => 'shate.txt',
+            'header_article' => 8,
+            'header_brand' => 1,
+            'header_price' => 7,
+            'header_count' => 4,
+            'header_warehouse' => null
+        ])->for($user->emails->first(), 'mainEmail')->for($supplier)->create();
+        $emailSupplierWarehouse = EmailSupplierWarehouse::factory()->for($emailSupplier)->for($warehouse)->create();
+        $report = app(ReportContract::class)->new(TaskTypes::SupplierUnload, [], $supplier);
+
+        $item = Item::factory()->for($supplier)->for($user)->create([
+            'article' => '000465',
+            'multiplicity' => 1,
+            'price' => 0
+        ]);
+
+        $mock = \Mockery::mock(MarketContract::class);
+
+        $mock->shouldReceive('unload')
+            ->never();
+
+        $this->app->instance(MarketContract::class, $mock);
+
+        $report->update(['status' => ReportStatus::cancelled]);
+
+        $service = app(EmailSupplierService::class);
+        $service->make($emailSupplier, Storage::disk('public')->path('tests/shate.txt'), $report);
+        $service->unload();
     }
 
     public function test_unload_success_with_warehouses()

@@ -22,7 +22,7 @@ class OzonMarketPostForm extends Form
     #[Validate]
     public $api_key;
     #[Validate]
-    public $min_price_percent = null;
+    public $min_price_coefficient = null;
     #[Validate]
     public $max_price_percent = null;
     #[Validate]
@@ -93,7 +93,7 @@ class OzonMarketPostForm extends Form
             ],
             'client_id' => ['required', 'integer'],
             'api_key' => ['required', 'string'],
-            'min_price_percent' => ['nullable', 'integer'],
+            'min_price_coefficient' => ['nullable', 'numeric', 'max:2', 'min:1'],
             'max_price_percent' => ['nullable', 'integer'],
             'seller_price_percent' => ['nullable', 'integer'],
             'max_count' => ['nullable', 'integer'],
@@ -125,7 +125,7 @@ class OzonMarketPostForm extends Form
         $this->name = $this->market->name;
         $this->client_id = $this->market->client_id;
         $this->api_key = $this->market->api_key;
-        $this->min_price_percent = $this->market->min_price_percent;
+        $this->min_price_coefficient = $this->market->min_price_coefficient;
         $this->max_price_percent = $this->market->max_price_percent;
         $this->seller_price_percent = $this->market->seller_price_percent;
         $this->open = $this->market->open;
@@ -163,7 +163,6 @@ class OzonMarketPostForm extends Form
 
     public function update(): void
     {
-        logger('валидация');
         $this->validate();
 
         $this->market->update($this->except('market'));

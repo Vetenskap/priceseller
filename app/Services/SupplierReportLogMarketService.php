@@ -15,7 +15,7 @@ class SupplierReportLogMarketService
         if ($log->loadExists('supplierReportLogMarkets')) {
             return $log->supplierReportLogMarkets()->create([
                 'message' => $message,
-                'status' => ReportStatus::pending,
+                'status' => ReportStatus::running,
                 'logable_type' => $item ? get_class($item) : null,
                 'logable_id' => $item?->getKey()
             ]);

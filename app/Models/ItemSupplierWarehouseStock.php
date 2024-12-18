@@ -21,4 +21,9 @@ class ItemSupplierWarehouseStock extends MainModel
     {
         return $this->belongsTo(SupplierWarehouse::class, 'supplier_warehouse_id', 'id');
     }
+
+    public function item(): BelongsTo
+    {
+        return $this->belongsTo(Item::class, 'item_id', 'id');
+    }
 }

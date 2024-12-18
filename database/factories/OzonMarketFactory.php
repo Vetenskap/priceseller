@@ -18,7 +18,7 @@ class OzonMarketFactory extends Factory
             'name' => $this->faker->name(),
             'client_id' => $this->faker->randomNumber(),
             'api_key' => $this->faker->word(),
-            'min_price_percent' => $this->faker->randomNumber(),
+            'min_price_coefficient' => $this->faker->randomNumber(),
             'max_price_percent' => $this->faker->randomNumber(),
             'seller_price_percent' => $this->faker->randomNumber(),
             'open' => $this->faker->boolean(),
@@ -38,6 +38,7 @@ class OzonMarketFactory extends Factory
             'enabled_update_commissions_in_time' => $this->faker->boolean(),
             'update_commissions_time' => $this->faker->word(),
             'tariff' => $this->faker->word(),
+            'user_id' => $this->faker->randomNumber(),
         ];
     }
 }

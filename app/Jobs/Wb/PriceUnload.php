@@ -2,6 +2,8 @@
 
 namespace App\Jobs\Wb;
 
+use App\Contracts\MarketItemPriceContract;
+use App\Contracts\MarketItemStockContract;
 use App\Contracts\ReportContract;
 use App\Contracts\ReportLogContract;
 use App\Enums\ReportStatus;
@@ -48,11 +50,17 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
             $this->supplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray() :
             $this->supplier->warehouses->pluck('id')->values()->toArray();
 
-        $service = new WbItemPriceService($actualSupplier, $this->market, $warehouses, $this->log);
-        $service->updatePrice();
-        $service->unloadAllPrices();
-        $service->updateStock();
-        $service->unloadAllStocks();
+        // Обновление цен
+        $servicePrice = app(MarketItemPriceContract::class);
+        $servicePrice->make($actualSupplier, $this->market, $this->log);
+        $servicePrice->updatePrice();
+        $servicePrice->unloadAllPrices();
+
+        // Обновление остатков
+        $serviceStock = app(MarketItemStockContract::class);
+        $serviceStock->make($actualSupplier, $this->market, $this->log, $warehouses);
+        $serviceStock->updateStock();
+        $serviceStock->unloadAllStocks();
 
         $this->reportLogContract->finished($this->log);
 

@@ -2,15 +2,14 @@
 
 namespace App\Jobs\Ozon;
 
-use App\Contracts\ReportContract;
+use App\Contracts\MarketItemPriceContract;
+use App\Contracts\MarketItemStockContract;
 use App\Contracts\ReportLogContract;
-use App\Enums\ReportStatus;
 use App\Models\EmailSupplier;
 use App\Models\OzonMarket;
 use App\Models\Report;
 use App\Models\ReportLog;
 use App\Models\Supplier;
-use App\Services\OzonItemPriceService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
@@ -48,11 +47,17 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
             $this->supplier->warehouses->pluck('supplier_warehouse_id')->values()->toArray() :
             $this->supplier->warehouses->pluck('id')->values()->toArray();
 
-        $service = new OzonItemPriceService($actualSupplier, $this->market, $warehouses, $this->log);
-        $service->updatePrice();
-        $service->unloadAllPrices();
-        $service->updateStock();
-        $service->unloadAllStocks();
+        // Обновление цен
+        $servicePrice = app(MarketItemPriceContract::class);
+        $servicePrice->make($actualSupplier, $this->market, $this->log);
+        $servicePrice->updatePrice();
+        $servicePrice->unloadAllPrices();
+
+        // Обновление остатков
+        $serviceStock = app(MarketItemStockContract::class);
+        $serviceStock->make($actualSupplier, $this->market, $this->log, $warehouses);
+        $serviceStock->updateStock();
+        $serviceStock->unloadAllStocks();
 
         $this->reportLogContract->finished($this->log);
 

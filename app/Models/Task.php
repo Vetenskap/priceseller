@@ -21,7 +21,7 @@ class Task extends Report
     ];
 
     protected $casts = [
-        'payload' => 'array'
+        'payload' => 'array',
     ];
 
     public function logs(): HasMany

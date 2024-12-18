@@ -4,6 +4,7 @@ namespace Modules\VoshodApi\Jobs;
 
 use App\Helpers\Helpers;
 use App\Models\OzonMarket;
+use App\Models\Supplier;
 use App\Models\WbMarket;
 use App\Services\SupplierReportService;
 use Illuminate\Bus\Batch;

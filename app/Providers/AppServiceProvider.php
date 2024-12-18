@@ -6,6 +6,8 @@ use App\Components\EmailClient\EmailClient;
 use App\Components\EmailClient\EmailHandlerLaravelImap;
 use App\Contracts\EmailHandlerContract;
 use App\Contracts\MarketContract;
+use App\Contracts\MarketItemPriceContract;
+use App\Contracts\MarketItemStockContract;
 use App\Contracts\NotificationContract;
 use App\Contracts\ReportContract;
 use App\Contracts\ReportLogContract;
@@ -15,6 +17,8 @@ use App\Models\Employee;
 use App\Models\Permission;
 use App\Models\User;
 use App\Services\EmailSupplierService;
+use App\Services\MarketItemPriceService;
+use App\Services\MarketItemStockService;
 use App\Services\MarketService;
 use App\Services\NotificationService;
 use App\Services\TaskLogService;
@@ -43,6 +47,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(EmailHandlerContract::class, EmailHandlerLaravelImap::class);
         $this->app->bind(SupplierUnloadContract::class, EmailSupplierService::class);
         $this->app->bind(MarketContract::class, MarketService::class);
+        $this->app->bind(MarketItemPriceContract::class, MarketItemPriceService::class);
+        $this->app->bind(MarketItemStockContract::class, MarketItemStockService::class);
     }
 
     /**

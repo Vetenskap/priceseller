@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Contracts\MarketContract;
 use App\Enums\ReportStatus;
 use App\Enums\TaskTypes;
+use App\Exceptions\ReportCancelled;
 use App\Jobs\Ozon\PriceUnload;
 use App\Models\EmailSupplier;
 use App\Models\Item;
@@ -21,6 +22,7 @@ use Tests\TestCase;
 class MarketServiceTest extends TestCase
 {
     use DatabaseTransactions;
+
     /**
      * A basic feature test example.
      */
@@ -32,9 +34,9 @@ class MarketServiceTest extends TestCase
             ->once()
             ->andReturn(
                 \Mockery::mock()
-                    ->shouldReceive('dispatch')->andReturnSelf()
-                    ->shouldReceive('onQueue')->andReturnSelf()
-                    ->shouldReceive('add')->withArgs(fn ($job) => $job instanceof PriceUnload)
+                    ->shouldReceive('dispatch')->once()->andReturnSelf()
+                    ->shouldReceive('onQueue')->once()->andReturnSelf()
+                    ->shouldReceive('add')->once()->withArgs(fn($job) => $job instanceof PriceUnload)
                     ->getMock()
             );
 
@@ -67,7 +69,7 @@ class MarketServiceTest extends TestCase
                 \Mockery::mock()
                     ->shouldReceive('dispatch')->once()->andReturnSelf()
                     ->shouldReceive('onQueue')->once()->andReturnSelf()
-                    ->shouldReceive('add')->withArgs(fn ($job) => $job instanceof PriceUnload)
+                    ->shouldReceive('add')->never()->withArgs(fn($job) => $job instanceof PriceUnload)
                     ->getMock()
             );
 
@@ -90,7 +92,33 @@ class MarketServiceTest extends TestCase
 
         $service = app(MarketContract::class);
         $service->unload($emailSupplier, $report);
+    }
 
-        Queue::assertPushed(PriceUnload::class, 0);
+    public function test_correct_unload_ozon_cancelled()
+    {
+        Queue::fake();
+
+        $this->expectException(ReportCancelled::class);
+
+        $user = User::factory()->hasEmails(1, [
+            'open' => true,
+            'address' => 'email@gmail.com',
+            'password' => 'qwerty1234'
+        ])->create();
+        $supplier = Supplier::factory()->for($user)->create();
+        $emailSupplier = EmailSupplier::factory()->for($user->emails->first(), 'mainEmail')->for($supplier)->create();
+        $report = Task::factory()->for($supplier, 'taskable')->create([
+            'status' => ReportStatus::running,
+            'type' => TaskTypes::SupplierUnload
+        ]);
+        $item = Item::factory()->for($user)->for($supplier)->create();
+        $market = OzonMarket::factory()->for($user)->create(['open' => true, 'close' => false]);
+        $ozonItem = OzonItem::factory()->for($item, 'itemable')->for($market, 'market')->create();
+
+        $report->update(['status' => ReportStatus::cancelled]);
+
+        $service = app(MarketContract::class);
+
+        $service->unload($emailSupplier, $report);
     }
 }

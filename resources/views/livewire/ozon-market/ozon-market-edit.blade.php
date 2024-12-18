@@ -68,13 +68,13 @@
                         <div class="flex gap-6 flex-wrap">
                             <div>
                                 <flux:field>
-                                    <flux:tooltip content="Итоговая минимальная цена умноженная на этот процент">
-                                        <flux:label>Процент увел. мин. цены</flux:label>
+                                    <flux:tooltip content="Итоговая минимальная цена умноженная на этот коэффициент">
+                                        <flux:label>Коэффициент увел. мин. цены</flux:label>
                                     </flux:tooltip>
 
-                                    <flux:input wire:model.live="form.min_price_percent" type="number"/>
+                                    <flux:input wire:model.live="form.min_price_coefficient" type="number"/>
 
-                                    <flux:error name="form.min_price_percent"/>
+                                    <flux:error name="form.min_price_coefficient"/>
                                 </flux:field>
                             </div>
                             <div>

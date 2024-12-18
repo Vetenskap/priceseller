@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('tasks', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('type'); // Тип задачи (например, импорт)
-            $table->string('status'); // Статус (pending, running, cancelled, completed)
+            $table->string('status')->enum('status', \App\Enums\ReportStatus::class); // Статус (pending, running, cancelled, completed)
             $table->longText('message')->nullable();
             $table->json('payload')->nullable(); // Данные задачи (если нужно)
             $table->string('taskable_id')->nullable();

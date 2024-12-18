@@ -24,7 +24,7 @@ class OzonMarket extends MainModel
         'name',
         'client_id',
         'api_key',
-        'min_price_percent',
+        'min_price_coefficient',
         'max_price_percent',
         'seller_price_percent',
         'open',

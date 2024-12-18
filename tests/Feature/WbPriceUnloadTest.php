@@ -6,24 +6,28 @@ use App\Contracts\MarketItemPriceContract;
 use App\Contracts\MarketItemStockContract;
 use App\Enums\ReportStatus;
 use App\Enums\TaskTypes;
-use App\Jobs\Ozon\PriceUnload;
-use App\Models\EmailSupplier;
+use App\Jobs\Wb\PriceUnload;
 use App\Models\Item;
 use App\Models\ItemSupplierWarehouseStock;
-use App\Models\OzonItem;
-use App\Models\OzonMarket;
 use App\Models\Supplier;
 use App\Models\SupplierWarehouse;
 use App\Models\Task;
 use App\Models\TaskLog;
 use App\Models\User;
+use App\Models\WbItem;
+use App\Models\WbMarket;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
+use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\TestCase;
 
-class OzonPriceUnloadTest extends TestCase
+class WbPriceUnloadTest extends TestCase
 {
     use DatabaseTransactions;
 
+    /**
+     * A basic feature test example.
+     */
     public function test_correct_job(): void
     {
         $user = User::factory()->hasEmails(1, [
@@ -41,8 +45,8 @@ class OzonPriceUnloadTest extends TestCase
         $stock = ItemSupplierWarehouseStock::factory()->for($supplierWarehouse, 'warehouse')->for($item)->create([
             'stock' => 10
         ]);
-        $market = OzonMarket::factory()->for($user)->create(['open' => true, 'close' => false]);
-        $ozonItem = OzonItem::factory()->for($item, 'itemable')->for($market, 'market')->create();
+        $market = WbMarket::factory()->for($user)->create(['open' => true, 'close' => false]);
+        $wbItem = WbItem::factory()->for($item, 'itemable')->for($market, 'market')->create();
 
         $mockPrice = \Mockery::mock(MarketItemPriceContract::class);
         $mockPrice->shouldReceive('make')
