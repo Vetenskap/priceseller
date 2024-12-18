@@ -25,7 +25,7 @@ class MoyskladBundlesApiImport implements ShouldQueue, ShouldBeUnique
     public function __construct(public Moysklad $moysklad)
     {
         $this->queue = 'moysklad';
-        $this->report = $moysklad->apiItemsReports()->create([
+        $this->report = $moysklad->apiBundlesReports()->create([
             'status' => 2,
             'message' => 'Идёт выгрузка товаров',
             'updated' => 0,
