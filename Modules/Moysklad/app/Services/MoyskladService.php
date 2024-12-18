@@ -259,7 +259,7 @@ class MoyskladService
                         $errors++;
                         $report?->items()->create([
                             'status' => 1,
-                            'message' => 'Ошибка в обновлении товара',
+                            'message' => 'Ошибка в обновлении комлекта',
                             'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
                             'data' => json_encode($bundle->toArray(), JSON_UNESCAPED_UNICODE)
                         ]);
@@ -267,7 +267,7 @@ class MoyskladService
                         $updated++;
                         $report?->items()->create([
                             'status' => 2,
-                            'message' => 'Товар обновлён',
+                            'message' => 'Комплект обновлён',
                             'exception' => json_encode([]),
                             'data' => json_encode($bundle->toArray(), JSON_UNESCAPED_UNICODE)
                         ]);
@@ -277,7 +277,7 @@ class MoyskladService
                         $errors++;
                         $report?->items()->create([
                             'status' => 1,
-                            'message' => 'Ошибка в создании товара',
+                            'message' => 'Ошибка в создании комплекта',
                             'exception' => json_encode([$error], JSON_UNESCAPED_UNICODE),
                             'data' => json_encode($bundle->toArray(), JSON_UNESCAPED_UNICODE)
                         ]);
@@ -285,7 +285,7 @@ class MoyskladService
                         $created++;
                         $report?->items()->create([
                             'status' => 0,
-                            'message' => 'Товар создан',
+                            'message' => 'Комплект создан',
                             'exception' => json_encode([]),
                             'data' => json_encode($bundle->toArray(), JSON_UNESCAPED_UNICODE)
                         ]);

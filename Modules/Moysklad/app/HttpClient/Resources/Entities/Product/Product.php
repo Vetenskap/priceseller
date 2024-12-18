@@ -67,7 +67,7 @@ class Product extends Entity
     protected ?string $externalCode = null;
     protected ?bool $isSerialTrackable = null;
     protected ?int $minimumBalance = null;
-    protected string $name;
+    protected ?string $name = null;
     protected ?bool $partialDisposal = null;
     protected ?string $pathName = null;
 
@@ -75,7 +75,7 @@ class Product extends Entity
     protected ?string $paymentItemType = null;
     // TODO: мой склад enum
     protected ?string $ppeType = null;
-    protected bool $shared;
+    protected ?bool $shared = null;
     protected ?string $syncId = null;
     // TODO: мой склад enum
     protected ?string $taxSystem = null;
