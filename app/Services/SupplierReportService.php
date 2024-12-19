@@ -70,8 +70,6 @@ class SupplierReportService
             $report->status = 0;
             $report->save();
 
-            NotificationService::send($supplier->user_id, $supplier->name, 'Поставщик успешно выгружен' . ($message ? ': ' . $message : ''), 0, route('supplier.report.edit', ['supplier' => $report->supplier, 'report' => $report]), 'supplier');
-
             return true;
         }
 
