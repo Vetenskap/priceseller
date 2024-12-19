@@ -2,15 +2,10 @@
 
 namespace Modules\Order\HttpClient;
 
-use App\Models\Supplier;
-use App\Services\SupplierReportService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
-use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
 
 class WbClient
 {

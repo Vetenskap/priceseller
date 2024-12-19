@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\EmailSupplier;
-use App\Services\EmailSupplierService;
+use App\Services\EmailSupplierEmailService;
 use Illuminate\Console\Command;
 
 class TestUnload extends Command
@@ -27,7 +27,7 @@ class TestUnload extends Command
      */
     public function handle()
     {
-        $service = new EmailSupplierService(EmailSupplier::find($this->argument('emailSupplierId')), $this->argument('path'));
+        $service = new EmailSupplierEmailService(EmailSupplier::find($this->argument('emailSupplierId')), $this->argument('path'));
         $service->unload();
     }
 }

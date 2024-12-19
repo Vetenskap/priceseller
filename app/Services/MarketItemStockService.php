@@ -52,8 +52,8 @@ class MarketItemStockService implements MarketItemStockContract
             'warehouses.suppliers.warehouses',
             'warehouses.userWarehouses.warehouse.stocks'
         ]);
-        $this->enabledMoyskladModule = ModuleService::moduleIsEnabled('Order', $this->user);
-        $this->enabledOrderModule = ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders;
+        $this->enabledOrderModule = ModuleService::moduleIsEnabled('Order', $this->user);
+        $this->enabledMoyskladModule = ModuleService::moduleIsEnabled('Moysklad', $this->user) && $this->user->moysklad && $this->user->moysklad->enabled_orders;
     }
 
     public function updateStock(): void
@@ -247,15 +247,15 @@ class MarketItemStockService implements MarketItemStockContract
             if ($type === Item::class) {
                 $query->where('supplier_id', $this->supplier->id);
             } else {
-                $query
-                    ->whereHasMorph('itemable', [Bundle::class], function (Builder $query) {
-                        $query->whereHas('items', function (Builder $query) {
-                            $query->where('supplier_id', $this->supplier->id);
-                        });
-                    });
+                $query->whereHas('items', function (Builder $query) {
+                    $query->where('supplier_id', $this->supplier->id);
+                });
             }
         })
-            ->where('wb_market_id', $this->market->id);
+            ->when($this->market instanceof WbMarket,
+                fn(Builder $query) => $query->where('wb_market_id', $this->market->id),
+                fn(Builder $query) => $query->where('ozon_market_id', $this->market->id)
+            );
     }
 
     public function unloadAllStocks(): void
@@ -284,7 +284,6 @@ class MarketItemStockService implements MarketItemStockContract
 
             $itemsQuery = $this->market
                 ->items()
-                ->with('itemable')
                 ->where(fn(Builder $query) => $this->filteredData($query));
 
             if ($this->market instanceof WbMarket) {
@@ -300,10 +299,15 @@ class MarketItemStockService implements MarketItemStockContract
                             ];
                         });
 
-                        if (App::isProduction() && $data->isNotEmpty()) {
-                            $wbClient = new WbClient($this->market->api_key);
-                            $wbClient->putStocks($data->values(), $warehouse->warehouse_id, $this->market, $this->log);
+                        if ($data->isNotEmpty()) {
+                            if (App::isProduction()) {
+                                $wbClient = new WbClient($this->market->api_key);
+                                $wbClient->putStocks($data->values(), $warehouse->warehouse_id, $this->market, $this->log);
+                            } else {
+                                SupplierReportLogMarketService::new($this->log, $data->values()->toJson());
+                            }
                         }
+
 
                     });
                 });
@@ -323,15 +327,19 @@ class MarketItemStockService implements MarketItemStockContract
                             ];
                         });
 
-                        if (App::isProduction() && $data->isNotEmpty()) {
-                            $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
+                        if ($data->isNotEmpty()) {
+                            if (App::isProduction()) {
+                                $ozonClient = new OzonClient($this->market->api_key, $this->market->client_id);
 
-                            try {
-                                $ozonClient->putStocks($data->values()->all(), $this->supplier, $this->market);
-                            } catch (RequestException $e) {
-                                report($e);
-                                $log = SupplierReportLogMarketService::new($this->log, 'Ошибка при выгрузке 100 остатков: ' . $e->getMessage());
-                                SupplierReportLogMarketService::failed($log);
+                                try {
+                                    $ozonClient->putStocks($data->values()->all(), $this->supplier, $this->market);
+                                } catch (RequestException $e) {
+                                    report($e);
+                                    $log = SupplierReportLogMarketService::new($this->log, 'Ошибка при выгрузке 100 остатков: ' . $e->getMessage());
+                                    SupplierReportLogMarketService::failed($log);
+                                }
+                            } else {
+                                SupplierReportLogMarketService::new($this->log, $data->values()->toJson());
                             }
                         }
 

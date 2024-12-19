@@ -20,4 +20,9 @@ class OzonWarehouseSupplierWarehouse extends MainModel
     {
         return $this->belongsTo(SupplierWarehouse::class);
     }
+
+    public function ozonWarehouseSupplier(): BelongsTo
+    {
+        return $this->belongsTo(OzonWarehouseSupplier::class, 'ozon_warehouse_supplier_id', 'id');
+    }
 }

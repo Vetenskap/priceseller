@@ -6,7 +6,6 @@ use App\Models\User;
 use App\Models\MainModel;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Modules\Moysklad\Database\Factories\MoyskladFactory;
 
 class Moysklad extends MainModel
 {

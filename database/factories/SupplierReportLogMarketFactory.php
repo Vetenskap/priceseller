@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ReportStatus;
 use App\Models\SupplierReportLogMarket;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -13,10 +14,9 @@ class SupplierReportLogMarketFactory extends Factory
     public function definition(): array
     {
         return [
-            'status' => $this->faker->word(),
+            'status' => ReportStatus::cases()[array_rand(ReportStatus::cases())],
             'message' => $this->faker->word(),
-            'item_id' => $this->faker->word(),
-            'task_log' => $this->faker->word(),
+            'task_log_id' => $this->faker->word(),
             'created_at' => Carbon::now(),
             'updated_at' => Carbon::now(),
         ];

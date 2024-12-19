@@ -20,4 +20,9 @@ class WbWarehouseSupplierWarehouse extends MainModel
     {
         return $this->belongsTo(SupplierWarehouse::class);
     }
+
+    public function wbWarehouseSupplier(): BelongsTo
+    {
+        return $this->belongsTo(WbWarehouseSupplier::class, 'wb_warehouse_supplier_id', 'id');
+    }
 }

@@ -5,7 +5,6 @@ namespace Modules\SamsonApi\Services;
 use App\Helpers\Helpers;
 use App\Models\User;
 use App\Services\ModuleService;
-use App\Services\SupplierReportService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Modules\SamsonApi\Jobs\SamsonUserProcess;
@@ -27,7 +26,7 @@ class SamsonUserProcessService
 
     protected static function checkTimeAndAddJob(User $user,string $time): void
     {
-        if ($user->samsonApi?->times()->where('time', $time)->exists() && !SupplierReportService::get($user->samsonApi->supplier)) {
+        if ($user->samsonApi?->times()->where('time', $time)->exists()) {
             SamsonUserProcess::dispatch($user->samsonApi);
         }
     }

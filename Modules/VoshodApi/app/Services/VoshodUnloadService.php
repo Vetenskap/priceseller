@@ -2,34 +2,43 @@
 
 namespace Modules\VoshodApi\Services;
 
+use App\Contracts\MarketContract;
+use App\Contracts\ReportContract;
+use App\Exceptions\ReportCancelled;
 use App\Models\Item;
+use App\Models\Report;
 use App\Models\User;
 use App\Services\Item\ItemPriceService;
 use GuzzleHttp\Exception\RequestException;
 use Illuminate\Support\Str;
+use Modules\VoshodApi\Contracts\VoshodUnloadContract;
 use Modules\VoshodApi\HttpClient\Resources\ItemsPageList;
 use Modules\VoshodApi\Models\VoshodApi;
 use Modules\VoshodApi\Models\VoshodApiItemAdditionalAttributeLink;
 use Modules\VoshodApi\Models\VoshodApiWarehouse;
 
-class VoshodUnloadService
+class VoshodUnloadService implements VoshodUnloadContract
 {
     public VoshodApi $voshodApi;
     public User $user;
+    public ReportContract $reportContract;
+    public Report $report;
 
-    /**
-     * @param VoshodApi $voshodApi
-     */
-    public function __construct(VoshodApi $voshodApi)
+    public function make(VoshodApi $voshodApi, Report $report): void
     {
         $this->voshodApi = $voshodApi;
         $this->user = $voshodApi->user;
-        $this->nullUpdated();
-        $this->nullAllStocks();
+        $this->report = $report;
+        $this->reportContract = app(ReportContract::class);
     }
 
     public function getNewPrice(): void
     {
+        $this->nullUpdated();
+        $this->nullAllStocks();
+
+        $this->reportContract->addLog($this->report, 'Получаем прайс по апи');
+
         $itemsPageList = new ItemsPageList(
             $this->voshodApi->api_key,
             $this->voshodApi->proxy_ip,
@@ -39,6 +48,11 @@ class VoshodUnloadService
         );
 
         do {
+
+            $this->report = $this->report->fresh();
+            if ($this->report->isCancelled()) {
+                throw new ReportCancelled('cancelled!');
+            }
 
             try {
                 $items = $itemsPageList->fetchNext();
@@ -101,18 +115,27 @@ class VoshodUnloadService
             });
 
         } while ($itemsPageList->hasNext());
+
+        $this->reportContract->addLog($this->report, 'Прайс по апи выгружен');
+        $marketContract = app(MarketContract::class);
+        $this->reportContract->addLog($this->report, 'Выгружаем новые данные в кабинеты..');
+        $marketContract->unload($this->voshodApi->supplier, $this->report);
     }
 
-    protected function nullUpdated(): void
+    public function nullUpdated(): void
     {
+        $this->reportContract->addLog($this->report, 'Переводим все товары поставщика в статус "Не обновлён"');
         $this->voshodApi->supplier->items()->update(['updated' => false]);
+        $this->reportContract->addLog($this->report, 'Перевели все товары в статус "Не обновлён"');
     }
 
-    protected function nullAllStocks(): void
+    public function nullAllStocks(): void
     {
+        $this->reportContract->addLog($this->report, 'Обнуляем все остатки поставщика');
         $this->voshodApi->warehouses->each(function (VoshodApiWarehouse $warehouse) {
             $warehouse->supplierWarehouse->stocks()->update(['stock' => 0]);
         });
+        $this->reportContract->addLog($this->report, 'Обнулили все остатки поставщика');
     }
 
 

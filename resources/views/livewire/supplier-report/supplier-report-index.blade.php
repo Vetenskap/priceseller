@@ -7,6 +7,8 @@
 
             <flux:columns>
                 <flux:column>Статус</flux:column>
+                <flux:column>Тип</flux:column>
+                <flux:column>Файл</flux:column>
                 <flux:column sortable :sorted="$sortBy === 'created_at'" :direction="$sortDirection"
                              wire:click="sort('created_at')">Начало
                 </flux:column>
@@ -19,12 +21,12 @@
                 @foreach($this->reports as $report)
                     <flux:row :key="$report->getKey()">
                         <flux:cell>
-                            <flux:badge size="sm"
-                                        :color="$report->status == 2 ? 'yellow' : ($report->status == 1 ? 'red' : 'lime')"
-                                        inset="top bottom">{{ $report->message }}</flux:badge>
+                            <flux:badge size="sm" color="{{$report->statusBadgeColorLivewire()}}" inset="top bottom">{{$report->statusMessage()}}</flux:badge>
                         </flux:cell>
+                        <flux:cell variant="strong">{{$report->payload['type'] ?? 'нет'}}</flux:cell>
+                        <flux:cell variant="strong">{{$report->payload['path'] ?? 'нет'}}</flux:cell>
                         <flux:cell variant="strong">{{$report->created_at}}</flux:cell>
-                        <flux:cell variant="strong">{{ $report->status != 2 ? $report->updated_at : ''}}</flux:cell>
+                        <flux:cell variant="strong">{{$report->updated_at}}</flux:cell>
                         <flux:cell align="right">
                             <flux:link
                                 href="{{ route('supplier.report.edit', ['report' => $report->getKey(), 'supplier' => $supplier]) }}">

@@ -5,7 +5,6 @@ namespace Modules\BergApi\Services;
 use App\Helpers\Helpers;
 use App\Models\User;
 use App\Services\ModuleService;
-use App\Services\SupplierReportService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Modules\BergApi\Jobs\BergUserProcess;
@@ -27,7 +26,7 @@ class BergUserProcessService
 
     protected static function checkTimeAndAddJob(User $user,string $time): void
     {
-        if ($user->bergApi?->times()->where('time', $time)->exists() && !SupplierReportService::get($user->bergApi->supplier)) {
+        if ($user->bergApi?->times()->where('time', $time)->exists()) {
             BergUserProcess::dispatch($user->bergApi);
         }
     }

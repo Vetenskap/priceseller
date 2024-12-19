@@ -6,6 +6,8 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\BergApi\Contracts\BergUnloadContract;
+use Modules\BergApi\Services\BergUnloadService;
 use Modules\BergApi\Services\BergUserProcessService;
 
 class BergApiServiceProvider extends ServiceProvider
@@ -25,6 +27,7 @@ class BergApiServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
+        $this->app->bind(BergUnloadContract::class, BergUnloadService::class);
     }
 
     /**

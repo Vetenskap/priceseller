@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Contracts\MarketContract;
 use App\Contracts\ReportContract;
-use App\Contracts\SupplierUnloadContract;
+use App\Contracts\SupplierEmailUnloadContract;
 use App\Helpers\Helpers;
 use App\Imports\SupplierPriceImport;
 use App\Jobs\Supplier\ProcessData;
@@ -25,7 +25,7 @@ use Illuminate\Support\Facades\Process;
 use Maatwebsite\Excel\Facades\Excel;
 use Modules\Moysklad\Models\Moysklad;
 
-class EmailSupplierService implements SupplierUnloadContract
+class EmailSupplierEmailService implements SupplierEmailUnloadContract
 {
     public Collection $stockValues;
     public Collection $warehouses;

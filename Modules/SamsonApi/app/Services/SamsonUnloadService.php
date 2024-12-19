@@ -2,39 +2,59 @@
 
 namespace Modules\SamsonApi\Services;
 
+use App\Contracts\MarketContract;
+use App\Contracts\ReportContract;
+use App\Exceptions\ReportCancelled;
 use App\Models\Item;
+use App\Models\Report;
 use App\Models\User;
 use App\Services\Item\ItemPriceService;
 use Illuminate\Support\Str;
+use Modules\SamsonApi\Contracts\SamsonUnloadContract;
 use Modules\SamsonApi\HttpClient\Resources\Sku;
 use Modules\SamsonApi\HttpClient\Resources\SkuList;
 use Modules\SamsonApi\Models\SamsonApi;
 use Modules\SamsonApi\Models\SamsonApiItemAdditionalAttributeLink;
 
-class SamsonUnloadService
+class SamsonUnloadService implements SamsonUnloadContract
 {
+    public SamsonApi $samsonApi;
+    public User $user;
+    public ReportContract $reportContract;
+    public Report $report;
 
-    public function getNewPrice(SamsonApi $samsonApi): void
+    public function make(SamsonApi $samsonApi, Report $report): void
     {
-        $user = $samsonApi->user;
-        $this->nullUpdated($samsonApi);
-        $this->nullAllStocks($samsonApi);
+        $this->samsonApi = $samsonApi;
+        $this->user = $samsonApi->user;
+        $this->report = $report;
+        $this->reportContract = app(ReportContract::class);
+    }
 
-        $skuList = new SkuList($samsonApi->api_key);
+    public function getNewPrice(): void
+    {
+        $this->nullUpdated();
+        $this->nullAllStocks();
+
+        $this->reportContract->addLog($this->report, 'Получаем прайс по апи');
+
+        $skuList = new SkuList($this->samsonApi->api_key);
 
         do {
+            $this->report = $this->report->fresh();
+            if ($this->report->isCancelled()) throw new ReportCancelled('cancelled!');
 
             $items = $skuList->fetchNext();
 
-            $items->each(function (Sku $samsonItem) use ($samsonApi) {
+            $items->each(function (Sku $samsonItem) {
 
                 $price = $samsonItem->getContract();
                 $article = $samsonItem->getSku();
                 $brand = $samsonItem->getBrand();
                 $count = $samsonItem->getIdp();
 
-                $itemService = new ItemPriceService($article, $samsonApi->supplier_id);
-                $items = $samsonApi->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
+                $itemService = new ItemPriceService($article, $this->samsonApi->supplier_id);
+                $items = $this->samsonApi->supplier->use_brand ? $itemService->withBrand($brand)->find() : $itemService->find();
 
                 if ($items) {
 
@@ -43,10 +63,10 @@ class SamsonUnloadService
 
                         if ($count >= 0) {
                             $item->supplierWarehouseStocks()->updateOrCreate([
-                                'supplier_warehouse_id' => $samsonApi->supplier_warehouse_id,
+                                'supplier_warehouse_id' => $this->samsonApi->supplier_warehouse_id,
                                 'item_id' => $item->id
                             ], [
-                                'supplier_warehouse_id' => $samsonApi->supplier_warehouse_id,
+                                'supplier_warehouse_id' => $this->samsonApi->supplier_warehouse_id,
                                 'stock' => $count
                             ]);
                         }
@@ -55,7 +75,7 @@ class SamsonUnloadService
                         $item->updated = true;
                         $item->save();
 
-                        $samsonApi->itemAdditionalAttributeLinks->each(function (SamsonApiItemAdditionalAttributeLink $link) use ($item, $samsonItem) {
+                        $this->samsonApi->itemAdditionalAttributeLinks->each(function (SamsonApiItemAdditionalAttributeLink $link) use ($item, $samsonItem) {
 
                             $value = $samsonItem->{'get' . Str::apa($link->link)}();
 
@@ -75,15 +95,24 @@ class SamsonUnloadService
             });
 
         } while ($skuList->hasNext());
+
+        $this->reportContract->addLog($this->report, 'Прайс по апи выгружен');
+        $marketContract = app(MarketContract::class);
+        $this->reportContract->addLog($this->report, 'Выгружаем новые данные в кабинеты..');
+        $marketContract->unload($this->samsonApi->supplier, $this->report);
     }
 
-    protected function nullUpdated(SamsonApi $samsonApi): void
+    public function nullUpdated(): void
     {
-        $samsonApi->supplier->items()->update(['updated' => false]);
+        $this->reportContract->addLog($this->report, 'Переводим все товары поставщика в статус "Не обновлён"');
+        $this->samsonApi->supplier->items()->update(['updated' => false]);
+        $this->reportContract->addLog($this->report, 'Перевели все товары в статус "Не обновлён"');
     }
 
-    protected function nullAllStocks(SamsonApi $samsonApi): void
+    public function nullAllStocks(): void
     {
-        $samsonApi->supplierWarehouse->stocks()->update(['stock' => 0]);
+        $this->reportContract->addLog($this->report, 'Обнуляем все остатки поставщика');
+        $this->samsonApi->supplierWarehouse->stocks()->update(['stock' => 0]);
+        $this->reportContract->addLog($this->report, 'Обнулили все остатки поставщика');
     }
 }

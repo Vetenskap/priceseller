@@ -6,17 +6,14 @@ use App\HttpClient\WbClient\Resources\Card\CardList;
 use App\HttpClient\WbClient\Resources\Order;
 use App\HttpClient\WbClient\Resources\Tariffs\Commission;
 use App\Models\ReportLog;
-use App\Models\Supplier;
 use App\Models\WbMarket;
 use App\Services\SupplierReportLogMarketService;
-use App\Services\SupplierReportService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 
 class WbClient

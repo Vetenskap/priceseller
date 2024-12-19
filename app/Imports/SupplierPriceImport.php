@@ -3,7 +3,7 @@
 namespace App\Imports;
 
 use App\Jobs\Supplier\ProcessData;
-use App\Services\EmailSupplierService;
+use App\Services\EmailSupplierEmailService;
 use Illuminate\Bus\Batch;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\ToCollection;
@@ -12,7 +12,7 @@ use Maatwebsite\Excel\Concerns\WithChunkReading;
 class SupplierPriceImport implements ToCollection, WithChunkReading
 {
 
-    public function __construct(protected EmailSupplierService $emailSupplierService, protected Batch $batch) {}
+    public function __construct(protected EmailSupplierEmailService $emailSupplierService, protected Batch $batch) {}
 
     /**
      * @param Collection $collection

@@ -3,7 +3,7 @@
 namespace App\Jobs\Supplier;
 
 use App\Contracts\ReportContract;
-use App\Contracts\SupplierUnloadContract;
+use App\Contracts\SupplierEmailUnloadContract;
 use App\Enums\TaskTypes;
 use App\Exceptions\ReportCancelled;
 use App\Models\EmailSupplier;
@@ -47,7 +47,7 @@ class PriceUnload implements ShouldQueue, ShouldBeUnique
         $this->reportContract->running($this->report);
 
         try {
-            $service = app(SupplierUnloadContract::class);
+            $service = app(SupplierEmailUnloadContract::class);
             $service->make($this->emailSupplier, Storage::disk('public')->path($this->path), $this->report);
             $service->unload();
         } catch (ReportCancelled $e) {

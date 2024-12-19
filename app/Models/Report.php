@@ -42,4 +42,26 @@ class Report extends MainModel
     {
         return $this->status === ReportStatus::pending->name;
     }
+
+    public function statusMessage(): string
+    {
+        return match ($this->status) {
+            ReportStatus::cancelled->name => 'Отменен',
+            ReportStatus::finished->name => 'Завершен',
+            ReportStatus::running->name => 'Выполняется',
+            ReportStatus::failed->name => 'Ошибка',
+            ReportStatus::pending->name => 'Ожидает',
+        };
+    }
+
+    public function statusBadgeColorLivewire(): string
+    {
+        return match ($this->status) {
+            ReportStatus::cancelled->name => 'purple',
+            ReportStatus::finished->name => 'lime',
+            ReportStatus::running->name => 'yellow',
+            ReportStatus::failed->name => 'red',
+            ReportStatus::pending->name => 'zinc',
+        };
+    }
 }

@@ -15,7 +15,7 @@ use App\Models\Supplier;
 use App\Models\SupplierWarehouse;
 use App\Models\TaskLog;
 use App\Models\User;
-use App\Services\EmailSupplierService;
+use App\Services\EmailSupplierEmailService;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
@@ -63,7 +63,7 @@ class EmailSupplierServiceTest extends TestCase
 
         $this->app->instance(MarketContract::class, $mock);
 
-        $service = app(EmailSupplierService::class);
+        $service = app(EmailSupplierEmailService::class);
         $service->make($emailSupplier, Storage::disk('public')->path('tests/shate.txt'), $report);
         $service->unload();
 
@@ -119,7 +119,7 @@ class EmailSupplierServiceTest extends TestCase
 
         $report->update(['status' => ReportStatus::cancelled]);
 
-        $service = app(EmailSupplierService::class);
+        $service = app(EmailSupplierEmailService::class);
         $service->make($emailSupplier, Storage::disk('public')->path('tests/shate.txt'), $report);
         $service->unload();
     }
@@ -174,7 +174,7 @@ class EmailSupplierServiceTest extends TestCase
 
         $this->app->instance(MarketContract::class, $mock);
 
-        $service = app(EmailSupplierService::class);
+        $service = app(EmailSupplierEmailService::class);
         $service->make($emailSupplier, Storage::disk('public')->path('tests/shate.txt'), $report);
         $service->unload();
 

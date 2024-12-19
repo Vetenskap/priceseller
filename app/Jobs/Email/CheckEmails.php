@@ -2,26 +2,17 @@
 
 namespace App\Jobs\Email;
 
-use App\Components\EmailClient\EmailHandlerLaravelImap;
 use App\Contracts\EmailHandlerContract;
-use App\Contracts\ReportContract;
-use App\Enums\TaskTypes;
 use App\Jobs\Supplier\PriceUnload;
 use App\Models\Email;
 use App\Models\EmailSupplier;
-use App\Models\Report;
 use App\Models\User;
-use App\Services\SupplierReportService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Facades\Context;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Redis;
 
 class CheckEmails implements ShouldQueue, ShouldBeUnique
 {

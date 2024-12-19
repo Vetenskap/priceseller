@@ -4,7 +4,6 @@ namespace App\HttpClient\OzonClient;
 
 use App\Models\OzonMarket;
 use App\Models\Supplier;
-use App\Services\SupplierReportService;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
@@ -100,7 +99,7 @@ class OzonClient
             return $this->request->post('/v1/product/import/prices', ['prices' => $data])->collect('result');
         } catch (RequestException $e) {
             if ($e->response->unauthorized()) {
-                SupplierReportService::addLog($supplier, 'Неверный токен или область его действия не включает обновление цен');
+                // TODO: add log
             }
         }
 
@@ -110,7 +109,7 @@ class OzonClient
     public function putStocks(array $data, Supplier $supplier, OzonMarket $market)
     {
         while (RateLimiter::attempts('ozon_put_stocks' . $market->id) >= 80) {
-            SupplierReportService::addLog($supplier, 'Превышен лимит запросов, ожидаем 60 сек.');
+            // TODO: add log
             sleep(60);
         }
 

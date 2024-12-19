@@ -6,6 +6,8 @@ use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
+use Modules\SamsonApi\Contracts\SamsonUnloadContract;
+use Modules\SamsonApi\Services\SamsonUnloadService;
 use Modules\SamsonApi\Services\SamsonUserProcessService;
 
 class SamsonApiServiceProvider extends ServiceProvider
@@ -25,6 +27,7 @@ class SamsonApiServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
+        $this->app->bind(SamsonUnloadContract::class, SamsonUnloadService::class);
     }
 
     /**

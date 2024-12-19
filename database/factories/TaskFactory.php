@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\ReportStatus;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
@@ -14,7 +15,7 @@ class TaskFactory extends Factory
     {
         return [
             'type' => $this->faker->word(),
-            'status' => $this->faker->word(),
+            'status' => ReportStatus::cases()[array_rand(ReportStatus::cases())],
             'payload' => $this->faker->words(),
             'taskable_id' => $this->faker->word(),
             'taskable_type' => $this->faker->word(),

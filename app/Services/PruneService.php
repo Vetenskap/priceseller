@@ -8,7 +8,6 @@ class PruneService
     {
         ItemsExportReportService::prune();
         ItemsImportReportService::prune();
-        SupplierReportService::prune();
         WarehouseItemsExportReportService::prune();
         WarehouseItemsImportReportService::prune();
     }

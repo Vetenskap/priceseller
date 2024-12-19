@@ -7,8 +7,10 @@ use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
+use Modules\VoshodApi\Contracts\VoshodUnloadContract;
 use Modules\VoshodApi\Models\VoshodApi;
 use Modules\VoshodApi\Policies\VoshodApiPolicy;
+use Modules\VoshodApi\Services\VoshodUnloadService;
 use Modules\VoshodApi\Services\VoshodUserProcessService;
 
 class VoshodApiServiceProvider extends ServiceProvider
@@ -28,6 +30,7 @@ class VoshodApiServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->loadMigrationsFrom(module_path($this->moduleName, 'database/migrations'));
+        $this->app->bind(VoshodUnloadContract::class, VoshodUnloadService::class);
     }
 
     /**

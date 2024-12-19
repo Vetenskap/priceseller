@@ -5,7 +5,6 @@ namespace Modules\VoshodApi\Services;
 use App\Helpers\Helpers;
 use App\Models\User;
 use App\Services\ModuleService;
-use App\Services\SupplierReportService;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\App;
 use Modules\VoshodApi\Jobs\VoshodUserProcess;
@@ -27,7 +26,7 @@ class VoshodUserProcessService
 
     protected static function checkTimeAndAddJob(User $user,string $time): void
     {
-        if ($user->voshodApi?->times()->where('time', $time)->exists() && !SupplierReportService::get($user->voshodApi->supplier)) {
+        if ($user->voshodApi?->times()->where('time', $time)->exists()) {
             VoshodUserProcess::dispatch($user->voshodApi);
         }
     }

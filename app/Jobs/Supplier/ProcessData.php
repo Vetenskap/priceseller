@@ -2,7 +2,7 @@
 
 namespace App\Jobs\Supplier;
 
-use App\Services\EmailSupplierService;
+use App\Services\EmailSupplierEmailService;
 use Box\Spout\Reader\XLSX\Sheet;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -16,7 +16,7 @@ class ProcessData implements ShouldQueue
     /**
      * Create a new job instance.
      */
-    public function __construct(public EmailSupplierService $emailSupplierService, public Collection $collection)
+    public function __construct(public EmailSupplierEmailService $emailSupplierService, public Collection $collection)
     {
         $this->queue = 'supplier-unload';
     }

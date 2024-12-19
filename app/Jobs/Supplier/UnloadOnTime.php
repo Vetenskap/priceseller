@@ -2,13 +2,12 @@
 
 namespace App\Jobs\Supplier;
 
-use App\Helpers\Helpers;
-use App\Models\OzonMarket;
+use App\Contracts\MarketContract;
+use App\Contracts\ReportContract;
+use App\Enums\TaskTypes;
+use App\Models\Report;
 use App\Models\Supplier;
-use App\Models\WbMarket;
-use App\Services\SupplierReportService;
 use App\Services\SupplierService;
-use Illuminate\Bus\Batch;
 use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
@@ -19,12 +18,20 @@ class UnloadOnTime implements ShouldQueue, ShouldBeUnique
 
     public int $uniqueFor = 7200;
     public int $tries = 1;
+    public ReportContract $reportContract;
+    public Report $report;
+
 
     /**
      * Create a new job instance.
      */
     public function __construct(public Supplier $supplier)
     {
+        $this->reportContract = app(ReportContract::class);
+        $this->report = $this->reportContract->new(TaskTypes::SupplierUnload, [
+            'type' => 'По времени',
+            'path' => ''
+        ], $supplier);
         $this->queue = 'supplier-unload';
     }
 
@@ -33,40 +40,21 @@ class UnloadOnTime implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        if (app(SupplierReportService::class)->get($this->supplier)) {
-            return;
-        } else {
-            app(SupplierReportService::class)->new($this->supplier);
-        }
+        $this->reportContract->running($this->report);
 
         \app(SupplierService::class)->setAllItemsUpdated($this->supplier);
-        Helpers::toBatch(function (Batch $batch) {
 
-            $this->supplier->user->ozonMarkets()
-                ->where('open', true)
-                ->where('close', false)
-                ->get()
-                ->filter(fn(OzonMarket $market) => $market->suppliers()->where('id', $this->supplier->id)->first())
-                ->each(function (OzonMarket $market) use ($batch) {
-                    $batch->add(new \App\Jobs\Ozon\PriceUnload($market, $this->supplier));
-                });
+        $marketContract = app(MarketContract::class);
+        $this->reportContract->addLog($this->report, 'Выгружаем новые данные в кабинеты..');
+        $marketContract->unload($this->supplier, $this->report);
 
-            $this->supplier->user->wbMarkets()
-                ->where('open', true)
-                ->where('close', false)
-                ->get()
-                ->filter(fn(WbMarket $market) => $market->suppliers()->where('id', $this->supplier->id)->first())
-                ->each(function (WbMarket $market) use ($batch) {
-                    $batch->add(new \App\Jobs\Wb\PriceUnload($market, $this->supplier));
-                });
-        }, 'market-unload');
+        $this->reportContract->finished($this->report);
 
-        SupplierReportService::success($this->supplier);
     }
 
     public function failed(\Throwable $th): void
     {
-        app(SupplierReportService::class)->error($this->supplier);
+        $this->reportContract->failed($this->report);
     }
 
     public function uniqueId(): string

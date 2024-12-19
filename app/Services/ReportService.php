@@ -8,7 +8,6 @@ class ReportService
     {
         ItemsExportReportService::timeout();
         ItemsImportReportService::timeout();
-        SupplierReportService::timeout();
         WarehouseItemsImportReportService::timeout();
         WarehouseItemsExportReportService::timeout();
     }

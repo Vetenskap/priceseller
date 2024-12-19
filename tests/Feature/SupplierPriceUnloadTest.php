@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Contracts\SupplierUnloadContract;
+use App\Contracts\SupplierEmailUnloadContract;
 use App\Enums\ReportStatus;
 use App\Exceptions\ReportCancelled;
 use App\Jobs\Supplier\PriceUnload;
@@ -31,7 +31,7 @@ class SupplierPriceUnloadTest extends TestCase
             'filename' => 'price.xlsx'
         ])->for($user->emails->first(), 'mainEmail')->for($supplier)->create();
 
-        $mockHandler = \Mockery::mock(SupplierUnloadContract::class);
+        $mockHandler = \Mockery::mock(SupplierEmailUnloadContract::class);
         $mockHandler->shouldReceive('unload')
             ->once()
             ->andReturnUndefined();
@@ -43,7 +43,7 @@ class SupplierPriceUnloadTest extends TestCase
             ->andReturnUndefined();
 
         // Привязываем мок в сервис-контейнер
-        $this->app->instance(SupplierUnloadContract::class, $mockHandler);
+        $this->app->instance(SupplierEmailUnloadContract::class, $mockHandler);
 
         $job = new PriceUnload($emailSupplier, 'price.xlsx');
         $job->handle();
@@ -68,7 +68,7 @@ class SupplierPriceUnloadTest extends TestCase
             'filename' => 'price.xlsx'
         ])->for($user->emails->first(), 'mainEmail')->for($supplier)->create();
 
-        $mockHandler = \Mockery::mock(SupplierUnloadContract::class);
+        $mockHandler = \Mockery::mock(SupplierEmailUnloadContract::class);
         $mockHandler->shouldReceive('unload')
             ->once()
             ->andThrow(new \Exception('test'));
@@ -80,7 +80,7 @@ class SupplierPriceUnloadTest extends TestCase
             ->andReturnUndefined();
 
         // Привязываем мок в сервис-контейнер
-        $this->app->instance(SupplierUnloadContract::class, $mockHandler);
+        $this->app->instance(SupplierEmailUnloadContract::class, $mockHandler);
 
         $job = new PriceUnload($emailSupplier, 'price.xlsx');
 
@@ -111,7 +111,7 @@ class SupplierPriceUnloadTest extends TestCase
             'filename' => 'price.xlsx'
         ])->for($user->emails->first(), 'mainEmail')->for($supplier)->create();
 
-        $mockHandler = \Mockery::mock(SupplierUnloadContract::class);
+        $mockHandler = \Mockery::mock(SupplierEmailUnloadContract::class);
         $mockHandler->shouldReceive('unload')
             ->once()
             ->andThrow(new ReportCancelled('cancelled!'));
@@ -123,7 +123,7 @@ class SupplierPriceUnloadTest extends TestCase
             ->andReturnUndefined();
 
         // Привязываем мок в сервис-контейнер
-        $this->app->instance(SupplierUnloadContract::class, $mockHandler);
+        $this->app->instance(SupplierEmailUnloadContract::class, $mockHandler);
 
         $job = new PriceUnload($emailSupplier, 'price.xlsx');
 

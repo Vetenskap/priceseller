@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class OzonWarehouseUserWarehouse extends MainModel
 {
@@ -15,8 +16,13 @@ class OzonWarehouseUserWarehouse extends MainModel
         'warehouse_id',
     ];
 
-    public function warehouse()
+    public function warehouse(): BelongsTo
     {
         return $this->belongsTo(Warehouse::class);
+    }
+
+    public function ozonWarehouse(): BelongsTo
+    {
+        return $this->belongsTo(OzonWarehouse::class, 'ozon_warehouse_id', 'id');
     }
 }
